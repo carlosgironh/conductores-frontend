@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registro de Conductores</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background:#f4f6f8; }
+    h1 { text-align:center; }
+    form { max-width:500px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    input, button { width:100%; padding:10px; margin-top:10px; border-radius:5px; border:1px solid #ccc; }
+    button { background:#0d6efd; color:white; font-weight:bold; border:none; }
+    #qrContainer { text-align:center; margin-top:30px; }
+  </style>
+</head>
+<body>
+
+<h1>Registro de Conductores</h1>
+
+<form id="formConductor">
+  <input type="text" id="nombre" placeholder="Nombre completo" required />
+  <input type="text" id="cedula" placeholder="Cédula" />
+  <input type="text" id="licencia" placeholder="Número de licencia" />
+  <input type="text" id="telefono" placeholder="Teléfono" />
+  <input type="text" id="direccion" placeholder="Dirección" />
+  <input type="text" id="cip" placeholder="CIP" />
+  <button type="submit">Registrarme y generar QR</button>
+</form>
+
+<div id="qrContainer"></div>
+
+<script>
+const form = document.getElementById("formConductor");
+const qrContainer = document.getElementById("qrContainer");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const datos = {
+    nombre: document.getElementById("nombre").value,
+    cedula: document.getElementById("cedula").value,
+    licencia_numero: document.getElementById("licencia").value,
+    telefono: document.getElementById("telefono").value,
+    direccion: document.getElementById("direccion").value,
+    cip: document.getElementById("cip").value
+  };
+
+  const respuesta = await fetch("https://conductores-api.onrender.com/api/conductores", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(datos)
+  });
+
+  const data = await respuesta.json();
+
+  if (data.url_qr) {
+    qrContainer.innerHTML = "<h2>Tu código QR</h2><canvas id='qr'></canvas><p>Guárdalo o haz captura</p>";
+    QRCode.toCanvas(document.getElementById("qr"), data.url_qr);
+  } else {
+    qrContainer.innerHTML = "<p>Error al registrar</p>";
+  }
+});
+</script>
+
+</body>
+</html>
