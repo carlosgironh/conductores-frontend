@@ -35,31 +35,31 @@
   </div>
 
   <!-- PERFIL Y EDICIÓN -->
-  <div id="perfilSection" style="display:none;">
+  <div id="perfilSection">
     <form id="formPerfil">
-      <input id="nombres" placeholder="Nombres" required>
-      <input id="apellidos" placeholder="Apellidos" required>
-      <input id="cedula" placeholder="Cédula" required>
-      <input id="licencia" placeholder="Número de Licencia" required>
-      <input id="placa" placeholder="Número de Placa Vehicular" required>
-      <input id="poliza_numero" placeholder="Número de Póliza Vehicular" required>
-      <input id="poliza_tipo" placeholder="Tipo de Póliza" required>
-      <input id="celular" placeholder="Número de Celular" required>
-      <input id="direccion" placeholder="Dirección" required>
+      <input id="nombres" placeholder="Nombres" disabled>
+      <input id="apellidos" placeholder="Apellidos" disabled>
+      <input id="cedula" placeholder="Cédula" disabled>
+      <input id="licencia" placeholder="Número de Licencia" disabled>
+      <input id="placa" placeholder="Número de Placa Vehicular" disabled>
+      <input id="poliza_numero" placeholder="Número de Póliza Vehicular" disabled>
+      <input id="poliza_tipo" placeholder="Tipo de Póliza" disabled>
+      <input id="celular" placeholder="Número de Celular" disabled>
+      <input id="direccion" placeholder="Dirección" disabled>
 
       <hr>
       <label>Foto de Licencia</label>
-      <input type="file" id="fileLicencia" accept="image/*,application/pdf">
+      <input type="file" id="fileLicencia" accept="image/*,application/pdf" disabled>
       <label>Foto del Registro Vehicular</label>
-      <input type="file" id="fileRegistro" accept="image/*,application/pdf">
+      <input type="file" id="fileRegistro" accept="image/*,application/pdf" disabled>
       <label>Foto del Vehículo</label>
-      <input type="file" id="fileVehiculo" accept="image/*">
+      <input type="file" id="fileVehiculo" accept="image/*" disabled>
       <label>Paz y Salvo Municipal o Pago de Placa</label>
-      <input type="file" id="filePazSalvo" accept="image/*,application/pdf">
+      <input type="file" id="filePazSalvo" accept="image/*,application/pdf" disabled>
       <label>Revisado Vehicular (Taller Autorizado)</label>
-      <input type="file" id="fileRevisado" accept="image/*,application/pdf">
+      <input type="file" id="fileRevisado" accept="image/*,application/pdf" disabled>
 
-      <button type="submit">Actualizar datos</button>
+      <button type="submit" style="display:none;">Actualizar datos</button>
     </form>
 
     <div class="section" id="documentosSection"></div>
@@ -69,8 +69,6 @@
 
 <script>
 const API = "https://conductores-api.onrender.com";
-
-// ⚡ Supabase client
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -86,6 +84,11 @@ async function loginConductor() {
   const password = document.getElementById("loginPassword").value;
   const loginMensaje = document.getElementById("loginMensaje");
 
+  if(!email || !password){
+    loginMensaje.innerHTML = "Ingrese email y contraseña";
+    return;
+  }
+
   loginMensaje.innerHTML = "Iniciando sesión...";
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -96,14 +99,21 @@ async function loginConductor() {
 
   currentUser = data.user;
   loginMensaje.innerHTML = "✅ Sesión iniciada";
-  document.getElementById("loginSection").style.display = "none";
-  document.getElementById("perfilSection").style.display = "block";
 
-  cargarPerfil();
+  habilitarEdicion();
 }
 
 // ==============================
-// 📄 CARGAR PERFIL
+// 🔑 HABILITAR EDICIÓN
+// ==============================
+function habilitarEdicion() {
+  // Habilita campos y botón solo si es propietario
+  document.getElementById("formPerfil").querySelectorAll("input").forEach(input => input.disabled = false);
+  document.getElementById("formPerfil").querySelector("button").style.display = "block";
+}
+
+// ==============================
+// 📄 CARGAR PERFIL PÚBLICO
 // ==============================
 async function cargarPerfil() {
   try {
@@ -117,14 +127,7 @@ async function cargarPerfil() {
 
     const c = data.conductor;
 
-    // Solo puede editar si es su usuario
-    if(currentUser && c.auth_user_id !== currentUser.id){
-      alert("No puedes editar este perfil");
-      document.getElementById("perfilSection").style.display = "none";
-      return;
-    }
-
-    // Rellenar campos
+    // Rellenar campos (solo lectura)
     document.getElementById("nombres").value = c.nombres;
     document.getElementById("apellidos").value = c.apellidos;
     document.getElementById("cedula").value = c.cedula;
@@ -138,7 +141,7 @@ async function cargarPerfil() {
     // Documentos
     const docSection = document.getElementById("documentosSection");
     docSection.innerHTML = "<h3>Documentos</h3>";
-    if(data.documentos && data.documentos.length>0){
+    if (data.documentos && data.documentos.length > 0) {
       data.documentos.forEach(doc => {
         docSection.innerHTML += `<p><strong>${doc.tipo}:</strong><br><a href="${doc.url_archivo}" target="_blank">Ver archivo</a></p>`;
       });
@@ -147,7 +150,7 @@ async function cargarPerfil() {
     // Quejas
     const quejasSection = document.getElementById("quejasSection");
     quejasSection.innerHTML = "<h3>Historial de Reportes</h3>";
-    if(data.quejas && data.quejas.length>0){
+    if (data.quejas && data.quejas.length > 0) {
       data.quejas.forEach(q => {
         quejasSection.innerHTML += `<div class="queja">${q.descripcion}<br><small>${new Date(q.fecha).toLocaleDateString()}</small></div>`;
       });
@@ -155,7 +158,7 @@ async function cargarPerfil() {
       quejasSection.innerHTML += "<p>Sin reportes registrados ✅</p>";
     }
 
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
 }
@@ -163,8 +166,13 @@ async function cargarPerfil() {
 // ==============================
 // 📝 ACTUALIZAR PERFIL
 // ==============================
-document.getElementById("formPerfil").addEventListener("submit", async (e)=>{
+document.getElementById("formPerfil").addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  if(!currentUser){
+    alert("Debes iniciar sesión para editar tu perfil");
+    return;
+  }
 
   const datos = {
     nombres: nombres.value,
@@ -211,6 +219,10 @@ document.getElementById("formPerfil").addEventListener("submit", async (e)=>{
     alert("Error actualizando perfil ❌");
   }
 });
+
+// Cargar perfil al inicio
+cargarPerfil();
+
 </script>
 
 </body>
