@@ -20,6 +20,8 @@
     #qrContainer { text-align:center; margin-top:20px; }
     #formPerfil input, #formPerfil button, #formPerfil label { display:none; }
     .resumen p { margin:5px 0; }
+    .documento { background:#e7f3fe; padding:5px 10px; border-radius:6px; margin-top:5px; }
+    .downloadQR { margin-top:10px; display:block; }
   </style>
 </head>
 <body>
@@ -31,6 +33,7 @@
   <div id="qrContainer">
     <p>Escanea el QR para acceder a este perfil:</p>
     <canvas id="qr"></canvas>
+    <button class="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
   </div>
 
   <!-- LOGIN -->
@@ -44,11 +47,8 @@
 
   <!-- PERFIL PÚBLICO -->
   <div id="perfilSection">
-    <div class="resumen" id="resumenDatos">
-      <!-- Aquí se muestra un resumen de los datos del conductor -->
-    </div>
+    <div class="resumen" id="resumenDatos"></div>
 
-    <div class="section" id="documentosSection"></div>
     <div class="section" id="quejasSection"></div>
 
     <!-- FORMULARIO DE EDICIÓN OCULTO -->
@@ -98,6 +98,16 @@ function generarQR() {
   });
 }
 
+// 🔹 DESCARGAR QR
+function descargarQR() {
+  const canvas = document.getElementById("qr");
+  const url = canvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "perfil_conductor.png";
+  link.click();
+}
+
 // 🔹 LOGIN
 async function loginConductor() {
   const email = document.getElementById("loginEmail").value;
@@ -126,7 +136,6 @@ async function loginConductor() {
 // 🔹 HABILITAR EDICIÓN
 function habilitarEdicion() {
   document.getElementById("formPerfil").querySelectorAll("input, button, label").forEach(el => el.style.display = "block");
-  // Rellenar formulario con datos actuales
   const resumen = document.getElementById("resumenDatos");
   resumen.querySelectorAll("p[data-campo]").forEach(p => {
     const id = p.dataset.campo;
@@ -148,7 +157,7 @@ async function cargarPerfil() {
 
     const c = data.conductor;
 
-    // Resumen público de datos
+    // Resumen público de datos + documentos inline
     const resumen = document.getElementById("resumenDatos");
     resumen.innerHTML = `
       <p data-campo="nombres" data-label="Nombres">Nombres: ${c.nombres}</p>
@@ -162,12 +171,13 @@ async function cargarPerfil() {
       <p data-campo="direccion" data-label="Dirección">Dirección: ${c.direccion}</p>
     `;
 
-    // Documentos
-    const docSection = document.getElementById("documentosSection");
-    docSection.innerHTML = "<h3>Documentos</h3>";
+    // Documentos inline
     if (data.documentos && data.documentos.length > 0) {
       data.documentos.forEach(doc => {
-        docSection.innerHTML += `<p><strong>${doc.tipo}:</strong><br><a href="${doc.url_archivo}" target="_blank">Ver archivo</a></p>`;
+        const div = document.createElement("div");
+        div.className = "documento";
+        div.innerHTML = `<strong>${doc.tipo}:</strong><br>${doc.url_archivo}`;
+        resumen.appendChild(div);
       });
     }
 
