@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/conductor",
+      "destination": "/conductor.html"
+    }
+  ]
+}
