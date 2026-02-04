@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil del Conductor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; padding:20px; background:#f4f6f8; }
+    .card { background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); max-width:600px; margin:auto; }
+    h2 { margin-top:0; }
+    img { max-width:100%; border-radius:8px; margin-top:10px; }
+    .section { margin-top:20px; }
+    .queja { background:#fff3cd; padding:10px; border-radius:6px; margin-top:8px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Perfil del Conductor</h2>
+  <div id="info">Cargando datos...</div>
+</div>
+
+<script>
+function obtenerParametro(nombre) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(nombre);
+}
+
+const conductorId = obtenerParametro("id");
+
+async function cargarPerfil() {
+  try {
+    const res = await fetch(`https://conductores-api.onrender.com/api/conductores/${conductorId}`);
+    const data = await res.json();
+
+    if (!data.conductor) {
+      document.getElementById("info").innerHTML = "Conductor no encontrado";
+      return;
+    }
+
+    const c = data.conductor;
+
+    let html = `
+      <p><strong>Nombre:</strong> ${c.nombre}</p>
+      <p><strong>Cédula:</strong> ${c.cedula || "No registrada"}</p>
+      <p><strong>Teléfono:</strong> ${c.telefono || "No registrado"}</p>
+      <p><strong>Dirección:</strong> ${c.direccion || "No registrada"}</p>
+      <p><strong>CIP:</strong> ${c.cip || "No registrado"}</p>
+    `;
+
+    // 📄 Documentos
+    if (data.documentos && data.documentos.length > 0) {
+      html += `<div class="section"><h3>Documento de Licencia</h3>`;
+      data.documentos.forEach(doc => {
+        html += `<img src="${doc.url_archivo}" alt="Documento">`;
+      });
+      html += `</div>`;
+    }
+
+    // ⚠️ Quejas
+    if (data.quejas && data.quejas.length > 0) {
+      html += `<div class="section"><h3>Historial de Reportes</h3>`;
+      data.quejas.forEach(q => {
+        html += `<div class="queja">${q.descripcion} <br><small>${new Date(q.fecha).toLocaleDateString()}</small></div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div class="section"><h3>Historial de Reportes</h3><p>Sin reportes registrados ✅</p></div>`;
+    }
+
+    document.getElementById("info").innerHTML = html;
+
+  } catch (error) {
+    document.getElementById("info").innerHTML = "Error cargando perfil";
+    console.error(error);
+  }
+}
+
+cargarPerfil();
+</script>
+
+</body>
+</html>
