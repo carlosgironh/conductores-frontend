@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Registro de Conductores</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- QR Code -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <!-- SDK Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background:#f4f6f8; }
     h1 { text-align:center; }
-    form { max-width:500px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    form { max-width:600px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
     input, button { width:100%; padding:10px; margin-top:10px; border-radius:5px; border:1px solid #ccc; }
     button { background:#0d6efd; color:white; font-weight:bold; border:none; cursor:pointer; }
     button:hover { opacity:0.9; }
     #qrContainer { text-align:center; margin-top:30px; }
-    label { font-weight:bold; margin-top:10px; display:block; }
+    label { font-weight:bold; margin-top:15px; display:block; }
+    hr { margin:20px 0; }
   </style>
 </head>
 <body>
@@ -21,15 +25,42 @@
 <h1>Registro de Conductores</h1>
 
 <form id="formConductor">
-  <input type="text" id="nombre" placeholder="Nombre completo" required />
-  <input type="text" id="cedula" placeholder="Cédula" />
-  <input type="text" id="licencia" placeholder="Número de licencia" />
-  <input type="text" id="telefono" placeholder="Teléfono" />
-  <input type="text" id="direccion" placeholder="Dirección" />
-  <input type="text" id="cip" placeholder="CIP" />
 
-  <label>Foto de Licencia:</label>
-  <input type="file" id="licenciaFile" accept="image/*,application/pdf" />
+  <!-- LOGIN -->
+  <hr>
+  <h3>Crear cuenta para administrar tus datos</h3>
+  <input id="email" type="email" placeholder="Correo electrónico" required>
+  <input id="password" type="password" placeholder="Contraseña" required>
+  <hr>
+
+  <!-- DATOS CONDUCTOR -->
+  <input id="nombres" placeholder="Nombres" required>
+  <input id="apellidos" placeholder="Apellidos" required>
+  <input id="cedula" placeholder="Cédula" required>
+  <input id="licencia" placeholder="Número de Licencia" required>
+  <input id="placa" placeholder="Número de Placa Vehicular" required>
+  <input id="poliza_numero" placeholder="Número de Póliza Vehicular" required>
+  <input id="poliza_tipo" placeholder="Tipo de Póliza" required>
+  <input id="celular" placeholder="Número de Celular" required>
+  <input id="direccion" placeholder="Dirección" required>
+
+  <hr>
+
+  <!-- DOCUMENTOS -->
+  <label>Foto de Licencia</label>
+  <input type="file" id="fileLicencia" accept="image/*,application/pdf" required>
+
+  <label>Foto del Registro Vehicular</label>
+  <input type="file" id="fileRegistro" accept="image/*,application/pdf" required>
+
+  <label>Foto del Vehículo</label>
+  <input type="file" id="fileVehiculo" accept="image/*" required>
+
+  <label>Paz y Salvo Municipal o Pago de Placa</label>
+  <input type="file" id="filePazSalvo" accept="image/*,application/pdf" required>
+
+  <label>Revisado Vehicular (Taller Autorizado)</label>
+  <input type="file" id="fileRevisado" accept="image/*,application/pdf" required>
 
   <button type="submit">Registrarme y generar QR</button>
 </form>
@@ -37,69 +68,91 @@
 <div id="qrContainer"></div>
 
 <script>
+const API = "https://conductores-api.onrender.com";
+
+// ⚡ Supabase client
+const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
+const SUPABASE_KEY = "TU-ANON-PUBLIC-KEY";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const form = document.getElementById("formConductor");
 const qrContainer = document.getElementById("qrContainer");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  qrContainer.innerHTML = "<p>Registrando conductor...</p>";
-
-  const datos = {
-    nombre: document.getElementById("nombre").value,
-    cedula: document.getElementById("cedula").value,
-    licencia_numero: document.getElementById("licencia").value,
-    telefono: document.getElementById("telefono").value,
-    direccion: document.getElementById("direccion").value,
-    cip: document.getElementById("cip").value
-  };
+  qrContainer.innerHTML = "<p>Creando cuenta y registrando conductor...</p>";
 
   try {
-    // 🟢 1. Crear conductor
-    const respuesta = await fetch("https://conductores-api.onrender.com/api/conductores", {
+    // 1️⃣ Crear usuario Supabase Auth
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      email,
+      password
+    });
+    if (authError) throw authError;
+
+    const userId = authData.user.id;
+
+    // 2️⃣ Crear conductor en backend
+    const datos = {
+      nombres: nombres.value,
+      apellidos: apellidos.value,
+      cedula: cedula.value,
+      licencia: licencia.value,
+      placa: placa.value,
+      poliza_numero: poliza_numero.value,
+      poliza_tipo: poliza_tipo.value,
+      celular: celular.value,
+      direccion: direccion.value,
+      auth_user_id: userId
+    };
+
+    const res = await fetch(`${API}/api/conductores`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datos)
     });
-
-    const data = await respuesta.json();
-
+    const data = await res.json();
     if (!data.conductor) throw new Error("No se creó el conductor");
 
     const conductorId = data.conductor.id;
 
-    // 🟢 2. Generar QR con enlace al perfil público
+    // 3️⃣ Subir documentos
+    async function subirDoc(tipo, inputId) {
+      const archivo = document.getElementById(inputId).files[0];
+      const fd = new FormData();
+      fd.append("archivo", archivo);
+
+      const upload = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, {
+        method: "POST",
+        body: fd
+      });
+
+      if (!upload.ok) throw new Error("Error subiendo " + tipo);
+    }
+
+    await subirDoc("licencia", "fileLicencia");
+    await subirDoc("registro_vehicular", "fileRegistro");
+    await subirDoc("foto_vehiculo", "fileVehiculo");
+    await subirDoc("paz_y_salvo", "filePazSalvo");
+    await subirDoc("revisado_vehicular", "fileRevisado");
+
+    // 4️⃣ Generar QR
     const perfilURL = `https://nrdesingcorp.com/perfil.html?id=${conductorId}`;
 
     qrContainer.innerHTML = `
-      <h2>Tu código QR</h2>
+      <h2>Registro completado ✅</h2>
+      <p>Tu cuenta fue creada. Usa tu correo y contraseña para editar tus datos.</p>
       <canvas id="qr"></canvas>
-      <p>Guárdalo o haz captura</p>
+      <p>Guarda este QR</p>
     `;
-
     QRCode.toCanvas(document.getElementById("qr"), perfilURL);
-
-    // 🟢 3. Subir foto de licencia si existe
-    const fileInput = document.getElementById("licenciaFile");
-    const file = fileInput.files[0];
-
-    if (file) {
-      const formData = new FormData();
-      formData.append("archivo", file);
-
-      const uploadRes = await fetch(`https://conductores-api.onrender.com/api/documentos/${conductorId}`, {
-        method: "POST",
-        body: formData
-      });
-
-      if (!uploadRes.ok) {
-        alert("Conductor creado, pero hubo un error subiendo la licencia.");
-      }
-    }
 
   } catch (error) {
     console.error(error);
-    qrContainer.innerHTML = "<p>Error al registrar conductor ❌</p>";
+    qrContainer.innerHTML = `<p>Error: ${error.message} ❌</p>`;
   }
 });
 </script>
