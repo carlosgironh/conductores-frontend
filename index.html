@@ -10,8 +10,10 @@
     h1 { text-align:center; }
     form { max-width:500px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
     input, button { width:100%; padding:10px; margin-top:10px; border-radius:5px; border:1px solid #ccc; }
-    button { background:#0d6efd; color:white; font-weight:bold; border:none; }
+    button { background:#0d6efd; color:white; font-weight:bold; border:none; cursor:pointer; }
+    button:hover { opacity:0.9; }
     #qrContainer { text-align:center; margin-top:30px; }
+    label { font-weight:bold; margin-top:10px; display:block; }
   </style>
 </head>
 <body>
@@ -25,6 +27,10 @@
   <input type="text" id="telefono" placeholder="Teléfono" />
   <input type="text" id="direccion" placeholder="Dirección" />
   <input type="text" id="cip" placeholder="CIP" />
+
+  <label>Foto de Licencia:</label>
+  <input type="file" id="licenciaFile" accept="image/*,application/pdf" />
+
   <button type="submit">Registrarme y generar QR</button>
 </form>
 
@@ -37,6 +43,8 @@ const qrContainer = document.getElementById("qrContainer");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  qrContainer.innerHTML = "<p>Registrando conductor...</p>";
+
   const datos = {
     nombre: document.getElementById("nombre").value,
     cedula: document.getElementById("cedula").value,
@@ -46,19 +54,52 @@ form.addEventListener("submit", async (e) => {
     cip: document.getElementById("cip").value
   };
 
-  const respuesta = await fetch("https://conductores-api.onrender.com/api/conductores", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(datos)
-  });
+  try {
+    // 🟢 1. Crear conductor
+    const respuesta = await fetch("https://conductores-api.onrender.com/api/conductores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
+    });
 
-  const data = await respuesta.json();
+    const data = await respuesta.json();
 
-  if (data.url_qr) {
-    qrContainer.innerHTML = "<h2>Tu código QR</h2><canvas id='qr'></canvas><p>Guárdalo o haz captura</p>";
-    QRCode.toCanvas(document.getElementById("qr"), data.url_qr);
-  } else {
-    qrContainer.innerHTML = "<p>Error al registrar</p>";
+    if (!data.conductor) throw new Error("No se creó el conductor");
+
+    const conductorId = data.conductor.id;
+
+    // 🟢 2. Generar QR con enlace al perfil público
+    const perfilURL = `https://nrdesingcorp.com/perfil.html?id=${conductorId}`;
+
+    qrContainer.innerHTML = `
+      <h2>Tu código QR</h2>
+      <canvas id="qr"></canvas>
+      <p>Guárdalo o haz captura</p>
+    `;
+
+    QRCode.toCanvas(document.getElementById("qr"), perfilURL);
+
+    // 🟢 3. Subir foto de licencia si existe
+    const fileInput = document.getElementById("licenciaFile");
+    const file = fileInput.files[0];
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("archivo", file);
+
+      const uploadRes = await fetch(`https://conductores-api.onrender.com/api/documentos/${conductorId}`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!uploadRes.ok) {
+        alert("Conductor creado, pero hubo un error subiendo la licencia.");
+      }
+    }
+
+  } catch (error) {
+    console.error(error);
+    qrContainer.innerHTML = "<p>Error al registrar conductor ❌</p>";
   }
 });
 </script>
