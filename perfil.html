@@ -13,17 +13,25 @@
     input, button { width:100%; margin-top:10px; padding:10px; border-radius:6px; border:1px solid #ccc; }
     button { background:#0d6efd; color:white; font-weight:bold; border:none; cursor:pointer; }
     button:hover { opacity:0.9; }
-    img { max-width:100%; border-radius:8px; margin-top:10px; }
     label { font-weight:bold; margin-top:15px; display:block; }
     hr { margin:20px 0; }
     .section { margin-top:20px; }
     .queja { background:#fff3cd; padding:10px; border-radius:6px; margin-top:8px; }
+    #qrContainer { text-align:center; margin-top:20px; }
+    #formPerfil input, #formPerfil button, #formPerfil label { display:none; }
+    .resumen p { margin:5px 0; }
   </style>
 </head>
 <body>
 
 <div class="card">
   <h2>Perfil del Conductor</h2>
+
+  <!-- QR -->
+  <div id="qrContainer">
+    <p>Escanea el QR para acceder a este perfil:</p>
+    <canvas id="qr"></canvas>
+  </div>
 
   <!-- LOGIN -->
   <div id="loginSection">
@@ -34,36 +42,41 @@
     <div id="loginMensaje"></div>
   </div>
 
-  <!-- PERFIL Y EDICIÓN -->
+  <!-- PERFIL PÚBLICO -->
   <div id="perfilSection">
-    <form id="formPerfil">
-      <input id="nombres" placeholder="Nombres" disabled>
-      <input id="apellidos" placeholder="Apellidos" disabled>
-      <input id="cedula" placeholder="Cédula" disabled>
-      <input id="licencia" placeholder="Número de Licencia" disabled>
-      <input id="placa" placeholder="Número de Placa Vehicular" disabled>
-      <input id="poliza_numero" placeholder="Número de Póliza Vehicular" disabled>
-      <input id="poliza_tipo" placeholder="Tipo de Póliza" disabled>
-      <input id="celular" placeholder="Número de Celular" disabled>
-      <input id="direccion" placeholder="Dirección" disabled>
-
-      <hr>
-      <label>Foto de Licencia</label>
-      <input type="file" id="fileLicencia" accept="image/*,application/pdf" disabled>
-      <label>Foto del Registro Vehicular</label>
-      <input type="file" id="fileRegistro" accept="image/*,application/pdf" disabled>
-      <label>Foto del Vehículo</label>
-      <input type="file" id="fileVehiculo" accept="image/*" disabled>
-      <label>Paz y Salvo Municipal o Pago de Placa</label>
-      <input type="file" id="filePazSalvo" accept="image/*,application/pdf" disabled>
-      <label>Revisado Vehicular (Taller Autorizado)</label>
-      <input type="file" id="fileRevisado" accept="image/*,application/pdf" disabled>
-
-      <button type="submit" style="display:none;">Actualizar datos</button>
-    </form>
+    <div class="resumen" id="resumenDatos">
+      <!-- Aquí se muestra un resumen de los datos del conductor -->
+    </div>
 
     <div class="section" id="documentosSection"></div>
     <div class="section" id="quejasSection"></div>
+
+    <!-- FORMULARIO DE EDICIÓN OCULTO -->
+    <form id="formPerfil">
+      <input id="nombres" placeholder="Nombres">
+      <input id="apellidos" placeholder="Apellidos">
+      <input id="cedula" placeholder="Cédula">
+      <input id="licencia" placeholder="Número de Licencia">
+      <input id="placa" placeholder="Número de Placa Vehicular">
+      <input id="poliza_numero" placeholder="Número de Póliza Vehicular">
+      <input id="poliza_tipo" placeholder="Tipo de Póliza">
+      <input id="celular" placeholder="Número de Celular">
+      <input id="direccion" placeholder="Dirección">
+
+      <hr>
+      <label>Foto de Licencia</label>
+      <input type="file" id="fileLicencia" accept="image/*,application/pdf">
+      <label>Foto del Registro Vehicular</label>
+      <input type="file" id="fileRegistro" accept="image/*,application/pdf">
+      <label>Foto del Vehículo</label>
+      <input type="file" id="fileVehiculo" accept="image/*">
+      <label>Paz y Salvo Municipal o Pago de Placa</label>
+      <input type="file" id="filePazSalvo" accept="image/*,application/pdf">
+      <label>Revisado Vehicular (Taller Autorizado)</label>
+      <input type="file" id="fileRevisado" accept="image/*,application/pdf">
+
+      <button type="submit">Actualizar datos</button>
+    </form>
   </div>
 </div>
 
@@ -76,9 +89,16 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let conductorId = new URLSearchParams(window.location.search).get("id");
 
-// ==============================
-// 🔑 LOGIN
-// ==============================
+// 🔹 GENERAR QR
+function generarQR() {
+  const perfilURL = `${window.location.href}`;
+  const canvas = document.getElementById("qr");
+  QRCode.toCanvas(canvas, perfilURL, { width: 180 }, function (error) {
+    if(error) console.error(error);
+  });
+}
+
+// 🔹 LOGIN
 async function loginConductor() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
@@ -103,18 +123,19 @@ async function loginConductor() {
   habilitarEdicion();
 }
 
-// ==============================
-// 🔑 HABILITAR EDICIÓN
-// ==============================
+// 🔹 HABILITAR EDICIÓN
 function habilitarEdicion() {
-  // Habilita campos y botón solo si es propietario
-  document.getElementById("formPerfil").querySelectorAll("input").forEach(input => input.disabled = false);
-  document.getElementById("formPerfil").querySelector("button").style.display = "block";
+  document.getElementById("formPerfil").querySelectorAll("input, button, label").forEach(el => el.style.display = "block");
+  // Rellenar formulario con datos actuales
+  const resumen = document.getElementById("resumenDatos");
+  resumen.querySelectorAll("p[data-campo]").forEach(p => {
+    const id = p.dataset.campo;
+    const input = document.getElementById(id);
+    if(input) input.value = p.textContent.replace(`${p.dataset.label}: `,"");
+  });
 }
 
-// ==============================
-// 📄 CARGAR PERFIL PÚBLICO
-// ==============================
+// 🔹 CARGAR PERFIL PÚBLICO
 async function cargarPerfil() {
   try {
     const res = await fetch(`${API}/api/conductores/${conductorId}`);
@@ -127,16 +148,19 @@ async function cargarPerfil() {
 
     const c = data.conductor;
 
-    // Rellenar campos (solo lectura)
-    document.getElementById("nombres").value = c.nombres;
-    document.getElementById("apellidos").value = c.apellidos;
-    document.getElementById("cedula").value = c.cedula;
-    document.getElementById("licencia").value = c.licencia;
-    document.getElementById("placa").value = c.placa;
-    document.getElementById("poliza_numero").value = c.poliza_numero;
-    document.getElementById("poliza_tipo").value = c.poliza_tipo;
-    document.getElementById("celular").value = c.celular;
-    document.getElementById("direccion").value = c.direccion;
+    // Resumen público de datos
+    const resumen = document.getElementById("resumenDatos");
+    resumen.innerHTML = `
+      <p data-campo="nombres" data-label="Nombres">Nombres: ${c.nombres}</p>
+      <p data-campo="apellidos" data-label="Apellidos">Apellidos: ${c.apellidos}</p>
+      <p data-campo="cedula" data-label="Cédula">Cédula: ${c.cedula}</p>
+      <p data-campo="licencia" data-label="Licencia">Licencia: ${c.licencia}</p>
+      <p data-campo="placa" data-label="Placa">Placa: ${c.placa}</p>
+      <p data-campo="poliza_numero" data-label="Póliza N°">Póliza N°: ${c.poliza_numero}</p>
+      <p data-campo="poliza_tipo" data-label="Tipo Póliza">Tipo Póliza: ${c.poliza_tipo}</p>
+      <p data-campo="celular" data-label="Celular">Celular: ${c.celular}</p>
+      <p data-campo="direccion" data-label="Dirección">Dirección: ${c.direccion}</p>
+    `;
 
     // Documentos
     const docSection = document.getElementById("documentosSection");
@@ -158,14 +182,15 @@ async function cargarPerfil() {
       quejasSection.innerHTML += "<p>Sin reportes registrados ✅</p>";
     }
 
+    // Generar QR
+    generarQR();
+
   } catch (error) {
     console.error(error);
   }
 }
 
-// ==============================
-// 📝 ACTUALIZAR PERFIL
-// ==============================
+// 🔹 ACTUALIZAR PERFIL
 document.getElementById("formPerfil").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -174,17 +199,10 @@ document.getElementById("formPerfil").addEventListener("submit", async (e) => {
     return;
   }
 
-  const datos = {
-    nombres: nombres.value,
-    apellidos: apellidos.value,
-    cedula: cedula.value,
-    licencia: licencia.value,
-    placa: placa.value,
-    poliza_numero: poliza_numero.value,
-    poliza_tipo: poliza_tipo.value,
-    celular: celular.value,
-    direccion: direccion.value
-  };
+  const datos = {};
+  ["nombres","apellidos","cedula","licencia","placa","poliza_numero","poliza_tipo","celular","direccion"].forEach(id => {
+    datos[id] = document.getElementById(id).value;
+  });
 
   try{
     const res = await fetch(`${API}/api/conductores`, {
@@ -224,6 +242,5 @@ document.getElementById("formPerfil").addEventListener("submit", async (e) => {
 cargarPerfil();
 
 </script>
-
 </body>
 </html>
