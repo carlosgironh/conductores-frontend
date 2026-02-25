@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel del Conductor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<h2>Panel del Conductor</h2>
+
+<div id="loginBox">
+  <h3>Iniciar Sesión</h3>
+  <input id="email" type="email" placeholder="Correo"><br><br>
+  <input id="password" type="password" placeholder="Contraseña"><br><br>
+  <button onclick="login()">Ingresar</button>
+  <p id="mensaje"></p>
+</div>
+
+<div id="perfilBox" style="display:none;">
+  <h3>Editar Perfil</h3>
+  <input id="nombres" placeholder="Nombres"><br><br>
+  <input id="apellidos" placeholder="Apellidos"><br><br>
+  <input id="licencia" placeholder="Licencia"><br><br>
+  <button onclick="guardar()">Guardar Cambios</button>
+  <p id="mensajePerfil"></p>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUI";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const API = "https://conductores-api.onrender.com";
+
+let conductorId = null;
+
+// 🔐 LOGIN
+async function login(){
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email.value,
+    password: password.value
+  });
+
+  if(error){
+    mensaje.innerText = error.message;
+    return;
+  }
+
+  mensaje.innerText = "Sesión iniciada";
+
+  // Buscar conductor por auth_user_id
+  const userId = data.user.id;
+
+  const res = await fetch(`${API}/api/conductor-por-user/${userId}`);
+  const dataConductor = await res.json();
+
+  conductorId = dataConductor.conductor.id;
+
+  nombres.value = dataConductor.conductor.nombres;
+  apellidos.value = dataConductor.conductor.apellidos;
+  licencia.value = dataConductor.conductor.licencia;
+
+  loginBox.style.display = "none";
+  perfilBox.style.display = "block";
+}
+
+// 💾 GUARDAR CAMBIOS
+async function guardar(){
+
+  const res = await fetch(`${API}/api/conductores/${conductorId}`,{
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      nombres: nombres.value,
+      apellidos: apellidos.value,
+      licencia: licencia.value
+    })
+  });
+
+  if(res.ok){
+    mensajePerfil.innerText = "Datos actualizados correctamente";
+  }else{
+    mensajePerfil.innerText = "Error actualizando";
+  }
+}
+
+</script>
+
+</body>
+</html>
