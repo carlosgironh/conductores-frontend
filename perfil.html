@@ -17,44 +17,55 @@ body{
 
 .card{
   background:white;
-  max-width:650px;
+  max-width:700px;
   margin:auto;
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.1);
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
 
 h1{
   text-align:center;
-  margin-bottom:10px;
+  margin-bottom:5px;
+}
+
+.subtitulo{
+  text-align:center;
+  font-size:14px;
+  color:green;
+  margin-bottom:25px;
 }
 
 .nombreGrande{
   text-align:center;
-  font-size:22px;
+  font-size:24px;
   font-weight:bold;
   margin-bottom:20px;
 }
 
-.item{
+.resumen{
   background:#f8f9fa;
-  padding:12px;
-  border-radius:8px;
+  padding:20px;
+  border-radius:10px;
+}
+
+.linea{
   margin-bottom:10px;
 }
 
-.item strong{
-  display:block;
+.linea strong{
+  display:inline-block;
+  width:160px;
 }
 
 button{
   background:#0d6efd;
   color:white;
   border:none;
-  padding:8px 12px;
+  padding:8px 14px;
   border-radius:6px;
   cursor:pointer;
-  margin-top:5px;
+  margin-top:8px;
 }
 
 button:hover{
@@ -63,19 +74,19 @@ button:hover{
 
 #qrContainer{
   text-align:center;
-  margin-top:25px;
+  margin-top:30px;
 }
 
 .loginBox{
-  margin-top:25px;
-  padding-top:15px;
+  margin-top:30px;
+  padding-top:20px;
   border-top:1px solid #ddd;
 }
 
 input{
   width:100%;
   padding:10px;
-  margin-top:8px;
+  margin-top:10px;
   border-radius:6px;
   border:1px solid #ccc;
 }
@@ -85,20 +96,17 @@ input{
 
 <div class="card">
 
-<h1>Perfil Verificado</h1>
-
-<div id="perfilPublico">
+<h1>Perfil del Conductor</h1>
+<div class="subtitulo">✔ Perfil Verificado</div>
 
 <div class="nombreGrande" id="nombreCompleto"></div>
 
-<div id="datosContainer"></div>
+<div class="resumen" id="resumenDatos"></div>
 
 <div id="qrContainer">
   <canvas id="qr"></canvas>
   <br>
   <button onclick="descargarQR()">Descargar QR</button>
-</div>
-
 </div>
 
 <div class="loginBox">
@@ -122,6 +130,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let conductorId = new URLSearchParams(window.location.search).get("id");
 
 async function cargarPerfil(){
+
   const res = await fetch(`${API}/api/conductores/${conductorId}`);
   const data = await res.json();
 
@@ -131,41 +140,52 @@ async function cargarPerfil(){
   }
 
   const c = data.conductor;
+  const docs = data.documentos || [];
+
+  function obtenerDocumento(tipo){
+    const doc = docs.find(d => d.tipo === tipo);
+    return doc ? doc.url_archivo : null;
+  }
 
   document.getElementById("nombreCompleto").innerText =
     `${c.nombres} ${c.apellidos}`;
 
-  const cont = document.getElementById("datosContainer");
-  cont.innerHTML = "";
+  const cont = document.getElementById("resumenDatos");
 
-  function crearItem(titulo, valor, tipoDoc){
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <strong>${titulo}</strong>
-      ${valor}
-      ${buscarBotonDocumento(tipoDoc)}
-    `;
-    cont.appendChild(div);
-  }
+  const docIdentidad = obtenerDocumento("licencia") || obtenerDocumento("cedula");
+  const docRegistro = obtenerDocumento("registro_vehicular");
+  const docPoliza = obtenerDocumento("poliza");
 
-  function buscarBotonDocumento(tipo){
-    if(!data.documentos) return "";
-    const doc = data.documentos.find(d => d.tipo === tipo);
-    if(!doc) return "";
-    return `<br><a href="${doc.url_archivo}" target="_blank">
-              <button>Ver Documento</button>
-            </a>`;
-  }
+  cont.innerHTML = `
+    <div class="linea"><strong>Cédula:</strong> ${c.cedula}</div>
+    <div class="linea"><strong>Licencia:</strong> ${c.licencia}</div>
+    ${docIdentidad ? `
+      <a href="${docIdentidad}" target="_blank">
+        <button>Ver Documento de Identidad</button>
+      </a>
+    ` : ""}
 
-  crearItem("Cédula de Identidad", c.cedula, "cedula");
-  crearItem("Licencia", c.licencia, "licencia");
-  crearItem("Placa", c.placa, "registro_vehicular");
-  crearItem("Modelo", c.modelo || "-", "foto_vehiculo");
-  crearItem("Marca", c.marca || "-", "foto_vehiculo");
-  crearItem("Color", c.color || "-", "foto_vehiculo");
-  crearItem("Número de Póliza", c.poliza_numero, "poliza");
-  crearItem("Registro Vehicular", "Documento Oficial", "registro_vehicular");
+    <hr>
+
+    <div class="linea"><strong>Placa:</strong> ${c.placa}</div>
+    <div class="linea"><strong>Modelo:</strong> ${c.modelo || "-"}</div>
+    <div class="linea"><strong>Marca:</strong> ${c.marca || "-"}</div>
+    <div class="linea"><strong>Color:</strong> ${c.color || "-"}</div>
+    ${docRegistro ? `
+      <a href="${docRegistro}" target="_blank">
+        <button>Ver Registro Vehicular</button>
+      </a>
+    ` : ""}
+
+    <hr>
+
+    <div class="linea"><strong>Número de Póliza:</strong> ${c.poliza_numero}</div>
+    ${docPoliza ? `
+      <a href="${docPoliza}" target="_blank">
+        <button>Ver Documento de Póliza</button>
+      </a>
+    ` : ""}
+  `;
 
   generarQR();
 }
@@ -183,7 +203,7 @@ function generarQR(){
 
     const ctx = canvas.getContext("2d");
     const logo = new Image();
-    logo.src = "logo.png"; // coloca tu logo en la misma carpeta
+    logo.src = "logo.png";
 
     logo.onload = function(){
       const size = 50;
@@ -192,7 +212,6 @@ function generarQR(){
 
       ctx.fillStyle = "white";
       ctx.fillRect(x-5, y-5, size+10, size+10);
-
       ctx.drawImage(logo, x, y, size, size);
     }
   });
