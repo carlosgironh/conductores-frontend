@@ -1,252 +1,224 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Perfil del Conductor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: Arial, sans-serif; padding:20px; background:#f4f6f8; }
-    .card { background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); max-width:600px; margin:auto; }
-    h2 { margin-top:0; text-align:center; }
-    input, button { width:100%; margin-top:10px; padding:10px; border-radius:6px; border:1px solid #ccc; }
-    button { background:#0d6efd; color:white; font-weight:bold; border:none; cursor:pointer; }
-    button:hover { opacity:0.9; }
-    label { font-weight:bold; margin-top:15px; display:block; }
-    hr { margin:20px 0; }
-    .section { margin-top:20px; }
-    .queja { background:#fff3cd; padding:10px; border-radius:6px; margin-top:8px; }
-    #qrContainer { text-align:center; margin-top:20px; }
-    #formPerfil input, #formPerfil button, #formPerfil label { display:none; }
-    .resumen p { margin:5px 0; }
-    .documento { margin-top:5px; }
-    .downloadQR { margin-top:10px; display:block; }
-  </style>
+<meta charset="UTF-8">
+<title>Perfil del Conductor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  max-width:650px;
+  margin:auto;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+h1{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.nombreGrande{
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  margin-bottom:20px;
+}
+
+.item{
+  background:#f8f9fa;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+
+.item strong{
+  display:block;
+}
+
+button{
+  background:#0d6efd;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-top:5px;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+#qrContainer{
+  text-align:center;
+  margin-top:25px;
+}
+
+.loginBox{
+  margin-top:25px;
+  padding-top:15px;
+  border-top:1px solid #ddd;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+</style>
 </head>
 <body>
 
 <div class="card">
-  <h2>Perfil del Conductor</h2>
 
-  <!-- PERFIL PÚBLICO -->
-  <div id="perfilSection">
-    <div class="resumen" id="resumenDatos"></div>
-    <div class="section" id="documentosSection"></div>
-    <div class="section" id="quejasSection"></div>
+<h1>Perfil Verificado</h1>
 
-    <!-- FORMULARIO DE EDICIÓN OCULTO -->
-    <form id="formPerfil">
-      <input id="nombres" placeholder="Nombres">
-      <input id="apellidos" placeholder="Apellidos">
-      <input id="cedula" placeholder="Cédula">
-      <input id="licencia" placeholder="Número de Licencia">
-      <input id="placa" placeholder="Número de Placa Vehicular">
-      <input id="poliza_numero" placeholder="Número de Póliza Vehicular">
-      <input id="poliza_tipo" placeholder="Tipo de Póliza">
-      <input id="celular" placeholder="Número de Celular">
-      <input id="direccion" placeholder="Dirección">
+<div id="perfilPublico">
 
-      <hr>
-      <label>Foto de Licencia</label>
-      <input type="file" id="fileLicencia" accept="image/*,application/pdf">
-      <label>Foto del Registro Vehicular</label>
-      <input type="file" id="fileRegistro" accept="image/*,application/pdf">
-      <label>Foto del Vehículo</label>
-      <input type="file" id="fileVehiculo" accept="image/*">
-      <label>Paz y Salvo Municipal o Pago de Placa</label>
-      <input type="file" id="filePazSalvo" accept="image/*,application/pdf">
-      <label>Revisado Vehicular (Taller Autorizado)</label>
-      <input type="file" id="fileRevisado" accept="image/*,application/pdf">
+<div class="nombreGrande" id="nombreCompleto"></div>
 
-      <button type="submit">Actualizar datos</button>
-    </form>
-  </div>
+<div id="datosContainer"></div>
 
-  <!-- LOGIN Y QR ABAJO -->
-  <div id="loginSection">
-    <h3>Inicia sesión para editar tus datos</h3>
-    <input id="loginEmail" type="email" placeholder="Correo electrónico" required>
-    <input id="loginPassword" type="password" placeholder="Contraseña" required>
-    <button onclick="loginConductor()">Iniciar sesión</button>
-    <div id="loginMensaje"></div>
+<div id="qrContainer">
+  <canvas id="qr"></canvas>
+  <br>
+  <button onclick="descargarQR()">Descargar QR</button>
+</div>
 
-    <div id="qrContainer">
-      <p>Escanea el QR para acceder a este perfil:</p>
-      <canvas id="qr"></canvas>
-      <button class="downloadQR" onclick="descargarQR()">📥 Descargar QR</button>
-    </div>
-  </div>
+</div>
+
+<div class="loginBox">
+<h3>Editar Perfil</h3>
+<input id="loginEmail" type="email" placeholder="Correo">
+<input id="loginPassword" type="password" placeholder="Contraseña">
+<button onclick="login()">Iniciar Sesión</button>
+<div id="loginMensaje"></div>
+</div>
+
 </div>
 
 <script>
+
 const API = "https://conductores-api.onrender.com";
+
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+const SUPABASE_KEY = "TU_PUBLIC_ANON_KEY";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
 let conductorId = new URLSearchParams(window.location.search).get("id");
 
-// 🔹 GENERAR QR
-function generarQR() {
-  const perfilURL = `${window.location.href}`;
+async function cargarPerfil(){
+  const res = await fetch(`${API}/api/conductores/${conductorId}`);
+  const data = await res.json();
+
+  if(!data.conductor){
+    alert("Conductor no encontrado");
+    return;
+  }
+
+  const c = data.conductor;
+
+  document.getElementById("nombreCompleto").innerText =
+    `${c.nombres} ${c.apellidos}`;
+
+  const cont = document.getElementById("datosContainer");
+  cont.innerHTML = "";
+
+  function crearItem(titulo, valor, tipoDoc){
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <strong>${titulo}</strong>
+      ${valor}
+      ${buscarBotonDocumento(tipoDoc)}
+    `;
+    cont.appendChild(div);
+  }
+
+  function buscarBotonDocumento(tipo){
+    if(!data.documentos) return "";
+    const doc = data.documentos.find(d => d.tipo === tipo);
+    if(!doc) return "";
+    return `<br><a href="${doc.url_archivo}" target="_blank">
+              <button>Ver Documento</button>
+            </a>`;
+  }
+
+  crearItem("Cédula de Identidad", c.cedula, "cedula");
+  crearItem("Licencia", c.licencia, "licencia");
+  crearItem("Placa", c.placa, "registro_vehicular");
+  crearItem("Modelo", c.modelo || "-", "foto_vehiculo");
+  crearItem("Marca", c.marca || "-", "foto_vehiculo");
+  crearItem("Color", c.color || "-", "foto_vehiculo");
+  crearItem("Número de Póliza", c.poliza_numero, "poliza");
+  crearItem("Registro Vehicular", "Documento Oficial", "registro_vehicular");
+
+  generarQR();
+}
+
+function generarQR(){
   const canvas = document.getElementById("qr");
-  QRCode.toCanvas(canvas, perfilURL, { width: 180 }, function (error) {
-    if(error) console.error(error);
+  const url = window.location.href;
+
+  QRCode.toCanvas(canvas, url, {
+    width:220,
+    errorCorrectionLevel:'H'
+  }, function (error) {
+
+    if(error) return console.error(error);
+
+    const ctx = canvas.getContext("2d");
+    const logo = new Image();
+    logo.src = "logo.png"; // coloca tu logo en la misma carpeta
+
+    logo.onload = function(){
+      const size = 50;
+      const x = (canvas.width - size)/2;
+      const y = (canvas.height - size)/2;
+
+      ctx.fillStyle = "white";
+      ctx.fillRect(x-5, y-5, size+10, size+10);
+
+      ctx.drawImage(logo, x, y, size, size);
+    }
   });
 }
 
-// 🔹 DESCARGAR QR
-function descargarQR() {
+function descargarQR(){
   const canvas = document.getElementById("qr");
-  const url = canvas.toDataURL("image/png");
   const link = document.createElement("a");
-  link.href = url;
-  link.download = "perfil_conductor.png";
+  link.download = "perfil_qr.png";
+  link.href = canvas.toDataURL();
   link.click();
 }
 
-// 🔹 LOGIN
-async function loginConductor() {
+async function login(){
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
-  const loginMensaje = document.getElementById("loginMensaje");
 
-  if(!email || !password){
-    loginMensaje.innerHTML = "Ingrese email y contraseña";
-    return;
-  }
+  const { error } = await supabaseClient.auth.signInWithPassword({email,password});
 
-  loginMensaje.innerHTML = "Iniciando sesión...";
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) {
-    loginMensaje.innerHTML = "Error: " + error.message;
-    return;
-  }
-
-  currentUser = data.user;
-  loginMensaje.innerHTML = "✅ Sesión iniciada";
-
-  habilitarEdicion();
-}
-
-// 🔹 HABILITAR EDICIÓN
-function habilitarEdicion() {
-  document.getElementById("formPerfil").querySelectorAll("input, button, label").forEach(el => el.style.display = "block");
-  const resumen = document.getElementById("resumenDatos");
-  resumen.querySelectorAll("p[data-campo]").forEach(p => {
-    const id = p.dataset.campo;
-    const input = document.getElementById(id);
-    if(input) input.value = p.textContent.replace(`${p.dataset.label}: `,"");
-  });
-}
-
-// 🔹 CARGAR PERFIL PÚBLICO
-async function cargarPerfil() {
-  try {
-    const res = await fetch(`${API}/api/conductores/${conductorId}`);
-    const data = await res.json();
-
-    if (!data.conductor) {
-      alert("Conductor no encontrado");
-      return;
-    }
-
-    const c = data.conductor;
-
-    // Resumen público de datos
-    const resumen = document.getElementById("resumenDatos");
-    resumen.innerHTML = `
-      <p data-campo="nombres" data-label="Nombres">Nombres: ${c.nombres}</p>
-      <p data-campo="apellidos" data-label="Apellidos">Apellidos: ${c.apellidos}</p>
-      <p data-campo="cedula" data-label="Cédula">Cédula: ${c.cedula}</p>
-      <p data-campo="licencia" data-label="Licencia">Licencia: ${c.licencia}</p>
-      <p data-campo="placa" data-label="Placa">Placa: ${c.placa}</p>
-      <p data-campo="poliza_numero" data-label="Póliza N°">Póliza N°: ${c.poliza_numero}</p>
-      <p data-campo="poliza_tipo" data-label="Tipo Póliza">Tipo Póliza: ${c.poliza_tipo}</p>
-      <p data-campo="celular" data-label="Celular">Celular: ${c.celular}</p>
-      <p data-campo="direccion" data-label="Dirección">Dirección: ${c.direccion}</p>
-    `;
-
-    // Documentos como enlaces
-    const docSection = document.getElementById("documentosSection");
-    docSection.innerHTML = "<h3>Documentos</h3>";
-    if (data.documentos && data.documentos.length > 0) {
-      data.documentos.forEach(doc => {
-        docSection.innerHTML += `<div class="documento"><strong>${doc.tipo}:</strong> <a href="${doc.url_archivo}" target="_blank">Ver archivo</a></div>`;
-      });
-    }
-
-    // Quejas
-    const quejasSection = document.getElementById("quejasSection");
-    quejasSection.innerHTML = "<h3>Historial de Reportes</h3>";
-    if (data.quejas && data.quejas.length > 0) {
-      data.quejas.forEach(q => {
-        quejasSection.innerHTML += `<div class="queja">${q.descripcion}<br><small>${new Date(q.fecha).toLocaleDateString()}</small></div>`;
-      });
-    } else {
-      quejasSection.innerHTML += "<p>Sin reportes registrados ✅</p>";
-    }
-
-    // Generar QR
-    generarQR();
-
-  } catch (error) {
-    console.error(error);
+  if(error){
+    document.getElementById("loginMensaje").innerText = error.message;
+  }else{
+    document.getElementById("loginMensaje").innerText = "Sesión iniciada";
   }
 }
 
-// 🔹 ACTUALIZAR PERFIL
-document.getElementById("formPerfil").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  if(!currentUser){
-    alert("Debes iniciar sesión para editar tu perfil");
-    return;
-  }
-
-  const datos = {};
-  ["nombres","apellidos","cedula","licencia","placa","poliza_numero","poliza_tipo","celular","direccion"].forEach(id => {
-    datos[id] = document.getElementById(id).value;
-  });
-
-  try{
-    const res = await fetch(`${API}/api/conductores`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(datos)
-    });
-    const data = await res.json();
-    if(!data.conductor) throw new Error("Error actualizando datos");
-
-    // Subir documentos si hay
-    async function subirDoc(tipo, inputId){
-      const archivo = document.getElementById(inputId).files[0];
-      if(!archivo) return;
-      const fd = new FormData();
-      fd.append("archivo", archivo);
-      const upload = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, { method:"POST", body:fd });
-      if(!upload.ok) throw new Error("Error subiendo " + tipo);
-    }
-
-    await subirDoc("licencia", "fileLicencia");
-    await subirDoc("registro_vehicular", "fileRegistro");
-    await subirDoc("foto_vehiculo", "fileVehiculo");
-    await subirDoc("paz_y_salvo", "filePazSalvo");
-    await subirDoc("revisado_vehicular", "fileRevisado");
-
-    alert("Perfil actualizado ✅");
-    cargarPerfil();
-
-  }catch(err){
-    console.error(err);
-    alert("Error actualizando perfil ❌");
-  }
-});
-
-// Cargar perfil al inicio
 cargarPerfil();
 
 </script>

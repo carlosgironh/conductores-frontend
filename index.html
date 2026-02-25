@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <title>Registro de Conductores</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <!-- QR Code -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <!-- SDK Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background:#f4f6f8; }
     h1 { text-align:center; }
@@ -26,14 +28,12 @@
 
 <form id="formConductor">
 
-  <!-- LOGIN -->
   <hr>
   <h3>Crear cuenta para administrar tus datos</h3>
   <input id="email" type="email" placeholder="Correo electrónico" required>
   <input id="password" type="password" placeholder="Contraseña" required>
   <hr>
 
-  <!-- DATOS CONDUCTOR -->
   <input id="nombres" placeholder="Nombres" required>
   <input id="apellidos" placeholder="Apellidos" required>
   <input id="cedula" placeholder="Cédula" required>
@@ -46,7 +46,6 @@
 
   <hr>
 
-  <!-- DOCUMENTOS -->
   <label>Foto de Licencia</label>
   <input type="file" id="fileLicencia" accept="image/*,application/pdf" required>
 
@@ -59,7 +58,7 @@
   <label>Paz y Salvo Municipal o Pago de Placa</label>
   <input type="file" id="filePazSalvo" accept="image/*,application/pdf" required>
 
-  <label>Revisado Vehicular (Taller Autorizado)</label>
+  <label>Revisado Vehicular</label>
   <input type="file" id="fileRevisado" accept="image/*,application/pdf" required>
 
   <button type="submit">Registrarme y generar QR</button>
@@ -68,44 +67,85 @@
 <div id="qrContainer"></div>
 
 <script>
+
 const API = "https://conductores-api.onrender.com";
 
-// ⚡ Supabase client
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+const SUPABASE_KEY = "TU_ANON_KEY_AQUI"; // 🔒 Mejor mover a variable segura
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const form = document.getElementById("formConductor");
 const qrContainer = document.getElementById("qrContainer");
 
+
+// ===============================
+// 🟢 FUNCIÓN QR CON LOGO
+// ===============================
+function generarQRConLogo(url) {
+
+  const size = 240;
+
+  qrContainer.innerHTML += `<canvas id="qr"></canvas>`;
+  const canvas = document.getElementById("qr");
+
+  QRCode.toCanvas(canvas, url, {
+    width: size,
+    errorCorrectionLevel: "H"
+  }, function (error) {
+
+    if (error) return console.error(error);
+
+    const ctx = canvas.getContext("2d");
+
+    const logo = new Image();
+    logo.src = "logo.png"; // 👈 Cambia si está en otra ruta
+
+    logo.onload = function () {
+      const logoSize = size * 0.25;
+      const x = (canvas.width - logoSize) / 2;
+      const y = (canvas.height - logoSize) / 2;
+
+      ctx.fillStyle = "white";
+      ctx.fillRect(x - 8, y - 8, logoSize + 16, logoSize + 16);
+
+      ctx.drawImage(logo, x, y, logoSize, logoSize);
+    };
+  });
+}
+
+
+// ===============================
+// 🟢 REGISTRO
+// ===============================
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   qrContainer.innerHTML = "<p>Creando cuenta y registrando conductor...</p>";
 
   try {
-    // 1️⃣ Crear usuario Supabase Auth
+
+    // 1️⃣ Crear usuario
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-      email,
-      password
-    });
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.signUp({ email, password });
+
     if (authError) throw authError;
 
     const userId = authData.user.id;
 
-    // 2️⃣ Crear conductor en backend
+    // 2️⃣ Registrar conductor
     const datos = {
-      nombres: nombres.value,
-      apellidos: apellidos.value,
-      cedula: cedula.value,
-      licencia: licencia.value,
-      placa: placa.value,
-      poliza_numero: poliza_numero.value,
-      poliza_tipo: poliza_tipo.value,
-      celular: celular.value,
-      direccion: direccion.value,
+      nombres: document.getElementById("nombres").value,
+      apellidos: document.getElementById("apellidos").value,
+      cedula: document.getElementById("cedula").value,
+      licencia: document.getElementById("licencia").value,
+      placa: document.getElementById("placa").value,
+      poliza_numero: document.getElementById("poliza_numero").value,
+      poliza_tipo: document.getElementById("poliza_tipo").value,
+      celular: document.getElementById("celular").value,
+      direccion: document.getElementById("direccion").value,
       auth_user_id: userId
     };
 
@@ -114,6 +154,7 @@ form.addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datos)
     });
+
     const data = await res.json();
     if (!data.conductor) throw new Error("No se creó el conductor");
 
@@ -122,6 +163,8 @@ form.addEventListener("submit", async (e) => {
     // 3️⃣ Subir documentos
     async function subirDoc(tipo, inputId) {
       const archivo = document.getElementById(inputId).files[0];
+      if (!archivo) return;
+
       const fd = new FormData();
       fd.append("archivo", archivo);
 
@@ -144,17 +187,18 @@ form.addEventListener("submit", async (e) => {
 
     qrContainer.innerHTML = `
       <h2>Registro completado ✅</h2>
-      <p>Tu cuenta fue creada. Usa tu correo y contraseña para editar tus datos.</p>
-      <canvas id="qr"></canvas>
-      <p>Guarda este QR</p>
+      <p>Tu cuenta fue creada. Guarda tu código QR.</p>
     `;
-    QRCode.toCanvas(document.getElementById("qr"), perfilURL);
+
+    generarQRConLogo(perfilURL);
 
   } catch (error) {
     console.error(error);
     qrContainer.innerHTML = `<p>Error: ${error.message} ❌</p>`;
   }
+
 });
+
 </script>
 
 </body>
