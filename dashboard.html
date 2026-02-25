@@ -1,93 +1,169 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Panel del Conductor</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <title>Panel Administrativo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial; padding:20px; background:#eef2f7; }
+    .card { background:white; padding:20px; border-radius:10px; max-width:700px; margin:auto; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    input, textarea, button { width:100%; margin-top:10px; padding:10px; border-radius:6px; border:1px solid #ccc; }
+    button { font-weight:bold; border:none; cursor:pointer; }
+    .login { background:#0d6efd; color:white; }
+    .buscar { background:#198754; color:white; }
+    .guardar { background:#dc3545; color:white; }
+    .hidden { display:none; }
+    h2, h3 { text-align:center; margin-top:0; }
+    .conductorCard { background:#f8f9fa; padding:10px; border-radius:6px; margin-top:10px; }
+  </style>
 </head>
 <body>
 
-<h2>Panel del Conductor</h2>
-
-<div id="loginBox">
-  <h3>Iniciar Sesión</h3>
-  <input id="email" type="email" placeholder="Correo"><br><br>
-  <input id="password" type="password" placeholder="Contraseña"><br><br>
-  <button onclick="login()">Ingresar</button>
-  <p id="mensaje"></p>
+<div class="card" id="loginCard">
+  <h2>Ingreso Administrador</h2>
+  <input type="text" id="usuario" placeholder="Usuario">
+  <input type="password" id="password" placeholder="Contraseña">
+  <button class="login" onclick="login()">Ingresar</button>
+  <div id="loginMsg"></div>
 </div>
 
-<div id="perfilBox" style="display:none;">
-  <h3>Editar Perfil</h3>
-  <input id="nombres" placeholder="Nombres"><br><br>
-  <input id="apellidos" placeholder="Apellidos"><br><br>
-  <input id="licencia" placeholder="Licencia"><br><br>
-  <button onclick="guardar()">Guardar Cambios</button>
-  <p id="mensajePerfil"></p>
+<div class="card hidden" id="adminPanel">
+  <h2>Panel Administrativo de Conductores</h2>
+
+  <h3>Buscar Conductor</h3>
+  <input type="text" id="buscarCedula" placeholder="Cédula">
+  <button class="buscar" onclick="buscarConductor()">Buscar</button>
+
+  <div id="infoConductor"></div>
+
+  <h3>Agregar Reporte / Queja</h3>
+  <textarea id="descripcionQueja" placeholder="Escribe el reporte aquí"></textarea>
+  <button class="guardar" onclick="guardarQueja()">Guardar Reporte</button>
+
+  <div id="mensaje"></div>
 </div>
 
 <script>
-
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUI";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const API = "https://conductores-api.onrender.com";
 
-let conductorId = null;
+// ⚡ Supabase client (opcional si quieres manejar auth de admins por Supabase)
+const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
+const SUPABASE_KEY = "TU-ANON-PUBLIC-KEY";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 🔐 LOGIN
-async function login(){
+let token = localStorage.getItem("adminToken");
+let conductorActual = null;
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email.value,
-    password: password.value
-  });
+// Mostrar panel si ya hay token válido
+if(token) mostrarPanel();
 
-  if(error){
-    mensaje.innerText = error.message;
-    return;
-  }
+// ==============================
+// 🔑 LOGIN ADMIN
+// ==============================
+async function login() {
+  const usuario = document.getElementById("usuario").value;
+  const password = document.getElementById("password").value;
+  const loginMsg = document.getElementById("loginMsg");
+  loginMsg.innerHTML = "Verificando...";
 
-  mensaje.innerText = "Sesión iniciada";
+  try {
+    const res = await fetch(`${API}/api/admin/login`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ usuario, password })
+    });
 
-  // Buscar conductor por auth_user_id
-  const userId = data.user.id;
-
-  const res = await fetch(`${API}/api/conductor-por-user/${userId}`);
-  const dataConductor = await res.json();
-
-  conductorId = dataConductor.conductor.id;
-
-  nombres.value = dataConductor.conductor.nombres;
-  apellidos.value = dataConductor.conductor.apellidos;
-  licencia.value = dataConductor.conductor.licencia;
-
-  loginBox.style.display = "none";
-  perfilBox.style.display = "block";
-}
-
-// 💾 GUARDAR CAMBIOS
-async function guardar(){
-
-  const res = await fetch(`${API}/api/conductores/${conductorId}`,{
-    method:"PUT",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      nombres: nombres.value,
-      apellidos: apellidos.value,
-      licencia: licencia.value
-    })
-  });
-
-  if(res.ok){
-    mensajePerfil.innerText = "Datos actualizados correctamente";
-  }else{
-    mensajePerfil.innerText = "Error actualizando";
+    if(res.ok){
+      const data = await res.json();
+      token = data.token;
+      localStorage.setItem("adminToken", token);
+      mostrarPanel();
+    } else {
+      loginMsg.innerHTML = "Usuario o contraseña incorrectos ❌";
+    }
+  } catch(err){
+    console.error(err);
+    loginMsg.innerHTML = "Error conectando con servidor ❌";
   }
 }
 
+// ==============================
+// 🟢 MOSTRAR PANEL
+// ==============================
+function mostrarPanel() {
+  document.getElementById("loginCard").classList.add("hidden");
+  document.getElementById("adminPanel").classList.remove("hidden");
+}
+
+// ==============================
+// 🟢 BUSCAR CONDUCTOR
+// ==============================
+async function buscarConductor() {
+  const cedula = document.getElementById("buscarCedula").value;
+  const infoDiv = document.getElementById("infoConductor");
+  infoDiv.innerHTML = "Buscando...";
+
+  try {
+    const res = await fetch(`${API}/api/admin/conductores?q=${cedula}`, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if(!res.ok) throw new Error("Error buscando conductor");
+
+    const data = await res.json();
+    if(data.length === 0){
+      infoDiv.innerHTML = "No se encontró el conductor";
+      conductorActual = null;
+      return;
+    }
+
+    conductorActual = data[0]; // Solo mostramos el primero
+    infoDiv.innerHTML = `
+      <div class="conductorCard">
+        <strong>${conductorActual.nombres} ${conductorActual.apellidos}</strong><br>
+        Cédula: ${conductorActual.cedula}<br>
+        Teléfono: ${conductorActual.celular}<br>
+        Dirección: ${conductorActual.direccion || "No registrada"}
+      </div>
+    `;
+  } catch(err){
+    console.error(err);
+    infoDiv.innerHTML = "Error buscando conductor ❌";
+  }
+}
+
+// ==============================
+// 📝 GUARDAR QUEJA
+// ==============================
+async function guardarQueja() {
+  if(!conductorActual) return alert("Primero busca un conductor");
+
+  const descripcion = document.getElementById("descripcionQueja").value;
+  const mensajeDiv = document.getElementById("mensaje");
+
+  if(!descripcion) return alert("Escribe un reporte");
+
+  try {
+    const res = await fetch(`${API}/api/quejas`, {
+      method:"POST",
+      headers: {
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + token
+      },
+      body: JSON.stringify({
+        conductor_id: conductorActual.id,
+        descripcion
+      })
+    });
+
+    mensajeDiv.innerHTML = res.ok ? "Reporte guardado ✅" : "Error guardando reporte ❌";
+    document.getElementById("descripcionQueja").value = "";
+  } catch(err){
+    console.error(err);
+    mensajeDiv.innerHTML = "Error ❌";
+  }
+}
 </script>
 
 </body>

@@ -11,12 +11,8 @@
 <style>
 body{
   font-family: Arial, sans-serif;
-  padding:20px;
   background:#f4f6f8;
-}
-
-h1{
-  text-align:center;
+  padding:20px;
 }
 
 form{
@@ -44,183 +40,167 @@ button{
   cursor:pointer;
 }
 
-button:hover{
-  opacity:0.9;
+button:disabled{
+  background:gray;
+  cursor:not-allowed;
 }
 
-label{
-  font-weight:bold;
+#mensaje{
   margin-top:15px;
-  display:block;
-}
-
-hr{
-  margin:20px 0;
-}
-
-#qrContainer{
+  font-weight:bold;
   text-align:center;
-  margin-top:30px;
 }
 </style>
 </head>
 <body>
 
-<h1>Registro de Conductores</h1>
+<h2 style="text-align:center;">Registro de Conductores</h2>
 
 <form id="formConductor">
 
-<h3>Crear cuenta</h3>
 <input id="email" type="email" placeholder="Correo electrónico" required>
-<input id="password" type="password" placeholder="Contraseña" required>
+<input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
 
 <hr>
 
-<h3>Datos Personales</h3>
 <input id="nombres" placeholder="Nombres" required>
 <input id="apellidos" placeholder="Apellidos" required>
-<input id="cedula" placeholder="Número de Cédula" required>
-<input id="licencia" placeholder="Número de Licencia" required>
-
-<hr>
-
-<h3>Datos del Vehículo</h3>
+<input id="cedula" placeholder="Cédula" required>
+<input id="licencia" placeholder="Licencia" required>
 <input id="placa" placeholder="Placa" required>
 <input id="modelo" placeholder="Modelo" required>
 <input id="marca" placeholder="Marca" required>
 <input id="color" placeholder="Color" required>
+<input id="poliza_numero" placeholder="Número de Póliza" required>
 
 <hr>
-
-<h3>Seguro</h3>
-<input id="poliza_numero" placeholder="Número de Póliza Vehicular" required>
-
-<hr>
-
-<h3>Subir Documentos</h3>
 
 <label>Cédula</label>
-<input type="file" id="fileCedula" accept="image/*,application/pdf" required>
+<input type="file" id="fileCedula" required>
 
 <label>Licencia</label>
-<input type="file" id="fileLicencia" accept="image/*,application/pdf" required>
+<input type="file" id="fileLicencia" required>
 
-<label>Registro Vehicular</label>
-<input type="file" id="fileRegistro" accept="image/*,application/pdf" required>
+<label>Registro</label>
+<input type="file" id="fileRegistro" required>
 
-<label>Póliza Vehicular</label>
-<input type="file" id="filePoliza" accept="image/*,application/pdf" required>
+<label>Póliza</label>
+<input type="file" id="filePoliza" required>
 
-<label>Foto del Vehículo</label>
-<input type="file" id="fileFotoVehiculo" accept="image/*" required>
+<label>Foto Vehículo</label>
+<input type="file" id="fileFotoVehiculo" required>
 
-<label>Foto del Conductor</label>
-<input type="file" id="fileFotoConductor" accept="image/*" required>
+<label>Foto Conductor</label>
+<input type="file" id="fileFotoConductor" required>
 
-<button type="submit">Registrar y Generar QR</button>
+<button id="btnRegistrar" type="submit">Registrar</button>
+
+<div id="mensaje"></div>
 
 </form>
 
-<div id="qrContainer"></div>
-
 <script>
 
-// ================================
-// CONFIG PRODUCCIÓN
-// ================================
-
 const API = "https://conductores-api.onrender.com";
-
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUI";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
-const qrContainer = document.getElementById("qrContainer");
+const mensaje = document.getElementById("mensaje");
+const btn = document.getElementById("btnRegistrar");
+
+let bloqueado = false;
 
 form.addEventListener("submit", async (e)=>{
   e.preventDefault();
 
-  qrContainer.innerHTML = "Registrando...";
+  if(bloqueado) return;
+
+  bloqueado = true;
+  btn.disabled = true;
+  mensaje.innerHTML = "Procesando...";
 
   try{
 
-    // 1️⃣ Crear usuario en Supabase
-    const { data: authData, error: authError } =
-      await supabaseClient.auth.signUp({
-        email: email.value,
-        password: password.value
-      });
+    // 1️⃣ Crear usuario
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: email.value.trim(),
+      password: password.value.trim()
+    });
 
-    if(authError) throw authError;
+    if(error){
+      if(error.message.includes("rate limit")){
+        throw new Error("Demasiados intentos. Espere 60 segundos.");
+      }
+      throw new Error(error.message);
+    }
 
-    const userId = authData.user.id;
+    const userId = data.user.id;
 
-    // 2️⃣ Crear conductor en backend
-    const datos = {
-      nombres: nombres.value,
-      apellidos: apellidos.value,
-      cedula: cedula.value,
-      licencia: licencia.value,
-      placa: placa.value,
-      modelo: modelo.value,
-      marca: marca.value,
-      color: color.value,
-      poliza_numero: poliza_numero.value,
-      auth_user_id: userId
-    };
-
+    // 2️⃣ Crear conductor
     const res = await fetch(`${API}/api/conductores`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(datos)
+      body: JSON.stringify({
+        nombres: nombres.value,
+        apellidos: apellidos.value,
+        cedula: cedula.value,
+        licencia: licencia.value,
+        placa: placa.value,
+        modelo: modelo.value,
+        marca: marca.value,
+        color: color.value,
+        poliza_numero: poliza_numero.value,
+        auth_user_id: userId
+      })
     });
 
-    const data = await res.json();
-    if(!data.conductor) throw new Error("Error creando conductor");
+    const backend = await res.json();
 
-    const conductorId = data.conductor.id;
+    if(!res.ok){
+      throw new Error(backend.message || "Error creando conductor");
+    }
+
+    const conductorId = backend.conductor.id;
 
     // 3️⃣ Subir documentos
-    async function subirDoc(tipo, inputId){
-      const archivo = document.getElementById(inputId).files[0];
+    async function subir(tipo, inputId){
+      const file = document.getElementById(inputId).files[0];
       const fd = new FormData();
-      fd.append("archivo", archivo);
+      fd.append("archivo", file);
 
       const upload = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`,{
         method:"POST",
-        body:fd
+        body: fd
       });
 
-      if(!upload.ok) throw new Error("Error subiendo " + tipo);
+      if(!upload.ok){
+        throw new Error("Error subiendo " + tipo);
+      }
     }
 
-    await subirDoc("cedula","fileCedula");
-    await subirDoc("licencia","fileLicencia");
-    await subirDoc("registro_vehicular","fileRegistro");
-    await subirDoc("poliza_vehicular","filePoliza");
-    await subirDoc("foto_vehiculo","fileFotoVehiculo");
-    await subirDoc("foto_conductor","fileFotoConductor");
+    await subir("cedula","fileCedula");
+    await subir("licencia","fileLicencia");
+    await subir("registro_vehicular","fileRegistro");
+    await subir("poliza_vehicular","filePoliza");
+    await subir("foto_vehiculo","fileFotoVehiculo");
+    await subir("foto_conductor","fileFotoConductor");
 
-    // 4️⃣ Generar QR producción
-    const perfilURL = `https://www.nrdesingcorp.com/perfil.html?id=${conductorId}`;
+    mensaje.innerHTML = "Registro exitoso ✅";
+    form.reset();
 
-    qrContainer.innerHTML = `
-      <h2>Registro completado ✅</h2>
-      <canvas id="qr"></canvas>
-      <p>Guarde este código QR</p>
-    `;
+    setTimeout(()=>{
+      window.location.href = `perfil.html?id=${conductorId}`;
+    },1500);
 
-    QRCode.toCanvas(document.getElementById("qr"), perfilURL, {
-      width:220,
-      errorCorrectionLevel:'H'
-    });
-
-  }catch(error){
-    qrContainer.innerHTML = "Error: " + error.message;
+  }catch(err){
+    mensaje.innerHTML = "Error: " + err.message;
   }
+
+  bloqueado = false;
+  btn.disabled = false;
 
 });
 

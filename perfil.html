@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,168 +6,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background:#f4f6f8;
   padding:20px;
 }
 
 .card{
-  background:white;
-  max-width:850px;
+  max-width:900px;
   margin:auto;
-  padding:30px;
-  border-radius:14px;
-  box-shadow:0 8px 25px rgba(0,0,0,0.1);
-}
-
-h1{
-  text-align:center;
-}
-
-.estado{
-  text-align:center;
-  font-size:14px;
-  margin-bottom:20px;
-  font-weight:bold;
-}
-
-.activo{
-  color:green;
-}
-
-.inactivo{
-  color:red;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
 .section{
-  margin-top:25px;
-  padding:20px;
-  border-radius:10px;
+  margin-top:20px;
+  padding:15px;
   background:#f9fafc;
+  border-radius:8px;
 }
 
-.section h3{
-  margin-top:0;
-  margin-bottom:15px;
-  color:#0d6efd;
-}
-
-.linea{
-  margin-bottom:8px;
-}
-
-.linea strong{
-  display:inline-block;
-  width:180px;
+.line{
+  margin-bottom:6px;
 }
 
 button{
+  margin-top:10px;
+  padding:6px 12px;
+  border:none;
   background:#0d6efd;
   color:white;
-  border:none;
-  padding:7px 12px;
   border-radius:6px;
   cursor:pointer;
-  margin-top:6px;
-}
-
-button:hover{
-  opacity:0.9;
-}
-
-.fotoConductor{
-  width:120px;
-  height:120px;
-  border-radius:12px;
-  object-fit:cover;
-  border:3px solid #0d6efd;
-}
-
-.fotoVehiculo{
-  width:100%;
-  max-height:250px;
-  object-fit:cover;
-  border-radius:10px;
-  margin-top:10px;
-}
-
-.headerPerfil{
-  display:flex;
-  gap:20px;
-  align-items:center;
-}
-
-#qrContainer{
-  text-align:center;
-  margin-top:30px;
 }
 </style>
 </head>
 <body>
 
 <div class="card">
+<h2>Perfil del Conductor</h2>
 
-<h1>Perfil del Conductor</h1>
-<div id="estadoPerfil" class="estado activo">✔ PERFIL ACTIVO</div>
+<div id="contenido"></div>
 
-<div class="headerPerfil">
-  <img id="fotoConductor" class="fotoConductor" src="" alt="Foto Conductor">
-  <div>
-    <div id="nombreCompleto" style="font-size:22px;font-weight:bold;"></div>
-    <div id="cedulaTexto"></div>
-  </div>
-</div>
-
-<!-- GRUPO 1 -->
-<div class="section">
-  <h3>Datos Personales</h3>
-  <div id="datosPersonales"></div>
-</div>
-
-<!-- GRUPO 2 -->
-<div class="section">
-  <h3>Datos del Vehículo</h3>
-  <div id="datosVehiculo"></div>
-</div>
-
-<!-- GRUPO 3 -->
-<div class="section">
-  <h3>Datos de Póliza</h3>
-  <div id="datosPoliza"></div>
-</div>
-
-<div id="qrContainer">
-  <canvas id="qr"></canvas>
-  <br>
-  <button onclick="descargarQR()">Descargar QR</button>
+<div style="text-align:center;margin-top:25px;">
+<canvas id="qr"></canvas><br>
+<button onclick="descargarQR()">Descargar QR</button>
 </div>
 
 </div>
 
 <script>
 
-// ===============================
-// CONFIGURACIÓN
-// ===============================
-
 const API = "https://conductores-api.onrender.com";
+const conductorId = new URLSearchParams(window.location.search).get("id");
 
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let conductorId = new URLSearchParams(window.location.search).get("id");
-
-// ===============================
-// CARGAR PERFIL
-// ===============================
-
-async function cargarPerfil(){
+async function cargar(){
 
   if(!conductorId){
     alert("ID no especificado");
@@ -178,80 +74,39 @@ async function cargarPerfil(){
   const res = await fetch(`${API}/api/conductores/${conductorId}`);
   const data = await res.json();
 
-  if(!data.conductor){
+  if(!res.ok){
     alert("Conductor no encontrado");
     return;
   }
 
   const c = data.conductor;
-  const docs = data.documentos || [];
 
-  function obtenerDocumento(tipo){
-    const doc = docs.find(d => d.tipo === tipo);
-    return doc ? doc.url_archivo : null;
-  }
+  document.getElementById("contenido").innerHTML = `
+    <div class="section">
+      <div class="line"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
+      <div class="line"><strong>Cédula:</strong> ${c.cedula}</div>
+      <div class="line"><strong>Licencia:</strong> ${c.licencia}</div>
+    </div>
 
-  const docCedula = obtenerDocumento("cedula");
-  const docLicencia = obtenerDocumento("licencia");
-  const docRegistro = obtenerDocumento("registro_vehicular");
-  const docPoliza = obtenerDocumento("poliza_vehicular");
-  const fotoVehiculo = obtenerDocumento("foto_vehiculo");
-  const fotoConductor = obtenerDocumento("foto_conductor");
+    <div class="section">
+      <div class="line"><strong>Vehículo:</strong> ${c.marca} ${c.modelo}</div>
+      <div class="line"><strong>Placa:</strong> ${c.placa}</div>
+      <div class="line"><strong>Color:</strong> ${c.color}</div>
+    </div>
 
-  // HEADER
-  document.getElementById("nombreCompleto").innerText =
-    `${c.nombres} ${c.apellidos}`;
-
-  document.getElementById("cedulaTexto").innerText =
-    "Cédula: " + c.cedula;
-
-  if(fotoConductor){
-    document.getElementById("fotoConductor").src = fotoConductor;
-  }
-
-  // Si más adelante agregas paz_y_salvo:
-  // if(c.paz_y_salvo === false){ cambiar estado }
-
-  // GRUPO 1
-  document.getElementById("datosPersonales").innerHTML = `
-    <div class="linea"><strong>Nombres:</strong> ${c.nombres}</div>
-    <div class="linea"><strong>Apellidos:</strong> ${c.apellidos}</div>
-    <div class="linea"><strong>Cédula:</strong> ${c.cedula}</div>
-    <div class="linea"><strong>Licencia:</strong> ${c.licencia}</div>
-    ${docCedula ? `<a href="${docCedula}" target="_blank"><button>Ver Cédula</button></a>` : ""}
-    ${docLicencia ? `<a href="${docLicencia}" target="_blank"><button>Ver Licencia</button></a>` : ""}
-  `;
-
-  // GRUPO 2
-  document.getElementById("datosVehiculo").innerHTML = `
-    <div class="linea"><strong>Placa:</strong> ${c.placa}</div>
-    ${docRegistro ? `<a href="${docRegistro}" target="_blank"><button>Ver Registro Vehicular</button></a>` : ""}
-    ${fotoVehiculo ? `<br><br><strong>Foto del Vehículo:</strong>
-    <img src="${fotoVehiculo}" class="fotoVehiculo">` : ""}
-  `;
-
-  // GRUPO 3
-  document.getElementById("datosPoliza").innerHTML = `
-    <div class="linea"><strong>Número de Póliza:</strong> ${c.poliza_numero || "-"}</div>
-    ${docPoliza ? `<a href="${docPoliza}" target="_blank"><button>Ver Póliza</button></a>` : ""}
+    <div class="section">
+      <div class="line"><strong>Póliza:</strong> ${c.poliza_numero}</div>
+    </div>
   `;
 
   generarQR();
+
 }
 
-// ===============================
-// QR PROFESIONAL
-// ===============================
-
 function generarQR(){
+  const urlPublica = window.location.href;
 
-  const canvas = document.getElementById("qr");
-
-  // IMPORTANTE:
-  // Cambia esto cuando tengas dominio real
-  const URL_PUBLICA = "https://tudominio.com/perfil.html?id=" + conductorId;
-
-  QRCode.toCanvas(canvas, URL_PUBLICA, {
+  QRCode.toCanvas(document.getElementById("qr"), urlPublica,{
     width:220,
     errorCorrectionLevel:'H'
   });
@@ -265,8 +120,9 @@ function descargarQR(){
   link.click();
 }
 
-cargarPerfil();
+cargar();
 
 </script>
+
 </body>
 </html>

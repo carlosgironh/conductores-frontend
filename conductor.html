@@ -1,77 +1,102 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Perfil del Conductor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { font-family: Arial, sans-serif; padding:20px; background:#f4f6f8; }
-    h1, h2 { text-align:center; }
-    .perfil { max-width:600px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    .campo { margin:10px 0; }
-    .campo span { font-weight:bold; }
-    .quejas { margin-top:20px; }
-    .queja { border-top:1px solid #ccc; padding:10px 0; }
-  </style>
+<meta charset="UTF-8">
+<title>Perfil del Conductor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family: Arial;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+.card{
+  max-width:700px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.campo{
+  margin-bottom:8px;
+}
+
+.estado{
+  font-weight:bold;
+  padding:6px 10px;
+  border-radius:6px;
+  display:inline-block;
+}
+
+.activo{ background:#d4edda; color:#155724; }
+.inactivo{ background:#f8d7da; color:#721c24; }
+
+.queja{
+  border-top:1px solid #ccc;
+  padding:8px 0;
+}
+</style>
 </head>
 <body>
 
-<h1>Perfil del Conductor</h1>
-<div class="perfil" id="perfil">
-  <p>Cargando datos...</p>
+<div class="card">
+<h2 style="text-align:center;">Perfil del Conductor</h2>
+<div id="contenido">Cargando...</div>
 </div>
 
 <script>
-  // Tomar el ID del conductor de la URL
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id"); // Esperamos que la URL sea: conductor.html?id=<UUID>
 
-  const perfilDiv = document.getElementById("perfil");
+const API = "https://conductores-api.onrender.com";
+const id = new URLSearchParams(window.location.search).get("id");
 
-  async function cargarDatos() {
-    if (!id) {
-      perfilDiv.innerHTML = "<p>ID del conductor no encontrado.</p>";
-      return;
-    }
+async function cargar(){
 
-    try {
-      const res = await fetch(`https://conductores-api.onrender.com/api/conductores/${id}`);
-      if (!res.ok) throw new Error("Conductor no encontrado");
-
-      const data = await res.json();
-      const c = data.conductor;
-      const q = data.quejas;
-
-      let html = `
-        <div class="campo"><span>Nombre:</span> ${c.nombre}</div>
-        <div class="campo"><span>Cédula:</span> ${c.cedula || "-"}</div>
-        <div class="campo"><span>Licencia:</span> ${c.licencia_numero || "-"}</div>
-        <div class="campo"><span>Teléfono:</span> ${c.telefono || "-"}</div>
-        <div class="campo"><span>Dirección:</span> ${c.direccion || "-"}</div>
-        <div class="campo"><span>CIP:</span> ${c.cip || "-"}</div>
-        <div class="campo"><span>Estado:</span> ${c.estado}</div>
-        <div class="quejas">
-          <h2>Historial de Quejas</h2>
-      `;
-
-      if (q.length === 0) html += "<p>No tiene quejas registradas.</p>";
-      else {
-        q.forEach(queja => {
-          html += `<div class="queja"><strong>${new Date(queja.fecha).toLocaleDateString()}</strong>: ${queja.descripcion} (${queja.estado})</div>`;
-        });
-      }
-
-      html += "</div>";
-
-      perfilDiv.innerHTML = html;
-
-    } catch (err) {
-      perfilDiv.innerHTML = "<p>Error al cargar datos del conductor.</p>";
-    }
+  if(!id){
+    contenido.innerHTML = "ID no válido";
+    return;
   }
 
-  cargarDatos();
-</script>
+  try{
 
+    const res = await fetch(`${API}/api/conductores/${id}`);
+    if(!res.ok) throw new Error();
+
+    const data = await res.json();
+    const c = data.conductor;
+    const q = data.quejas || [];
+
+    contenido.innerHTML = `
+      <div class="campo"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
+      <div class="campo"><strong>Cédula:</strong> ${c.cedula}</div>
+      <div class="campo"><strong>Licencia:</strong> ${c.licencia}</div>
+      <div class="campo"><strong>Estado:</strong> 
+        <span class="estado ${c.estado === 'ACTIVO' ? 'activo':'inactivo'}">
+        ${c.estado}
+        </span>
+      </div>
+
+      <h3>Historial de Reportes</h3>
+      ${q.length === 0 ? "Sin reportes." :
+        q.map(x=>`
+          <div class="queja">
+            <strong>${new Date(x.fecha).toLocaleDateString()}</strong><br>
+            ${x.descripcion} (${x.estado})
+          </div>
+        `).join("")
+      }
+    `;
+
+  }catch{
+    contenido.innerHTML = "Error cargando datos.";
+  }
+}
+
+cargar();
+
+</script>
 </body>
 </html>

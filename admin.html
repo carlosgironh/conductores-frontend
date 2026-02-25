@@ -1,169 +1,166 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Panel Administrativo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: Arial; padding:20px; background:#eef2f7; }
-    .card { background:white; padding:20px; border-radius:10px; max-width:700px; margin:auto; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    input, textarea, button { width:100%; margin-top:10px; padding:10px; border-radius:6px; border:1px solid #ccc; }
-    button { font-weight:bold; border:none; cursor:pointer; }
-    .login { background:#0d6efd; color:white; }
-    .buscar { background:#198754; color:white; }
-    .guardar { background:#dc3545; color:white; }
-    .hidden { display:none; }
-    h2, h3 { text-align:center; margin-top:0; }
-    .conductorCard { background:#f8f9fa; padding:10px; border-radius:6px; margin-top:10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Panel Administrativo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{ font-family:Arial; background:#eef2f7; padding:20px; }
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  max-width:700px;
+  margin:auto;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+input,textarea,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+}
+
+.login{ background:#0d6efd; color:white; }
+.buscar{ background:#198754; color:white; }
+.guardar{ background:#dc3545; color:white; }
+.logout{ background:#6c757d; color:white; }
+
+.hidden{ display:none; }
+.msg{ margin-top:10px; font-weight:bold; text-align:center; }
+</style>
 </head>
 <body>
 
 <div class="card" id="loginCard">
   <h2>Ingreso Administrador</h2>
-  <input type="text" id="usuario" placeholder="Usuario">
-  <input type="password" id="password" placeholder="Contraseña">
+  <input id="usuario" placeholder="Usuario">
+  <input id="password" type="password" placeholder="Contraseña">
   <button class="login" onclick="login()">Ingresar</button>
-  <div id="loginMsg"></div>
+  <div id="loginMsg" class="msg"></div>
 </div>
 
 <div class="card hidden" id="adminPanel">
-  <h2>Panel Administrativo de Conductores</h2>
 
-  <h3>Buscar Conductor</h3>
-  <input type="text" id="buscarCedula" placeholder="Cédula">
-  <button class="buscar" onclick="buscarConductor()">Buscar</button>
+  <h2>Panel Administrativo</h2>
 
-  <div id="infoConductor"></div>
+  <input id="buscarCedula" placeholder="Buscar por cédula">
+  <button class="buscar" onclick="buscar()">Buscar</button>
 
-  <h3>Agregar Reporte / Queja</h3>
-  <textarea id="descripcionQueja" placeholder="Escribe el reporte aquí"></textarea>
-  <button class="guardar" onclick="guardarQueja()">Guardar Reporte</button>
+  <div id="info"></div>
 
-  <div id="mensaje"></div>
+  <textarea id="descripcion" placeholder="Nuevo reporte"></textarea>
+  <button class="guardar" onclick="guardar()">Guardar Reporte</button>
+  <button class="logout" onclick="logout()">Cerrar Sesión</button>
+
+  <div id="msg" class="msg"></div>
+
 </div>
 
 <script>
+
 const API = "https://conductores-api.onrender.com";
-
-// ⚡ Supabase client (opcional si quieres manejar auth de admins por Supabase)
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
-const SUPABASE_KEY = "TU-ANON-PUBLIC-KEY";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 let token = localStorage.getItem("adminToken");
 let conductorActual = null;
 
-// Mostrar panel si ya hay token válido
 if(token) mostrarPanel();
 
-// ==============================
-// 🔑 LOGIN ADMIN
-// ==============================
-async function login() {
-  const usuario = document.getElementById("usuario").value;
-  const password = document.getElementById("password").value;
-  const loginMsg = document.getElementById("loginMsg");
-  loginMsg.innerHTML = "Verificando...";
+async function login(){
 
-  try {
-    const res = await fetch(`${API}/api/admin/login`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ usuario, password })
-    });
+  loginMsg.innerText = "Verificando...";
 
-    if(res.ok){
-      const data = await res.json();
-      token = data.token;
-      localStorage.setItem("adminToken", token);
-      mostrarPanel();
-    } else {
-      loginMsg.innerHTML = "Usuario o contraseña incorrectos ❌";
-    }
-  } catch(err){
-    console.error(err);
-    loginMsg.innerHTML = "Error conectando con servidor ❌";
+  const res = await fetch(`${API}/api/admin/login`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      usuario: usuario.value,
+      password: password.value
+    })
+  });
+
+  if(!res.ok){
+    loginMsg.innerText = "Credenciales incorrectas ❌";
+    return;
   }
+
+  const data = await res.json();
+  token = data.token;
+  localStorage.setItem("adminToken", token);
+  mostrarPanel();
 }
 
-// ==============================
-// 🟢 MOSTRAR PANEL
-// ==============================
-function mostrarPanel() {
-  document.getElementById("loginCard").classList.add("hidden");
-  document.getElementById("adminPanel").classList.remove("hidden");
+function mostrarPanel(){
+  loginCard.classList.add("hidden");
+  adminPanel.classList.remove("hidden");
 }
 
-// ==============================
-// 🟢 BUSCAR CONDUCTOR
-// ==============================
-async function buscarConductor() {
-  const cedula = document.getElementById("buscarCedula").value;
-  const infoDiv = document.getElementById("infoConductor");
-  infoDiv.innerHTML = "Buscando...";
+function logout(){
+  localStorage.removeItem("adminToken");
+  location.reload();
+}
 
-  try {
-    const res = await fetch(`${API}/api/admin/conductores?q=${cedula}`, {
-      headers: { "Authorization": "Bearer " + token }
-    });
+async function buscar(){
 
-    if(!res.ok) throw new Error("Error buscando conductor");
+  info.innerHTML = "Buscando...";
 
-    const data = await res.json();
-    if(data.length === 0){
-      infoDiv.innerHTML = "No se encontró el conductor";
-      conductorActual = null;
-      return;
-    }
+  const res = await fetch(`${API}/api/admin/conductores?q=${buscarCedula.value}`,{
+    headers:{ "Authorization":"Bearer "+token }
+  });
 
-    conductorActual = data[0]; // Solo mostramos el primero
-    infoDiv.innerHTML = `
-      <div class="conductorCard">
-        <strong>${conductorActual.nombres} ${conductorActual.apellidos}</strong><br>
-        Cédula: ${conductorActual.cedula}<br>
-        Teléfono: ${conductorActual.celular}<br>
-        Dirección: ${conductorActual.direccion || "No registrada"}
-      </div>
-    `;
-  } catch(err){
-    console.error(err);
-    infoDiv.innerHTML = "Error buscando conductor ❌";
+  if(!res.ok){
+    info.innerHTML = "Error buscando ❌";
+    return;
   }
+
+  const data = await res.json();
+  if(data.length === 0){
+    info.innerHTML = "No encontrado";
+    conductorActual = null;
+    return;
+  }
+
+  conductorActual = data[0];
+
+  info.innerHTML = `
+    <strong>${conductorActual.nombres} ${conductorActual.apellidos}</strong><br>
+    Cédula: ${conductorActual.cedula}<br>
+    Estado: ${conductorActual.estado}
+  `;
 }
 
-// ==============================
-// 📝 GUARDAR QUEJA
-// ==============================
-async function guardarQueja() {
+async function guardar(){
+
   if(!conductorActual) return alert("Primero busca un conductor");
 
-  const descripcion = document.getElementById("descripcionQueja").value;
-  const mensajeDiv = document.getElementById("mensaje");
+  const res = await fetch(`${API}/api/quejas`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body: JSON.stringify({
+      conductor_id: conductorActual.id,
+      descripcion: descripcion.value
+    })
+  });
 
-  if(!descripcion) return alert("Escribe un reporte");
+  msg.innerText = res.ok
+    ? "Reporte guardado ✅"
+    : "Error guardando ❌";
 
-  try {
-    const res = await fetch(`${API}/api/quejas`, {
-      method:"POST",
-      headers: {
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + token
-      },
-      body: JSON.stringify({
-        conductor_id: conductorActual.id,
-        descripcion
-      })
-    });
-
-    mensajeDiv.innerHTML = res.ok ? "Reporte guardado ✅" : "Error guardando reporte ❌";
-    document.getElementById("descripcionQueja").value = "";
-  } catch(err){
-    console.error(err);
-    mensajeDiv.innerHTML = "Error ❌";
-  }
+  descripcion.value="";
 }
+
 </script>
 
 </body>
