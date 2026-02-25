@@ -17,7 +17,7 @@ body{
 
 .card{
   background:white;
-  max-width:700px;
+  max-width:750px;
   margin:auto;
   padding:30px;
   border-radius:14px;
@@ -29,18 +29,31 @@ h1{
   margin-bottom:5px;
 }
 
-.subtitulo{
+.verificado{
   text-align:center;
-  font-size:14px;
   color:green;
-  margin-bottom:25px;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.headerPerfil{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.fotoConductor{
+  width:120px;
+  height:120px;
+  border-radius:12px;
+  object-fit:cover;
+  border:3px solid #0d6efd;
 }
 
 .nombreGrande{
-  text-align:center;
-  font-size:24px;
+  font-size:22px;
   font-weight:bold;
-  margin-bottom:20px;
 }
 
 .resumen{
@@ -50,12 +63,12 @@ h1{
 }
 
 .linea{
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 .linea strong{
   display:inline-block;
-  width:160px;
+  width:170px;
 }
 
 button{
@@ -70,6 +83,14 @@ button{
 
 button:hover{
   opacity:0.9;
+}
+
+.fotoVehiculo{
+  width:100%;
+  max-height:250px;
+  object-fit:cover;
+  border-radius:10px;
+  margin-top:10px;
 }
 
 #qrContainer{
@@ -97,9 +118,15 @@ input{
 <div class="card">
 
 <h1>Perfil del Conductor</h1>
-<div class="subtitulo">✔ Perfil Verificado</div>
+<div class="verificado">✔ Perfil Verificado</div>
 
-<div class="nombreGrande" id="nombreCompleto"></div>
+<div class="headerPerfil">
+  <img id="fotoConductor" class="fotoConductor" src="" alt="Foto Conductor">
+  <div>
+    <div class="nombreGrande" id="nombreCompleto"></div>
+    <div id="cedulaTexto"></div>
+  </div>
+</div>
 
 <div class="resumen" id="resumenDatos"></div>
 
@@ -150,20 +177,26 @@ async function cargarPerfil(){
   document.getElementById("nombreCompleto").innerText =
     `${c.nombres} ${c.apellidos}`;
 
+  document.getElementById("cedulaTexto").innerText =
+    "Cédula: " + c.cedula;
+
+  const docCedula = obtenerDocumento("cedula");
+  const docLicencia = obtenerDocumento("licencia");
+  const docRegistro = obtenerDocumento("registro_vehicular");
+  const docPoliza = obtenerDocumento("poliza_vehicular");
+  const fotoVehiculo = obtenerDocumento("foto_vehiculo");
+  const fotoConductor = obtenerDocumento("foto_conductor");
+
+  if(fotoConductor){
+    document.getElementById("fotoConductor").src = fotoConductor;
+  }
+
   const cont = document.getElementById("resumenDatos");
 
-  const docIdentidad = obtenerDocumento("licencia") || obtenerDocumento("cedula");
-  const docRegistro = obtenerDocumento("registro_vehicular");
-  const docPoliza = obtenerDocumento("poliza");
-
   cont.innerHTML = `
-    <div class="linea"><strong>Cédula:</strong> ${c.cedula}</div>
     <div class="linea"><strong>Licencia:</strong> ${c.licencia}</div>
-    ${docIdentidad ? `
-      <a href="${docIdentidad}" target="_blank">
-        <button>Ver Documento de Identidad</button>
-      </a>
-    ` : ""}
+    ${docCedula ? `<a href="${docCedula}" target="_blank"><button>Ver Cédula</button></a>` : ""}
+    ${docLicencia ? `<a href="${docLicencia}" target="_blank"><button>Ver Licencia</button></a>` : ""}
 
     <hr>
 
@@ -171,20 +204,18 @@ async function cargarPerfil(){
     <div class="linea"><strong>Modelo:</strong> ${c.modelo || "-"}</div>
     <div class="linea"><strong>Marca:</strong> ${c.marca || "-"}</div>
     <div class="linea"><strong>Color:</strong> ${c.color || "-"}</div>
-    ${docRegistro ? `
-      <a href="${docRegistro}" target="_blank">
-        <button>Ver Registro Vehicular</button>
-      </a>
+    ${docRegistro ? `<a href="${docRegistro}" target="_blank"><button>Ver Registro Vehicular</button></a>` : ""}
+
+    ${fotoVehiculo ? `
+      <hr>
+      <strong>Foto del Vehículo:</strong>
+      <img src="${fotoVehiculo}" class="fotoVehiculo">
     ` : ""}
 
     <hr>
 
     <div class="linea"><strong>Número de Póliza:</strong> ${c.poliza_numero}</div>
-    ${docPoliza ? `
-      <a href="${docPoliza}" target="_blank">
-        <button>Ver Documento de Póliza</button>
-      </a>
-    ` : ""}
+    ${docPoliza ? `<a href="${docPoliza}" target="_blank"><button>Ver Póliza Vehicular</button></a>` : ""}
   `;
 
   generarQR();
