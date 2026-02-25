@@ -20,7 +20,7 @@ h1{
 }
 
 form{
-  max-width:700px;
+  max-width:750px;
   margin:auto;
   background:white;
   padding:25px;
@@ -125,11 +125,17 @@ hr{
 
 <script>
 
+// ================================
+// CONFIG PRODUCCIÓN
+// ================================
+
 const API = "https://conductores-api.onrender.com";
 
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_KEY = "TU_PUBLIC_ANON_KEY";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
 const qrContainer = document.getElementById("qrContainer");
@@ -141,7 +147,7 @@ form.addEventListener("submit", async (e)=>{
 
   try{
 
-    // 1️⃣ Crear usuario
+    // 1️⃣ Crear usuario en Supabase
     const { data: authData, error: authError } =
       await supabaseClient.auth.signUp({
         email: email.value,
@@ -152,7 +158,7 @@ form.addEventListener("submit", async (e)=>{
 
     const userId = authData.user.id;
 
-    // 2️⃣ Crear conductor
+    // 2️⃣ Crear conductor en backend
     const datos = {
       nombres: nombres.value,
       apellidos: apellidos.value,
@@ -198,35 +204,18 @@ form.addEventListener("submit", async (e)=>{
     await subirDoc("foto_vehiculo","fileFotoVehiculo");
     await subirDoc("foto_conductor","fileFotoConductor");
 
-    // 4️⃣ Generar QR
-    const perfilURL = `https://nrdesingcorp.com/perfil.html?id=${conductorId}`;
+    // 4️⃣ Generar QR producción
+    const perfilURL = `https://www.nrdesingcorp.com/perfil.html?id=${conductorId}`;
 
     qrContainer.innerHTML = `
       <h2>Registro completado ✅</h2>
       <canvas id="qr"></canvas>
-      <p>Guarda este código QR</p>
+      <p>Guarde este código QR</p>
     `;
 
     QRCode.toCanvas(document.getElementById("qr"), perfilURL, {
       width:220,
       errorCorrectionLevel:'H'
-    }, function(error){
-      if(error) console.error(error);
-
-      const canvas = document.getElementById("qr");
-      const ctx = canvas.getContext("2d");
-      const logo = new Image();
-      logo.src = "logo.png";
-
-      logo.onload = function(){
-        const size = 50;
-        const x = (canvas.width - size)/2;
-        const y = (canvas.height - size)/2;
-
-        ctx.fillStyle = "white";
-        ctx.fillRect(x-5,y-5,size+10,size+10);
-        ctx.drawImage(logo,x,y,size,size);
-      }
     });
 
   }catch(error){
