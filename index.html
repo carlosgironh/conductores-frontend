@@ -5,84 +5,23 @@
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<!-- Cargar Supabase v2 desde CDN correctamente -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  body{
-    font-family: 'Arial', sans-serif;
-    background:#f4f6f8;
-    margin:0;
-    padding:20px;
+  body{ font-family: 'Arial', sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+  .card{ max-width:720px; margin:auto; background:white; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:25px; }
+  h2{ text-align:center; color:#0d6efd; margin-bottom:20px; }
+  form input[type="text"], form input[type="email"], form input[type="password"], form input[type="file"]{
+    width:100%; padding:10px; margin-top:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;
   }
-
-  .card{
-    max-width:720px;
-    margin:auto;
-    background:white;
-    border-radius:16px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
-    padding:25px;
-  }
-
-  h2{
-    text-align:center;
-    color:#0d6efd;
-    margin-bottom:20px;
-  }
-
-  form input[type="text"],
-  form input[type="email"],
-  form input[type="password"],
-  form input[type="file"]{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    box-sizing:border-box;
-  }
-
-  form label{
-    display:block;
-    margin-top:15px;
-    font-weight:bold;
-  }
-
+  form label{ display:block; margin-top:15px; font-weight:bold; }
   button[type="submit"]{
-    background:#0d6efd;
-    color:white;
-    border:none;
-    padding:12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-    margin-top:20px;
-    width:100%;
-    font-size:16px;
-    transition: background 0.2s;
+    background:#0d6efd; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer;
+    font-weight:bold; margin-top:20px; width:100%; font-size:16px; transition: background 0.2s;
   }
-
-  button[type="submit"]:hover{
-    background:#0b5ed7;
-  }
-
-  hr{
-    margin:20px 0;
-    border:none;
-    border-top:1px solid #ccc;
-  }
-
-  #mensaje{
-    margin-top:15px;
-    font-weight:bold;
-    text-align:center;
-  }
-
-  @media(max-width:480px){
-    .card{
-      padding:15px;
-    }
-  }
+  button[type="submit"]:hover{ background:#0b5ed7; }
+  hr{ margin:20px 0; border:none; border-top:1px solid #ccc; }
+  #mensaje{ margin-top:15px; font-weight:bold; text-align:center; }
+  @media(max-width:480px){ .card{ padding:15px; } }
 </style>
 </head>
 <body>
@@ -94,15 +33,15 @@
     <input id="email" type="email" placeholder="Correo" required>
     <input id="password" type="password" placeholder="Contraseña" required minlength="6">
     <hr>
-    <input id="nombres" placeholder="Nombres" required>
-    <input id="apellidos" placeholder="Apellidos" required>
-    <input id="cedula" placeholder="Cédula" required>
-    <input id="licencia" placeholder="Licencia" required>
-    <input id="placa" placeholder="Placa" required>
-    <input id="modelo" placeholder="Modelo" required>
-    <input id="marca" placeholder="Marca" required>
-    <input id="color" placeholder="Color" required>
-    <input id="poliza_numero" placeholder="Número de póliza" required>
+    <input id="nombres" type="text" placeholder="Nombres" required>
+    <input id="apellidos" type="text" placeholder="Apellidos" required>
+    <input id="cedula" type="text" placeholder="Cédula" required>
+    <input id="licencia" type="text" placeholder="Licencia" required>
+    <input id="placa" type="text" placeholder="Placa" required>
+    <input id="modelo" type="text" placeholder="Modelo" required>
+    <input id="marca" type="text" placeholder="Marca" required>
+    <input id="color" type="text" placeholder="Color" required>
+    <input id="poliza_numero" type="text" placeholder="Número de póliza" required>
     <hr>
     <label for="fileCedula">Cédula</label><input type="file" id="fileCedula" required>
     <label for="fileLicencia">Licencia</label><input type="file" id="fileLicencia" required>
@@ -110,80 +49,107 @@
     <label for="filePoliza">Póliza</label><input type="file" id="filePoliza" required>
     <label for="fileFotoVehiculo">Foto Vehículo</label><input type="file" id="fileFotoVehiculo" required>
     <label for="fileFotoConductor">Foto Conductor</label><input type="file" id="fileFotoConductor" required>
-    <button type="submit">Registrar</button>
+    <button type="submit" id="btnRegistrar">Registrar</button>
     <div id="mensaje"></div>
   </form>
 </div>
 
 <script>
+// Configuración
 const API = "https://conductores-api.onrender.com";
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-// Inicializar Supabase correctamente desde CDN
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inicialización correcta de Supabase v2
+const { createClient } = window.supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
 const mensaje = document.getElementById("mensaje");
 
-form.addEventListener("submit", async e=>{
+form.addEventListener("submit", async e => {
   e.preventDefault();
+  
   mensaje.innerText = "Procesando...";
-  try {
-    // Crear usuario Supabase
-    const { data, error } = await supabaseClient.auth.signUp({
-      email: email.value.trim(),
-      password: password.value.trim()
-    });
-    if(error) throw new Error(error.message);
-    const userId = data.user.id;
-    const qr_token = crypto.randomUUID();
+  mensaje.style.color = "blue";
 
-    // Crear conductor en backend
-    const res = await fetch(`${API}/api/registro`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
+  // Captura de valores manual para asegurar compatibilidad
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    // 1. Registro en Supabase Auth
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    if (error) throw error;
+    if (!data.user) throw new Error("No se pudo crear el usuario.");
+
+    const userId = data.user.id;
+
+    // 2. Registro en tu Backend (Render)
+    const res = await fetch(`${API}/api/registro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: email.value.trim(),
-        password: password.value.trim(),
-        nombres: nombres.value.trim(),
-        apellidos: apellidos.value.trim(),
-        cedula: cedula.value.trim(),
-        licencia: licencia.value.trim(),
-        placa: placa.value.trim(),
-        modelo: modelo.value.trim(),
-        marca: marca.value.trim(),
-        color: color.value.trim(),
-        poliza_numero: poliza_numero.value.trim(),
+        email: email,
+        password: password,
+        nombres: document.getElementById("nombres").value.trim(),
+        apellidos: document.getElementById("apellidos").value.trim(),
+        cedula: document.getElementById("cedula").value.trim(),
+        licencia: document.getElementById("licencia").value.trim(),
+        placa: document.getElementById("placa").value.trim(),
+        modelo: document.getElementById("modelo").value.trim(),
+        marca: document.getElementById("marca").value.trim(),
+        color: document.getElementById("color").value.trim(),
+        poliza_numero: document.getElementById("poliza_numero").value.trim(),
         auth_user_id: userId
       })
     });
+
     const dataBackend = await res.json();
-    if(!res.ok) throw new Error(dataBackend.error||"Error registro conductor");
+    if (!res.ok) throw new Error(dataBackend.error || "Error en el servidor");
+
     const conductorId = dataBackend.conductorId;
 
-    // Subir documentos
-    const files = [
-      ["CEDULA","fileCedula"],
-      ["LICENCIA","fileLicencia"],
-      ["REGISTRO_VEHICULAR","fileRegistro"],
-      ["POLIZA_VEHICULAR","filePoliza"],
-      ["FOTO_VEHICULO","fileFotoVehiculo"],
-      ["FOTO_CONDUCTOR","fileFotoConductor"]
+    // 3. Subida de archivos
+    const filesMapping = [
+      ["CEDULA", "fileCedula"],
+      ["LICENCIA", "fileLicencia"],
+      ["REGISTRO_VEHICULAR", "fileRegistro"],
+      ["POLIZA_VEHICULAR", "filePoliza"],
+      ["FOTO_VEHICULO", "fileFotoVehiculo"],
+      ["FOTO_CONDUCTOR", "fileFotoConductor"]
     ];
 
-    for(const [tipo,id] of files){
-      const file = document.getElementById(id).files[0];
-      const fd = new FormData();
-      fd.append("archivo",file);
-      await fetch(`${API}/api/documentos/${conductorId}/${tipo}`,{ method:"POST", body:fd });
+    for (const [tipo, id] of filesMapping) {
+      const fileInput = document.getElementById(id);
+      if (fileInput.files.length > 0) {
+        const fd = new FormData();
+        fd.append("archivo", fileInput.files[0]);
+        await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, { 
+            method: "POST", 
+            body: fd 
+        });
+      }
     }
 
-    mensaje.innerText = "Registro exitoso ✅";
+    mensaje.innerText = "¡Registro exitoso! Redirigiendo...";
+    mensaje.style.color = "green";
+    
     form.reset();
-    setTimeout(()=> window.location.href = `perfil.html?token=${dataBackend.qr_token}`,1500);
+    
+    setTimeout(() => {
+      window.location.href = `perfil.html?token=${dataBackend.qr_token}`;
+    }, 2000);
 
-  } catch(err){ mensaje.innerText = "Error: "+err.message; }
+  } catch (err) {
+    console.error(err);
+    mensaje.innerText = "Error: " + (err.message || "Ocurrió un problema");
+    mensaje.style.color = "red";
+  }
 });
 </script>
 
