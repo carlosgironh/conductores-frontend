@@ -37,17 +37,6 @@
     color:#333;
   }
 
-  .documento-link{
-    color:#0d6efd;
-    text-decoration:none;
-    margin-left:8px;
-    font-size:14px;
-  }
-
-  .documento-link:hover{
-    text-decoration:underline;
-  }
-
   .fotos-container{
     display:flex;
     gap:15px;
@@ -68,7 +57,7 @@
     transform: scale(1.05);
   }
 
-  .btn-registro{
+  .btn-registro, .btn-ver{
     display:inline-block;
     background:#0d6efd;
     color:white;
@@ -78,10 +67,14 @@
     cursor:pointer;
     font-weight:bold;
     margin-top:10px;
+    margin-left:8px;
+    font-size:14px;
     text-align:center;
+    text-decoration:none;
+    transition: background 0.2s;
   }
 
-  .btn-registro:hover{
+  .btn-registro:hover, .btn-ver:hover{
     background:#0b5ed7;
   }
 
@@ -188,13 +181,13 @@ async function cargar(){
     const contenido = document.getElementById("contenido");
     contenido.innerHTML = `
       <div class="campo"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
-      <div class="campo"><strong>Cédula:</strong> ${c.cedula} ${docUrl("CEDULA")?`<a class="documento-link" href="${docUrl("CEDULA")}" target="_blank">Ver</a>`:""}</div>
-      <div class="campo"><strong>Licencia:</strong> ${c.licencia} ${docUrl("LICENCIA")?`<a class="documento-link" href="${docUrl("LICENCIA")}" target="_blank">Ver</a>`:""}</div>
+      <div class="campo"><strong>Cédula:</strong> ${c.cedula} ${docUrl("CEDULA")?`<a class="btn-ver" href="${docUrl("CEDULA")}" target="_blank">Ver</a>`:""}</div>
+      <div class="campo"><strong>Licencia:</strong> ${c.licencia} ${docUrl("LICENCIA")?`<a class="btn-ver" href="${docUrl("LICENCIA")}" target="_blank">Ver</a>`:""}</div>
       <div class="campo"><strong>Vehículo:</strong> ${c.marca || ''} ${c.modelo || ''}</div>
       <div class="campo"><strong>Placa:</strong> ${c.placa || ''}</div>
       <div class="campo"><strong>Color:</strong> ${c.color || ''}</div>
       ${docUrl("REGISTRO_VEHICULAR") ? `<button class="btn-registro" onclick="mostrarModal('${docUrl("REGISTRO_VEHICULAR")}')">Ver Registro Vehicular</button>` : ""}
-      <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR")?`<a class="documento-link" href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
+      <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR")?`<a class="btn-ver" href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
     `;
 
     // Cargar fotos y mostrar botón para verlas grandes
