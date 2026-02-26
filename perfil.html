@@ -68,6 +68,23 @@
     transform: scale(1.05);
   }
 
+  .btn-registro{
+    display:inline-block;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    margin-top:10px;
+    text-align:center;
+  }
+
+  .btn-registro:hover{
+    background:#0b5ed7;
+  }
+
   #qr-container{
     text-align:center;
     margin-top:25px;
@@ -176,6 +193,7 @@ async function cargar(){
       <div class="campo"><strong>Vehículo:</strong> ${c.marca || ''} ${c.modelo || ''}</div>
       <div class="campo"><strong>Placa:</strong> ${c.placa || ''}</div>
       <div class="campo"><strong>Color:</strong> ${c.color || ''}</div>
+      ${docUrl("REGISTRO_VEHICULAR") ? `<button class="btn-registro" onclick="mostrarModal('${docUrl("REGISTRO_VEHICULAR")}')">Ver Registro Vehicular</button>` : ""}
       <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR")?`<a class="documento-link" href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
     `;
 
@@ -213,9 +231,9 @@ async function cargar(){
     // Cargar logo y dibujarlo en el centro
     const ctx = canvas.getContext('2d');
     const logo = new Image();
-    logo.src = 'logo.png'; // <- ruta de tu logo
+    logo.src = 'logo.png'; 
     logo.onload = () => {
-      const size = canvas.width * 0.2; // 20% del QR
+      const size = canvas.width * 0.2;
       const x = (canvas.width - size)/2;
       const y = (canvas.height - size)/2;
       ctx.drawImage(logo, x, y, size, size);

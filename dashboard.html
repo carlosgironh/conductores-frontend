@@ -23,7 +23,7 @@ button{ font-weight:bold; border:none; cursor:pointer; }
 
 <div class="card" id="loginCard">
 <h2>Ingreso Administrador</h2>
-<input id="usuario" placeholder="Usuario">
+<input id="usuario" placeholder="Usuario o cédula">
 <input type="password" id="password" placeholder="Contraseña">
 <button class="login" onclick="login()">Ingresar</button>
 <button class="olvidar" onclick="recuperarPassword()">Olvidé mi contraseña</button>
@@ -132,20 +132,20 @@ async function guardar(){
 // RECUPERAR CONTRASEÑA
 // ---------------------------
 async function recuperarPassword(){
-  const email = prompt("Ingresa tu correo de administrador para reiniciar la contraseña:");
-  if(!email) return;
+  const usuarioInput = prompt("Ingresa tu usuario o cédula para reiniciar la contraseña:");
+  if(!usuarioInput) return;
   loginMsg.innerText = "Solicitando recuperación de contraseña...";
   try{
     const res = await fetch(`${API}/api/admin/recuperar-password`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ usuario: usuarioInput })
     });
     if(res.ok){
-      loginMsg.innerText = "Correo enviado ✅ Revisa tu bandeja de entrada.";
+      loginMsg.innerText = "Se envió un enlace temporal o clave a tu correo registrado ✅";
     } else {
       const err = await res.json();
-      loginMsg.innerText = `Error: ${err.message || 'No se pudo enviar correo'} ❌`;
+      loginMsg.innerText = `Error: ${err.message || 'No se pudo enviar el enlace'} ❌`;
     }
   }catch(err){
     console.error(err);
