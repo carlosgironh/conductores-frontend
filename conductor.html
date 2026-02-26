@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Perfil del Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <style>
 body { font-family: Arial; background:#f4f6f8; padding:20px; }
 .card { max-width:700px; margin:auto; background:white; padding:25px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.1); }
@@ -13,41 +14,49 @@ body { font-family: Arial; background:#f4f6f8; padding:20px; }
 .inactivo { background:#f8d7da; color:#721c24; }
 .queja { border-top:1px solid #ccc; padding:8px 0; }
 img.foto { max-width:100%; border-radius:8px; margin-top:10px; }
+#qrContainer { text-align:center; margin-top:20px; }
+#qr { margin-top:10px; }
+button { padding:6px 12px; margin-top:10px; cursor:pointer; border:none; border-radius:6px; background:#0d6efd; color:white; }
 </style>
 </head>
 <body>
 
 <div class="card">
-<h2 style="text-align:center;">Perfil del Conductor</h2>
-<div id="contenido">Cargando...</div>
+  <h2 style="text-align:center;">Perfil del Conductor</h2>
+  <div id="contenido">Cargando...</div>
+
+  <!-- QR solo si es acceso público -->
+  <div id="qrContainer" style="display:none;">
+    <canvas id="qr"></canvas><br>
+    <button onclick="descargarQR()">Descargar QR</button>
+  </div>
 </div>
 
 <script>
 const API = "https://conductores-api.onrender.com";
-
-// Puede ser ?id=123 (admin) o ?token=xxxx (QR público)
 const id = new URLSearchParams(window.location.search).get("id");
 const token = new URLSearchParams(window.location.search).get("token");
 
+// Logo para el QR
+const logoURL = "https://tusitio.com/logo.png"; // reemplaza con tu logo
+
 async function cargar() {
   const contenido = document.getElementById("contenido");
-
   if(!id && !token){
     contenido.innerHTML = "ID o token no especificado";
     return;
   }
 
-  let url = id ? `${API}/api/conductores/${id}` : `${API}/api/perfil/${token}`;
+  const url = id ? `${API}/api/conductores/${id}` : `${API}/api/perfil/${token}`;
 
   try{
     const res = await fetch(url);
     if(!res.ok) throw new Error();
 
     const data = await res.json();
-    const c = id ? data.conductor : data.conductor;
+    const c = data.conductor;
     const quejas = data.quejas || data.documentos || [];
 
-    // Función para mostrar documentos (solo si QR)
     function docUrl(tipo){
       if(!data.documentos) return null;
       const d = data.documentos.find(x=>x.tipo.toLowerCase()===tipo.toLowerCase());
@@ -58,30 +67,63 @@ async function cargar() {
       <div class="campo"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
       <div class="campo"><strong>Cédula:</strong> ${c.cedula} ${docUrl("CEDULA") ? `<a href="${docUrl("CEDULA")}" target="_blank">Ver</a>` : ""}</div>
       <div class="campo"><strong>Licencia:</strong> ${c.licencia} ${docUrl("LICENCIA") ? `<a href="${docUrl("LICENCIA")}" target="_blank">Ver</a>` : ""}</div>
-      <div class="campo"><strong>Estado:</strong> 
-        <span class="estado ${c.estado === 'ACTIVO' ? 'activo':'inactivo'}">${c.estado || 'N/A'}</span>
-      </div>
-      <div class="campo"><strong>Vehículo:</strong> ${c.marca || ''} ${c.modelo || ''}</div>
-      <div class="campo"><strong>Placa:</strong> ${c.placa || ''}</div>
-      <div class="campo"><strong>Color:</strong> ${c.color || ''}</div>
+      <div class="campo"><strong>Estado:</strong> <span class="estado ${c.estado==='ACTIVO'?'activo':'inactivo'}">${c.estado||'N/A'}</span></div>
+      <div class="campo"><strong>Vehículo:</strong> ${c.marca||''} ${c.modelo||''}</div>
+      <div class="campo"><strong>Placa:</strong> ${c.placa||''}</div>
+      <div class="campo"><strong>Color:</strong> ${c.color||''}</div>
       ${docUrl("FOTO_VEHICULO") ? `<img class="foto" src="${docUrl("FOTO_VEHICULO")}" alt="Foto Vehículo">` : ''}
-      <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR") ? `<a href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>` : ''}</div>
+      <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero||''} ${docUrl("POLIZA_VEHICULAR") ? `<a href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>` : ''}</div>
       ${docUrl("FOTO_CONDUCTOR") ? `<img class="foto" src="${docUrl("FOTO_CONDUCTOR")}" alt="Foto Conductor">` : ''}
-
       <h3>Historial de Quejas / Reportes</h3>
       ${quejas.length===0 ? "Sin reportes." :
         quejas.map(q=>`
           <div class="queja">
             <strong>${new Date(q.fecha||q.created_at).toLocaleDateString()}</strong><br>
-            ${q.descripcion || ''} (${q.estado || 'N/A'})
+            ${q.descripcion||''} (${q.estado||'N/A'})
           </div>
         `).join("")
       }
     `;
+
+    // Mostrar QR solo si es acceso por token
+    if(token){
+      document.getElementById("qrContainer").style.display = "block";
+      generarQR(token);
+    }
+
   }catch(err){
     console.error(err);
     contenido.innerHTML = "Error cargando datos del conductor.";
   }
+}
+
+async function generarQR(token) {
+  const canvas = document.getElementById("qr");
+  const urlPublica = window.location.href;
+
+  await QRCode.toCanvas(canvas, urlPublica, {
+    width: 220,
+    errorCorrectionLevel: 'H'
+  });
+
+  // Dibujar logo en el centro
+  const ctx = canvas.getContext("2d");
+  const logo = new Image();
+  logo.src = logoURL;
+  logo.onload = () => {
+    const logoSize = canvas.width * 0.2; // 20% del QR
+    const x = (canvas.width - logoSize) / 2;
+    const y = (canvas.height - logoSize) / 2;
+    ctx.drawImage(logo, x, y, logoSize, logoSize);
+  };
+}
+
+function descargarQR(){
+  const canvas = document.getElementById("qr");
+  const link = document.createElement("a");
+  link.download = "perfil_qr.png";
+  link.href = canvas.toDataURL();
+  link.click();
 }
 
 cargar();

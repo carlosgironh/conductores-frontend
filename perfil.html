@@ -5,14 +5,99 @@
 <title>Perfil del Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+  body{
+    font-family: 'Arial', sans-serif;
+    background:#f4f6f8;
+    margin:0;
+    padding:20px;
+  }
+
+  .card{
+    max-width:720px;
+    margin:auto;
+    background:white;
+    border-radius:16px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    padding:25px;
+  }
+
+  h2{
+    text-align:center;
+    color:#0d6efd;
+    margin-bottom:20px;
+  }
+
+  .campo{
+    margin-bottom:12px;
+    font-size:16px;
+  }
+
+  .campo strong{
+    color:#333;
+  }
+
+  .documento-link{
+    color:#0d6efd;
+    text-decoration:none;
+    margin-left:8px;
+    font-size:14px;
+  }
+
+  .documento-link:hover{
+    text-decoration:underline;
+  }
+
+  .foto{
+    max-width:100%;
+    border-radius:12px;
+    margin:12px 0;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  #qr-container{
+    text-align:center;
+    margin-top:25px;
+  }
+
+  #qr{
+    background:white;
+    padding:10px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+  }
+
+  #descargarQR{
+    margin-top:15px;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+  }
+
+  #descargarQR:hover{
+    background:#0b5ed7;
+  }
+
+  @media(max-width:480px){
+    .card{
+      padding:15px;
+    }
+  }
+</style>
 </head>
 <body>
+
 <div class="card">
   <h2>Perfil del Conductor</h2>
   <div id="contenido">Cargando...</div>
-  <div style="text-align:center;margin-top:25px;">
+
+  <div id="qr-container">
     <canvas id="qr"></canvas><br>
-    <button onclick="descargarQR()">Descargar QR</button>
+    <button id="descargarQR" onclick="descargarQR()">Descargar QR</button>
   </div>
 </div>
 
@@ -26,28 +111,38 @@ async function cargar(){
     const res = await fetch(`${API}/api/perfil/${qr_token}`);
     const data = await res.json();
     if(!res.ok || !data.conductor){ alert("Conductor no encontrado"); return; }
+
     const c = data.conductor;
     const docs = data.documentos || [];
 
-    function docUrl(tipo){ const d = docs.find(x=>x.tipo===tipo); return d?d.url_archivo:null; }
+    function docUrl(tipo){ 
+      const d = docs.find(x=>x.tipo.toUpperCase()===tipo.toUpperCase()); 
+      return d ? d.url_archivo : null; 
+    }
 
     const contenido = document.getElementById("contenido");
     contenido.innerHTML = `
-      <div><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
-      <div><strong>Cédula:</strong> ${c.cedula} ${docUrl("CEDULA")?`<a href="${docUrl("CEDULA")}" target="_blank">Ver</a>`:""}</div>
-      <div><strong>Licencia:</strong> ${c.licencia} ${docUrl("LICENCIA")?`<a href="${docUrl("LICENCIA")}" target="_blank">Ver</a>`:""}</div>
-      <div><strong>Vehículo:</strong> ${c.marca} ${c.modelo}</div>
-      <div><strong>Placa:</strong> ${c.placa}</div>
-      <div><strong>Color:</strong> ${c.color}</div>
-      ${docUrl("FOTO_VEHICULO")?`<img src="${docUrl("FOTO_VEHICULO")}" style="max-width:100%">`:``}
-      <div><strong>Póliza:</strong> ${c.poliza_numero} ${docUrl("POLIZA_VEHICULAR")?`<a href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
-      ${docUrl("FOTO_CONDUCTOR")?`<img src="${docUrl("FOTO_CONDUCTOR")}" style="max-width:100%">`:``}
+      <div class="campo"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
+      <div class="campo"><strong>Cédula:</strong> ${c.cedula} ${docUrl("CEDULA")?`<a class="documento-link" href="${docUrl("CEDULA")}" target="_blank">Ver</a>`:""}</div>
+      <div class="campo"><strong>Licencia:</strong> ${c.licencia} ${docUrl("LICENCIA")?`<a class="documento-link" href="${docUrl("LICENCIA")}" target="_blank">Ver</a>`:""}</div>
+      <div class="campo"><strong>Vehículo:</strong> ${c.marca || ''} ${c.modelo || ''}</div>
+      <div class="campo"><strong>Placa:</strong> ${c.placa || ''}</div>
+      <div class="campo"><strong>Color:</strong> ${c.color || ''}</div>
+      ${docUrl("FOTO_VEHICULO")?`<img class="foto" src="${docUrl("FOTO_VEHICULO")}" alt="Foto Vehículo">`:``}
+      <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR")?`<a class="documento-link" href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
+      ${docUrl("FOTO_CONDUCTOR")?`<img class="foto" src="${docUrl("FOTO_CONDUCTOR")}" alt="Foto Conductor">`:``}
     `;
 
-    // Generar QR
-    QRCode.toCanvas(document.getElementById("qr"), window.location.href,{ width:220,errorCorrectionLevel:'H' });
+    // Generar QR con logo opcional
+    QRCode.toCanvas(document.getElementById("qr"), window.location.href,{
+      width:220,
+      errorCorrectionLevel:'H'
+    });
 
-  } catch(err){ console.error(err); document.getElementById("contenido").innerText="Error al cargar perfil"; }
+  } catch(err){
+    console.error(err);
+    document.getElementById("contenido").innerText="Error al cargar perfil";
+  }
 }
 
 function descargarQR(){
@@ -60,5 +155,6 @@ function descargarQR(){
 
 cargar();
 </script>
+
 </body>
 </html>
