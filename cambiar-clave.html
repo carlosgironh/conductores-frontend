@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cambiar Contraseña</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  font-family: 'Arial', sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+
+.card{
+  max-width:500px;
+  margin:auto;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  padding:25px;
+}
+
+h2{
+  text-align:center;
+  color:#0d6efd;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+button.cambiar{
+  background:#0d6efd;
+  color:white;
+}
+
+button.cambiar:hover{
+  background:#0b5ed7;
+}
+
+.msg{
+  margin-top:15px;
+  font-weight:bold;
+  text-align:center;
+  color:#333;
+}
+
+@media(max-width:480px){
+  .card{
+    padding:15px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Cambiar Contraseña</h2>
+  <input id="nuevaClave" type="password" placeholder="Nueva contraseña" minlength="6">
+  <input id="confirmarClave" type="password" placeholder="Confirmar contraseña" minlength="6">
+  <button class="cambiar" onclick="cambiarClave()">Cambiar Contraseña</button>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+const API = "https://conductores-api.onrender.com";
+const params = new URLSearchParams(window.location.search);
+const tokenTemporal = params.get("token");
+
+if(!tokenTemporal){
+  document.getElementById("msg").innerText = "Token inválido o expirado ❌";
+}
+
+async function cambiarClave(){
+  const nueva = document.getElementById("nuevaClave").value.trim();
+  const confirmar = document.getElementById("confirmarClave").value.trim();
+  const msg = document.getElementById("msg");
+
+  if(!nueva || !confirmar){ msg.innerText="Completa ambos campos ❌"; return; }
+  if(nueva !== confirmar){ msg.innerText="Las contraseñas no coinciden ❌"; return; }
+
+  msg.innerText = "Procesando...";
+
+  try{
+    const res = await fetch(`${API}/api/usuario/cambiar-password`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ token: tokenTemporal, nueva_password: nueva })
+    });
+
+    if(res.ok){
+      msg.innerText="Contraseña cambiada con éxito ✅";
+      setTimeout(()=> window.location.href = "index.html", 1500);
+    } else {
+      const err = await res.json();
+      msg.innerText = `Error: ${err.message || "No se pudo cambiar la contraseña"} ❌`;
+    }
+
+  } catch(err){
+    console.error(err);
+    msg.innerText = "Error conectando con servidor ❌";
+  }
+}
+</script>
+
+</body>
+</html>
