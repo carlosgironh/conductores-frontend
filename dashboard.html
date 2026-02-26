@@ -13,6 +13,7 @@ button{ font-weight:bold; border:none; cursor:pointer; }
 .buscar{ background:#198754; color:white; }
 .guardar{ background:#dc3545; color:white; }
 .logout{ background:#6c757d; color:white; }
+.olvidar{ background:#ffc107; color:white; }
 .hidden{ display:none; }
 .msg{ margin-top:10px; font-weight:bold; text-align:center; }
 .conductorCard{ background:#f8f9fa; padding:10px; border-radius:6px; margin-top:10px; }
@@ -25,6 +26,7 @@ button{ font-weight:bold; border:none; cursor:pointer; }
 <input id="usuario" placeholder="Usuario">
 <input type="password" id="password" placeholder="Contraseña">
 <button class="login" onclick="login()">Ingresar</button>
+<button class="olvidar" onclick="recuperarPassword()">Olvidé mi contraseña</button>
 <div id="loginMsg" class="msg"></div>
 </div>
 
@@ -49,6 +51,9 @@ let conductorActual = null;
 
 if(token) mostrarPanel();
 
+// ---------------------------
+// LOGIN ADMIN
+// ---------------------------
 async function login(){
   loginMsg.innerText = "Verificando...";
   try{
@@ -65,16 +70,25 @@ async function login(){
   }catch{ loginMsg.innerText="Error conectando con servidor ❌"; }
 }
 
+// ---------------------------
+// MOSTRAR PANEL
+// ---------------------------
 function mostrarPanel(){
   loginCard.classList.add("hidden");
   adminPanel.classList.remove("hidden");
 }
 
+// ---------------------------
+// CERRAR SESIÓN
+// ---------------------------
 function logout(){
   localStorage.removeItem("adminToken");
   location.reload();
 }
 
+// ---------------------------
+// BUSCAR CONDUCTOR
+// ---------------------------
 async function buscar(){
   info.innerHTML = "Buscando...";
   try{
@@ -96,6 +110,9 @@ async function buscar(){
   }catch{ info.innerHTML="Error buscando ❌"; }
 }
 
+// ---------------------------
+// GUARDAR QUEJA
+// ---------------------------
 async function guardar(){
   if(!conductorActual) return alert("Primero busca un conductor");
   const descripcion = descripcion.value;
@@ -109,6 +126,31 @@ async function guardar(){
     msg.innerText = res.ok ? "Reporte guardado ✅" : "Error guardando ❌";
     descripcion.value="";
   }catch{ msg.innerText="Error ❌"; }
+}
+
+// ---------------------------
+// RECUPERAR CONTRASEÑA
+// ---------------------------
+async function recuperarPassword(){
+  const email = prompt("Ingresa tu correo de administrador para reiniciar la contraseña:");
+  if(!email) return;
+  loginMsg.innerText = "Solicitando recuperación de contraseña...";
+  try{
+    const res = await fetch(`${API}/api/admin/recuperar-password`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email })
+    });
+    if(res.ok){
+      loginMsg.innerText = "Correo enviado ✅ Revisa tu bandeja de entrada.";
+    } else {
+      const err = await res.json();
+      loginMsg.innerText = `Error: ${err.message || 'No se pudo enviar correo'} ❌`;
+    }
+  }catch(err){
+    console.error(err);
+    loginMsg.innerText = "Error conectando con servidor ❌";
+  }
 }
 </script>
 
