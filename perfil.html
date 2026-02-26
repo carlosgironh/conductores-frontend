@@ -1,6 +1,3 @@
-nos falta lo actual esta bien pero nos falta boton para mostrar el registro vehicular aparte de mover la foto del vehiculo y la del conductor para que queden en paralelo y mas chica con un boton para verla en tamaño completo
-
-perfil.html actual "recuerda no modificar el funcionamiento y el logo dentro del qr "
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -51,11 +48,24 @@ perfil.html actual "recuerda no modificar el funcionamiento y el logo dentro del
     text-decoration:underline;
   }
 
+  .fotos-container{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:15px 0;
+  }
+
   .foto{
-    max-width:100%;
+    width:48%;
     border-radius:12px;
-    margin:12px 0;
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    cursor:pointer;
+    transition: transform 0.2s;
+  }
+
+  .foto:hover{
+    transform: scale(1.05);
   }
 
   #qr-container{
@@ -85,9 +95,37 @@ perfil.html actual "recuerda no modificar el funcionamiento y el logo dentro del
     background:#0b5ed7;
   }
 
+  /* Modal imagen grande */
+  .modal{
+    display:none;
+    position:fixed;
+    z-index:999;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    justify-content:center;
+    align-items:center;
+  }
+
+  .modal img{
+    max-width:90%;
+    max-height:90%;
+    border-radius:12px;
+    box-shadow:0 5px 25px rgba(0,0,0,0.3);
+  }
+
+  .modal:target{
+    display:flex;
+  }
+
   @media(max-width:480px){
     .card{
       padding:15px;
+    }
+    .foto{
+      width:100%;
     }
   }
 </style>
@@ -98,10 +136,17 @@ perfil.html actual "recuerda no modificar el funcionamiento y el logo dentro del
   <h2>Perfil del Conductor</h2>
   <div id="contenido">Cargando...</div>
 
+  <div class="fotos-container" id="fotos-container"></div>
+
   <div id="qr-container">
     <canvas id="qr"></canvas><br>
     <button id="descargarQR" onclick="descargarQR()">Descargar QR</button>
   </div>
+</div>
+
+<!-- Modal para imagen grande -->
+<div id="modalFoto" class="modal" onclick="this.style.display='none'">
+  <img id="modalImg" src="">
 </div>
 
 <script>
@@ -131,10 +176,32 @@ async function cargar(){
       <div class="campo"><strong>Vehículo:</strong> ${c.marca || ''} ${c.modelo || ''}</div>
       <div class="campo"><strong>Placa:</strong> ${c.placa || ''}</div>
       <div class="campo"><strong>Color:</strong> ${c.color || ''}</div>
-      ${docUrl("FOTO_VEHICULO")?`<img class="foto" src="${docUrl("FOTO_VEHICULO")}" alt="Foto Vehículo">`:``}
       <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR")?`<a class="documento-link" href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
-      ${docUrl("FOTO_CONDUCTOR")?`<img class="foto" src="${docUrl("FOTO_CONDUCTOR")}" alt="Foto Conductor">`:``}
     `;
+
+    // Cargar fotos y mostrar botón para verlas grandes
+    const fotosCont = document.getElementById("fotos-container");
+    fotosCont.innerHTML = '';
+    const fotoVeh = docUrl("FOTO_VEHICULO");
+    const fotoCond = docUrl("FOTO_CONDUCTOR");
+
+    if(fotoVeh){
+      const imgV = document.createElement("img");
+      imgV.src = fotoVeh;
+      imgV.alt = "Foto Vehículo";
+      imgV.className = "foto";
+      imgV.onclick = () => mostrarModal(fotoVeh);
+      fotosCont.appendChild(imgV);
+    }
+
+    if(fotoCond){
+      const imgC = document.createElement("img");
+      imgC.src = fotoCond;
+      imgC.alt = "Foto Conductor";
+      imgC.className = "foto";
+      imgC.onclick = () => mostrarModal(fotoCond);
+      fotosCont.appendChild(imgC);
+    }
 
     // Generar QR con logo
     const canvas = document.getElementById("qr");
@@ -158,6 +225,13 @@ async function cargar(){
     console.error(err);
     document.getElementById("contenido").innerText="Error al cargar perfil";
   }
+}
+
+function mostrarModal(src){
+  const modal = document.getElementById("modalFoto");
+  const modalImg = document.getElementById("modalImg");
+  modalImg.src = src;
+  modal.style.display = "flex";
 }
 
 function descargarQR(){
