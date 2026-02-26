@@ -4,143 +4,66 @@
 <meta charset="UTF-8">
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
-
-form{
-  max-width:750px;
-  margin:auto;
-  background:white;
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.1);
-}
-
-input, button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-button{
-  background:#0d6efd;
-  color:white;
-  font-weight:bold;
-  border:none;
-  cursor:pointer;
-}
-
-button:disabled{
-  background:gray;
-  cursor:not-allowed;
-}
-
-#mensaje{
-  margin-top:15px;
-  font-weight:bold;
-  text-align:center;
-}
-</style>
 </head>
 <body>
 
-<h2 style="text-align:center;">Registro de Conductores</h2>
+<h2>Registro de Conductores</h2>
 
 <form id="formConductor">
-
-<input id="email" type="email" placeholder="Correo electrónico" required>
-<input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
-
-<hr>
-
-<input id="nombres" placeholder="Nombres" required>
-<input id="apellidos" placeholder="Apellidos" required>
-<input id="cedula" placeholder="Cédula" required>
-<input id="licencia" placeholder="Licencia" required>
-<input id="placa" placeholder="Placa" required>
-<input id="modelo" placeholder="Modelo" required>
-<input id="marca" placeholder="Marca" required>
-<input id="color" placeholder="Color" required>
-<input id="poliza_numero" placeholder="Número de Póliza" required>
-
-<hr>
-
-<label>Cédula</label>
-<input type="file" id="fileCedula" required>
-
-<label>Licencia</label>
-<input type="file" id="fileLicencia" required>
-
-<label>Registro</label>
-<input type="file" id="fileRegistro" required>
-
-<label>Póliza</label>
-<input type="file" id="filePoliza" required>
-
-<label>Foto Vehículo</label>
-<input type="file" id="fileFotoVehiculo" required>
-
-<label>Foto Conductor</label>
-<input type="file" id="fileFotoConductor" required>
-
-<button id="btnRegistrar" type="submit">Registrar</button>
-
-<div id="mensaje"></div>
-
+  <input id="email" type="email" placeholder="Correo" required>
+  <input id="password" type="password" placeholder="Contraseña" required minlength="6">
+  <hr>
+  <input id="nombres" placeholder="Nombres" required>
+  <input id="apellidos" placeholder="Apellidos" required>
+  <input id="cedula" placeholder="Cédula" required>
+  <input id="licencia" placeholder="Licencia" required>
+  <input id="placa" placeholder="Placa" required>
+  <input id="modelo" placeholder="Modelo" required>
+  <input id="marca" placeholder="Marca" required>
+  <input id="color" placeholder="Color" required>
+  <input id="poliza_numero" placeholder="Número de póliza" required>
+  <hr>
+  <label>Cédula</label><input type="file" id="fileCedula" required>
+  <label>Licencia</label><input type="file" id="fileLicencia" required>
+  <label>Registro</label><input type="file" id="fileRegistro" required>
+  <label>Póliza</label><input type="file" id="filePoliza" required>
+  <label>Foto Vehículo</label><input type="file" id="fileFotoVehiculo" required>
+  <label>Foto Conductor</label><input type="file" id="fileFotoConductor" required>
+  <button type="submit">Registrar</button>
+  <div id="mensaje"></div>
 </form>
 
 <script>
 const API = "https://conductores-api.onrender.com";
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_ANON_KEY = "TU_ANON_KEY";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
 const mensaje = document.getElementById("mensaje");
-const btn = document.getElementById("btnRegistrar");
 
-let bloqueado = false;
-
-form.addEventListener("submit", async (e)=>{
+form.addEventListener("submit", async e=>{
   e.preventDefault();
-
-  if(bloqueado) return;
-  bloqueado = true;
-  btn.disabled = true;
-  mensaje.innerHTML = "Procesando...";
-
-  try{
-    // 1️⃣ Crear usuario
-    const { data, error } = await supabaseClient.auth.signUp({
+  mensaje.innerText = "Procesando...";
+  try {
+    // Crear usuario Supabase
+    const { data, error } = await supabase.auth.signUp({
       email: email.value.trim(),
       password: password.value.trim()
     });
-
-    if(error){
-      throw new Error(error.message);
-    }
-
+    if(error) throw new Error(error.message);
     const userId = data.user.id;
-
-    // 2️⃣ Generar QR token único
     const qr_token = crypto.randomUUID();
 
-    // 3️⃣ Crear conductor
-    const res = await fetch(`${API}/api/conductores`,{
+    // Crear conductor en backend
+    const res = await fetch(`${API}/api/registro`,{
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
+      headers:{"Content-Type":"application/json"},
       body: JSON.stringify({
+        email: email.value.trim(),
+        password: password.value.trim(),
         nombres: nombres.value.trim(),
         apellidos: apellidos.value.trim(),
         cedula: cedula.value.trim(),
@@ -150,59 +73,36 @@ form.addEventListener("submit", async (e)=>{
         marca: marca.value.trim(),
         color: color.value.trim(),
         poliza_numero: poliza_numero.value.trim(),
-        auth_user_id: userId,
-        qr_token
+        auth_user_id: userId
       })
     });
+    const dataBackend = await res.json();
+    if(!res.ok) throw new Error(dataBackend.error||"Error registro conductor");
+    const conductorId = dataBackend.conductorId;
 
-    const backend = await res.json();
+    // Subir documentos
+    const files = [
+      ["CEDULA","fileCedula"],
+      ["LICENCIA","fileLicencia"],
+      ["REGISTRO_VEHICULAR","fileRegistro"],
+      ["POLIZA_VEHICULAR","filePoliza"],
+      ["FOTO_VEHICULO","fileFotoVehiculo"],
+      ["FOTO_CONDUCTOR","fileFotoConductor"]
+    ];
 
-    if(!res.ok){
-      throw new Error(backend.error || "Error creando conductor");
-    }
-
-    const conductorId = backend.conductor.id;
-
-    // 4️⃣ Subir documentos
-    async function subir(tipo, inputId){
-      const file = document.getElementById(inputId).files[0];
+    for(const [tipo,id] of files){
+      const file = document.getElementById(id).files[0];
       const fd = new FormData();
-      fd.append("archivo", file);
-
-      const upload = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`,{
-        method:"POST",
-        body: fd
-      });
-
-      if(!upload.ok){
-        throw new Error("Error subiendo " + tipo);
-      }
+      fd.append("archivo",file);
+      await fetch(`${API}/api/documentos/${conductorId}/${tipo}`,{ method:"POST", body:fd });
     }
 
-    await subir("CEDULA","fileCedula");
-    await subir("LICENCIA","fileLicencia");
-    await subir("REGISTRO_VEHICULAR","fileRegistro");
-    await subir("POLIZA_VEHICULAR","filePoliza");
-    await subir("FOTO_VEHICULO","fileFotoVehiculo");
-    await subir("FOTO_CONDUCTOR","fileFotoConductor");
-
-    mensaje.innerHTML = "Registro exitoso ✅";
-
+    mensaje.innerText = "Registro exitoso ✅";
     form.reset();
+    setTimeout(()=> window.location.href = `perfil.html?token=${dataBackend.qr_token}`,1500);
 
-    // 5️⃣ Redirigir al perfil
-    setTimeout(()=>{
-      window.location.href = `perfil.html?token=${qr_token}`;
-    },1500);
-
-  }catch(err){
-    mensaje.innerHTML = "Error: " + err.message;
-  }
-
-  bloqueado = false;
-  btn.disabled = false;
+  } catch(err){ mensaje.innerText = "Error: "+err.message; }
 });
 </script>
-
 </body>
 </html>
