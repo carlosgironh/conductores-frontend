@@ -34,6 +34,12 @@ body{
   margin-bottom:6px;
 }
 
+img.foto{
+  max-width:100%;
+  border-radius:8px;
+  margin-top:10px;
+}
+
 button{
   margin-top:10px;
   padding:6px 12px;
@@ -50,7 +56,7 @@ button{
 <div class="card">
 <h2>Perfil del Conductor</h2>
 
-<div id="contenido"></div>
+<div id="contenido">Cargando...</div>
 
 <div style="text-align:center;margin-top:25px;">
 <canvas id="qr"></canvas><br>
@@ -60,53 +66,70 @@ button{
 </div>
 
 <script>
-
 const API = "https://conductores-api.onrender.com";
-const conductorId = new URLSearchParams(window.location.search).get("id");
+
+// ⚠️ Usar token enviado desde el registro
+const qr_token = new URLSearchParams(window.location.search).get("token");
 
 async function cargar(){
-
-  if(!conductorId){
-    alert("ID no especificado");
+  if(!qr_token){
+    alert("Token no especificado");
     return;
   }
 
-  const res = await fetch(`${API}/api/conductores/${conductorId}`);
-  const data = await res.json();
+  try{
+    const res = await fetch(`${API}/api/conductor-por-token/${qr_token}`);
+    const data = await res.json();
 
-  if(!res.ok){
-    alert("Conductor no encontrado");
-    return;
+    if(!res.ok || !data.conductor){
+      alert("Conductor no encontrado");
+      return;
+    }
+
+    const c = data.conductor;
+    const docs = data.documentos || [];
+
+    function docUrl(tipo){
+      const doc = docs.find(d=>d.tipo===tipo);
+      return doc ? doc.url_archivo : null;
+    }
+
+    document.getElementById("contenido").innerHTML = `
+      <div class="section">
+        <div class="line"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
+        <div class="line"><strong>Cédula:</strong> ${c.cedula}</div>
+        <div class="line"><strong>Licencia:</strong> ${c.licencia}</div>
+        ${docUrl("cedula") ? `<a href="${docUrl("cedula")}" target="_blank"><button>Ver Cédula</button></a>` : ""}
+        ${docUrl("licencia") ? `<a href="${docUrl("licencia")}" target="_blank"><button>Ver Licencia</button></a>` : ""}
+      </div>
+
+      <div class="section">
+        <div class="line"><strong>Vehículo:</strong> ${c.marca} ${c.modelo}</div>
+        <div class="line"><strong>Placa:</strong> ${c.placa}</div>
+        <div class="line"><strong>Color:</strong> ${c.color}</div>
+        ${docUrl("foto_vehiculo") ? `<img class="foto" src="${docUrl("foto_vehiculo")}" alt="Foto Vehículo">` : ""}
+      </div>
+
+      <div class="section">
+        <div class="line"><strong>Póliza:</strong> ${c.poliza_numero}</div>
+        ${docUrl("poliza_vehicular") ? `<a href="${docUrl("poliza_vehicular")}" target="_blank"><button>Ver Póliza</button></a>` : ""}
+      </div>
+
+      ${docUrl("foto_conductor") ? `<div class="section"><img class="foto" src="${docUrl("foto_conductor")}" alt="Foto Conductor"></div>` : ""}
+    `;
+
+    generarQR();
+
+  }catch(err){
+    console.error(err);
+    document.getElementById("contenido").innerHTML = "Error al cargar datos del conductor.";
   }
-
-  const c = data.conductor;
-
-  document.getElementById("contenido").innerHTML = `
-    <div class="section">
-      <div class="line"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
-      <div class="line"><strong>Cédula:</strong> ${c.cedula}</div>
-      <div class="line"><strong>Licencia:</strong> ${c.licencia}</div>
-    </div>
-
-    <div class="section">
-      <div class="line"><strong>Vehículo:</strong> ${c.marca} ${c.modelo}</div>
-      <div class="line"><strong>Placa:</strong> ${c.placa}</div>
-      <div class="line"><strong>Color:</strong> ${c.color}</div>
-    </div>
-
-    <div class="section">
-      <div class="line"><strong>Póliza:</strong> ${c.poliza_numero}</div>
-    </div>
-  `;
-
-  generarQR();
-
 }
 
 function generarQR(){
-  const urlPublica = window.location.href;
-
-  QRCode.toCanvas(document.getElementById("qr"), urlPublica,{
+  const canvas = document.getElementById("qr");
+  const urlPublica = window.location.href; // tu QR apunta a esta página
+  QRCode.toCanvas(canvas, urlPublica,{
     width:220,
     errorCorrectionLevel:'H'
   });
@@ -121,7 +144,6 @@ function descargarQR(){
 }
 
 cargar();
-
 </script>
 
 </body>
