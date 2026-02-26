@@ -5,7 +5,6 @@
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<!-- Usar la versión compilada que expone la clase Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <style>
   body{ font-family: 'Arial', sans-serif; background:#f4f6f8; margin:0; padding:20px; }
@@ -31,18 +30,18 @@
   <h2>Registro de Conductores</h2>
 
   <form id="formConductor">
-    <input id="email" type="email" placeholder="Correo" required>
-    <input id="password" type="password" placeholder="Contraseña" required minlength="6">
+    <input id="email" type="email" placeholder="Correo" required autocomplete="email">
+    <input id="password" type="password" placeholder="Contraseña" required minlength="6" autocomplete="new-password">
     <hr>
-    <input id="nombres" type="text" placeholder="Nombres" required>
-    <input id="apellidos" type="text" placeholder="Apellidos" required>
-    <input id="cedula" type="text" placeholder="Cédula" required>
-    <input id="licencia" type="text" placeholder="Licencia" required>
-    <input id="placa" type="text" placeholder="Placa" required>
-    <input id="modelo" type="text" placeholder="Modelo" required>
-    <input id="marca" type="text" placeholder="Marca" required>
-    <input id="color" type="text" placeholder="Color" required>
-    <input id="poliza_numero" type="text" placeholder="Número de póliza" required>
+    <input id="nombres" type="text" placeholder="Nombres" required autocomplete="given-name">
+    <input id="apellidos" type="text" placeholder="Apellidos" required autocomplete="family-name">
+    <input id="cedula" type="text" placeholder="Cédula" required autocomplete="off">
+    <input id="licencia" type="text" placeholder="Licencia" required autocomplete="off">
+    <input id="placa" type="text" placeholder="Placa" required autocomplete="off">
+    <input id="modelo" type="text" placeholder="Modelo" required autocomplete="off">
+    <input id="marca" type="text" placeholder="Marca" required autocomplete="off">
+    <input id="color" type="text" placeholder="Color" required autocomplete="off">
+    <input id="poliza_numero" type="text" placeholder="Número de póliza" required autocomplete="off">
     <hr>
     <label for="fileCedula">Cédula</label><input type="file" id="fileCedula" required>
     <label for="fileLicencia">Licencia</label><input type="file" id="fileLicencia" required>
@@ -60,8 +59,8 @@ const API = "https://conductores-api.onrender.com";
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-// Inicialización correcta usando la clase global Supabase
-const supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inicialización correcta usando el objeto global 'supabase'
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
 const mensaje = document.getElementById("mensaje");
