@@ -5,7 +5,8 @@
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Usar la versión compilada que expone la clase Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <style>
   body{ font-family: 'Arial', sans-serif; background:#f4f6f8; margin:0; padding:20px; }
   .card{ max-width:720px; margin:auto; background:white; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:25px; }
@@ -55,14 +56,12 @@
 </div>
 
 <script>
-// Configuración
 const API = "https://conductores-api.onrender.com";
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-// Inicialización correcta de Supabase v2
-const { createClient } = window.supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inicialización correcta usando la clase global Supabase
+const supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
 const mensaje = document.getElementById("mensaje");
@@ -73,29 +72,24 @@ form.addEventListener("submit", async e => {
   mensaje.innerText = "Procesando...";
   mensaje.style.color = "blue";
 
-  // Captura de valores manual para asegurar compatibilidad
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
   try {
-    // 1. Registro en Supabase Auth
-    const { data, error } = await supabaseClient.auth.signUp({
-      email: email,
-      password: password
-    });
-
+    // 1️⃣ Registro en Supabase Auth
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) throw error;
     if (!data.user) throw new Error("No se pudo crear el usuario.");
 
     const userId = data.user.id;
 
-    // 2. Registro en tu Backend (Render)
+    // 2️⃣ Registro en backend
     const res = await fetch(`${API}/api/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: email,
-        password: password,
+        email,
+        password,
         nombres: document.getElementById("nombres").value.trim(),
         apellidos: document.getElementById("apellidos").value.trim(),
         cedula: document.getElementById("cedula").value.trim(),
@@ -108,13 +102,12 @@ form.addEventListener("submit", async e => {
         auth_user_id: userId
       })
     });
-
     const dataBackend = await res.json();
     if (!res.ok) throw new Error(dataBackend.error || "Error en el servidor");
 
     const conductorId = dataBackend.conductorId;
 
-    // 3. Subida de archivos
+    // 3️⃣ Subida de archivos
     const filesMapping = [
       ["CEDULA", "fileCedula"],
       ["LICENCIA", "fileLicencia"],
@@ -129,18 +122,14 @@ form.addEventListener("submit", async e => {
       if (fileInput.files.length > 0) {
         const fd = new FormData();
         fd.append("archivo", fileInput.files[0]);
-        await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, { 
-            method: "POST", 
-            body: fd 
-        });
+        await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, { method: "POST", body: fd });
       }
     }
 
     mensaje.innerText = "¡Registro exitoso! Redirigiendo...";
     mensaje.style.color = "green";
-    
     form.reset();
-    
+
     setTimeout(() => {
       window.location.href = `perfil.html?token=${dataBackend.qr_token}`;
     }, 2000);
