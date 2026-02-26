@@ -133,11 +133,23 @@ async function cargar(){
       ${docUrl("FOTO_CONDUCTOR")?`<img class="foto" src="${docUrl("FOTO_CONDUCTOR")}" alt="Foto Conductor">`:``}
     `;
 
-    // Generar QR con logo opcional
-    QRCode.toCanvas(document.getElementById("qr"), window.location.href,{
-      width:220,
-      errorCorrectionLevel:'H'
+    // Generar QR con logo
+    const canvas = document.getElementById("qr");
+    await QRCode.toCanvas(canvas, window.location.href, {
+      width: 220,
+      errorCorrectionLevel: 'H'
     });
+
+    // Cargar logo y dibujarlo en el centro
+    const ctx = canvas.getContext('2d');
+    const logo = new Image();
+    logo.src = 'logo.png'; // <- ruta de tu logo
+    logo.onload = () => {
+      const size = canvas.width * 0.2; // 20% del QR
+      const x = (canvas.width - size)/2;
+      const y = (canvas.height - size)/2;
+      ctx.drawImage(logo, x, y, size, size);
+    }
 
   } catch(err){
     console.error(err);
