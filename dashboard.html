@@ -54,6 +54,7 @@ async function login(){
       body: JSON.stringify({ usuario: usuarioVal, password: passwordVal })
     });
     if(!res.ok){ loginMsg.innerText="Usuario o clave incorrecta ❌"; return; }
+
     const data = await res.json();
     localStorage.setItem("userToken", data.token);
     loginMsg.innerText="Ingreso exitoso ✅";
@@ -73,16 +74,23 @@ async function recuperarPassword(){
   loginMsg.innerText = "Solicitando recuperación...";
 
   try{
-    const res = await fetch(`${API}/api/usuario/recuperar-password`,{
+    const res = await fetch(`${API}/api/admin/recuperar-password`,{ // <- usa endpoint que exista
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ usuario: input })
     });
+
+    const text = await res.text(); // leer respuesta
     if(res.ok){
       loginMsg.innerText = "Se envió un enlace temporal a tu correo registrado ✅";
     } else {
-      const err = await res.json();
-      loginMsg.innerText = `Error: ${err.message || 'No se pudo enviar el enlace'} ❌`;
+      try{
+        const err = JSON.parse(text);
+        loginMsg.innerText = `Error: ${err.message || 'No se pudo enviar el enlace'} ❌`;
+      }catch{
+        loginMsg.innerText = "Error: respuesta inesperada del servidor ❌";
+        console.error("Respuesta inválida:", text);
+      }
     }
   }catch(err){
     console.error(err);
@@ -115,13 +123,21 @@ async function resetPassword(){
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ token: resetToken, new_password: newPass })
     });
+
+    const text = await res.text();
     if(res.ok){
       resetMsg.innerText="Contraseña cambiada ✅ Redirigiendo...";
       setTimeout(()=> window.location.href="dashboard.html",1500);
     } else {
-      const err = await res.json();
-      resetMsg.innerText = `Error: ${err.message || 'No se pudo cambiar la contraseña'} ❌`;
+      try{
+        const err = JSON.parse(text);
+        resetMsg.innerText = `Error: ${err.message || 'No se pudo cambiar la contraseña'} ❌`;
+      }catch{
+        resetMsg.innerText = "Error: respuesta inesperada del servidor ❌";
+        console.error("Respuesta inválida:", text);
+      }
     }
+
   }catch(err){
     console.error(err);
     resetMsg.innerText="Error conectando con servidor ❌";
