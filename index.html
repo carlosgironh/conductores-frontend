@@ -100,7 +100,6 @@ button:disabled{
 </form>
 
 <script>
-
 const API = "https://conductores-api.onrender.com";
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
@@ -117,13 +116,11 @@ form.addEventListener("submit", async (e)=>{
   e.preventDefault();
 
   if(bloqueado) return;
-
   bloqueado = true;
   btn.disabled = true;
   mensaje.innerHTML = "Procesando...";
 
   try{
-
     // 1️⃣ Crear usuario
     const { data, error } = await supabaseClient.auth.signUp({
       email: email.value.trim(),
@@ -131,41 +128,42 @@ form.addEventListener("submit", async (e)=>{
     });
 
     if(error){
-      if(error.message.includes("rate limit")){
-        throw new Error("Demasiados intentos. Espere 60 segundos.");
-      }
       throw new Error(error.message);
     }
 
     const userId = data.user.id;
 
-    // 2️⃣ Crear conductor
+    // 2️⃣ Generar QR token único
+    const qr_token = crypto.randomUUID();
+
+    // 3️⃣ Crear conductor
     const res = await fetch(`${API}/api/conductores`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({
-        nombres: nombres.value,
-        apellidos: apellidos.value,
-        cedula: cedula.value,
-        licencia: licencia.value,
-        placa: placa.value,
-        modelo: modelo.value,
-        marca: marca.value,
-        color: color.value,
-        poliza_numero: poliza_numero.value,
-        auth_user_id: userId
+        nombres: nombres.value.trim(),
+        apellidos: apellidos.value.trim(),
+        cedula: cedula.value.trim(),
+        licencia: licencia.value.trim(),
+        placa: placa.value.trim(),
+        modelo: modelo.value.trim(),
+        marca: marca.value.trim(),
+        color: color.value.trim(),
+        poliza_numero: poliza_numero.value.trim(),
+        auth_user_id: userId,
+        qr_token
       })
     });
 
     const backend = await res.json();
 
     if(!res.ok){
-      throw new Error(backend.message || "Error creando conductor");
+      throw new Error(backend.error || "Error creando conductor");
     }
 
     const conductorId = backend.conductor.id;
 
-    // 3️⃣ Subir documentos
+    // 4️⃣ Subir documentos
     async function subir(tipo, inputId){
       const file = document.getElementById(inputId).files[0];
       const fd = new FormData();
@@ -181,18 +179,20 @@ form.addEventListener("submit", async (e)=>{
       }
     }
 
-    await subir("cedula","fileCedula");
-    await subir("licencia","fileLicencia");
-    await subir("registro_vehicular","fileRegistro");
-    await subir("poliza_vehicular","filePoliza");
-    await subir("foto_vehiculo","fileFotoVehiculo");
-    await subir("foto_conductor","fileFotoConductor");
+    await subir("CEDULA","fileCedula");
+    await subir("LICENCIA","fileLicencia");
+    await subir("REGISTRO_VEHICULAR","fileRegistro");
+    await subir("POLIZA_VEHICULAR","filePoliza");
+    await subir("FOTO_VEHICULO","fileFotoVehiculo");
+    await subir("FOTO_CONDUCTOR","fileFotoConductor");
 
     mensaje.innerHTML = "Registro exitoso ✅";
+
     form.reset();
 
+    // 5️⃣ Redirigir al perfil
     setTimeout(()=>{
-      window.location.href = `perfil.html?id=${conductorId}`;
+      window.location.href = `perfil.html?token=${qr_token}`;
     },1500);
 
   }catch(err){
@@ -201,9 +201,7 @@ form.addEventListener("submit", async (e)=>{
 
   bloqueado = false;
   btn.disabled = false;
-
 });
-
 </script>
 
 </body>
