@@ -1,9 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Registro de Conductores</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<!-- Cargar Supabase v2 desde CDN correctamente -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<style>
+  body{
+    font-family: 'Arial', sans-serif;
+    background:#f4f6f8;
+    margin:0;
+    padding:20px;
+  }
+
+  .card{
+    max-width:720px;
+    margin:auto;
+    background:white;
+    border-radius:16px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    padding:25px;
+  }
+
+  h2{
+    text-align:center;
+    color:#0d6efd;
+    margin-bottom:20px;
+  }
+
+  form input[type="text"],
+  form input[type="email"],
+  form input[type="password"],
+  form input[type="file"]{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+  }
+
+  form label{
+    display:block;
+    margin-top:15px;
+    font-weight:bold;
+  }
+
+  button[type="submit"]{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    margin-top:20px;
+    width:100%;
+    font-size:16px;
+    transition: background 0.2s;
+  }
+
+  button[type="submit"]:hover{
+    background:#0b5ed7;
+  }
+
+  hr{
+    margin:20px 0;
+    border:none;
+    border-top:1px solid #ccc;
+  }
+
+  #mensaje{
+    margin-top:15px;
+    font-weight:bold;
+    text-align:center;
+  }
+
+  @media(max-width:480px){
+    .card{
+      padding:15px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Registro de Conductores</h2>
+
+  <form id="formConductor">
+    <input id="email" type="email" placeholder="Correo" required>
+    <input id="password" type="password" placeholder="Contraseña" required minlength="6">
+    <hr>
+    <input id="nombres" placeholder="Nombres" required>
+    <input id="apellidos" placeholder="Apellidos" required>
+    <input id="cedula" placeholder="Cédula" required>
+    <input id="licencia" placeholder="Licencia" required>
+    <input id="placa" placeholder="Placa" required>
+    <input id="modelo" placeholder="Modelo" required>
+    <input id="marca" placeholder="Marca" required>
+    <input id="color" placeholder="Color" required>
+    <input id="poliza_numero" placeholder="Número de póliza" required>
+    <hr>
+    <label for="fileCedula">Cédula</label><input type="file" id="fileCedula" required>
+    <label for="fileLicencia">Licencia</label><input type="file" id="fileLicencia" required>
+    <label for="fileRegistro">Registro Vehicular</label><input type="file" id="fileRegistro" required>
+    <label for="filePoliza">Póliza</label><input type="file" id="filePoliza" required>
+    <label for="fileFotoVehiculo">Foto Vehículo</label><input type="file" id="fileFotoVehiculo" required>
+    <label for="fileFotoConductor">Foto Conductor</label><input type="file" id="fileFotoConductor" required>
+    <button type="submit">Registrar</button>
+    <div id="mensaje"></div>
+  </form>
+</div>
+
 <script>
 const API = "https://conductores-api.onrender.com";
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-// Cambié el nombre a supabaseClient para no redeclarar el global
+// Inicializar Supabase correctamente desde CDN
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const form = document.getElementById("formConductor");
@@ -69,3 +186,6 @@ form.addEventListener("submit", async e=>{
   } catch(err){ mensaje.innerText = "Error: "+err.message; }
 });
 </script>
+
+</body>
+</html>
