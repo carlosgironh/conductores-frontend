@@ -1,316 +1,257 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Registro de Conductores</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- ==========================================================
-     LIBRERÍAS EXTERNAS
-     ==========================================================
-     QRCode se mantiene por compatibilidad con otras vistas.
-     Supabase SDK se mantiene cargado si lo usas en otras páginas,
-     pero NO se usa aquí para crear usuario.
-=========================================================== -->
+<!-- Librería para generar QR -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-/* ==========================================================
-   ESTILOS GENERALES
-=========================================================== */
-body{
+body {
   font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:20px;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
 }
 
-.card{
-  max-width:720px;
-  margin:auto;
-  background:white;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  padding:25px;
+h2 {
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 5px;
 }
 
-h2{
-  text-align:center;
-  color:#0d6efd;
-  margin-bottom:20px;
+input, button {
+  display: block;
+  margin: 8px 0;
+  padding: 8px;
+  width: 100%;
 }
 
-/* Inputs */
-form input,
-form input[type="file"]{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
+button {
+  cursor: pointer;
+  background: #1f6feb;
+  color: white;
+  border: none;
 }
 
-form label{
-  display:block;
-  margin-top:15px;
-  font-weight:bold;
+button:hover {
+  background: #174ea6;
 }
 
-/* Botón principal */
-button{
-  background:#0d6efd;
-  color:white;
-  border:none;
-  padding:12px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
-  margin-top:20px;
-  width:100%;
-  font-size:16px;
+#qr {
+  margin-top: 20px;
 }
 
-button:disabled{
-  opacity:0.7;
-  cursor:not-allowed;
-}
-
-#mensaje{
-  margin-top:15px;
-  font-weight:bold;
-  text-align:center;
-}
-
-/* Estados visuales */
-.error{ color:#b00020; }
-.ok{ color:green; }
-.busy{ color:#0b5ed7; }
-
-/* Loader simple */
-.loader{
-  border:3px solid #f3f3f3;
-  border-top:3px solid white;
-  border-radius:50%;
-  width:14px;
-  height:14px;
-  animation: spin 1s linear infinite;
-  display:inline-block;
-  margin-right:8px;
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
-@media(max-width:480px){
-  .card{ padding:15px; }
+.hidden {
+  display: none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ==========================================================
-     CONTENEDOR PRINCIPAL
-=========================================================== -->
-<div class="card">
+<h1>Sistema de Conductores 🚗</h1>
 
-  <h2>Registro de Conductores</h2>
+<!-- ================= REGISTRO ================= -->
+<h2>Registro</h2>
 
-  <!-- ==========================================================
-       FORMULARIO DE REGISTRO
-       ==========================================================
-       Flujo:
-       1. Envía datos al backend
-       2. Backend crea usuario + conductor
-       3. Devuelve conductorId + qr_token
-       4. Se suben documentos
-       5. Redirección a perfil
-  =========================================================== -->
-  <form id="formConductor" autocomplete="off">
+<input id="regEmail" placeholder="Email">
+<input id="regPassword" type="password" placeholder="Password">
 
-    <!-- Datos de acceso -->
-    <input id="email" type="email" placeholder="Correo" required>
-    <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
+<input id="nombres" placeholder="Nombres">
+<input id="apellidos" placeholder="Apellidos">
+<input id="cedula" placeholder="Cédula">
+<input id="licencia" placeholder="Licencia">
+<input id="placa" placeholder="Placa">
+<input id="modelo" placeholder="Modelo">
+<input id="marca" placeholder="Marca">
+<input id="color" placeholder="Color">
+<input id="poliza" placeholder="Número de póliza">
+<input id="celular" placeholder="Celular">
+<input id="direccion" placeholder="Dirección">
 
-    <hr>
+<button onclick="registrar()">Registrar</button>
 
-    <!-- Datos personales -->
-    <input id="nombres" type="text" placeholder="Nombres" required>
-    <input id="apellidos" type="text" placeholder="Apellidos" required>
-    <input id="cedula" type="text" placeholder="Cédula" required>
-    <input id="licencia" type="text" placeholder="Licencia" required>
+<div id="qr"></div>
 
-    <!-- Datos del vehículo -->
-    <input id="placa" type="text" placeholder="Placa" required>
-    <input id="modelo" type="text" placeholder="Modelo" required>
-    <input id="marca" type="text" placeholder="Marca" required>
-    <input id="color" type="text" placeholder="Color" required>
-    <input id="poliza_numero" type="text" placeholder="Número de póliza" required>
+<hr>
 
-    <hr>
+<!-- ================= LOGIN ================= -->
+<h2>Login</h2>
 
-    <!-- Documentos -->
-    <label>Cédula</label><input type="file" id="fileCedula" required>
-    <label>Licencia</label><input type="file" id="fileLicencia" required>
-    <label>Registro Vehicular</label><input type="file" id="fileRegistro" required>
-    <label>Póliza</label><input type="file" id="filePoliza" required>
-    <label>Foto Vehículo</label><input type="file" id="fileFotoVehiculo" required>
-    <label>Foto Conductor</label><input type="file" id="fileFotoConductor" required>
+<input id="loginEmail" placeholder="Email">
+<input id="loginPassword" type="password" placeholder="Password">
 
-    <button type="submit" id="btnRegistrar">Registrar</button>
-    <div id="mensaje"></div>
+<button onclick="login()">Iniciar Sesión</button>
 
-  </form>
+<hr>
+
+<!-- ================= SUBIR DOCUMENTOS ================= -->
+<div id="documentosSection" class="hidden">
+<h2>Subir Documentos</h2>
+
+<input type="file" id="fileCedula">
+<input type="file" id="fileLicencia">
+<input type="file" id="fileRegistro">
+<input type="file" id="filePoliza">
+<input type="file" id="fileFotoVehiculo">
+<input type="file" id="fileFotoConductor">
+
+<button onclick="subirDocumentos()">Subir Documentos</button>
 </div>
 
 <script>
-/* ==========================================================
-   CONFIGURACIÓN GLOBAL
-=========================================================== */
-const API = "https://conductores-api.onrender.com";
 
-/* ==========================================================
-   REFERENCIAS DOM
-=========================================================== */
-const form = document.getElementById("formConductor");
-const btn = document.getElementById("btnRegistrar");
-const mensaje = document.getElementById("mensaje");
+/* =====================================================
+   ⚙ CONFIGURACIÓN
+===================================================== */
 
-/* ==========================================================
-   UTILIDAD: Mostrar mensajes visuales
-=========================================================== */
-function showMessage(text, type="") {
-  mensaje.innerHTML = text;
-  mensaje.className = type;
-}
+const API_URL = "http://localhost:3000";
 
-/* ==========================================================
-   VALIDACIÓN: Tamaño máximo de archivos (5MB)
-=========================================================== */
-function validateFiles() {
-  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-  const fileInputs = form.querySelectorAll("input[type='file']");
+let token = null;
+let conductorId = null;
 
-  for (let input of fileInputs) {
-    if (input.files[0] && input.files[0].size > MAX_SIZE) {
-      throw new Error(`El archivo ${input.files[0].name} supera 5MB.`);
-    }
-  }
-}
+/* =====================================================
+   📝 REGISTRO
+===================================================== */
 
-/* ==========================================================
-   SUBIR DOCUMENTO AL BACKEND
-=========================================================== */
-async function uploadFile(conductorId, tipo, inputId) {
+async function registrar() {
 
-  const input = document.getElementById(inputId);
-  if (!input.files.length) return;
+  const body = {
+    email: regEmail.value,
+    password: regPassword.value,
+    nombres: nombres.value,
+    apellidos: apellidos.value,
+    cedula: cedula.value,
+    licencia: licencia.value,
+    placa: placa.value,
+    modelo: modelo.value,
+    marca: marca.value,
+    color: color.value,
+    poliza_numero: poliza.value,
+    celular: celular.value,
+    direccion: direccion.value
+  };
 
-  const formData = new FormData();
-  formData.append("archivo", input.files[0]);
-
-  const res = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, {
+  const res = await fetch(`${API_URL}/api/registro`, {
     method: "POST",
-    body: formData
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    throw new Error(`Error subiendo ${tipo}`);
+    alert(data.error);
+    return;
   }
+
+  conductorId = data.conductorId;
+
+  /* Generar QR con token público */
+  const perfilURL = `${API_URL}/api/perfil/${data.qr_token}`;
+
+  QRCode.toCanvas(perfilURL, function (err, canvas) {
+    if (err) console.error(err);
+    qr.innerHTML = "<h3>QR generado:</h3>";
+    qr.appendChild(canvas);
+  });
+
+  alert("Registro exitoso");
 }
 
-/* ==========================================================
-   EVENTO PRINCIPAL: REGISTRO COMPLETO
-=========================================================== */
-form.addEventListener("submit", async (e) => {
+/* =====================================================
+   🔐 LOGIN
+===================================================== */
 
-  e.preventDefault();
+async function login() {
 
-  /* Protección contra doble envío */
-  if (btn.disabled) return;
+  const res = await fetch(`${API_URL}/api/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: loginEmail.value,
+      password: loginPassword.value
+    })
+  });
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loader"></span>Procesando...';
-  showMessage("Creando registro...", "busy");
+  const data = await res.json();
 
-  try {
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
 
-    /* Validaciones previas */
-    validateFiles();
+  token = data.token;
 
-    /* Construcción del payload */
-    const payload = {
-      email: email.value.trim(),
-      password: password.value,
-      nombres: nombres.value.trim(),
-      apellidos: apellidos.value.trim(),
-      cedula: cedula.value.trim(),
-      licencia: licencia.value.trim(),
-      placa: placa.value.trim(),
-      modelo: modelo.value.trim(),
-      marca: marca.value.trim(),
-      color: color.value.trim(),
-      poliza_numero: poliza_numero.value.trim()
-    };
+  /* Obtener conductorId desde perfil JWT */
+  const user = parseJwt(token);
+  conductorId = user.sub;
 
-    /* 1️⃣ Enviar datos al backend */
-    const res = await fetch(`${API}/api/registro`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+  documentosSection.classList.remove("hidden");
+
+  alert("Login exitoso");
+}
+
+/* =====================================================
+   📂 SUBIR DOCUMENTOS
+===================================================== */
+
+async function subirDocumentos() {
+
+  const documentos = [
+    ["cedula", fileCedula],
+    ["licencia", fileLicencia],
+    ["registro_vehicular", fileRegistro],
+    ["poliza_vehicular", filePoliza],
+    ["foto_vehiculo", fileFotoVehiculo],
+    ["foto_conductor", fileFotoConductor]
+  ];
+
+  for (let [tipo, input] of documentos) {
+
+    if (!input.files[0]) continue;
+
+    const formData = new FormData();
+    formData.append("archivo", input.files[0]);
+
+    const res = await fetch(
+      `${API_URL}/api/documentos/${conductorId}/${tipo}`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      }
+    );
 
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || "Error creando usuario");
+      alert(`Error en ${tipo}: ${data.error}`);
+      return;
     }
-
-    const conductorId = data.conductorId;
-    const qrToken = data.qr_token;
-
-    if (!conductorId) {
-      throw new Error("El servidor no devolvió conductorId");
-    }
-
-    /* 2️⃣ Subir documentos */
-    const documentos = [
-      ["CEDULA","fileCedula"],
-      ["LICENCIA","fileLicencia"],
-      ["REGISTRO_VEHICULAR","fileRegistro"],
-      ["POLIZA_VEHICULAR","filePoliza"],
-      ["FOTO_VEHICULO","fileFotoVehiculo"],
-      ["FOTO_CONDUCTOR","fileFotoConductor"]
-    ];
-
-    for (const [tipo,id] of documentos) {
-      await uploadFile(conductorId, tipo, id);
-    }
-
-    /* 3️⃣ Finalización */
-    showMessage("¡Registro exitoso! Redirigiendo...", "ok");
-    form.reset();
-
-    setTimeout(() => {
-      window.location.href = `perfil.html?token=${qrToken}`;
-    }, 1500);
-
-  } catch (error) {
-
-    console.error("Error registro:", error);
-    showMessage("Error: " + error.message, "error");
-
-  } finally {
-
-    btn.disabled = false;
-    btn.innerHTML = "Registrar";
-
   }
 
-});
+  alert("Todos los documentos fueron subidos correctamente");
+}
+
+/* =====================================================
+   🧠 DECODIFICAR JWT
+===================================================== */
+
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+
+  return JSON.parse(jsonPayload);
+}
+
 </script>
 
 </body>
