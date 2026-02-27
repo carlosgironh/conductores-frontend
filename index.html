@@ -1,258 +1,186 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Registro de Conductores</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Librería para generar QR -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
-
-h2 {
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 5px;
-}
-
-input, button {
-  display: block;
-  margin: 8px 0;
-  padding: 8px;
-  width: 100%;
-}
-
-button {
-  cursor: pointer;
-  background: #1f6feb;
-  color: white;
-  border: none;
-}
-
-button:hover {
-  background: #174ea6;
-}
-
-#qr {
-  margin-top: 20px;
-}
-
-.hidden {
-  display: none;
-}
-</style>
-</head>
-
-<body>
-
-<h1>Sistema de Conductores 🚗</h1>
-
-<!-- ================= REGISTRO ================= -->
-<h2>Registro</h2>
-
-<input id="regEmail" placeholder="Email">
-<input id="regPassword" type="password" placeholder="Password">
-
-<input id="nombres" placeholder="Nombres">
-<input id="apellidos" placeholder="Apellidos">
-<input id="cedula" placeholder="Cédula">
-<input id="licencia" placeholder="Licencia">
-<input id="placa" placeholder="Placa">
-<input id="modelo" placeholder="Modelo">
-<input id="marca" placeholder="Marca">
-<input id="color" placeholder="Color">
-<input id="poliza" placeholder="Número de póliza">
-<input id="celular" placeholder="Celular">
-<input id="direccion" placeholder="Dirección">
-
-<button onclick="registrar()">Registrar</button>
-
-<div id="qr"></div>
-
-<hr>
-
-<!-- ================= LOGIN ================= -->
-<h2>Login</h2>
-
-<input id="loginEmail" placeholder="Email">
-<input id="loginPassword" type="password" placeholder="Password">
-
-<button onclick="login()">Iniciar Sesión</button>
-
-<hr>
-
-<!-- ================= SUBIR DOCUMENTOS ================= -->
-<div id="documentosSection" class="hidden">
-<h2>Subir Documentos</h2>
-
-<input type="file" id="fileCedula">
-<input type="file" id="fileLicencia">
-<input type="file" id="fileRegistro">
-<input type="file" id="filePoliza">
-<input type="file" id="fileFotoVehiculo">
-<input type="file" id="fileFotoConductor">
-
-<button onclick="subirDocumentos()">Subir Documentos</button>
-</div>
-
 <script>
+/* ==========================================================
+   CONFIGURACIÓN GLOBAL
+=========================================================== */
+const API = "https://conductores-api.onrender.com";
 
-/* =====================================================
-   ⚙ CONFIGURACIÓN
-===================================================== */
+/* ==========================================================
+   REFERENCIAS DOM
+=========================================================== */
+const form = document.getElementById("formConductor");
+const btn = document.getElementById("btnRegistrar");
+const mensaje = document.getElementById("mensaje");
 
-const API_URL = "http://localhost:3000";
-
-let token = null;
-let conductorId = null;
-
-/* =====================================================
-   📝 REGISTRO
-===================================================== */
-
-async function registrar() {
-
-  const body = {
-    email: regEmail.value,
-    password: regPassword.value,
-    nombres: nombres.value,
-    apellidos: apellidos.value,
-    cedula: cedula.value,
-    licencia: licencia.value,
-    placa: placa.value,
-    modelo: modelo.value,
-    marca: marca.value,
-    color: color.value,
-    poliza_numero: poliza.value,
-    celular: celular.value,
-    direccion: direccion.value
-  };
-
-  const res = await fetch(`${API_URL}/api/registro`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error);
-    return;
-  }
-
-  conductorId = data.conductorId;
-
-  /* Generar QR con token público */
-  const perfilURL = `${API_URL}/api/perfil/${data.qr_token}`;
-
-  QRCode.toCanvas(perfilURL, function (err, canvas) {
-    if (err) console.error(err);
-    qr.innerHTML = "<h3>QR generado:</h3>";
-    qr.appendChild(canvas);
-  });
-
-  alert("Registro exitoso");
+/* ==========================================================
+   UTILIDAD: Mostrar mensajes visuales
+=========================================================== */
+function showMessage(text, type="") {
+  mensaje.innerHTML = text;
+  mensaje.className = type;
 }
 
-/* =====================================================
-   🔐 LOGIN
-===================================================== */
+/* ==========================================================
+   VALIDACIÓN: Tamaño máximo de archivos (5MB)
+=========================================================== */
+function validateFiles() {
+  const MAX_SIZE = 5 * 1024 * 1024;
+  const fileInputs = form.querySelectorAll("input[type='file']");
 
-async function login() {
-
-  const res = await fetch(`${API_URL}/api/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: loginEmail.value,
-      password: loginPassword.value
-    })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error);
-    return;
+  for (let input of fileInputs) {
+    if (input.files[0] && input.files[0].size > MAX_SIZE) {
+      throw new Error(`El archivo ${input.files[0].name} supera 5MB.`);
+    }
   }
-
-  token = data.token;
-
-  /* Obtener conductorId desde perfil JWT */
-  const user = parseJwt(token);
-  conductorId = user.sub;
-
-  documentosSection.classList.remove("hidden");
-
-  alert("Login exitoso");
 }
 
-/* =====================================================
-   📂 SUBIR DOCUMENTOS
-===================================================== */
+/* ==========================================================
+   SUBIR DOCUMENTO CON JWT
+=========================================================== */
+async function uploadFile(conductorId, tipo, inputId, token) {
 
-async function subirDocumentos() {
+  const input = document.getElementById(inputId);
+  if (!input.files.length) return;
 
-  const documentos = [
-    ["cedula", fileCedula],
-    ["licencia", fileLicencia],
-    ["registro_vehicular", fileRegistro],
-    ["poliza_vehicular", filePoliza],
-    ["foto_vehiculo", fileFotoVehiculo],
-    ["foto_conductor", fileFotoConductor]
-  ];
+  const formData = new FormData();
+  formData.append("archivo", input.files[0]);
 
-  for (let [tipo, input] of documentos) {
+  // 🔐 Normalizamos el tipo a minúscula por seguridad
+  const tipoNormalizado = tipo.toLowerCase();
 
-    if (!input.files[0]) continue;
+  const res = await fetch(`${API}/api/documentos/${conductorId}/${tipoNormalizado}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData
+  });
 
-    const formData = new FormData();
-    formData.append("archivo", input.files[0]);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Error subiendo ${tipoNormalizado}`);
+  }
+}
 
-    const res = await fetch(
-      `${API_URL}/api/documentos/${conductorId}/${tipo}`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
-        body: formData
-      }
-    );
+/* ==========================================================
+   EVENTO PRINCIPAL
+=========================================================== */
+form.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>Procesando...';
+  showMessage("Creando registro...", "busy");
+
+  try {
+
+    validateFiles();
+
+    const payload = {
+      email: email.value.trim(),
+      password: password.value,
+      nombres: nombres.value.trim(),
+      apellidos: apellidos.value.trim(),
+      cedula: cedula.value.trim(),
+      licencia: licencia.value.trim(),
+      placa: placa.value.trim(),
+      modelo: modelo.value.trim(),
+      marca: marca.value.trim(),
+      color: color.value.trim(),
+      poliza_numero: poliza_numero.value.trim()
+    };
+
+    /* ==============================
+       1️⃣ REGISTRO
+    ============================== */
+    const res = await fetch(`${API}/api/registro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
     const data = await res.json();
 
     if (!res.ok) {
-      alert(`Error en ${tipo}: ${data.error}`);
-      return;
+      throw new Error(data.error || "Error creando usuario");
     }
+
+    const conductorId = data.conductorId;
+    const qrToken = data.qr_token;
+
+    if (!conductorId) {
+      throw new Error("El servidor no devolvió conductorId");
+    }
+
+    /* ==============================
+       2️⃣ LOGIN AUTOMÁTICO
+    ============================== */
+    showMessage("Autenticando usuario...", "busy");
+
+    const loginRes = await fetch(`${API}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: payload.email,
+        password: payload.password
+      })
+    });
+
+    const loginData = await loginRes.json();
+
+    if (!loginRes.ok) {
+      throw new Error(loginData.error || "No se pudo autenticar usuario");
+    }
+
+    const userToken = loginData.token;
+
+    if (!userToken) {
+      throw new Error("No se recibió token de autenticación");
+    }
+
+    localStorage.setItem("userToken", userToken);
+
+    /* ==============================
+       3️⃣ SUBIR DOCUMENTOS
+    ============================== */
+    showMessage("Subiendo documentos...", "busy");
+
+    // ✅ Tipos alineados con backend (minúsculas)
+    const documentos = [
+      ["cedula","fileCedula"],
+      ["licencia","fileLicencia"],
+      ["registro_vehicular","fileRegistro"],
+      ["poliza_vehicular","filePoliza"],
+      ["foto_vehiculo","fileFotoVehiculo"],
+      ["foto_conductor","fileFotoConductor"]
+    ];
+
+    for (const [tipo,id] of documentos) {
+      await uploadFile(conductorId, tipo, id, userToken);
+    }
+
+    /* ==============================
+       4️⃣ FINALIZACIÓN
+    ============================== */
+    showMessage("¡Registro exitoso! Redirigiendo...", "ok");
+    form.reset();
+
+    setTimeout(() => {
+      window.location.href = `perfil.html?token=${qrToken}`;
+    }, 1500);
+
+  } catch (error) {
+
+    console.error("Error registro:", error);
+    showMessage("Error: " + error.message, "error");
+
+  } finally {
+
+    btn.disabled = false;
+    btn.innerHTML = "Registrar";
+
   }
 
-  alert("Todos los documentos fueron subidos correctamente");
-}
-
-/* =====================================================
-   🧠 DECODIFICAR JWT
-===================================================== */
-
-function parseJwt(token) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
-
-  return JSON.parse(jsonPayload);
-}
-
+});
 </script>
-
-</body>
-</html>
