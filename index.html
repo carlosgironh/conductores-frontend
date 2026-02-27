@@ -1,96 +1,317 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Registro Conductores</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>Registro de Conductores</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- ==========================================================
+     LIBRERÍAS EXTERNAS
+     ==========================================================
+     QRCode se mantiene por compatibilidad con otras vistas.
+     Supabase SDK se mantiene cargado si lo usas en otras páginas,
+     pero NO se usa aquí para crear usuario.
+=========================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+/* ==========================================================
+   ESTILOS GENERALES
+=========================================================== */
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+
+.card{
+  max-width:720px;
+  margin:auto;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  padding:25px;
+}
+
+h2{
+  text-align:center;
+  color:#0d6efd;
+  margin-bottom:20px;
+}
+
+/* Inputs */
+form input,
+form input[type="file"]{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+form label{
+  display:block;
+  margin-top:15px;
+  font-weight:bold;
+}
+
+/* Botón principal */
+button{
+  background:#0d6efd;
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-top:20px;
+  width:100%;
+  font-size:16px;
+}
+
+button:disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+}
+
+#mensaje{
+  margin-top:15px;
+  font-weight:bold;
+  text-align:center;
+}
+
+/* Estados visuales */
+.error{ color:#b00020; }
+.ok{ color:green; }
+.busy{ color:#0b5ed7; }
+
+/* Loader simple */
+.loader{
+  border:3px solid #f3f3f3;
+  border-top:3px solid white;
+  border-radius:50%;
+  width:14px;
+  height:14px;
+  animation: spin 1s linear infinite;
+  display:inline-block;
+  margin-right:8px;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+@media(max-width:480px){
+  .card{ padding:15px; }
+}
+</style>
 </head>
+
 <body>
 
-<h2>Registro</h2>
-<form id="formRegistro">
-<input type="email" id="email" placeholder="Correo" required>
-<input type="password" id="password" placeholder="Password" required minlength="6">
-<button type="submit">Registrar</button>
-</form>
+<!-- ==========================================================
+     CONTENEDOR PRINCIPAL
+=========================================================== -->
+<div class="card">
 
-<h2>Login</h2>
-<form id="formLogin">
-<input type="email" id="loginEmail" required>
-<input type="password" id="loginPassword" required>
-<button type="submit">Login</button>
-</form>
+  <h2>Registro de Conductores</h2>
 
-<h2>Subir Documento</h2>
-<input type="file" id="archivo" accept=".pdf,.jpg,.jpeg">
-<button onclick="subir()">Subir</button>
+  <!-- ==========================================================
+       FORMULARIO DE REGISTRO
+       ==========================================================
+       Flujo:
+       1. Envía datos al backend
+       2. Backend crea usuario + conductor
+       3. Devuelve conductorId + qr_token
+       4. Se suben documentos
+       5. Redirección a perfil
+  =========================================================== -->
+  <form id="formConductor" autocomplete="off">
+
+    <!-- Datos de acceso -->
+    <input id="email" type="email" placeholder="Correo" required>
+    <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
+
+    <hr>
+
+    <!-- Datos personales -->
+    <input id="nombres" type="text" placeholder="Nombres" required>
+    <input id="apellidos" type="text" placeholder="Apellidos" required>
+    <input id="cedula" type="text" placeholder="Cédula" required>
+    <input id="licencia" type="text" placeholder="Licencia" required>
+
+    <!-- Datos del vehículo -->
+    <input id="placa" type="text" placeholder="Placa" required>
+    <input id="modelo" type="text" placeholder="Modelo" required>
+    <input id="marca" type="text" placeholder="Marca" required>
+    <input id="color" type="text" placeholder="Color" required>
+    <input id="poliza_numero" type="text" placeholder="Número de póliza" required>
+
+    <hr>
+
+    <!-- Documentos -->
+    <label>Cédula</label><input type="file" id="fileCedula" required>
+    <label>Licencia</label><input type="file" id="fileLicencia" required>
+    <label>Registro Vehicular</label><input type="file" id="fileRegistro" required>
+    <label>Póliza</label><input type="file" id="filePoliza" required>
+    <label>Foto Vehículo</label><input type="file" id="fileFotoVehiculo" required>
+    <label>Foto Conductor</label><input type="file" id="fileFotoConductor" required>
+
+    <button type="submit" id="btnRegistrar">Registrar</button>
+    <div id="mensaje"></div>
+
+  </form>
+</div>
 
 <script>
+/* ==========================================================
+   CONFIGURACIÓN GLOBAL
+=========================================================== */
+const API = "https://conductores-api.onrender.com";
 
-let token = null;
-let conductorId = null;
+/* ==========================================================
+   REFERENCIAS DOM
+=========================================================== */
+const form = document.getElementById("formConductor");
+const btn = document.getElementById("btnRegistrar");
+const mensaje = document.getElementById("mensaje");
 
-// REGISTRO
-document.getElementById("formRegistro").addEventListener("submit", async e => {
-  e.preventDefault();
+/* ==========================================================
+   UTILIDAD: Mostrar mensajes visuales
+=========================================================== */
+function showMessage(text, type="") {
+  mensaje.innerHTML = text;
+  mensaje.className = type;
+}
 
-  const res = await fetch("/api/registro", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: email.value,
-      password: password.value
-    })
-  });
+/* ==========================================================
+   VALIDACIÓN: Tamaño máximo de archivos (5MB)
+=========================================================== */
+function validateFiles() {
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  const fileInputs = form.querySelectorAll("input[type='file']");
 
-  const data = await res.json();
-  conductorId = data.conductorId;
-  alert(data.mensaje);
-});
-
-// LOGIN
-document.getElementById("formLogin").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const res = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: loginEmail.value,
-      password: loginPassword.value
-    })
-  });
-
-  const data = await res.json();
-  token = data.token;
-  alert("Login exitoso");
-});
-
-// SUBIDA
-async function subir() {
-
-  const file = document.getElementById("archivo").files[0];
-
-  if (!file) {
-    alert("Selecciona archivo");
-    return;
+  for (let input of fileInputs) {
+    if (input.files[0] && input.files[0].size > MAX_SIZE) {
+      throw new Error(`El archivo ${input.files[0].name} supera 5MB.`);
+    }
   }
+}
+
+/* ==========================================================
+   SUBIR DOCUMENTO AL BACKEND
+=========================================================== */
+async function uploadFile(conductorId, tipo, inputId) {
+
+  const input = document.getElementById(inputId);
+  if (!input.files.length) return;
 
   const formData = new FormData();
-  formData.append("archivo", file);
+  formData.append("archivo", input.files[0]);
 
-  const res = await fetch(`/api/documentos/${conductorId}/cedula`, {
+  const res = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${token}`
-    },
     body: formData
   });
 
-  const data = await res.json();
-  alert(data.mensaje || data.error);
+  if (!res.ok) {
+    throw new Error(`Error subiendo ${tipo}`);
+  }
 }
 
+/* ==========================================================
+   EVENTO PRINCIPAL: REGISTRO COMPLETO
+=========================================================== */
+form.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+  /* Protección contra doble envío */
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>Procesando...';
+  showMessage("Creando registro...", "busy");
+
+  try {
+
+    /* Validaciones previas */
+    validateFiles();
+
+    /* Construcción del payload */
+    const payload = {
+      email: email.value.trim(),
+      password: password.value,
+      nombres: nombres.value.trim(),
+      apellidos: apellidos.value.trim(),
+      cedula: cedula.value.trim(),
+      licencia: licencia.value.trim(),
+      placa: placa.value.trim(),
+      modelo: modelo.value.trim(),
+      marca: marca.value.trim(),
+      color: color.value.trim(),
+      poliza_numero: poliza_numero.value.trim()
+    };
+
+    /* 1️⃣ Enviar datos al backend */
+    const res = await fetch(`${API}/api/registro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Error creando usuario");
+    }
+
+    const conductorId = data.conductorId;
+    const qrToken = data.qr_token;
+
+    if (!conductorId) {
+      throw new Error("El servidor no devolvió conductorId");
+    }
+
+    /* 2️⃣ Subir documentos */
+    const documentos = [
+      ["CEDULA","fileCedula"],
+      ["LICENCIA","fileLicencia"],
+      ["REGISTRO_VEHICULAR","fileRegistro"],
+      ["POLIZA_VEHICULAR","filePoliza"],
+      ["FOTO_VEHICULO","fileFotoVehiculo"],
+      ["FOTO_CONDUCTOR","fileFotoConductor"]
+    ];
+
+    for (const [tipo,id] of documentos) {
+      await uploadFile(conductorId, tipo, id);
+    }
+
+    /* 3️⃣ Finalización */
+    showMessage("¡Registro exitoso! Redirigiendo...", "ok");
+    form.reset();
+
+    setTimeout(() => {
+      window.location.href = `perfil.html?token=${qrToken}`;
+    }, 1500);
+
+  } catch (error) {
+
+    console.error("Error registro:", error);
+    showMessage("Error: " + error.message, "error");
+
+  } finally {
+
+    btn.disabled = false;
+    btn.innerHTML = "Registrar";
+
+  }
+
+});
 </script>
+
 </body>
 </html>
