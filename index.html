@@ -4,267 +4,312 @@
 <meta charset="UTF-8" />
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- ==========================================================
+     LIBRERÍAS EXTERNAS
+     ==========================================================
+     QRCode se mantiene por compatibilidad con otras vistas.
+     Supabase SDK se mantiene cargado si lo usas en otras páginas,
+     pero NO se usa aquí para crear usuario.
+=========================================================== -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<!-- Usar unpkg para exponer correctamente 'supabase' -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-  body{ font-family: 'Arial', sans-serif; background:#f4f6f8; margin:0; padding:20px; }
-  .card{ max-width:720px; margin:auto; background:white; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.1); padding:25px; }
-  h2{ text-align:center; color:#0d6efd; margin-bottom:20px; }
-  form input[type="text"], form input[type="email"], form input[type="password"], form input[type="file"]{
-    width:100%; padding:10px; margin-top:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;
-  }
-  form label{ display:block; margin-top:15px; font-weight:bold; }
-  button[type="submit"]{
-    background:#0d6efd; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer;
-    font-weight:bold; margin-top:20px; width:100%; font-size:16px; transition: background 0.2s;
-  }
-  button[type="submit"]:hover{ background:#0b5ed7; }
-  .hint{ font-size:13px; color:#666; margin-top:6px; }
-  #mensaje{ margin-top:15px; font-weight:bold; text-align:center; }
-  .error{ color:#b00020; }
-  .ok{ color:green; }
-  .busy{ color:#0b5ed7; }
-  @media(max-width:480px){ .card{ padding:15px; } }
+/* ==========================================================
+   ESTILOS GENERALES
+=========================================================== */
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+
+.card{
+  max-width:720px;
+  margin:auto;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  padding:25px;
+}
+
+h2{
+  text-align:center;
+  color:#0d6efd;
+  margin-bottom:20px;
+}
+
+/* Inputs */
+form input,
+form input[type="file"]{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+form label{
+  display:block;
+  margin-top:15px;
+  font-weight:bold;
+}
+
+/* Botón principal */
+button{
+  background:#0d6efd;
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-top:20px;
+  width:100%;
+  font-size:16px;
+}
+
+button:disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+}
+
+#mensaje{
+  margin-top:15px;
+  font-weight:bold;
+  text-align:center;
+}
+
+/* Estados visuales */
+.error{ color:#b00020; }
+.ok{ color:green; }
+.busy{ color:#0b5ed7; }
+
+/* Loader simple */
+.loader{
+  border:3px solid #f3f3f3;
+  border-top:3px solid white;
+  border-radius:50%;
+  width:14px;
+  height:14px;
+  animation: spin 1s linear infinite;
+  display:inline-block;
+  margin-right:8px;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+@media(max-width:480px){
+  .card{ padding:15px; }
+}
 </style>
 </head>
+
 <body>
 
+<!-- ==========================================================
+     CONTENEDOR PRINCIPAL
+=========================================================== -->
 <div class="card">
+
   <h2>Registro de Conductores</h2>
 
+  <!-- ==========================================================
+       FORMULARIO DE REGISTRO
+       ==========================================================
+       Flujo:
+       1. Envía datos al backend
+       2. Backend crea usuario + conductor
+       3. Devuelve conductorId + qr_token
+       4. Se suben documentos
+       5. Redirección a perfil
+  =========================================================== -->
   <form id="formConductor" autocomplete="off">
-    <input id="email" type="email" placeholder="Correo" required autocomplete="email">
-    <input id="password" type="password" placeholder="Contraseña" required minlength="6" autocomplete="new-password">
-    <div class="hint">La contraseña debe tener al menos 6 caracteres.</div>
+
+    <!-- Datos de acceso -->
+    <input id="email" type="email" placeholder="Correo" required>
+    <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
 
     <hr>
-    <input id="nombres" type="text" placeholder="Nombres" required autocomplete="given-name">
-    <input id="apellidos" type="text" placeholder="Apellidos" required autocomplete="family-name">
-    <input id="cedula" type="text" placeholder="Cédula" required autocomplete="off">
-    <input id="licencia" type="text" placeholder="Licencia" required autocomplete="off">
-    <input id="placa" type="text" placeholder="Placa" required autocomplete="off">
-    <input id="modelo" type="text" placeholder="Modelo" required autocomplete="off">
-    <input id="marca" type="text" placeholder="Marca" required autocomplete="off">
-    <input id="color" type="text" placeholder="Color" required autocomplete="off">
-    <input id="poliza_numero" type="text" placeholder="Número de póliza" required autocomplete="off">
+
+    <!-- Datos personales -->
+    <input id="nombres" type="text" placeholder="Nombres" required>
+    <input id="apellidos" type="text" placeholder="Apellidos" required>
+    <input id="cedula" type="text" placeholder="Cédula" required>
+    <input id="licencia" type="text" placeholder="Licencia" required>
+
+    <!-- Datos del vehículo -->
+    <input id="placa" type="text" placeholder="Placa" required>
+    <input id="modelo" type="text" placeholder="Modelo" required>
+    <input id="marca" type="text" placeholder="Marca" required>
+    <input id="color" type="text" placeholder="Color" required>
+    <input id="poliza_numero" type="text" placeholder="Número de póliza" required>
 
     <hr>
-    <label for="fileCedula">Cédula</label><input type="file" id="fileCedula" accept="image/*,application/pdf" required>
-    <label for="fileLicencia">Licencia</label><input type="file" id="fileLicencia" accept="image/*,application/pdf" required>
-    <label for="fileRegistro">Registro Vehicular</label><input type="file" id="fileRegistro" accept="image/*,application/pdf" required>
-    <label for="filePoliza">Póliza</label><input type="file" id="filePoliza" accept="image/*,application/pdf" required>
-    <label for="fileFotoVehiculo">Foto Vehículo</label><input type="file" id="fileFotoVehiculo" accept="image/*" required>
-    <label for="fileFotoConductor">Foto Conductor</label><input type="file" id="fileFotoConductor" accept="image/*" required>
+
+    <!-- Documentos -->
+    <label>Cédula</label><input type="file" id="fileCedula" required>
+    <label>Licencia</label><input type="file" id="fileLicencia" required>
+    <label>Registro Vehicular</label><input type="file" id="fileRegistro" required>
+    <label>Póliza</label><input type="file" id="filePoliza" required>
+    <label>Foto Vehículo</label><input type="file" id="fileFotoVehiculo" required>
+    <label>Foto Conductor</label><input type="file" id="fileFotoConductor" required>
 
     <button type="submit" id="btnRegistrar">Registrar</button>
-    <div id="mensaje" role="status"></div>
+    <div id="mensaje"></div>
+
   </form>
 </div>
 
 <script>
-/* CONFIG - ajusta a producción si cambia */
+/* ==========================================================
+   CONFIGURACIÓN GLOBAL
+=========================================================== */
 const API = "https://conductores-api.onrender.com";
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-/* Verificar que SDK cargó */
-if (!window.supabase) {
-  console.error("Supabase SDK no cargó. Verifica la etiqueta <script> del SDK.");
-  document.getElementById("mensaje").innerHTML = '<span class="error">Error interno: no se cargó Supabase SDK.</span>';
-}
-
-/* Inicializar cliente Supabase (v2 CDN expone 'supabase' global) */
-const { createClient } = supabase || {};
-const supabaseClient = (typeof createClient === 'function')
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
-
-if (!supabaseClient) {
-  console.error("No fue posible inicializar supabaseClient.");
-  document.getElementById("mensaje").innerHTML = '<span class="error">Error interno: supabaseClient no inicializado.</span>';
-}
-
-/* Selecciones DOM */
+/* ==========================================================
+   REFERENCIAS DOM
+=========================================================== */
 const form = document.getElementById("formConductor");
-const mensaje = document.getElementById("mensaje");
 const btn = document.getElementById("btnRegistrar");
+const mensaje = document.getElementById("mensaje");
 
-/* Helper: mostrar mensaje */
-function showMessage(text, type = '') {
+/* ==========================================================
+   UTILIDAD: Mostrar mensajes visuales
+=========================================================== */
+function showMessage(text, type="") {
   mensaje.innerHTML = text;
-  mensaje.className = type === 'error' ? 'error' : (type === 'ok' ? 'ok' : (type === 'busy' ? 'busy' : ''));
+  mensaje.className = type;
 }
 
-/* Helper: extraer conductorId y qr_token flexible */
-function parseBackendCreateResponse(d) {
-  if (!d) return {};
-  return {
-    conductorId:
-      (d.conductor && d.conductor.id) ||
-      d.conductorId ||
-      d.id ||
-      d.conductor_id ||
-      null,
-    qr_token:
-      d.qr_token || d.token || d.qrToken || (d.conductor && d.conductor.qr_token) || null
-  };
+/* ==========================================================
+   VALIDACIÓN: Tamaño máximo de archivos (5MB)
+=========================================================== */
+function validateFiles() {
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  const fileInputs = form.querySelectorAll("input[type='file']");
+
+  for (let input of fileInputs) {
+    if (input.files[0] && input.files[0].size > MAX_SIZE) {
+      throw new Error(`El archivo ${input.files[0].name} supera 5MB.`);
+    }
+  }
 }
 
-/* Subida de un archivo a tu API */
+/* ==========================================================
+   SUBIR DOCUMENTO AL BACKEND
+=========================================================== */
 async function uploadFile(conductorId, tipo, inputId) {
-  const fileInput = document.getElementById(inputId);
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
-  const file = fileInput.files[0];
-  const fd = new FormData();
-  fd.append('archivo', file);
+
+  const input = document.getElementById(inputId);
+  if (!input.files.length) return;
+
+  const formData = new FormData();
+  formData.append("archivo", input.files[0]);
 
   const res = await fetch(`${API}/api/documentos/${conductorId}/${tipo}`, {
-    method: 'POST',
-    body: fd
+    method: "POST",
+    body: formData
   });
+
   if (!res.ok) {
-    const txt = await res.text().catch(() => null);
-    throw new Error(`Error subiendo ${tipo}: ${res.status} ${txt ? '- ' + txt : ''}`);
+    throw new Error(`Error subiendo ${tipo}`);
   }
-  return res;
 }
 
-/* Evento submit */
-form.addEventListener('submit', async (e) => {
+/* ==========================================================
+   EVENTO PRINCIPAL: REGISTRO COMPLETO
+=========================================================== */
+form.addEventListener("submit", async (e) => {
+
   e.preventDefault();
-  if (!supabaseClient) {
-    showMessage('Error: cliente Supabase no inicializado.', 'error');
-    return;
-  }
+
+  /* Protección contra doble envío */
+  if (btn.disabled) return;
 
   btn.disabled = true;
-  showMessage('Procesando registro... esto puede tardar unos segundos.', 'busy');
+  btn.innerHTML = '<span class="loader"></span>Procesando...';
+  showMessage("Creando registro...", "busy");
 
   try {
-    // Recolectar datos
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    if (!email || password.length < 6) throw new Error('Correo y contraseña válidos son requeridos.');
 
-    // 1) Registrar usuario en Supabase Auth
-    const { data: signData, error: signError } = await supabaseClient.auth.signUp({ email, password });
+    /* Validaciones previas */
+    validateFiles();
 
-    if (signError) {
-      // Mensaje más amigable si es rate limit
-      if ((signError.message || '').toLowerCase().includes('rate')) {
-        throw new Error('Demasiados intentos. Intenta nuevamente en unos minutos.');
-      }
-      throw signError;
-    }
-
-    // signData puede tener user o similar
-    const userId = (signData && signData.user && signData.user.id) || (signData && signData.id) || null;
-    if (!userId) {
-      // En algunos casos la respuesta es distinta; tratarlo como no fatal (pero informar)
-      console.warn('signData inesperado:', signData);
-    }
-
-    // 2) Llamar a backend para crear conductor (tu endpoint /api/registro)
+    /* Construcción del payload */
     const payload = {
-      email,
-      password, // si backend lo necesita (tu server lo usaba)
-      nombres: document.getElementById('nombres').value.trim(),
-      apellidos: document.getElementById('apellidos').value.trim(),
-      cedula: document.getElementById('cedula').value.trim(),
-      licencia: document.getElementById('licencia').value.trim(),
-      placa: document.getElementById('placa').value.trim(),
-      modelo: document.getElementById('modelo').value.trim(),
-      marca: document.getElementById('marca').value.trim(),
-      color: document.getElementById('color').value.trim(),
-      poliza_numero: document.getElementById('poliza_numero').value.trim(),
-      auth_user_id: userId
+      email: email.value.trim(),
+      password: password.value,
+      nombres: nombres.value.trim(),
+      apellidos: apellidos.value.trim(),
+      cedula: cedula.value.trim(),
+      licencia: licencia.value.trim(),
+      placa: placa.value.trim(),
+      modelo: modelo.value.trim(),
+      marca: marca.value.trim(),
+      color: color.value.trim(),
+      poliza_numero: poliza_numero.value.trim()
     };
 
-    const resCreate = await fetch(`${API}/api/registro`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    /* 1️⃣ Enviar datos al backend */
+    const res = await fetch(`${API}/api/registro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    // Si el backend devolvió HTML por error (CORB o 500), capturarlo para mostrar mensaje
-    let jsonCreate;
-    try {
-      jsonCreate = await resCreate.json();
-    } catch (parseErr) {
-      const txt = await resCreate.text().catch(() => '');
-      throw new Error(`Respuesta inesperada del servidor: ${resCreate.status} ${txt ? '- ' + txt : ''}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Error creando usuario");
     }
 
-    if (!resCreate.ok) {
-      const serverMsg = jsonCreate && (jsonCreate.error || jsonCreate.message || JSON.stringify(jsonCreate));
-      throw new Error(serverMsg || `Error creando conductor (${resCreate.status})`);
-    }
-
-    const parsed = parseBackendCreateResponse(jsonCreate);
-    const conductorId = parsed.conductorId || jsonCreate.conductor?.id || null;
-    const qrToken = parsed.qr_token || jsonCreate.qr_token || jsonCreate.token || null;
+    const conductorId = data.conductorId;
+    const qrToken = data.qr_token;
 
     if (!conductorId) {
-      // si backend no retornó conductorId pero devolvió token (caso tu server antiguo),
-      // intentamos recuperar conductor por token (solo si backend soporta ese flujo).
-      if (qrToken) {
-        // opcional: podrías llamar /api/perfil/:token para obtener conductor.id — pero eso agrega más latencia.
-        console.warn('Backend devolvió qr_token pero no conductorId. Usando token para redirigir al perfil.');
-      } else {
-        throw new Error('Respuesta del servidor no contiene conductorId ni qr_token.');
-      }
+      throw new Error("El servidor no devolvió conductorId");
     }
 
-    // 3) Subir documentos (si hay conductorId)
-    const filesMapping = [
-      ['CEDULA', 'fileCedula'],
-      ['LICENCIA', 'fileLicencia'],
-      ['REGISTRO_VEHICULAR', 'fileRegistro'],
-      ['POLIZA_VEHICULAR', 'filePoliza'],
-      ['FOTO_VEHICULO', 'fileFotoVehiculo'],
-      ['FOTO_CONDUCTOR', 'fileFotoConductor']
+    /* 2️⃣ Subir documentos */
+    const documentos = [
+      ["CEDULA","fileCedula"],
+      ["LICENCIA","fileLicencia"],
+      ["REGISTRO_VEHICULAR","fileRegistro"],
+      ["POLIZA_VEHICULAR","filePoliza"],
+      ["FOTO_VEHICULO","fileFotoVehiculo"],
+      ["FOTO_CONDUCTOR","fileFotoConductor"]
     ];
 
-    // Si backend devolvió conductorId: subir archivos
-    if (conductorId) {
-      for (const [tipo, id] of filesMapping) {
-        try {
-          await uploadFile(conductorId, tipo, id);
-        } catch (uerr) {
-          console.warn('Fallo uploading', tipo, uerr);
-          // No abortamos todo por un archivo fallido, pero avisamos
-          showMessage(`Registro creado pero fallo subiendo ${tipo}. Ver consola para más info.`, 'error');
-        }
-      }
+    for (const [tipo,id] of documentos) {
+      await uploadFile(conductorId, tipo, id);
     }
 
-    // 4) Resultado final y redirección
-    showMessage('¡Registro exitoso! Redirigiendo...', 'ok');
+    /* 3️⃣ Finalización */
+    showMessage("¡Registro exitoso! Redirigiendo...", "ok");
     form.reset();
 
-    // Prioriza qrToken para redirigir al perfil (si lo tienes), sino usa conductorId
-    const redirectToken = qrToken || null;
     setTimeout(() => {
-      if (redirectToken) {
-        window.location.href = `perfil.html?token=${redirectToken}`;
-      } else if (conductorId) {
-        // si tu perfil público usa id
-        window.location.href = `conductor.html?id=${conductorId}`;
-      } else {
-        window.location.href = '/';
-      }
+      window.location.href = `perfil.html?token=${qrToken}`;
     }, 1500);
 
-  } catch (err) {
-    console.error('Registro error:', err);
-    // Mensaje humano legible
-    const text = (err && err.message) ? err.message : 'Ocurrió un problema inesperado.';
-    showMessage('Error: ' + text, 'error');
+  } catch (error) {
+
+    console.error("Error registro:", error);
+    showMessage("Error: " + error.message, "error");
+
   } finally {
+
     btn.disabled = false;
+    btn.innerHTML = "Registrar";
+
   }
+
 });
 </script>
 

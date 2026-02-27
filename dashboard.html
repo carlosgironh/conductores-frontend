@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Ingreso Usuario / Recuperar Clave</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{ font-family:Arial; background:#eef2f7; padding:20px; }
 .card{ background:white; padding:20px; border-radius:12px; max-width:500px; margin:auto; box-shadow:0 5px 20px rgba(0,0,0,0.1); }
@@ -14,93 +15,166 @@ button{ font-weight:bold; border:none; cursor:pointer; }
 .reset{ background:#198754; color:white; }
 .msg{ margin-top:10px; font-weight:bold; text-align:center; }
 .hidden{ display:none; }
+.valid{ border:2px solid #198754; }
+.invalid{ border:2px solid #dc3545; }
 </style>
 </head>
 <body>
 
+<!-- ============================= -->
+<!-- TARJETA LOGIN -->
+<!-- ============================= -->
 <div class="card" id="loginCard">
 <h2>Ingreso Usuario</h2>
+
 <input id="usuario" placeholder="Correo o cédula">
 <input type="password" id="password" placeholder="Contraseña">
+
+<!-- Honeypot anti-bots (campo invisible) -->
+<input type="text" id="website" style="display:none">
+
 <button class="login" onclick="login()">Ingresar</button>
 <button class="recuperar" onclick="recuperarPassword()">Olvidé mi contraseña</button>
 <div id="loginMsg" class="msg"></div>
 </div>
 
+<!-- ============================= -->
+<!-- TARJETA RESET PASSWORD -->
+<!-- ============================= -->
 <div class="card hidden" id="resetCard">
 <h2>Restablecer Contraseña</h2>
+
 <input type="password" id="newPassword" placeholder="Nueva contraseña (mínimo 6 caracteres)">
 <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
+
 <button class="reset" onclick="resetPassword()">Cambiar Contraseña</button>
 <div id="resetMsg" class="msg"></div>
 </div>
 
 <script>
 const API = "https://conductores-api.onrender.com";
+let formLoadTime = Date.now(); // Para validar tiempo humano
 
-// ---------------------------
+// ==================================================
+// VALIDACIÓN EN TIEMPO REAL
+// ==================================================
+usuario.addEventListener("input", () => {
+  const val = usuario.value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(emailRegex.test(val) || val.length >= 6){
+    usuario.classList.add("valid");
+    usuario.classList.remove("invalid");
+  } else {
+    usuario.classList.add("invalid");
+    usuario.classList.remove("valid");
+  }
+});
+
+password.addEventListener("input", () => {
+  if(password.value.length >= 6){
+    password.classList.add("valid");
+    password.classList.remove("invalid");
+  } else {
+    password.classList.add("invalid");
+    password.classList.remove("valid");
+  }
+});
+
+// ==================================================
 // LOGIN USUARIO
-// ---------------------------
+// ==================================================
 async function login(){
+
+  // 🛡️ Protección anti-bot (honeypot)
+  if(document.getElementById("website").value !== "") return;
+
+  // 🛡️ Protección anti-bot (envío demasiado rápido)
+  if(Date.now() - formLoadTime < 1500){
+    loginMsg.innerText="Espera un momento antes de enviar ❌";
+    return;
+  }
+
   const usuarioVal = usuario.value.trim();
   const passwordVal = password.value.trim();
-  if(!usuarioVal || !passwordVal){ loginMsg.innerText="Completa todos los campos ❌"; return; }
 
-  loginMsg.innerText = "Verificando...";
+  if(!usuarioVal || !passwordVal){
+    loginMsg.innerText="Completa todos los campos ❌";
+    return;
+  }
+
+  loginMsg.innerText="Verificando...";
+
   try{
     const res = await fetch(`${API}/api/login-usuario`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ usuario: usuarioVal, password: passwordVal })
     });
-    if(!res.ok){ loginMsg.innerText="Usuario o clave incorrecta ❌"; return; }
 
-    const data = await res.json();
+    const text = await res.text();
+
+    if(!res.ok){
+      loginMsg.innerText="Usuario o clave incorrecta ❌";
+      return;
+    }
+
+    const data = JSON.parse(text);
+
     localStorage.setItem("userToken", data.token);
+
     loginMsg.innerText="Ingreso exitoso ✅";
-    setTimeout(()=> window.location.href="perfil.html?token="+data.qr_token,800);
+
+    setTimeout(()=> 
+      window.location.href="perfil.html?token="+data.qr_token
+    ,800);
+
   }catch(err){
     console.error(err);
     loginMsg.innerText="Error conectando con servidor ❌";
   }
 }
 
-// ---------------------------
+// ==================================================
 // RECUPERAR CONTRASEÑA
-// ---------------------------
+// ==================================================
 async function recuperarPassword(){
-  const input = prompt("Ingresa tu correo o cédula para recibir un enlace temporal:");
+
+  const input = prompt("Ingresa tu correo o cédula:");
   if(!input) return;
-  loginMsg.innerText = "Solicitando recuperación...";
+
+  loginMsg.innerText="Solicitando recuperación...";
 
   try{
-    const res = await fetch(`${API}/api/admin/recuperar-password`,{ // <- usa endpoint que exista
+    const res = await fetch(`${API}/api/admin/recuperar-password`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ usuario: input })
+      body: JSON.stringify({ usuario: input.trim() })
     });
 
-    const text = await res.text(); // leer respuesta
+    const text = await res.text();
+
     if(res.ok){
-      loginMsg.innerText = "Se envió un enlace temporal a tu correo registrado ✅";
-    } else {
+      loginMsg.innerText="Si el usuario existe, se envió enlace temporal ✅";
+    }else{
       try{
         const err = JSON.parse(text);
-        loginMsg.innerText = `Error: ${err.message || 'No se pudo enviar el enlace'} ❌`;
+        loginMsg.innerText=`Error: ${err.message || 'Solicitud inválida'} ❌`;
       }catch{
-        loginMsg.innerText = "Error: respuesta inesperada del servidor ❌";
-        console.error("Respuesta inválida:", text);
+        loginMsg.innerText="Error inesperado del servidor ❌";
+        console.error(text);
       }
     }
+
   }catch(err){
     console.error(err);
     loginMsg.innerText="Error conectando con servidor ❌";
   }
 }
 
-// ---------------------------
-// CAMBIO DE CONTRASEÑA CON TOKEN
-// ---------------------------
+// ==================================================
+// DETECTAR TOKEN EN URL
+// ==================================================
 const params = new URLSearchParams(window.location.search);
 const resetToken = params.get("reset_token");
 
@@ -109,14 +183,26 @@ if(resetToken){
   resetCard.classList.remove("hidden");
 }
 
+// ==================================================
+// RESET PASSWORD
+// ==================================================
 async function resetPassword(){
+
   const newPass = newPassword.value.trim();
   const confirmPass = confirmPassword.value.trim();
 
-  if(newPass.length < 6){ resetMsg.innerText="La contraseña debe tener mínimo 6 caracteres ❌"; return; }
-  if(newPass !== confirmPass){ resetMsg.innerText="Las contraseñas no coinciden ❌"; return; }
+  if(newPass.length < 6){
+    resetMsg.innerText="Mínimo 6 caracteres ❌";
+    return;
+  }
 
-  resetMsg.innerText = "Restableciendo contraseña...";
+  if(newPass !== confirmPass){
+    resetMsg.innerText="Las contraseñas no coinciden ❌";
+    return;
+  }
+
+  resetMsg.innerText="Actualizando contraseña...";
+
   try{
     const res = await fetch(`${API}/api/usuario/reset-password`,{
       method:"POST",
@@ -125,16 +211,17 @@ async function resetPassword(){
     });
 
     const text = await res.text();
+
     if(res.ok){
-      resetMsg.innerText="Contraseña cambiada ✅ Redirigiendo...";
+      resetMsg.innerText="Contraseña actualizada ✅";
       setTimeout(()=> window.location.href="dashboard.html",1500);
-    } else {
+    }else{
       try{
         const err = JSON.parse(text);
-        resetMsg.innerText = `Error: ${err.message || 'No se pudo cambiar la contraseña'} ❌`;
+        resetMsg.innerText=`Error: ${err.message || 'No se pudo actualizar'} ❌`;
       }catch{
-        resetMsg.innerText = "Error: respuesta inesperada del servidor ❌";
-        console.error("Respuesta inválida:", text);
+        resetMsg.innerText="Error inesperado del servidor ❌";
+        console.error(text);
       }
     }
 
