@@ -2,43 +2,142 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Panel Usuario</title>
+<title>Mi Perfil - NRDesignCorp</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{ font-family:Arial; background:#f4f6f8; padding:20px; }
-.card{
-  max-width:650px;
-  margin:auto;
-  background:white;
-  padding:25px;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
-h2{ text-align:center; color:#0d6efd; }
-input{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-button{
-  width:100%;
-  padding:12px;
-  margin-top:15px;
-  border:none;
-  border-radius:30px;
-  font-weight:bold;
-  background:#0d6efd;
-  color:white;
-  cursor:pointer;
-}
-.logout{
-  background:#dc3545;
-}
-.msg{ margin-top:15px; text-align:center; font-weight:bold; }
+  /* 1. Tipografía y Base */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * {
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    padding: 40px 20px;
+    min-height: 100vh;
+    /* Fondo con degradado radial profundo */
+    background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* 2. Tarjeta Glassmorphism */
+  .card {
+    max-width: 650px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    padding: 45px;
+  }
+
+  h2 {
+    text-align: center;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -1px;
+    margin-bottom: 35px;
+    background: linear-gradient(to bottom, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 3. Inputs Estilizados */
+  input {
+    width: 100%;
+    padding: 14px 18px;
+    margin-top: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  input:focus {
+    border-color: #6366f1;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  }
+
+  input::placeholder {
+    color: #64748b;
+  }
+
+  /* 4. Botones */
+  button {
+    width: 100%;
+    padding: 16px;
+    margin-top: 25px;
+    border: none;
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  /* Botón Guardar (Principal) */
+  .btn-save {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+  }
+
+  .btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+    filter: brightness(1.1);
+  }
+
+  /* Botón Logout (Rojo Suave) */
+  .logout {
+    background: rgba(220, 53, 69, 0.1);
+    color: #ff4d4d;
+    margin-top: 12px;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+
+  .logout:hover {
+    background: #dc3545;
+    color: white;
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  /* Mensajes de Estado */
+  .msg {
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+    min-height: 22px;
+  }
+
+  /* Grid para inputs (opcional para escritorio) */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  @media(max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .card { padding: 30px 20px; }
+  }
 </style>
 </head>
 <body>
@@ -46,17 +145,27 @@ button{
 <div class="card">
   <h2>Mi Perfil</h2>
 
-  <input id="nombres" placeholder="Nombres">
-  <input id="apellidos" placeholder="Apellidos">
-  <input id="cedula" placeholder="Cédula">
-  <input id="licencia" placeholder="Licencia">
-  <input id="marca" placeholder="Marca vehículo">
-  <input id="modelo" placeholder="Modelo">
-  <input id="placa" placeholder="Placa">
-  <input id="color" placeholder="Color">
-  <input id="poliza" placeholder="Número póliza">
+  <div class="grid">
+    <input id="nombres" placeholder="Nombres">
+    <input id="apellidos" placeholder="Apellidos">
+  </div>
+  
+  <input id="cedula" placeholder="Cédula de Identidad">
+  <input id="licencia" placeholder="Número de Licencia">
+  
+  <div class="grid">
+    <input id="marca" placeholder="Marca vehículo">
+    <input id="modelo" placeholder="Modelo">
+  </div>
+  
+  <div class="grid">
+    <input id="placa" placeholder="Placa">
+    <input id="color" placeholder="Color">
+  </div>
+  
+  <input id="poliza" placeholder="Número de Póliza">
 
-  <button onclick="guardar()">Guardar Cambios</button>
+  <button class="btn-save" onclick="guardar()">Guardar Cambios</button>
   <button class="logout" onclick="logout()">Cerrar Sesión</button>
 
   <div id="msg" class="msg"></div>
@@ -69,6 +178,20 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Referencias rápidas
+const inputs = {
+  nombres: document.getElementById("nombres"),
+  apellidos: document.getElementById("apellidos"),
+  cedula: document.getElementById("cedula"),
+  licencia: document.getElementById("licencia"),
+  marca: document.getElementById("marca"),
+  modelo: document.getElementById("modelo"),
+  placa: document.getElementById("placa"),
+  color: document.getElementById("color"),
+  poliza: document.getElementById("poliza"),
+  msg: document.getElementById("msg")
+};
+
 async function verificarSesion(){
   const { data } = await supabaseClient.auth.getUser();
   if(!data.user){
@@ -79,46 +202,53 @@ async function verificarSesion(){
 }
 
 async function cargarDatos(userId){
-  const { data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("conductores")
     .select("*")
     .eq("id", userId)
     .single();
 
-  if(!data) return;
+  if(error || !data) return;
 
-  nombres.value=data.nombres || "";
-  apellidos.value=data.apellidos || "";
-  cedula.value=data.cedula || "";
-  licencia.value=data.licencia || "";
-  marca.value=data.marca || "";
-  modelo.value=data.modelo || "";
-  placa.value=data.placa || "";
-  color.value=data.color || "";
-  poliza.value=data.poliza_numero || "";
+  inputs.nombres.value = data.nombres || "";
+  inputs.apellidos.value = data.apellidos || "";
+  inputs.cedula.value = data.cedula || "";
+  inputs.licencia.value = data.licencia || "";
+  inputs.marca.value = data.marca || "";
+  inputs.modelo.value = data.modelo || "";
+  inputs.placa.value = data.placa || "";
+  inputs.color.value = data.color || "";
+  inputs.poliza.value = data.poliza_numero || "";
 }
 
 async function guardar(){
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if(!user) return;
 
-  const { data } = await supabaseClient.auth.getUser();
-  const user = data.user;
+  inputs.msg.style.color = "#818cf8";
+  inputs.msg.innerText = "Guardando cambios...";
 
   const { error } = await supabaseClient
     .from("conductores")
     .update({
-      nombres:nombres.value,
-      apellidos:apellidos.value,
-      cedula:cedula.value,
-      licencia:licencia.value,
-      marca:marca.value,
-      modelo:modelo.value,
-      placa:placa.value,
-      color:color.value,
-      poliza_numero:poliza.value
+      nombres: inputs.nombres.value,
+      apellidos: inputs.apellidos.value,
+      cedula: inputs.cedula.value,
+      licencia: inputs.licencia.value,
+      marca: inputs.marca.value,
+      modelo: inputs.modelo.value,
+      placa: inputs.placa.value,
+      color: inputs.color.value,
+      poliza_numero: inputs.poliza.value
     })
     .eq("id", user.id);
 
-  msg.innerText = error ? "Error guardando ❌" : "Datos actualizados ✅";
+  if(error){
+    inputs.msg.innerHTML = "<span style='color: #f87171;'>Error guardando ❌</span>";
+  } else {
+    inputs.msg.innerHTML = "<span style='color: #4ade80;'>Datos actualizados ✅</span>";
+    setTimeout(() => { inputs.msg.innerText = ""; }, 3000);
+  }
 }
 
 async function logout(){

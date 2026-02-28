@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Administrativo - Crear Usuario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* 1. Tipografía y Base */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      height: 100vh;
+      /* Fondo con degradado radial profundo */
+      background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 2. Tarjeta Glassmorphism */
+    .card {
+      max-width: 450px;
+      width: 100%;
+      background: rgba(30, 41, 59, 0.45);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 32px;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+      padding: 45px 35px;
+    }
+
+    h2 {
+      text-align: center;
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 30px;
+      background: linear-gradient(to bottom, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* 3. Inputs Estilizados */
+    input {
+      width: 100%;
+      padding: 16px 20px;
+      margin-top: 15px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      color: #fff;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    input:focus {
+      border-color: #3b82f6;
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    }
+
+    input::placeholder {
+      color: #64748b;
+    }
+
+    /* 4. Botón de Acción */
+    button {
+      width: 100%;
+      padding: 16px;
+      margin-top: 25px;
+      border: none;
+      border-radius: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+      filter: brightness(1.1);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Mensajes de Estado */
+    .msg {
+      margin-top: 25px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 14px;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Nuevo Administrador</h2>
+  <input id="email" type="email" placeholder="Correo electrónico">
+  <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)">
+  <button onclick="crearAdmin()">Crear Administrador</button>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+// Recuerda reemplazar con tus credenciales reales de Supabase
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function crearAdmin() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("msg");
+
+  if (!email || !password) {
+    msg.innerHTML = "<span style='color: #f87171;'>Completa todos los campos ❌</span>";
+    return;
+  }
+
+  msg.style.color = "#818cf8";
+  msg.innerText = "Registrando acceso...";
+
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      msg.innerHTML = `<span style='color: #f87171;'>Error: ${error.message} ❌</span>`;
+      return;
+    }
+
+    // Nota: El usuario se crea en auth.users. 
+    // Dependiendo de tu lógica, aquí asignarías el rol en tu tabla 'conductores' o 'usuarios'.
+    const { error: roleError } = await supabaseClient
+      .from('conductores') // Ajusta el nombre de la tabla si es necesario
+      .update({ rol: 'admin' })
+      .eq('auth_user_id', data.user.id);
+
+    if (roleError) {
+      msg.innerHTML = `<span style='color: #f87171;'>Error de rol: ${roleError.message} ❌</span>`;
+      return;
+    }
+
+    msg.innerHTML = "<span style='color: #4ade80;'>Administrador creado con éxito ✅</span>";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    
+  } catch (err) {
+    console.error(err);
+    msg.innerHTML = "<span style='color: #f87171;'>Error de conexión ❌</span>";
+  }
+}
+</script>
+
+</body>
+</html>
