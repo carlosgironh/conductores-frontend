@@ -2,106 +2,185 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Perfil del Conductor</title>
+<title>Mi Perfil - Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
-/* === TU MISMO CSS (sin cambios visuales) === */
-body{
-  font-family: 'Arial', sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:20px;
-}
-.card{
-  max-width:720px;
-  margin:auto;
-  background:white;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  padding:25px;
-}
-h2{
-  text-align:center;
-  color:#0d6efd;
-  margin-bottom:20px;
-}
-.campo{ margin-bottom:12px; font-size:16px; }
-.campo strong{ color:#333; }
+  /* 1. Tipografía y Base */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-.fotos-container{
-  display:flex;
-  gap:15px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:15px 0;
-}
-.foto{
-  width:48%;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  cursor:pointer;
-  transition: transform 0.2s;
-}
-.foto:hover{ transform: scale(1.05); }
+  * { box-sizing: border-box; outline: none; }
 
-#qr-container{
-  text-align:center;
-  margin-top:25px;
-}
-#qr{
-  background:white;
-  padding:10px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.15);
-}
-button{
-  margin-top:15px;
-  background:#0d6efd;
-  color:white;
-  border:none;
-  padding:10px 20px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
-}
-button:hover{ background:#0b5ed7; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
 
-.modal{
-  display:none;
-  position:fixed;
-  z-index:999;
-  left:0; top:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.8);
-  justify-content:center;
-  align-items:center;
-}
-.modal img{
-  max-width:90%;
-  max-height:90%;
-  border-radius:12px;
-}
-@media(max-width:480px){
-  .card{ padding:15px; }
-  .foto{ width:100%; }
-}
+  /* 2. Tarjeta Glassmorphism */
+  .card {
+    max-width: 720px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    padding: 40px;
+  }
+
+  h2 {
+    text-align: center;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -1px;
+    margin-bottom: 30px;
+    background: linear-gradient(to bottom, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 3. Campos de Datos Estilizados */
+  #contenido {
+    background: rgba(15, 23, 42, 0.3);
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 25px;
+  }
+
+  .campo {
+    margin-bottom: 12px;
+    font-size: 15px;
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+  }
+
+  .campo strong {
+    color: #6366f1;
+    width: 130px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding-top: 4px;
+  }
+
+  /* 4. Contenedor de Fotos */
+  .fotos-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 25px 0;
+  }
+
+  .foto {
+    width: calc(50% - 10px);
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+
+  .foto:hover {
+    transform: scale(1.03);
+    border-color: #6366f1;
+    box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
+  }
+
+  /* 5. Sección QR */
+  #qr-container {
+    text-align: center;
+    margin-top: 35px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  #qr {
+    background: white;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+  }
+
+  button {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 15px rgba(79, 70, 229, 0.3);
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(79, 70, 229, 0.4);
+    filter: brightness(1.1);
+  }
+
+  /* 6. Modal de Fotos (Lightbox) */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(10, 15, 25, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+  }
+
+  .modal img {
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  @media(max-width:480px){
+    .foto { width: 100%; }
+    .campo { flex-direction: column; }
+    .campo strong { margin-bottom: 5px; }
+  }
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h2>Perfil del Conductor</h2>
-  <div id="contenido">Cargando perfil...</div>
+  <h2>Mi Perfil de Conductor</h2>
+  
+  <div id="contenido">Cargando datos de sesión...</div>
+  
   <div class="fotos-container" id="fotos-container"></div>
 
   <div id="qr-container">
     <canvas id="qr"></canvas><br>
-    <button onclick="descargarQR()">Descargar QR</button>
+    <button onclick="descargarQR()">Descargar Código QR</button>
   </div>
 </div>
 
@@ -117,16 +196,14 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function cargarPerfil(){
-
   const { data: { user } } = await supabaseClient.auth.getUser();
 
   if(!user){
-    alert("No hay sesión activa");
-    window.location.href = "index.html";
+    window.location.href = "index.html"; // Redirigir si no hay sesión
     return;
   }
 
-  // 1️⃣ Buscar conductor por auth_user_id
+  // 1. Buscar conductor
   const { data: conductor, error } = await supabaseClient
     .from("conductores")
     .select("*")
@@ -134,93 +211,95 @@ async function cargarPerfil(){
     .single();
 
   if(error || !conductor){
-    document.getElementById("contenido").innerText="No se encontró perfil";
+    document.getElementById("contenido").innerHTML = "<p style='color:#f87171'>No se encontró el perfil vinculado a esta cuenta.</p>";
     return;
   }
 
-  // 2️⃣ Traer documentos
+  // 2. Traer documentos (fotos)
   const { data: documentos } = await supabaseClient
     .from("documentos")
     .select("*")
     .eq("conductor_id", conductor.id);
 
   function docUrl(tipo){
-    const doc = documentos.find(d => d.tipo === tipo);
+    const doc = documentos?.find(d => d.tipo === tipo);
     if(!doc) return null;
-
-    return supabaseClient
-      .storage
-      .from("documentos-conductores")
-      .getPublicUrl(doc.url_archivo).data.publicUrl;
+    return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
   }
 
-  // 3️⃣ Mostrar datos
+  // 3. Renderizar Datos
   document.getElementById("contenido").innerHTML = `
-    <div class="campo"><strong>Nombre:</strong> ${conductor.nombres} ${conductor.apellidos}</div>
-    <div class="campo"><strong>Cédula:</strong> ${conductor.cedula}</div>
-    <div class="campo"><strong>Licencia:</strong> ${conductor.licencia}</div>
-    <div class="campo"><strong>Vehículo:</strong> ${conductor.marca} ${conductor.modelo}</div>
-    <div class="campo"><strong>Placa:</strong> ${conductor.placa}</div>
-    <div class="campo"><strong>Color:</strong> ${conductor.color}</div>
-    <div class="campo"><strong>Póliza:</strong> ${conductor.poliza_numero}</div>
+    <div class="campo"><strong>Nombre</strong> ${conductor.nombres} ${conductor.apellidos}</div>
+    <div class="campo"><strong>Cédula</strong> ${conductor.cedula}</div>
+    <div class="campo"><strong>Licencia</strong> ${conductor.licencia}</div>
+    <div class="campo"><strong>Vehículo</strong> ${conductor.marca} ${conductor.modelo}</div>
+    <div class="campo"><strong>Placa</strong> ${conductor.placa}</div>
+    <div class="campo"><strong>Color</strong> ${conductor.color}</div>
+    <div class="campo"><strong>Póliza</strong> ${conductor.poliza_numero}</div>
   `;
 
-  // 4️⃣ Mostrar fotos
+  // 4. Renderizar Fotos Interactuables
   const fotosCont = document.getElementById("fotos-container");
   fotosCont.innerHTML = "";
 
   const fotoVeh = docUrl("FOTO_VEHICULO");
   const fotoCond = docUrl("FOTO_CONDUCTOR");
 
-  if(fotoVeh){
+  if(fotoVeh) {
     const img = document.createElement("img");
     img.src = fotoVeh;
     img.className = "foto";
-    img.onclick = ()=> mostrarModal(fotoVeh);
+    img.onclick = () => mostrarModal(fotoVeh);
     fotosCont.appendChild(img);
   }
 
-  if(fotoCond){
+  if(fotoCond) {
     const img = document.createElement("img");
     img.src = fotoCond;
     img.className = "foto";
-    img.onclick = ()=> mostrarModal(fotoCond);
+    img.onclick = () => mostrarModal(fotoCond);
     fotosCont.appendChild(img);
   }
 
-  // 5️⃣ Generar QR con enlace público
+  // 5. QR con enlace público dinámico
   const publicUrl = `${window.location.origin}/perfil_publico.html?id=${conductor.id}`;
-
   const canvas = document.getElementById("qr");
 
-await QRCode.toCanvas(canvas, publicUrl, {
-  width: 220,
-  errorCorrectionLevel: 'H'
-});
+  await QRCode.toCanvas(canvas, publicUrl, {
+    width: 200,
+    margin: 0,
+    color: { dark: '#1e293b', light: '#ffffff' },
+    errorCorrectionLevel: 'H'
+  });
 
-// Dibujar logo en el centro
-const ctx = canvas.getContext("2d");
-const logo = new Image();
-logo.src = "logo.png"; // debe estar en la misma carpeta
+  // Logo en el centro del QR
+  const ctx = canvas.getContext("2d");
+  const logo = new Image();
+  logo.src = "logo.png"; 
 
-logo.onload = () => {
-  const size = canvas.width * 0.22; // tamaño del logo
-  const x = (canvas.width - size) / 2;
-  const y = (canvas.height - size) / 2;
-  ctx.drawImage(logo, x, y, size, size);
-};
+  logo.onload = () => {
+    const size = canvas.width * 0.22;
+    const x = (canvas.width - size) / 2;
+    const y = (canvas.height - size) / 2;
+    
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2, size/2 + 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.drawImage(logo, x, y, size, size);
+  };
 }
 
 function mostrarModal(src){
   document.getElementById("modalImg").src = src;
-  document.getElementById("modalFoto").style.display="flex";
+  document.getElementById("modalFoto").style.display = "flex";
 }
 
 function descargarQR(){
   const canvas = document.getElementById("qr");
   const link = document.createElement("a");
-  link.download="perfil_qr.png";
-  link.href = canvas.toDataURL();
+  link.download = "mi_credencial_qr.png";
+  link.href = canvas.toDataURL("image/png");
   link.click();
 }
 

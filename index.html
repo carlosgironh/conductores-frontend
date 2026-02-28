@@ -5,49 +5,106 @@
   <title>Página Principal NRDesignCorp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* Tipografía moderna 'Inter' */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+      outline: none;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      /* FONDO: Un degradado radial suave (Azul Noche) */
+      background: radial-gradient(circle at top left, #2b3242, #111317);
+      color: #e2e8f0; /* Blanco hueso suave */
     }
+
     .card {
-      max-width: 500px;
+      max-width: 420px;
       width: 100%;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      padding: 30px;
+      
+      /* EFECTO CRISTAL (Glassmorphism) */
+      background: rgba(30, 41, 59, 0.4); /* Semitransparente */
+      backdrop-filter: blur(24px);       /* Desenfoque fuerte detrás */
+      -webkit-backdrop-filter: blur(24px);
+      
+      /* Borde sutil para definir el cristal */
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      
+      /* Sombra suave y difusa */
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      
+      padding: 48px 40px;
       text-align: center;
+      transition: transform 0.3s ease;
     }
+
     .card img {
-      width: 150px;
-      margin-bottom: 20px;
+      width: 100px;
+      margin-bottom: 24px;
+      /* Sombra suave al logo */
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
     }
+
     h2 {
-      margin-bottom: 20px;
-      color: #333;
+      margin-bottom: 32px;
+      font-weight: 600;
+      font-size: 26px;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
     }
+
     button {
       display: block;
-      width: 80%;
-      margin: 10px auto;
-      padding: 12px 0;
+      width: 100%;
+      margin: 16px auto;
+      padding: 16px;
       border: none;
-      border-radius: 8px;
-      background-color: #0d6efd;
-      color: white;
+      border-radius: 14px;
       font-size: 16px;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.2s ease-in-out;
     }
-    button:hover {
-      background-color: #0b5ed7;
+
+    /* Botón Principal (Registro) - Azul Apple */
+    button:nth-of-type(1) {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
     }
+
+    button:nth-of-type(1):hover {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Botón Secundario (Login) - Estilo Ghost (Transparente) */
+    button:nth-of-type(2) {
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8; /* Gris azulado */
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    button:nth-of-type(2):hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
   </style>
 </head>
 <body>

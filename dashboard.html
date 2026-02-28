@@ -8,65 +8,123 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
+  /* 1. Tipografía y Base */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-.card{
-  background:white;
-  padding:25px;
-  border-radius:16px;
-  max-width:450px;
-  margin:auto;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
+  * {
+    box-sizing: border-box;
+    outline: none;
+  }
 
-h2{
-  text-align:center;
-  color:#0d6efd;
-}
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    padding: 20px;
+    height: 100vh;
+    /* Fondo con degradado radial profundo */
+    background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-input{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
+  /* 2. Tarjeta Glassmorphism */
+  .card {
+    max-width: 420px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    padding: 45px 35px;
+  }
 
-button{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border:none;
-  border-radius:30px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
-}
+  h2 {
+    text-align: center;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -1px;
+    margin-bottom: 35px;
+    background: linear-gradient(to bottom, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-.btn-login{
-  background:linear-gradient(135deg,#0d6efd,#0b5ed7);
-  color:white;
-}
+  /* 3. Inputs Estilizados */
+  input {
+    width: 100%;
+    padding: 16px 20px;
+    margin-top: 15px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-.btn-login:hover{
-  transform:translateY(-2px);
-}
+  input:focus {
+    border-color: #6366f1;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  }
 
-.btn-reset{
-  background:#ffc107;
-  color:white;
-}
+  /* 4. Botones */
+  button {
+    width: 100%;
+    padding: 16px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
 
-.msg{
-  margin-top:15px;
-  text-align:center;
-  font-weight:bold;
-}
+  /* Botón Ingresar (Principal) */
+  .btn-login {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+  }
+
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+    filter: brightness(1.1);
+  }
+
+  /* Botón Olvidé Contraseña (Secundario/Suave) */
+  .btn-reset {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    margin-top: 12px;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .btn-reset:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  /* Mensajes de Estado */
+  .msg {
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+    min-height: 20px;
+    color: #818cf8; /* Color neutro para "Verificando..." */
+  }
 </style>
 </head>
 <body>
@@ -98,7 +156,7 @@ async function login(){
   const msg = document.getElementById("msg");
 
   if(!email || !password){
-    msg.innerText="Completa todos los campos ❌";
+    msg.innerHTML="<span style='color: #f87171;'>Completa todos los campos ❌</span>";
     return;
   }
 
@@ -110,11 +168,11 @@ async function login(){
   });
 
   if(error){
-    msg.innerText="Correo o contraseña incorrectos ❌";
+    msg.innerHTML="<span style='color: #f87171;'>Correo o contraseña incorrectos ❌</span>";
     return;
   }
 
-  msg.innerText="Ingreso exitoso ✅";
+  msg.innerHTML="<span style='color: #4ade80;'>Ingreso exitoso ✅</span>";
 
   setTimeout(()=>{
     window.location.href="panel-usuario.html";
@@ -122,12 +180,10 @@ async function login(){
 }
 
 async function recuperar(){
-
   const email = prompt("Ingresa tu correo electrónico:");
   if(!email) return;
 
   const msg = document.getElementById("msg");
-
   msg.innerText="Enviando correo de recuperación...";
 
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email,{
@@ -135,9 +191,9 @@ async function recuperar(){
   });
 
   if(error){
-    msg.innerText="Error enviando correo ❌";
+    msg.innerHTML="<span style='color: #f87171;'>Error enviando correo ❌</span>";
   }else{
-    msg.innerText="Si el correo existe, se envió enlace ✅";
+    msg.innerHTML="<span style='color: #4ade80;'>Si el correo existe, se envió enlace ✅</span>";
   }
 }
 

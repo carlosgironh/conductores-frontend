@@ -8,75 +8,176 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:20px;
-}
-.card{
-  max-width:720px;
-  margin:auto;
-  background:white;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  padding:25px;
-}
-h2{
-  text-align:center;
-  color:#0d6efd;
-  margin-bottom:20px;
-}
-form input{
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
-label{
-  display:block;
-  margin-top:15px;
-  font-weight:bold;
-}
-button{
-  background:#0d6efd;
-  color:white;
-  border:none;
-  padding:12px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
-  margin-top:20px;
-  width:100%;
-  font-size:16px;
-}
-button:disabled{
-  opacity:0.7;
-  cursor:not-allowed;
-}
-#mensaje{
-  margin-top:15px;
-  font-weight:bold;
-  text-align:center;
-}
-.error{ color:#b00020; }
-.ok{ color:green; }
-.busy{ color:#0b5ed7; }
-.loader{
-  border:3px solid #f3f3f3;
-  border-top:3px solid white;
-  border-radius:50%;
-  width:14px;
-  height:14px;
-  animation: spin 1s linear infinite;
-  display:inline-block;
-  margin-right:8px;
-}
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
+  /* 1. Tipografía Apple Moderna */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 40px 20px; /* Padding extra para que no se pegue a los bordes al hacer scroll */
+    min-height: 100vh;
+    /* Fondo Midnight (Azul Noche Profundo) */
+    background: radial-gradient(circle at top left, #2b3242, #111317);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alineado arriba para permitir scroll */
+  }
+
+  /* 2. Tarjeta con Efecto Cristal (Glassmorphism) */
+  .card {
+    max-width: 600px; /* Un poco más estrecha para elegancia */
+    width: 100%;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 40px;
+    margin: auto;
+  }
+
+  h2 {
+    text-align: center;
+    color: #f1f5f9;
+    font-weight: 600;
+    font-size: 26px;
+    margin-bottom: 30px;
+    letter-spacing: -0.5px;
+  }
+
+  /* 3. Estilos de Inputs (Texto) */
+  form input[type="text"],
+  form input[type="email"],
+  form input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    margin-top: 8px;
+    margin-bottom: 16px; /* Espacio automático entre inputs */
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.2); /* Input oscuro */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 15px;
+    transition: all 0.2s ease;
+  }
+
+  form input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* 4. Estilos de Inputs (Archivos) - Truco CSS */
+  form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    color: #94a3b8;
+    cursor: pointer;
+  }
+
+  /* Estiliza el botón interno de "Seleccionar archivo" */
+  form input[type="file"]::file-selector-button {
+    margin-right: 15px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: background .2s ease-in-out;
+    font-weight: 500;
+  }
+
+  form input[type="file"]::file-selector-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  label {
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #cbd5e1; /* Gris claro para etiquetas */
+    margin-left: 4px; /* Alineación visual sutil */
+  }
+
+  /* Separador */
+  hr {
+    border: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 30px 0;
+  }
+
+  /* 5. Botón Principal */
+  button[type="submit"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 30px;
+    width: 100%;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+  }
+
+  button:disabled {
+    background: #475569;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* Mensajes de Estado */
+  #mensaje {
+    margin-top: 20px;
+    font-weight: 500;
+    text-align: center;
+    min-height: 24px;
+  }
+  .error { color: #ff6b6b; }
+  .ok { color: #4ade80; }
+  .busy { color: #60a5fa; }
+
+  /* Loader Animado */
+  .loader {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    100% { transform: rotate(360deg); }
+  }
 </style>
 </head>
 

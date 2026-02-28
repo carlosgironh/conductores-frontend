@@ -2,56 +2,148 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Panel Admin</title>
+<title>Panel Admin - NRDesignCorp</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{ font-family:Arial; background:#f4f6f8; padding:20px; }
-.card{
-  max-width:900px;
-  margin:auto;
-  background:white;
-  padding:25px;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
-h2{ text-align:center; color:#dc3545; }
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-}
-th,td{
-  padding:10px;
-  border-bottom:1px solid #ddd;
-}
-th{ background:#f1f1f1; }
-button{
-  padding:6px 12px;
-  border:none;
-  border-radius:20px;
-  background:#dc3545;
-  color:white;
-  cursor:pointer;
-}
+  /* 1. Tipografía y Base */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * {
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    padding: 40px 20px;
+    min-height: 100vh;
+    /* Fondo con degradado radial profundo */
+    background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* 2. Tarjeta Glassmorphism */
+  .card {
+    max-width: 1000px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.45);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    padding: 40px;
+  }
+
+  h2 {
+    text-align: center;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -1px;
+    margin-bottom: 35px;
+    /* Degradado rojo/rosado suave para el título de Admin */
+    background: linear-gradient(to bottom, #ff4d4d, #b30000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 3. Estilo de Tabla Pro */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Espaciado entre filas */
+    margin-top: 20px;
+  }
+
+  th {
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #94a3b8;
+    padding: 15px;
+    text-align: left;
+  }
+
+  td {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #f1f5f9;
+    font-size: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Redondear esquinas de las filas */
+  td:first-child {
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px 0 0 12px;
+  }
+  td:last-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0 12px 12px 0;
+  }
+
+  tr:hover td {
+    background: rgba(255, 255, 255, 0.07);
+    transition: background 0.3s ease;
+  }
+
+  /* 4. Botón de Acción (Eliminar) */
+  button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(220, 53, 69, 0.1);
+    color: #ff4d4d;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+
+  button:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+
+  button:active {
+    transform: scale(0.95);
+  }
+
+  /* Scrollbar personalizado para la tabla en móviles */
+  .table-container {
+    overflow-x: auto;
+  }
 </style>
 </head>
 <body>
 
 <div class="card">
   <h2>Panel Administrador</h2>
-  <table id="tabla">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Cédula</th>
-        <th>Placa</th>
-        <th>Acción</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="table-container">
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>Nombre Completo</th>
+          <th>Cédula</th>
+          <th>Placa</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
@@ -62,8 +154,8 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function verificarAdmin(){
-  const { data } = await supabaseClient.auth.getUser();
-  if(!data.user){
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if(!user){
     window.location.href="dashboard.html";
     return;
   }
@@ -71,11 +163,11 @@ async function verificarAdmin(){
   const { data: perfil } = await supabaseClient
     .from("conductores")
     .select("rol")
-    .eq("id", data.user.id)
+    .eq("auth_user_id", user.id) // Cambiado a auth_user_id según la lógica de registro anterior
     .single();
 
   if(perfil?.rol !== "admin"){
-    alert("Acceso denegado");
+    alert("Acceso denegado: Se requieren privilegios de administrador.");
     window.location.href="dashboard.html";
     return;
   }
@@ -84,9 +176,14 @@ async function verificarAdmin(){
 }
 
 async function cargarConductores(){
-  const { data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("conductores")
     .select("*");
+
+  if (error) {
+    console.error("Error cargando datos:", error);
+    return;
+  }
 
   const tbody = document.querySelector("#tabla tbody");
   tbody.innerHTML="";
@@ -94,9 +191,9 @@ async function cargarConductores(){
   data.forEach(c=>{
     const tr = document.createElement("tr");
     tr.innerHTML=`
-      <td>${c.nombres} ${c.apellidos}</td>
+      <td style="font-weight: 500;">${c.nombres} ${c.apellidos}</td>
       <td>${c.cedula}</td>
-      <td>${c.placa}</td>
+      <td style="font-family: monospace; letter-spacing: 1px;">${c.placa}</td>
       <td><button onclick="eliminar('${c.id}')">Eliminar</button></td>
     `;
     tbody.appendChild(tr);
@@ -104,10 +201,15 @@ async function cargarConductores(){
 }
 
 async function eliminar(id){
-  if(!confirm("¿Eliminar conductor?")) return;
+  if(!confirm("¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.")) return;
 
-  await supabaseClient.from("conductores").delete().eq("id",id);
-  cargarConductores();
+  const { error } = await supabaseClient.from("conductores").delete().eq("id",id);
+  
+  if(error) {
+    alert("Error al eliminar: " + error.message);
+  } else {
+    cargarConductores();
+  }
 }
 
 verificarAdmin();
