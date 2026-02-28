@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     /* Tipografía moderna 'Inter' */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
     * {
       box-sizing: border-box;
@@ -21,88 +21,106 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      /* FONDO: Un degradado radial suave (Azul Noche) */
-      background: radial-gradient(circle at top left, #2b3242, #111317);
-      color: #e2e8f0; /* Blanco hueso suave */
+      /* FONDO: Degradado radial profundo */
+      background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
+      color: #e2e8f0;
+      overflow: hidden;
     }
 
+    /* AREA A MEJORAR: La tarjeta y el entorno del logo */
     .card {
-      max-width: 420px;
+      max-width: 400px;
       width: 100%;
+      background: rgba(30, 41, 59, 0.45); /* Color más profundo */
+      backdrop-filter: blur(25px);      /* Difuminado de cristal */
+      -webkit-backdrop-filter: blur(25px);
       
-      /* EFECTO CRISTAL (Glassmorphism) */
-      background: rgba(30, 41, 59, 0.4); /* Semitransparente */
-      backdrop-filter: blur(24px);       /* Desenfoque fuerte detrás */
-      -webkit-backdrop-filter: blur(24px);
+      /* Borde de cristal con brillo superior */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2); 
       
-      /* Borde sutil para definir el cristal */
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
+      border-radius: 35px; /* Bordes más curvos estilo Apple */
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
       
-      /* Sombra suave y difusa */
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      
-      padding: 48px 40px;
+      padding: 50px 35px;
       text-align: center;
-      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    /* Contenedor especial para el logo */
+    .logo-wrapper {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: rgba(255, 255, 255, 0.03); /* Fondo casi invisible */
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
     }
 
     .card img {
-      width: 100px;
-      margin-bottom: 24px;
-      /* Sombra suave al logo */
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      width: 85px; /* Un poco más pequeño para que respire dentro del círculo */
+      height: auto;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
     }
 
     h2 {
-      margin-bottom: 32px;
-      font-weight: 600;
-      font-size: 26px;
-      color: #f1f5f9;
-      letter-spacing: -0.5px;
+      margin-bottom: 35px;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: -1px;
+      background: linear-gradient(to bottom, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
+    /* BOTONES REESTILIZADOS */
     button {
       display: block;
       width: 100%;
-      margin: 16px auto;
-      padding: 16px;
+      margin: 18px 0;
+      padding: 18px;
       border: none;
-      border-radius: 14px;
+      border-radius: 20px; /* Botones más redondeados */
       font-size: 16px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Botón Principal (Registro) - Azul Apple */
+    /* Registro - Degradado azul vibrante */
     button:nth-of-type(1) {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: white;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
     }
 
     button:nth-of-type(1):hover {
-      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(37, 99, 235, 0.5);
+      filter: brightness(1.1);
     }
 
-    /* Botón Secundario (Login) - Estilo Ghost (Transparente) */
+    /* Iniciar Sesión - Estilo Vidrio Esmerilado (Frosted Glass) */
     button:nth-of-type(2) {
-      background: rgba(255, 255, 255, 0.05);
-      color: #94a3b8; /* Gris azulado */
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.07);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
     }
 
     button:nth-of-type(2):hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       color: #ffffff;
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     button:active {
-      transform: scale(0.98);
+      transform: scale(0.96);
     }
 
   </style>
@@ -110,8 +128,12 @@
 <body>
 
 <div class="card">
-  <img src="logo.png" alt="NRDesignCorp Logo">
-  <h2>Bienvenido a NRDesignCorp</h2>
+  <div class="logo-wrapper">
+    <img src="logo.png" alt="NRDesignCorp Logo">
+  </div>
+  
+  <h2>Bienvenido a<br>NRDesignCorp</h2>
+  
   <button onclick="window.location.href='N-Reg.html'">Registro</button>
   <button onclick="window.location.href='dashboard.html'">Iniciar Sesión</button>
 </div>
