@@ -4,256 +4,227 @@
 <meta charset="UTF-8">
 <title>Perfil del Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
 <style>
-  body{
-    font-family: 'Arial', sans-serif;
-    background:#f4f6f8;
-    margin:0;
-    padding:20px;
-  }
+/* === TU MISMO CSS (sin cambios visuales) === */
+body{
+  font-family: 'Arial', sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+.card{
+  max-width:720px;
+  margin:auto;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  padding:25px;
+}
+h2{
+  text-align:center;
+  color:#0d6efd;
+  margin-bottom:20px;
+}
+.campo{ margin-bottom:12px; font-size:16px; }
+.campo strong{ color:#333; }
 
-  .card{
-    max-width:720px;
-    margin:auto;
-    background:white;
-    border-radius:16px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
-    padding:25px;
-  }
+.fotos-container{
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:15px 0;
+}
+.foto{
+  width:48%;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  cursor:pointer;
+  transition: transform 0.2s;
+}
+.foto:hover{ transform: scale(1.05); }
 
-  h2{
-    text-align:center;
-    color:#0d6efd;
-    margin-bottom:20px;
-  }
+#qr-container{
+  text-align:center;
+  margin-top:25px;
+}
+#qr{
+  background:white;
+  padding:10px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.15);
+}
+button{
+  margin-top:15px;
+  background:#0d6efd;
+  color:white;
+  border:none;
+  padding:10px 20px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+button:hover{ background:#0b5ed7; }
 
-  .campo{
-    margin-bottom:12px;
-    font-size:16px;
-  }
-
-  .campo strong{
-    color:#333;
-  }
-
-  .fotos-container{
-    display:flex;
-    gap:15px;
-    justify-content:center;
-    flex-wrap:wrap;
-    margin:15px 0;
-  }
-
-  .foto{
-    width:48%;
-    border-radius:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
-    cursor:pointer;
-    transition: transform 0.2s;
-  }
-
-  .foto:hover{
-    transform: scale(1.05);
-  }
-
-  .btn-registro, .btn-ver{
-    display:inline-block;
-    background:#0d6efd;
-    color:white;
-    border:none;
-    padding:8px 16px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-    margin-top:10px;
-    margin-left:8px;
-    font-size:14px;
-    text-align:center;
-    text-decoration:none;
-    transition: background 0.2s;
-  }
-
-  .btn-registro:hover, .btn-ver:hover{
-    background:#0b5ed7;
-  }
-
-  #qr-container{
-    text-align:center;
-    margin-top:25px;
-  }
-
-  #qr{
-    background:white;
-    padding:10px;
-    border-radius:12px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.15);
-  }
-
-  #descargarQR{
-    margin-top:15px;
-    background:#0d6efd;
-    color:white;
-    border:none;
-    padding:10px 20px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-  }
-
-  #descargarQR:hover{
-    background:#0b5ed7;
-  }
-
-  /* Modal imagen grande */
-  .modal{
-    display:none;
-    position:fixed;
-    z-index:999;
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.8);
-    justify-content:center;
-    align-items:center;
-  }
-
-  .modal img{
-    max-width:90%;
-    max-height:90%;
-    border-radius:12px;
-    box-shadow:0 5px 25px rgba(0,0,0,0.3);
-  }
-
-  .modal:target{
-    display:flex;
-  }
-
-  @media(max-width:480px){
-    .card{
-      padding:15px;
-    }
-    .foto{
-      width:100%;
-    }
-  }
+.modal{
+  display:none;
+  position:fixed;
+  z-index:999;
+  left:0; top:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.8);
+  justify-content:center;
+  align-items:center;
+}
+.modal img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:12px;
+}
+@media(max-width:480px){
+  .card{ padding:15px; }
+  .foto{ width:100%; }
+}
 </style>
 </head>
+
 <body>
 
 <div class="card">
   <h2>Perfil del Conductor</h2>
-  <div id="contenido">Cargando...</div>
-
+  <div id="contenido">Cargando perfil...</div>
   <div class="fotos-container" id="fotos-container"></div>
 
   <div id="qr-container">
     <canvas id="qr"></canvas><br>
-    <button id="descargarQR" onclick="descargarQR()">Descargar QR</button>
+    <button onclick="descargarQR()">Descargar QR</button>
   </div>
 </div>
 
-<!-- Modal para imagen grande -->
 <div id="modalFoto" class="modal" onclick="this.style.display='none'">
   <img id="modalImg" src="">
 </div>
 
 <script>
-const API = "https://conductores-api.onrender.com";
-const qr_token = new URLSearchParams(window.location.search).get("token");
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUI";
 
-async function cargar(){
-  if(!qr_token){ alert("Token no especificado"); return; }
-  try{
-    const res = await fetch(`${API}/api/perfil/${qr_token}`);
-    const data = await res.json();
-    if(!res.ok || !data.conductor){ alert("Conductor no encontrado"); return; }
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const c = data.conductor;
-    const docs = data.documentos || [];
+async function cargarPerfil(){
 
-    function docUrl(tipo){ 
-      const d = docs.find(x=>x.tipo.toUpperCase()===tipo.toUpperCase()); 
-      return d ? d.url_archivo : null; 
-    }
+  const { data: { user } } = await supabaseClient.auth.getUser();
 
-    const contenido = document.getElementById("contenido");
-    contenido.innerHTML = `
-      <div class="campo"><strong>Nombre:</strong> ${c.nombres} ${c.apellidos}</div>
-      <div class="campo"><strong>Cédula:</strong> ${c.cedula} ${docUrl("CEDULA")?`<a class="btn-ver" href="${docUrl("CEDULA")}" target="_blank">Ver</a>`:""}</div>
-      <div class="campo"><strong>Licencia:</strong> ${c.licencia} ${docUrl("LICENCIA")?`<a class="btn-ver" href="${docUrl("LICENCIA")}" target="_blank">Ver</a>`:""}</div>
-      <div class="campo"><strong>Vehículo:</strong> ${c.marca || ''} ${c.modelo || ''}</div>
-      <div class="campo"><strong>Placa:</strong> ${c.placa || ''}</div>
-      <div class="campo"><strong>Color:</strong> ${c.color || ''}</div>
-      ${docUrl("REGISTRO_VEHICULAR") ? `<button class="btn-registro" onclick="mostrarModal('${docUrl("REGISTRO_VEHICULAR")}')">Ver Registro Vehicular</button>` : ""}
-      <div class="campo"><strong>Póliza:</strong> ${c.poliza_numero || ''} ${docUrl("POLIZA_VEHICULAR")?`<a class="btn-ver" href="${docUrl("POLIZA_VEHICULAR")}" target="_blank">Ver</a>`:""}</div>
-    `;
-
-    // Cargar fotos y mostrar botón para verlas grandes
-    const fotosCont = document.getElementById("fotos-container");
-    fotosCont.innerHTML = '';
-    const fotoVeh = docUrl("FOTO_VEHICULO");
-    const fotoCond = docUrl("FOTO_CONDUCTOR");
-
-    if(fotoVeh){
-      const imgV = document.createElement("img");
-      imgV.src = fotoVeh;
-      imgV.alt = "Foto Vehículo";
-      imgV.className = "foto";
-      imgV.onclick = () => mostrarModal(fotoVeh);
-      fotosCont.appendChild(imgV);
-    }
-
-    if(fotoCond){
-      const imgC = document.createElement("img");
-      imgC.src = fotoCond;
-      imgC.alt = "Foto Conductor";
-      imgC.className = "foto";
-      imgC.onclick = () => mostrarModal(fotoCond);
-      fotosCont.appendChild(imgC);
-    }
-
-    // Generar QR con logo
-    const canvas = document.getElementById("qr");
-    await QRCode.toCanvas(canvas, window.location.href, {
-      width: 220,
-      errorCorrectionLevel: 'H'
-    });
-
-    // Cargar logo y dibujarlo en el centro
-    const ctx = canvas.getContext('2d');
-    const logo = new Image();
-    logo.src = 'logo.png'; 
-    logo.onload = () => {
-      const size = canvas.width * 0.2;
-      const x = (canvas.width - size)/2;
-      const y = (canvas.height - size)/2;
-      ctx.drawImage(logo, x, y, size, size);
-    }
-
-  } catch(err){
-    console.error(err);
-    document.getElementById("contenido").innerText="Error al cargar perfil";
+  if(!user){
+    alert("No hay sesión activa");
+    window.location.href = "index.html";
+    return;
   }
+
+  // 1️⃣ Buscar conductor por auth_user_id
+  const { data: conductor, error } = await supabaseClient
+    .from("conductores")
+    .select("*")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if(error || !conductor){
+    document.getElementById("contenido").innerText="No se encontró perfil";
+    return;
+  }
+
+  // 2️⃣ Traer documentos
+  const { data: documentos } = await supabaseClient
+    .from("documentos")
+    .select("*")
+    .eq("conductor_id", conductor.id);
+
+  function docUrl(tipo){
+    const doc = documentos.find(d => d.tipo === tipo);
+    if(!doc) return null;
+
+    return supabaseClient
+      .storage
+      .from("documentos-conductores")
+      .getPublicUrl(doc.url_archivo).data.publicUrl;
+  }
+
+  // 3️⃣ Mostrar datos
+  document.getElementById("contenido").innerHTML = `
+    <div class="campo"><strong>Nombre:</strong> ${conductor.nombres} ${conductor.apellidos}</div>
+    <div class="campo"><strong>Cédula:</strong> ${conductor.cedula}</div>
+    <div class="campo"><strong>Licencia:</strong> ${conductor.licencia}</div>
+    <div class="campo"><strong>Vehículo:</strong> ${conductor.marca} ${conductor.modelo}</div>
+    <div class="campo"><strong>Placa:</strong> ${conductor.placa}</div>
+    <div class="campo"><strong>Color:</strong> ${conductor.color}</div>
+    <div class="campo"><strong>Póliza:</strong> ${conductor.poliza_numero}</div>
+  `;
+
+  // 4️⃣ Mostrar fotos
+  const fotosCont = document.getElementById("fotos-container");
+  fotosCont.innerHTML = "";
+
+  const fotoVeh = docUrl("FOTO_VEHICULO");
+  const fotoCond = docUrl("FOTO_CONDUCTOR");
+
+  if(fotoVeh){
+    const img = document.createElement("img");
+    img.src = fotoVeh;
+    img.className = "foto";
+    img.onclick = ()=> mostrarModal(fotoVeh);
+    fotosCont.appendChild(img);
+  }
+
+  if(fotoCond){
+    const img = document.createElement("img");
+    img.src = fotoCond;
+    img.className = "foto";
+    img.onclick = ()=> mostrarModal(fotoCond);
+    fotosCont.appendChild(img);
+  }
+
+  // 5️⃣ Generar QR con enlace público
+  const publicUrl = `${window.location.origin}/perfil_publico.html?id=${conductor.id}`;
+
+  const canvas = document.getElementById("qr");
+
+await QRCode.toCanvas(canvas, publicUrl, {
+  width: 220,
+  errorCorrectionLevel: 'H'
+});
+
+// Dibujar logo en el centro
+const ctx = canvas.getContext("2d");
+const logo = new Image();
+logo.src = "logo.png"; // debe estar en la misma carpeta
+
+logo.onload = () => {
+  const size = canvas.width * 0.22; // tamaño del logo
+  const x = (canvas.width - size) / 2;
+  const y = (canvas.height - size) / 2;
+  ctx.drawImage(logo, x, y, size, size);
+};
 }
 
 function mostrarModal(src){
-  const modal = document.getElementById("modalFoto");
-  const modalImg = document.getElementById("modalImg");
-  modalImg.src = src;
-  modal.style.display = "flex";
+  document.getElementById("modalImg").src = src;
+  document.getElementById("modalFoto").style.display="flex";
 }
 
 function descargarQR(){
   const canvas = document.getElementById("qr");
   const link = document.createElement("a");
-  link.download = "perfil_qr.png";
+  link.download="perfil_qr.png";
   link.href = canvas.toDataURL();
   link.click();
 }
 
-cargar();
+cargarPerfil();
 </script>
 
 </body>
