@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Usuario</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{ font-family:Arial; background:#f4f6f8; padding:20px; }
+.card{
+  max-width:650px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+h2{ text-align:center; color:#0d6efd; }
+input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:15px;
+  border:none;
+  border-radius:30px;
+  font-weight:bold;
+  background:#0d6efd;
+  color:white;
+  cursor:pointer;
+}
+.logout{
+  background:#dc3545;
+}
+.msg{ margin-top:15px; text-align:center; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Mi Perfil</h2>
+
+  <input id="nombres" placeholder="Nombres">
+  <input id="apellidos" placeholder="Apellidos">
+  <input id="cedula" placeholder="Cédula">
+  <input id="licencia" placeholder="Licencia">
+  <input id="marca" placeholder="Marca vehículo">
+  <input id="modelo" placeholder="Modelo">
+  <input id="placa" placeholder="Placa">
+  <input id="color" placeholder="Color">
+  <input id="poliza" placeholder="Número póliza">
+
+  <button onclick="guardar()">Guardar Cambios</button>
+  <button class="logout" onclick="logout()">Cerrar Sesión</button>
+
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function verificarSesion(){
+  const { data } = await supabaseClient.auth.getUser();
+  if(!data.user){
+    window.location.href="dashboard.html";
+    return;
+  }
+  cargarDatos(data.user.id);
+}
+
+async function cargarDatos(userId){
+  const { data } = await supabaseClient
+    .from("conductores")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if(!data) return;
+
+  nombres.value=data.nombres || "";
+  apellidos.value=data.apellidos || "";
+  cedula.value=data.cedula || "";
+  licencia.value=data.licencia || "";
+  marca.value=data.marca || "";
+  modelo.value=data.modelo || "";
+  placa.value=data.placa || "";
+  color.value=data.color || "";
+  poliza.value=data.poliza_numero || "";
+}
+
+async function guardar(){
+
+  const { data } = await supabaseClient.auth.getUser();
+  const user = data.user;
+
+  const { error } = await supabaseClient
+    .from("conductores")
+    .update({
+      nombres:nombres.value,
+      apellidos:apellidos.value,
+      cedula:cedula.value,
+      licencia:licencia.value,
+      marca:marca.value,
+      modelo:modelo.value,
+      placa:placa.value,
+      color:color.value,
+      poliza_numero:poliza.value
+    })
+    .eq("id", user.id);
+
+  msg.innerText = error ? "Error guardando ❌" : "Datos actualizados ✅";
+}
+
+async function logout(){
+  await supabaseClient.auth.signOut();
+  window.location.href="dashboard.html";
+}
+
+verificarSesion();
+</script>
+
+</body>
+</html>

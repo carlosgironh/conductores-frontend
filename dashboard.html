@@ -2,235 +2,145 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Ingreso Usuario / Recuperar Clave</title>
+<title>Ingreso Usuario</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-body{ font-family:Arial; background:#eef2f7; padding:20px; }
-.card{ background:white; padding:20px; border-radius:12px; max-width:500px; margin:auto; box-shadow:0 5px 20px rgba(0,0,0,0.1); }
-input,textarea,button{ width:100%; padding:10px; margin-top:10px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;}
-button{ font-weight:bold; border:none; cursor:pointer; }
-.login{ background:#0d6efd; color:white; }
-.recuperar{ background:#ffc107; color:white; }
-.reset{ background:#198754; color:white; }
-.msg{ margin-top:10px; font-weight:bold; text-align:center; }
-.hidden{ display:none; }
-.valid{ border:2px solid #198754; }
-.invalid{ border:2px solid #dc3545; }
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:16px;
+  max-width:450px;
+  margin:auto;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+
+h2{
+  text-align:center;
+  color:#0d6efd;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border:none;
+  border-radius:30px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.btn-login{
+  background:linear-gradient(135deg,#0d6efd,#0b5ed7);
+  color:white;
+}
+
+.btn-login:hover{
+  transform:translateY(-2px);
+}
+
+.btn-reset{
+  background:#ffc107;
+  color:white;
+}
+
+.msg{
+  margin-top:15px;
+  text-align:center;
+  font-weight:bold;
+}
 </style>
 </head>
 <body>
 
-<!-- ============================= -->
-<!-- TARJETA LOGIN -->
-<!-- ============================= -->
-<div class="card" id="loginCard">
-<h2>Ingreso Usuario</h2>
+<div class="card">
+  <h2>Ingreso Usuario</h2>
 
-<input id="usuario" placeholder="Correo o cédula">
-<input type="password" id="password" placeholder="Contraseña">
+  <input id="email" type="email" placeholder="Correo electrónico">
+  <input id="password" type="password" placeholder="Contraseña">
 
-<!-- Honeypot anti-bots (campo invisible) -->
-<input type="text" id="website" style="display:none">
+  <button class="btn-login" onclick="login()">Ingresar</button>
+  <button class="btn-reset" onclick="recuperar()">Olvidé mi contraseña</button>
 
-<button class="login" onclick="login()">Ingresar</button>
-<button class="recuperar" onclick="recuperarPassword()">Olvidé mi contraseña</button>
-<div id="loginMsg" class="msg"></div>
-</div>
-
-<!-- ============================= -->
-<!-- TARJETA RESET PASSWORD -->
-<!-- ============================= -->
-<div class="card hidden" id="resetCard">
-<h2>Restablecer Contraseña</h2>
-
-<input type="password" id="newPassword" placeholder="Nueva contraseña (mínimo 6 caracteres)">
-<input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
-
-<button class="reset" onclick="resetPassword()">Cambiar Contraseña</button>
-<div id="resetMsg" class="msg"></div>
+  <div id="msg" class="msg"></div>
 </div>
 
 <script>
-const API = "https://conductores-api.onrender.com";
-let formLoadTime = Date.now(); // Para validar tiempo humano
 
-// ==================================================
-// VALIDACIÓN EN TIEMPO REAL
-// ==================================================
-usuario.addEventListener("input", () => {
-  const val = usuario.value.trim();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-  if(emailRegex.test(val) || val.length >= 6){
-    usuario.classList.add("valid");
-    usuario.classList.remove("invalid");
-  } else {
-    usuario.classList.add("invalid");
-    usuario.classList.remove("valid");
-  }
-});
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-password.addEventListener("input", () => {
-  if(password.value.length >= 6){
-    password.classList.add("valid");
-    password.classList.remove("invalid");
-  } else {
-    password.classList.add("invalid");
-    password.classList.remove("valid");
-  }
-});
-
-// ==================================================
-// LOGIN USUARIO
-// ==================================================
 async function login(){
 
-  // 🛡️ Protección anti-bot (honeypot)
-  if(document.getElementById("website").value !== "") return;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("msg");
 
-  // 🛡️ Protección anti-bot (envío demasiado rápido)
-  if(Date.now() - formLoadTime < 1500){
-    loginMsg.innerText="Espera un momento antes de enviar ❌";
+  if(!email || !password){
+    msg.innerText="Completa todos los campos ❌";
     return;
   }
 
-  const usuarioVal = usuario.value.trim();
-  const passwordVal = password.value.trim();
+  msg.innerText="Verificando...";
 
-  if(!usuarioVal || !passwordVal){
-    loginMsg.innerText="Completa todos los campos ❌";
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    msg.innerText="Correo o contraseña incorrectos ❌";
     return;
   }
 
-  loginMsg.innerText="Verificando...";
+  msg.innerText="Ingreso exitoso ✅";
 
-  try{
-    const res = await fetch(`${API}/api/login-usuario`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ usuario: usuarioVal, password: passwordVal })
-    });
+  setTimeout(()=>{
+    window.location.href="panel-usuario.html";
+  },800);
+}
 
-    const text = await res.text();
+async function recuperar(){
 
-    if(!res.ok){
-      loginMsg.innerText="Usuario o clave incorrecta ❌";
-      return;
-    }
+  const email = prompt("Ingresa tu correo electrónico:");
+  if(!email) return;
 
-    const data = JSON.parse(text);
+  const msg = document.getElementById("msg");
 
-    localStorage.setItem("userToken", data.token);
+  msg.innerText="Enviando correo de recuperación...";
 
-    loginMsg.innerText="Ingreso exitoso ✅";
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email,{
+    redirectTo: window.location.origin + "/reset-password.html"
+  });
 
-    setTimeout(()=> 
-      window.location.href="perfil.html?token="+data.qr_token
-    ,800);
-
-  }catch(err){
-    console.error(err);
-    loginMsg.innerText="Error conectando con servidor ❌";
+  if(error){
+    msg.innerText="Error enviando correo ❌";
+  }else{
+    msg.innerText="Si el correo existe, se envió enlace ✅";
   }
 }
 
-// ==================================================
-// RECUPERAR CONTRASEÑA
-// ==================================================
-async function recuperarPassword(){
-
-  const input = prompt("Ingresa tu correo o cédula:");
-  if(!input) return;
-
-  loginMsg.innerText="Solicitando recuperación...";
-
-  try{
-    const res = await fetch(`${API}/api/admin/recuperar-password`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ usuario: input.trim() })
-    });
-
-    const text = await res.text();
-
-    if(res.ok){
-      loginMsg.innerText="Si el usuario existe, se envió enlace temporal ✅";
-    }else{
-      try{
-        const err = JSON.parse(text);
-        loginMsg.innerText=`Error: ${err.message || 'Solicitud inválida'} ❌`;
-      }catch{
-        loginMsg.innerText="Error inesperado del servidor ❌";
-        console.error(text);
-      }
-    }
-
-  }catch(err){
-    console.error(err);
-    loginMsg.innerText="Error conectando con servidor ❌";
-  }
-}
-
-// ==================================================
-// DETECTAR TOKEN EN URL
-// ==================================================
-const params = new URLSearchParams(window.location.search);
-const resetToken = params.get("reset_token");
-
-if(resetToken){
-  loginCard.classList.add("hidden");
-  resetCard.classList.remove("hidden");
-}
-
-// ==================================================
-// RESET PASSWORD
-// ==================================================
-async function resetPassword(){
-
-  const newPass = newPassword.value.trim();
-  const confirmPass = confirmPassword.value.trim();
-
-  if(newPass.length < 6){
-    resetMsg.innerText="Mínimo 6 caracteres ❌";
-    return;
-  }
-
-  if(newPass !== confirmPass){
-    resetMsg.innerText="Las contraseñas no coinciden ❌";
-    return;
-  }
-
-  resetMsg.innerText="Actualizando contraseña...";
-
-  try{
-    const res = await fetch(`${API}/api/usuario/reset-password`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ token: resetToken, new_password: newPass })
-    });
-
-    const text = await res.text();
-
-    if(res.ok){
-      resetMsg.innerText="Contraseña actualizada ✅";
-      setTimeout(()=> window.location.href="dashboard.html",1500);
-    }else{
-      try{
-        const err = JSON.parse(text);
-        resetMsg.innerText=`Error: ${err.message || 'No se pudo actualizar'} ❌`;
-      }catch{
-        resetMsg.innerText="Error inesperado del servidor ❌";
-        console.error(text);
-      }
-    }
-
-  }catch(err){
-    console.error(err);
-    resetMsg.innerText="Error conectando con servidor ❌";
-  }
-}
 </script>
-
 </body>
 </html>

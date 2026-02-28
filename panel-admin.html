@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{ font-family:Arial; background:#f4f6f8; padding:20px; }
+.card{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+h2{ text-align:center; color:#dc3545; }
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+th,td{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+}
+th{ background:#f1f1f1; }
+button{
+  padding:6px 12px;
+  border:none;
+  border-radius:20px;
+  background:#dc3545;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Panel Administrador</h2>
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Cédula</th>
+        <th>Placa</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function verificarAdmin(){
+  const { data } = await supabaseClient.auth.getUser();
+  if(!data.user){
+    window.location.href="dashboard.html";
+    return;
+  }
+
+  const { data: perfil } = await supabaseClient
+    .from("conductores")
+    .select("rol")
+    .eq("id", data.user.id)
+    .single();
+
+  if(perfil?.rol !== "admin"){
+    alert("Acceso denegado");
+    window.location.href="dashboard.html";
+    return;
+  }
+
+  cargarConductores();
+}
+
+async function cargarConductores(){
+  const { data } = await supabaseClient
+    .from("conductores")
+    .select("*");
+
+  const tbody = document.querySelector("#tabla tbody");
+  tbody.innerHTML="";
+
+  data.forEach(c=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML=`
+      <td>${c.nombres} ${c.apellidos}</td>
+      <td>${c.cedula}</td>
+      <td>${c.placa}</td>
+      <td><button onclick="eliminar('${c.id}')">Eliminar</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function eliminar(id){
+  if(!confirm("¿Eliminar conductor?")) return;
+
+  await supabaseClient.from("conductores").delete().eq("id",id);
+  cargarConductores();
+}
+
+verificarAdmin();
+</script>
+
+</body>
+</html>
