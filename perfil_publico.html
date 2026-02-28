@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
 body{
@@ -53,6 +54,10 @@ button{
   cursor:pointer;
 }
 button:hover{ background:#0b5ed7; }
+#qr-container{
+  margin-top:25px;
+  text-align:center;
+}
 @media(max-width:480px){
   .foto{ width:100%; }
 }
@@ -66,6 +71,7 @@ button:hover{ background:#0b5ed7; }
   <div id="contenido">Cargando perfil...</div>
   <div class="fotos-container" id="fotos-container"></div>
   <div id="documentos"></div>
+  <div id="qr-container"></div>
 </div>
 
 <script>
@@ -102,8 +108,10 @@ async function cargarPerfilPublico(){
     .select("*")
     .eq("conductor_id", conductor.id);
 
+  const listaDocs = documentos || [];
+
   function docUrl(tipo){
-    const doc = documentos.find(d => d.tipo === tipo);
+    const doc = listaDocs.find(d => d.tipo === tipo);
     if(!doc) return null;
 
     return supabaseClient
@@ -111,6 +119,10 @@ async function cargarPerfilPublico(){
       .from("documentos-conductores")
       .getPublicUrl(doc.url_archivo).data.publicUrl;
   }
+
+  // ==========================
+  // DATOS DEL CONDUCTOR
+  // ==========================
 
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre:</strong> ${conductor.nombres} ${conductor.apellidos}</div>
@@ -122,10 +134,21 @@ async function cargarPerfilPublico(){
     <div class="campo"><strong>Póliza:</strong> ${conductor.poliza_numero}</div>
   `;
 
+  // ==========================
+  // FOTOS
+  // ==========================
+
   const fotosCont = document.getElementById("fotos-container");
 
   const fotoVeh = docUrl("FOTO_VEHICULO");
   const fotoCond = docUrl("FOTO_CONDUCTOR");
+
+  if(fotoCond){
+    const img = document.createElement("img");
+    img.src = fotoCond;
+    img.className = "foto";
+    fotosCont.appendChild(img);
+  }
 
   if(fotoVeh){
     const img = document.createElement("img");
@@ -134,12 +157,9 @@ async function cargarPerfilPublico(){
     fotosCont.appendChild(img);
   }
 
-  if(fotoCond){
-    const img = document.createElement("img");
-    img.src = fotoCond;
-    img.className = "foto";
-    fotosCont.appendChild(img);
-  }
+  // ==========================
+  // BOTONES DOCUMENTOS
+  // ==========================
 
   const docsDiv = document.getElementById("documentos");
 
@@ -159,6 +179,21 @@ async function cargarPerfilPublico(){
       btn.onclick = () => window.open(url, "_blank");
       docsDiv.appendChild(btn);
     }
+  });
+
+  // ==========================
+  // QR FINAL
+  // ==========================
+
+  const qrContainer = document.getElementById("qr-container");
+  const canvas = document.createElement("canvas");
+  qrContainer.appendChild(canvas);
+
+  const currentUrl = window.location.href;
+
+  QRCode.toCanvas(canvas, currentUrl, {
+    width: 200,
+    errorCorrectionLevel: 'H'
   });
 
 }
