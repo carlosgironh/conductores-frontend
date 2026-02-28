@@ -7,20 +7,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* 1. Tipografía y Base */
+    /* ===== NO TOCAR ===== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    * {
-      box-sizing: border-box;
-      outline: none;
-    }
+    * { box-sizing: border-box; outline: none; }
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
       margin: 0;
       padding: 20px;
       height: 100vh;
-      /* Fondo con degradado radial profundo */
       background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
       color: #e2e8f0;
       display: flex;
@@ -28,7 +24,6 @@
       align-items: center;
     }
 
-    /* 2. Tarjeta Glassmorphism */
     .card {
       max-width: 450px;
       width: 100%;
@@ -52,7 +47,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* 3. Inputs Estilizados */
     input {
       width: 100%;
       padding: 16px 20px;
@@ -71,11 +65,8 @@
       box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
     }
 
-    input::placeholder {
-      color: #64748b;
-    }
+    input::placeholder { color: #64748b; }
 
-    /* 4. Botón de Acción */
     button {
       width: 100%;
       padding: 16px;
@@ -97,32 +88,22 @@
       filter: brightness(1.1);
     }
 
-    button:active {
-      transform: scale(0.98);
-    }
+    button:active { transform: scale(0.98); }
 
-    /* Mensajes de Estado */
-    .msg {
-      margin-top: 25px;
-      text-align: center;
-      font-weight: 500;
-      font-size: 14px;
-      min-height: 20px;
-    }
+    .msg { margin-top: 25px; text-align: center; font-weight: 500; font-size: 14px; min-height: 20px; }
   </style>
 </head>
 <body>
 
 <div class="card">
   <h2>Nuevo Administrador</h2>
-  <input id="email" type="email" placeholder="Correo electrónico">
-  <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)">
+  <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
+  <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password">
   <button onclick="crearAdmin()">Crear Administrador</button>
   <div id="msg" class="msg"></div>
 </div>
 
 <script>
-// Recuerda reemplazar con tus credenciales reales de Supabase
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
@@ -143,32 +124,40 @@ async function crearAdmin() {
   msg.innerText = "Registrando acceso...";
 
   try {
-    const { data, error } = await supabaseClient.auth.signUp({
-      email: email,
-      password: password
-    });
+    // Verificar si ya existe en tabla admins
+    const { data: existing } = await supabaseClient
+      .from('admins')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (existing) {
+      msg.innerHTML = "<span style='color: #f87171;'>Error: El correo ya es un administrador ❌</span>";
+      return;
+    }
+
+    // Crear usuario en auth.users
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
 
     if (error) {
       msg.innerHTML = `<span style='color: #f87171;'>Error: ${error.message} ❌</span>`;
       return;
     }
 
-    // Nota: El usuario se crea en auth.users. 
-    // Dependiendo de tu lógica, aquí asignarías el rol en tu tabla 'conductores' o 'usuarios'.
-    const { error: roleError } = await supabaseClient
-      .from('conductores') // Ajusta el nombre de la tabla si es necesario
-      .update({ rol: 'admin' })
-      .eq('auth_user_id', data.user.id);
+    // Insertar en tabla admins
+    const { error: insertError } = await supabaseClient
+      .from('admins')
+      .insert([{ auth_user_id: data.user.id, email }]);
 
-    if (roleError) {
-      msg.innerHTML = `<span style='color: #f87171;'>Error de rol: ${roleError.message} ❌</span>`;
+    if (insertError) {
+      msg.innerHTML = `<span style='color: #f87171;'>Error al asignar rol: ${insertError.message} ❌</span>`;
       return;
     }
 
     msg.innerHTML = "<span style='color: #4ade80;'>Administrador creado con éxito ✅</span>";
     document.getElementById("email").value = "";
     document.getElementById("password").value = "";
-    
+
   } catch (err) {
     console.error(err);
     msg.innerHTML = "<span style='color: #f87171;'>Error de conexión ❌</span>";

@@ -7,123 +7,28 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  /* 1. Tipografía y Base */
+  /* ===== NO TOCAR ===== */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-  * {
-    box-sizing: border-box;
-    outline: none;
-  }
-
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    margin: 0;
-    padding: 40px 20px;
-    min-height: 100vh;
-    /* Fondo con degradado radial profundo */
-    background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
-    color: #e2e8f0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
-
-  /* 2. Tarjeta Glassmorphism */
-  .card {
-    max-width: 1000px;
-    width: 100%;
-    background: rgba(30, 41, 59, 0.45);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 28px;
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
-    padding: 40px;
-  }
-
-  h2 {
-    text-align: center;
-    font-weight: 700;
-    font-size: 28px;
-    letter-spacing: -1px;
-    margin-bottom: 35px;
-    /* Degradado rojo/rosado suave para el título de Admin */
-    background: linear-gradient(to bottom, #ff4d4d, #b30000);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* 3. Estilo de Tabla Pro */
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* Espaciado entre filas */
-    margin-top: 20px;
-  }
-
-  th {
-    text-transform: uppercase;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    color: #94a3b8;
-    padding: 15px;
-    text-align: left;
-  }
-
-  td {
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
-    color: #f1f5f9;
-    font-size: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  /* Redondear esquinas de las filas */
-  td:first-child {
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px 0 0 12px;
-  }
-  td:last-child {
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 0 12px 12px 0;
-  }
-
-  tr:hover td {
-    background: rgba(255, 255, 255, 0.07);
-    transition: background 0.3s ease;
-  }
-
-  /* 4. Botón de Acción (Eliminar) */
-  button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 10px;
-    background: rgba(220, 53, 69, 0.1);
-    color: #ff4d4d;
-    font-weight: 600;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(220, 53, 69, 0.2);
-  }
-
-  button:hover {
-    background: #dc3545;
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-  }
-
-  button:active {
-    transform: scale(0.95);
-  }
-
-  /* Scrollbar personalizado para la tabla en móviles */
-  .table-container {
-    overflow-x: auto;
-  }
+  * { box-sizing: border-box; outline: none; }
+  body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 40px 20px; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%); color: #e2e8f0; display: flex; justify-content: center; align-items: flex-start; }
+  .card { max-width: 1000px; width: 100%; background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5); padding: 40px; }
+  h2 { text-align: center; font-weight: 700; font-size: 28px; letter-spacing: -1px; margin-bottom: 35px; background: linear-gradient(to bottom, #ff4d4d, #b30000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 20px; }
+  th { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #94a3b8; padding: 15px; text-align: left; }
+  td { padding: 15px; background: rgba(255, 255, 255, 0.03); color: #f1f5f9; font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+  td:first-child { border-left: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px 0 0 12px; }
+  td:last-child { border-right: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0 12px 12px 0; }
+  tr:hover td { background: rgba(255, 255, 255, 0.07); transition: background 0.3s ease; }
+  button { padding: 8px 16px; border: none; border-radius: 10px; background: rgba(220, 53, 69, 0.1); color: #ff4d4d; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(220, 53, 69, 0.2); margin-right:5px; }
+  button:hover { background: #dc3545; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3); }
+  button:active { transform: scale(0.95); }
+  .table-container { overflow-x: auto; }
+  #modalEdit { display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+  #modalEdit .modal-content { background: rgba(30,41,59,0.95); border-radius: 20px; padding: 30px; width: 500px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; max-height: 90%; overflow-y: auto; }
+  #modalEdit input, #modalEdit select { margin-bottom: 15px; padding: 10px; border-radius: 10px; border: none; font-size: 14px; width: 100%; }
+  #modalEdit .modal-buttons { display: flex; justify-content: flex-end; flex-wrap: wrap; }
+  #modalEdit .modal-buttons button { margin-left: 10px; margin-top:5px; }
+  #modalEdit label { margin-bottom: 5px; display: block; color: #cbd5e1; font-size: 13px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -140,80 +45,227 @@
           <th>Acción</th>
         </tr>
       </thead>
-      <tbody>
-        </tbody>
+      <tbody></tbody>
     </table>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CONDUCTOR -->
+<div id="modalEdit">
+  <div class="modal-content">
+    <h3>Editar Conductor</h3>
+
+    <label>Correo</label>
+    <input type="email" id="editEmail">
+
+    <label>Nombres</label>
+    <input type="text" id="editNombres">
+
+    <label>Apellidos</label>
+    <input type="text" id="editApellidos">
+
+    <label>Dirección</label>
+    <input type="text" id="editDireccion">
+
+    <label>Celular</label>
+    <input type="text" id="editCelular">
+
+    <label>Cédula</label>
+    <input type="text" id="editCedula">
+
+    <label>Licencia</label>
+    <input type="text" id="editLicencia">
+
+    <label>Placa</label>
+    <input type="text" id="editPlaca">
+
+    <label>Modelo</label>
+    <input type="text" id="editModelo">
+
+    <label>Marca</label>
+    <input type="text" id="editMarca">
+
+    <label>Color</label>
+    <input type="text" id="editColor">
+
+    <label>Número de póliza</label>
+    <input type="text" id="editPoliza">
+
+    <hr>
+
+    <label>Cédula (doc)</label>
+    <input type="file" id="editCedulaDoc">
+
+    <label>Licencia (doc)</label>
+    <input type="file" id="editLicenciaDoc">
+
+    <label>Registro Vehicular</label>
+    <input type="file" id="editRegistroDoc">
+
+    <label>Póliza</label>
+    <input type="file" id="editPolizaDoc">
+
+    <label>Foto Vehículo</label>
+    <input type="file" id="editFotoVehiculo">
+
+    <label>Foto Conductor</label>
+    <input type="file" id="editFotoConductor">
+
+    <label>Autorización Propietario</label>
+    <input type="file" id="editAuthPropietario">
+
+    <div class="modal-buttons">
+      <button onclick="cerrarModal()">Cancelar</button>
+      <button onclick="guardarEdicion()">Guardar Cambios</button>
+    </div>
   </div>
 </div>
 
 <script>
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+let conductorEditId = null;
+
+// Verificar admin
 async function verificarAdmin(){
   const { data: { user } } = await supabaseClient.auth.getUser();
-  if(!user){
-    window.location.href="dashboard.html";
-    return;
-  }
+  if(!user){ window.location.href="dashboard.html"; return; }
 
-  const { data: perfil } = await supabaseClient
-    .from("conductores")
-    .select("rol")
-    .eq("auth_user_id", user.id) // Cambiado a auth_user_id según la lógica de registro anterior
-    .single();
+  const { data: perfil } = await supabaseClient.from("admins")
+    .select("*").eq("email", user.email).single();
 
-  if(perfil?.rol !== "admin"){
-    alert("Acceso denegado: Se requieren privilegios de administrador.");
-    window.location.href="dashboard.html";
-    return;
-  }
+  if(!perfil){ alert("Acceso denegado."); window.location.href="dashboard.html"; return; }
 
   cargarConductores();
 }
 
+// Cargar conductores
 async function cargarConductores(){
-  const { data, error } = await supabaseClient
-    .from("conductores")
-    .select("*");
-
-  if (error) {
-    console.error("Error cargando datos:", error);
-    return;
-  }
+  const { data, error } = await supabaseClient.from("conductores").select("*");
+  if(error){ console.error(error); return; }
 
   const tbody = document.querySelector("#tabla tbody");
   tbody.innerHTML="";
 
-  data.forEach(c=>{
+  data.forEach(c => {
     const tr = document.createElement("tr");
-    tr.innerHTML=`
-      <td style="font-weight: 500;">${c.nombres} ${c.apellidos}</td>
+    tr.innerHTML = `
+      <td style="font-weight:500;">${c.nombres} ${c.apellidos}</td>
       <td>${c.cedula}</td>
-      <td style="font-family: monospace; letter-spacing: 1px;">${c.placa}</td>
-      <td><button onclick="eliminar('${c.id}')">Eliminar</button></td>
+      <td style="font-family: monospace; letter-spacing:1px;">${c.placa}</td>
+      <td>
+        <button onclick="abrirModal('${c.id}')">Editar</button>
+        <button onclick="descargarDocumentos('${c.id}')">Descargar</button>
+        <button onclick="eliminar('${c.id}')">Eliminar</button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-async function eliminar(id){
-  if(!confirm("¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.")) return;
+// Abrir modal con datos
+async function abrirModal(id){
+  conductorEditId = id;
+  const { data: c } = await supabaseClient.from("conductores").select("*").eq("id", id).single();
+  if(!c) return;
 
-  const { error } = await supabaseClient.from("conductores").delete().eq("id",id);
-  
-  if(error) {
-    alert("Error al eliminar: " + error.message);
-  } else {
-    cargarConductores();
+  document.getElementById("editEmail").value = c.email || "";
+  document.getElementById("editNombres").value = c.nombres || "";
+  document.getElementById("editApellidos").value = c.apellidos || "";
+  document.getElementById("editDireccion").value = c.direccion || "";
+  document.getElementById("editCelular").value = c.celular || "";
+  document.getElementById("editCedula").value = c.cedula || "";
+  document.getElementById("editLicencia").value = c.licencia || "";
+  document.getElementById("editPlaca").value = c.placa || "";
+  document.getElementById("editModelo").value = c.modelo || "";
+  document.getElementById("editMarca").value = c.marca || "";
+  document.getElementById("editColor").value = c.color || "";
+  document.getElementById("editPoliza").value = c.poliza_numero || "";
+
+  document.getElementById("modalEdit").style.display="flex";
+}
+
+// Cerrar modal
+function cerrarModal(){ conductorEditId = null; document.getElementById("modalEdit").style.display="none"; }
+
+// Guardar edición
+async function guardarEdicion(){
+  const campos = {
+    email: document.getElementById("editEmail").value.trim(),
+    nombres: document.getElementById("editNombres").value.trim(),
+    apellidos: document.getElementById("editApellidos").value.trim(),
+    direccion: document.getElementById("editDireccion").value.trim(),
+    celular: document.getElementById("editCelular").value.trim(),
+    cedula: document.getElementById("editCedula").value.trim(),
+    licencia: document.getElementById("editLicencia").value.trim(),
+    placa: document.getElementById("editPlaca").value.trim(),
+    modelo: document.getElementById("editModelo").value.trim(),
+    marca: document.getElementById("editMarca").value.trim(),
+    color: document.getElementById("editColor").value.trim(),
+    poliza_numero: document.getElementById("editPoliza").value.trim()
+  };
+
+  // Actualizar tabla
+  const { error } = await supabaseClient.from("conductores").update(campos).eq("id", conductorEditId);
+  if(error){ alert("Error al guardar: "+error.message); return; }
+
+  // Subir archivos si hay cambios
+  const fileIds = [
+    {input:"editCedulaDoc", tipo:"CEDULA"},
+    {input:"editLicenciaDoc", tipo:"LICENCIA"},
+    {input:"editRegistroDoc", tipo:"REGISTRO"},
+    {input:"editPolizaDoc", tipo:"POLIZA"},
+    {input:"editFotoVehiculo", tipo:"FOTO_VEHICULO"},
+    {input:"editFotoConductor", tipo:"FOTO_CONDUCTOR"},
+    {input:"editAuthPropietario", tipo:"AUTH_PROPIETARIO"}
+  ];
+
+  for(const f of fileIds){
+    const fileInput = document.getElementById(f.input);
+    if(fileInput.files.length>0){
+      const file = fileInput.files[0];
+      const path = `${conductorEditId}/${f.tipo}_${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabaseClient.storage.from("documentos-conductores").upload(path,file,{upsert:true});
+      if(uploadError){ alert("Error al subir "+f.tipo+": "+uploadError.message); }
+      else{
+        await supabaseClient.from("documentos").insert([{conductor_id: conductorEditId, tipo:f.tipo, url_archivo:path}]);
+      }
+    }
   }
+
+  cerrarModal();
+  cargarConductores();
+}
+
+// Descargar documentos
+async function descargarDocumentos(id){
+  const { data, error } = await supabaseClient.from("documentos").select("*").eq("conductor_id", id);
+  if(error){ alert("Error al obtener documentos: "+error.message); return; }
+
+  for(const doc of data){
+    const { data: archivo, error: downloadError } = await supabaseClient.storage.from("documentos-conductores").download(doc.url_archivo);
+    if(downloadError){ console.error("Error descargando", doc.tipo, downloadError); continue; }
+    const url = URL.createObjectURL(archivo);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = doc.url_archivo.split("/").pop();
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+}
+
+// Eliminar conductor
+async function eliminar(id){
+  if(!confirm("¿Seguro de eliminar este conductor?")) return;
+  const { error } = await supabaseClient.from("conductores").delete().eq("id", id);
+  if(error){ alert("Error al eliminar: "+error.message); } else { cargarConductores(); }
 }
 
 verificarAdmin();
 </script>
-
 </body>
 </html>
