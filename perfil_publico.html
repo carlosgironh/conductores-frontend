@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Perfil Público del Conductor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+.card{
+  max-width:720px;
+  margin:auto;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  padding:25px;
+}
+h2{
+  text-align:center;
+  color:#0d6efd;
+  margin-bottom:20px;
+}
+.campo{
+  margin-bottom:12px;
+  font-size:16px;
+}
+.fotos-container{
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:15px 0;
+}
+.foto{
+  width:48%;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+button{
+  margin:5px;
+  background:#0d6efd;
+  color:white;
+  border:none;
+  padding:8px 15px;
+  border-radius:8px;
+  cursor:pointer;
+}
+button:hover{ background:#0b5ed7; }
+@media(max-width:480px){
+  .foto{ width:100%; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>Perfil del Conductor</h2>
+  <div id="contenido">Cargando perfil...</div>
+  <div class="fotos-container" id="fotos-container"></div>
+  <div id="documentos"></div>
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function cargarPerfilPublico(){
+
+  const params = new URLSearchParams(window.location.search);
+  const conductorId = params.get("id");
+
+  if(!conductorId){
+    document.getElementById("contenido").innerText="Perfil no encontrado";
+    return;
+  }
+
+  const { data: conductor, error } = await supabaseClient
+    .from("conductores")
+    .select("*")
+    .eq("id", conductorId)
+    .single();
+
+  if(error || !conductor){
+    document.getElementById("contenido").innerText="Perfil no encontrado";
+    return;
+  }
+
+  const { data: documentos } = await supabaseClient
+    .from("documentos")
+    .select("*")
+    .eq("conductor_id", conductor.id);
+
+  function docUrl(tipo){
+    const doc = documentos.find(d => d.tipo === tipo);
+    if(!doc) return null;
+
+    return supabaseClient
+      .storage
+      .from("documentos-conductores")
+      .getPublicUrl(doc.url_archivo).data.publicUrl;
+  }
+
+  document.getElementById("contenido").innerHTML = `
+    <div class="campo"><strong>Nombre:</strong> ${conductor.nombres} ${conductor.apellidos}</div>
+    <div class="campo"><strong>Cédula:</strong> ${conductor.cedula}</div>
+    <div class="campo"><strong>Licencia:</strong> ${conductor.licencia}</div>
+    <div class="campo"><strong>Vehículo:</strong> ${conductor.marca} ${conductor.modelo}</div>
+    <div class="campo"><strong>Placa:</strong> ${conductor.placa}</div>
+    <div class="campo"><strong>Color:</strong> ${conductor.color}</div>
+    <div class="campo"><strong>Póliza:</strong> ${conductor.poliza_numero}</div>
+  `;
+
+  const fotosCont = document.getElementById("fotos-container");
+
+  const fotoVeh = docUrl("FOTO_VEHICULO");
+  const fotoCond = docUrl("FOTO_CONDUCTOR");
+
+  if(fotoVeh){
+    const img = document.createElement("img");
+    img.src = fotoVeh;
+    img.className = "foto";
+    fotosCont.appendChild(img);
+  }
+
+  if(fotoCond){
+    const img = document.createElement("img");
+    img.src = fotoCond;
+    img.className = "foto";
+    fotosCont.appendChild(img);
+  }
+
+  const docsDiv = document.getElementById("documentos");
+
+  const tipos = [
+    "CEDULA",
+    "LICENCIA",
+    "REGISTRO",
+    "POLIZA",
+    "AUTH_PROPIETARIO"
+  ];
+
+  tipos.forEach(tipo => {
+    const url = docUrl(tipo);
+    if(url){
+      const btn = document.createElement("button");
+      btn.innerText = "Ver " + tipo;
+      btn.onclick = () => window.open(url, "_blank");
+      docsDiv.appendChild(btn);
+    }
+  });
+
+}
+
+cargarPerfilPublico();
+</script>
+
+</body>
+</html>
