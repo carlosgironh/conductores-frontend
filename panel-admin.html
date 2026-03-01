@@ -29,19 +29,28 @@
   #modalEdit .modal-buttons { display: flex; justify-content: flex-end; flex-wrap: wrap; }
   #modalEdit .modal-buttons button { margin-left: 10px; margin-top:5px; }
   #modalEdit label { margin-bottom: 5px; display: block; color: #cbd5e1; font-size: 13px; font-weight: 500; }
+  .doc-container { margin-bottom: 10px; position: relative; }
+  .doc-container button { position: absolute; right: 0; top: 0; font-size: 10px; padding: 3px 6px; background: rgba(255,0,0,0.2); color: #fff; border-radius:5px; }
 </style>
 </head>
 <body>
 
 <div class="card">
   <h2>Panel Administrador</h2>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+    <span id="correoAdmin" style="font-weight:500;"></span>
+    <button style="background:#ff4d4d; color:white;" onclick="cerrarSesion()">Cerrar Sesión</button>
+  </div>
+
   <div class="table-container">
     <table id="tabla">
       <thead>
         <tr>
           <th>Nombre Completo</th>
+          <th>Correo</th>
           <th>Cédula</th>
           <th>Placa</th>
+          <th>Documentos</th>
           <th>Acción</th>
         </tr>
       </thead>
@@ -50,73 +59,39 @@
   </div>
 </div>
 
-<!-- MODAL EDITAR CONDUCTOR -->
 <div id="modalEdit">
   <div class="modal-content">
     <h3>Editar Conductor</h3>
-
-    <label>Correo</label>
-    <input type="email" id="editEmail">
-
-    <label>Nombres</label>
-    <input type="text" id="editNombres">
-
-    <label>Apellidos</label>
-    <input type="text" id="editApellidos">
-
-    <label>Dirección</label>
-    <input type="text" id="editDireccion">
-
-    <label>Celular</label>
-    <input type="text" id="editCelular">
-
-    <label>Cédula</label>
-    <input type="text" id="editCedula">
-
-    <label>Licencia</label>
-    <input type="text" id="editLicencia">
-
-    <label>Placa</label>
-    <input type="text" id="editPlaca">
-
-    <label>Modelo</label>
-    <input type="text" id="editModelo">
-
-    <label>Marca</label>
-    <input type="text" id="editMarca">
-
-    <label>Color</label>
-    <input type="text" id="editColor">
-
-    <label>Número de póliza</label>
-    <input type="text" id="editPoliza">
-
+    <label>Correo</label><input type="email" id="editEmail">
+    <label>Nombres</label><input type="text" id="editNombres">
+    <label>Apellidos</label><input type="text" id="editApellidos">
+    <label>Dirección</label><input type="text" id="editDireccion">
+    <label>Celular</label><input type="text" id="editCelular">
+    <label>Cédula</label><input type="text" id="editCedula">
+    <label>Licencia</label><input type="text" id="editLicencia">
+    <label>Placa</label><input type="text" id="editPlaca">
+    <label>Modelo</label><input type="text" id="editModelo">
+    <label>Marca</label><input type="text" id="editMarca">
+    <label>Color</label><input type="text" id="editColor">
+    <label>Número de póliza</label><input type="text" id="editPoliza">
     <hr>
-
-    <label>Cédula (doc)</label>
-    <input type="file" id="editCedulaDoc">
-
-    <label>Licencia (doc)</label>
-    <input type="file" id="editLicenciaDoc">
-
-    <label>Registro Vehicular</label>
-    <input type="file" id="editRegistroDoc">
-
-    <label>Póliza</label>
-    <input type="file" id="editPolizaDoc">
-
-    <label>Foto Vehículo</label>
-    <input type="file" id="editFotoVehiculo">
-
-    <label>Foto Conductor</label>
-    <input type="file" id="editFotoConductor">
-
-    <label>Autorización Propietario</label>
-    <input type="file" id="editAuthPropietario">
-
+    <label>Motivo desactivación (opcional)</label>
+    <input type="text" id="editMotivo" placeholder="Solo si deshabilita el perfil">
+    <hr>
+    <h4>Documentos actuales</h4>
+    <div id="documentosExistentes" style="margin-bottom:15px;"></div>
+    <label>Cédula (doc)</label><input type="file" id="editCedulaDoc">
+    <label>Licencia (doc)</label><input type="file" id="editLicenciaDoc">
+    <label>Registro Vehicular</label><input type="file" id="editRegistroDoc">
+    <label>Póliza</label><input type="file" id="editPolizaDoc">
+    <label>Foto Vehículo</label><input type="file" id="editFotoVehiculo">
+    <label>Foto Conductor</label><input type="file" id="editFotoConductor">
+    <label>Autorización Propietario</label><input type="file" id="editAuthPropietario">
     <div class="modal-buttons">
       <button onclick="cerrarModal()">Cancelar</button>
       <button onclick="guardarEdicion()">Guardar Cambios</button>
+      <button onclick="toggleActivo(conductorEditId, false)">Deshabilitar/Habilitar</button>
+      <button onclick="eliminar(conductorEditId)">Eliminar</button>
     </div>
   </div>
 </div>
@@ -131,16 +106,19 @@ let conductorEditId = null;
 
 // Verificar admin
 async function verificarAdmin(){
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const { data, error } = await supabaseClient.auth.getUser();
+  const user = data?.user;
   if(!user){ window.location.href="dashboard.html"; return; }
+  document.getElementById("correoAdmin").textContent = "Usuario: " + user.email;
 
-  const { data: perfil } = await supabaseClient.from("admins")
-    .select("*").eq("email", user.email).single();
-
+  const { data: perfil } = await supabaseClient.from("admins").select("*").eq("email", user.email).single();
   if(!perfil){ alert("Acceso denegado."); window.location.href="dashboard.html"; return; }
 
   cargarConductores();
 }
+
+// Cerrar sesión
+async function cerrarSesion(){ await supabaseClient.auth.signOut(); window.location.href="dashboard.html"; }
 
 // Cargar conductores
 async function cargarConductores(){
@@ -148,17 +126,20 @@ async function cargarConductores(){
   if(error){ console.error(error); return; }
 
   const tbody = document.querySelector("#tabla tbody");
-  tbody.innerHTML="";
+  tbody.innerHTML = "";
 
   data.forEach(c => {
     const tr = document.createElement("tr");
+    tr.style.opacity = c.activo===false ? 0.5 : 1;
+
     tr.innerHTML = `
       <td style="font-weight:500;">${c.nombres} ${c.apellidos}</td>
+      <td>${c.email || ''}</td>
       <td>${c.cedula}</td>
       <td style="font-family: monospace; letter-spacing:1px;">${c.placa}</td>
+      <td><button onclick="abrirModal('${c.id}')">Ver/Editar</button></td>
       <td>
-        <button onclick="abrirModal('${c.id}')">Editar</button>
-        <button onclick="descargarDocumentos('${c.id}')">Descargar</button>
+        <button onclick="toggleActivo('${c.id}',${c.activo})">${c.activo? 'Deshabilitar':'Habilitar'}</button>
         <button onclick="eliminar('${c.id}')">Eliminar</button>
       </td>
     `;
@@ -166,7 +147,7 @@ async function cargarConductores(){
   });
 }
 
-// Abrir modal con datos
+// Abrir modal
 async function abrirModal(id){
   conductorEditId = id;
   const { data: c } = await supabaseClient.from("conductores").select("*").eq("id", id).single();
@@ -184,12 +165,63 @@ async function abrirModal(id){
   document.getElementById("editMarca").value = c.marca || "";
   document.getElementById("editColor").value = c.color || "";
   document.getElementById("editPoliza").value = c.poliza_numero || "";
+  document.getElementById("editMotivo").value = c.motivo_desactivacion || "";
+
+  // Cargar documentos
+  const { data: docs } = await supabaseClient.from("documentos").select("*").eq("conductor_id", id);
+  const divDocs = document.getElementById("documentosExistentes");
+  divDocs.innerHTML = "";
+
+  if(docs && docs.length){
+    docs.forEach(d => {
+      const container = document.createElement("div");
+      container.className = "doc-container";
+      const title = document.createElement("strong");
+      title.textContent = d.tipo;
+      container.appendChild(title);
+
+      const ext = d.url_archivo.split('.').pop().toLowerCase();
+      if(["png","jpg","jpeg","gif","webp"].includes(ext)){
+        const img = document.createElement("img");
+        img.src = d.url_archivo;
+        img.style.maxWidth="100%";
+        img.style.maxHeight="150px";
+        img.style.display="block";
+        img.style.marginTop="5px";
+        container.appendChild(img);
+      } else if(ext === "pdf"){
+        const iframe = document.createElement("iframe");
+        iframe.src = d.url_archivo;
+        iframe.style.width="100%";
+        iframe.style.height="200px";
+        iframe.style.marginTop="5px";
+        container.appendChild(iframe);
+      } else {
+        const link = document.createElement("a");
+        link.href = d.url_archivo;
+        link.target="_blank";
+        link.textContent = "Abrir documento";
+        link.style.display="block";
+        link.style.color="#ff4d4d";
+        link.style.marginTop="5px";
+        container.appendChild(link);
+      }
+
+      const btnDel = document.createElement("button");
+      btnDel.textContent="Eliminar";
+      btnDel.onclick = async () => {
+        if(!confirm(`Eliminar documento ${d.tipo}?`)) return;
+        const { error } = await supabaseClient.from("documentos").delete().eq("id", d.id);
+        if(error){ alert("Error eliminando: "+error.message); return; }
+        abrirModal(conductorEditId);
+      };
+      container.appendChild(btnDel);
+      divDocs.appendChild(container);
+    });
+  } else divDocs.textContent="No hay documentos cargados.";
 
   document.getElementById("modalEdit").style.display="flex";
 }
-
-// Cerrar modal
-function cerrarModal(){ conductorEditId = null; document.getElementById("modalEdit").style.display="none"; }
 
 // Guardar edición
 async function guardarEdicion(){
@@ -205,65 +237,36 @@ async function guardarEdicion(){
     modelo: document.getElementById("editModelo").value.trim(),
     marca: document.getElementById("editMarca").value.trim(),
     color: document.getElementById("editColor").value.trim(),
-    poliza_numero: document.getElementById("editPoliza").value.trim()
+    poliza_numero: document.getElementById("editPoliza").value.trim(),
+    motivo_desactivacion: document.getElementById("editMotivo").value.trim()
   };
-
-  // Actualizar tabla
   const { error } = await supabaseClient.from("conductores").update(campos).eq("id", conductorEditId);
   if(error){ alert("Error al guardar: "+error.message); return; }
-
-  // Subir archivos si hay cambios
-  const fileIds = [
-    {input:"editCedulaDoc", tipo:"CEDULA"},
-    {input:"editLicenciaDoc", tipo:"LICENCIA"},
-    {input:"editRegistroDoc", tipo:"REGISTRO"},
-    {input:"editPolizaDoc", tipo:"POLIZA"},
-    {input:"editFotoVehiculo", tipo:"FOTO_VEHICULO"},
-    {input:"editFotoConductor", tipo:"FOTO_CONDUCTOR"},
-    {input:"editAuthPropietario", tipo:"AUTH_PROPIETARIO"}
-  ];
-
-  for(const f of fileIds){
-    const fileInput = document.getElementById(f.input);
-    if(fileInput.files.length>0){
-      const file = fileInput.files[0];
-      const path = `${conductorEditId}/${f.tipo}_${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabaseClient.storage.from("documentos-conductores").upload(path,file,{upsert:true});
-      if(uploadError){ alert("Error al subir "+f.tipo+": "+uploadError.message); }
-      else{
-        await supabaseClient.from("documentos").insert([{conductor_id: conductorEditId, tipo:f.tipo, url_archivo:path}]);
-      }
-    }
-  }
-
   cerrarModal();
   cargarConductores();
 }
 
-// Descargar documentos
-async function descargarDocumentos(id){
-  const { data, error } = await supabaseClient.from("documentos").select("*").eq("conductor_id", id);
-  if(error){ alert("Error al obtener documentos: "+error.message); return; }
-
-  for(const doc of data){
-    const { data: archivo, error: downloadError } = await supabaseClient.storage.from("documentos-conductores").download(doc.url_archivo);
-    if(downloadError){ console.error("Error descargando", doc.tipo, downloadError); continue; }
-    const url = URL.createObjectURL(archivo);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = doc.url_archivo.split("/").pop();
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+// Toggle activo/desactivo
+async function toggleActivo(id,actual){
+  let motivo="";
+  if(actual){
+    motivo=prompt("Ingrese motivo de desactivación para el conductor:");
+    if(!motivo){ alert("Debe ingresar un motivo."); return; }
   }
+  const { error } = await supabaseClient.from("conductores").update({activo:!actual, motivo_desactivacion:motivo}).eq("id",id);
+  if(error){ alert("Error actualizando estado: "+error.message); return; }
+  cargarConductores();
 }
 
-// Eliminar conductor
+// Eliminar
 async function eliminar(id){
   if(!confirm("¿Seguro de eliminar este conductor?")) return;
-  const { error } = await supabaseClient.from("conductores").delete().eq("id", id);
+  const { error } = await supabaseClient.from("conductores").delete().eq("id",id);
   if(error){ alert("Error al eliminar: "+error.message); } else { cargarConductores(); }
 }
+
+// Cerrar modal
+function cerrarModal(){ conductorEditId=null; document.getElementById("modalEdit").style.display="none"; }
 
 verificarAdmin();
 </script>
