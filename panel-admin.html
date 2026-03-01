@@ -62,7 +62,7 @@
 <div id="modalEdit">
   <div class="modal-content">
     <h3>Editar Conductor</h3>
-    <label>Correo</label><input type="email" id="editEmail">
+    <label>Correo registrado</label><input type="email" id="editEmail" readonly>
     <label>Nombres</label><input type="text" id="editNombres">
     <label>Apellidos</label><input type="text" id="editApellidos">
     <label>Dirección</label><input type="text" id="editDireccion">
@@ -106,7 +106,7 @@ let conductorEditId = null;
 
 // Verificar admin
 async function verificarAdmin(){
-  const { data, error } = await supabaseClient.auth.getUser();
+  const { data } = await supabaseClient.auth.getUser();
   const user = data?.user;
   if(!user){ window.location.href="dashboard.html"; return; }
   document.getElementById("correoAdmin").textContent = "Usuario: " + user.email;
@@ -180,32 +180,14 @@ async function abrirModal(id){
       title.textContent = d.tipo;
       container.appendChild(title);
 
-      const ext = d.url_archivo.split('.').pop().toLowerCase();
-      if(["png","jpg","jpeg","gif","webp"].includes(ext)){
-        const img = document.createElement("img");
-        img.src = d.url_archivo;
-        img.style.maxWidth="100%";
-        img.style.maxHeight="150px";
-        img.style.display="block";
-        img.style.marginTop="5px";
-        container.appendChild(img);
-      } else if(ext === "pdf"){
-        const iframe = document.createElement("iframe");
-        iframe.src = d.url_archivo;
-        iframe.style.width="100%";
-        iframe.style.height="200px";
-        iframe.style.marginTop="5px";
-        container.appendChild(iframe);
-      } else {
-        const link = document.createElement("a");
-        link.href = d.url_archivo;
-        link.target="_blank";
-        link.textContent = "Abrir documento";
-        link.style.display="block";
-        link.style.color="#ff4d4d";
-        link.style.marginTop="5px";
-        container.appendChild(link);
-      }
+      const link = document.createElement("a");
+      link.href = d.url_archivo;
+      link.target = "_blank";
+      link.textContent = "Abrir documento";
+      link.style.display = "block";
+      link.style.color = "#ff4d4d";
+      link.style.marginTop = "5px";
+      container.appendChild(link);
 
       const btnDel = document.createElement("button");
       btnDel.textContent="Eliminar";
@@ -226,7 +208,6 @@ async function abrirModal(id){
 // Guardar edición
 async function guardarEdicion(){
   const campos = {
-    email: document.getElementById("editEmail").value.trim(),
     nombres: document.getElementById("editNombres").value.trim(),
     apellidos: document.getElementById("editApellidos").value.trim(),
     direccion: document.getElementById("editDireccion").value.trim(),
