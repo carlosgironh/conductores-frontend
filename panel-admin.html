@@ -7,51 +7,767 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  /* ===== NO TOCAR ===== */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  * { box-sizing: border-box; outline: none; }
-  body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 40px 20px; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%); color: #e2e8f0; display: flex; justify-content: center; align-items: flex-start; }
-  .card { max-width: 1000px; width: 100%; background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5); padding: 40px; }
-  h2 { text-align: center; font-weight: 700; font-size: 28px; letter-spacing: -1px; margin-bottom: 35px; background: linear-gradient(to bottom, #ff4d4d, #b30000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 20px; }
-  th { text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #94a3b8; padding: 15px; text-align: left; }
-  td { padding: 15px; background: rgba(255, 255, 255, 0.03); color: #f1f5f9; font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-  td:first-child { border-left: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px 0 0 12px; }
-  td:last-child { border-right: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0 12px 12px 0; }
-  tr:hover td { background: rgba(255, 255, 255, 0.07); transition: background 0.3s ease; }
-  button { padding: 8px 16px; border: none; border-radius: 10px; background: rgba(220, 53, 69, 0.1); color: #ff4d4d; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(220, 53, 69, 0.2); margin-right:5px; }
-  button:hover { background: #dc3545; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3); }
-  button:active { transform: scale(0.95); }
-  .table-container { overflow-x: auto; }
-  #modalEdit { display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-  #modalEdit .modal-content { background: rgba(30,41,59,0.95); border-radius: 20px; padding: 30px; width: 500px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; max-height: 90%; overflow-y: auto; }
-  #modalEdit input, #modalEdit select { margin-bottom: 15px; padding: 10px; border-radius: 10px; border: none; font-size: 14px; width: 100%; }
-  #modalEdit .modal-buttons { display: flex; justify-content: flex-end; flex-wrap: wrap; }
-  #modalEdit .modal-buttons button { margin-left: 10px; margin-top:5px; }
-  #modalEdit label { margin-bottom: 5px; display: block; color: #cbd5e1; font-size: 13px; font-weight: 500; }
-  .doc-container { margin-bottom: 10px; position: relative; }
-  .doc-container button { position: absolute; right: 0; top: 0; font-size: 10px; padding: 3px 6px; background: rgba(255,0,0,0.2); color: #fff; border-radius:5px; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  
+  * { 
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+  }
+  
+  body { 
+    font-family: 'Inter', -apple-system, sans-serif; 
+    min-height: 100vh; 
+    padding: 40px 20px; 
+    background: 
+      radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+    color: #f8fafc; 
+    display: flex; 
+    justify-content: center; 
+    align-items: flex-start;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%);
+    background-size: 150px 150px;
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+  
+  .card { 
+    max-width: 1200px; 
+    width: 100%; 
+    background: rgba(30, 41, 59, 0.4); 
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px); 
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px; 
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    padding: 50px 45px; 
+    position: relative;
+    z-index: 1;
+    animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+    overflow: hidden;
+  }
+
+  @keyframes cardEntry {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.7s;
+    pointer-events: none;
+    border-radius: 32px;
+  }
+
+  .card:hover::before {
+    left: 100%;
+  }
+  
+  h2 { 
+    text-align: center; 
+    font-weight: 800; 
+    font-size: 32px; 
+    letter-spacing: -0.5px; 
+    margin-bottom: 35px;
+    background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 25px;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  #correoAdmin {
+    font-weight: 600;
+    color: #e2e8f0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #correoAdmin::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+  }
+
+  .header-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-create-admin {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-create-admin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+  }
+
+  .btn-create-admin:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .btn-create-admin svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-logout {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 14px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .btn-logout:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-logout:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  table { 
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0 10px; 
+    margin-top: 20px; 
+  }
+  
+  th { 
+    text-transform: uppercase; 
+    font-size: 11px; 
+    font-weight: 700; 
+    letter-spacing: 1.5px; 
+    color: #94a3b8; 
+    padding: 15px; 
+    text-align: left; 
+  }
+  
+  td { 
+    padding: 18px 15px; 
+    background: rgba(15, 23, 42, 0.4); 
+    color: #f1f5f9; 
+    font-size: 14px; 
+    border-top: 1px solid rgba(255, 255, 255, 0.05); 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    transition: all 0.3s ease;
+  }
+  
+  td:first-child { 
+    border-left: 1px solid rgba(255, 255, 255, 0.05); 
+    border-radius: 14px 0 0 14px; 
+    font-weight: 600;
+  }
+  
+  td:last-child { 
+    border-right: 1px solid rgba(255, 255, 255, 0.05); 
+    border-radius: 0 14px 14px 0; 
+  }
+  
+  tr:hover td { 
+    background: rgba(255, 255, 255, 0.07); 
+    transform: translateX(5px);
+  }
+
+  .btn-action {
+    padding: 8px 16px; 
+    border: none; 
+    border-radius: 10px; 
+    background: rgba(99, 102, 241, 0.1); 
+    color: #818cf8; 
+    font-weight: 600; 
+    font-size: 12px; 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    margin-right: 8px;
+    margin-bottom: 5px;
+    display: inline-block;
+  }
+
+  .btn-action:hover { 
+    background: #6366f1; 
+    color: white; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); 
+  }
+
+  .btn-action:active { 
+    transform: scale(0.95); 
+  }
+
+  .btn-action.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-action.danger:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-action.toggle {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.2);
+  }
+
+  .btn-action.toggle:hover {
+    background: #22c55e;
+    color: white;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  }
+
+  .btn-action.toggle.inactive {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+
+  .btn-action.toggle.inactive:hover {
+    background: #f59e0b;
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  }
+
+  .btn-action.view {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+
+  .btn-action.view:hover {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+  
+  .table-container { 
+    overflow-x: auto; 
+    border-radius: 16px;
+  }
+
+  .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .status-indicator.active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+  }
+
+  .status-indicator.inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+  }
+
+  .status-indicator.active .status-dot {
+    background: #4ade80;
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+
+  .status-indicator.inactive .status-dot {
+    background: #f87171;
+    animation: none;
+  }
+
+  @keyframes pulse-dot {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+  }
+
+  td .email-cell {
+    font-size: 12px;
+    color: #94a3b8;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  td .email-cell:hover {
+    color: #60a5fa;
+    cursor: pointer;
+  }
+  
+  #modalEdit { 
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left:0; 
+    top:0; 
+    width:100%; 
+    height:100%; 
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    justify-content: center; 
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  #modalEdit .modal-content { 
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px; 
+    padding: 35px; 
+    width: 650px; 
+    max-width: 90%; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    display: flex; 
+    flex-direction: column; 
+    max-height: 90vh; 
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideUp 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .btn-close-modal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  .btn-close-modal:hover {
+    background: #ef4444;
+    color: white;
+    transform: rotate(90deg);
+  }
+
+  .btn-close-modal svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  #modalEdit h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-right: 50px;
+  }
+
+  #modalEdit h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #60a5fa;
+    margin: 25px 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  #modalEdit input, #modalEdit select { 
+    margin-bottom: 15px; 
+    padding: 14px 18px; 
+    border-radius: 12px; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.6);
+    color: white;
+    font-size: 14px; 
+    width: 100%;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  #modalEdit input:focus {
+    border-color: #6366f1;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    outline: none;
+  }
+
+  #modalEdit input[readonly] {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+  
+  #modalEdit .modal-buttons { 
+    display: flex; 
+    justify-content: flex-end; 
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  #modalEdit .modal-buttons button {
+    margin: 0;
+  }
+  
+  #modalEdit label { 
+    margin-bottom: 8px; 
+    display: block; 
+    color: #cbd5e1; 
+    font-size: 13px; 
+    font-weight: 600; 
+  }
+
+  #modalEdit hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 25px 0;
+  }
+  
+  .doc-container { 
+    margin-bottom: 15px; 
+    position: relative; 
+    background: rgba(15, 23, 42, 0.4);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .doc-container strong {
+    color: #60a5fa;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .doc-preview {
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .doc-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .doc-preview iframe {
+    width: 100%;
+    height: 250px;
+    border: none;
+  }
+
+  .doc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+
+  .doc-link:hover {
+    background: #6366f1;
+    color: white;
+  }
+
+  .doc-container button { 
+    position: absolute; 
+    right: 10px; 
+    top: 10px; 
+    font-size: 11px; 
+    padding: 6px 12px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .doc-container button:hover {
+    background: #ef4444;
+    color: white;
+  }
+
+  .no-docs {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+
+  .file-input-group {
+    margin-bottom: 15px;
+  }
+
+  .file-input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .file-input-group input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.4);
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .file-input-group input[type="file"]:hover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    z-index: 2000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    max-width: 350px;
+  }
+
+  .toast.show {
+    transform: translateX(0);
+  }
+
+  .toast.success {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+  }
+
+  .toast.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      padding: 30px 20px;
+      border-radius: 24px;
+    }
+
+    h2 {
+      font-size: 26px;
+    }
+
+    .header-bar {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .header-buttons {
+      width: 100%;
+      justify-content: center;
+    }
+
+    th {
+      font-size: 10px;
+      padding: 10px 8px;
+    }
+
+    td {
+      padding: 14px 10px;
+      font-size: 13px;
+    }
+
+    .btn-action {
+      padding: 6px 12px;
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    td .email-cell {
+      max-width: 100px;
+    }
+
+    .btn-close-modal {
+      top: 15px;
+      right: 15px;
+      width: 35px;
+      height: 35px;
+    }
+
+    #modalEdit h3 {
+      font-size: 20px;
+      padding-right: 40px;
+    }
+
+    .toast {
+      left: 20px;
+      right: 20px;
+      max-width: none;
+    }
+  }
 </style>
 </head>
 <body>
 
 <div class="card">
   <h2>Panel Administrador</h2>
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-    <span id="correoAdmin" style="font-weight:500;"></span>
-    <button style="background:#ff4d4d; color:white;" onclick="cerrarSesion()">Cerrar Sesión</button>
+  
+  <div class="header-bar">
+    <span id="correoAdmin"></span>
+    <div class="header-buttons">
+      <button class="btn-create-admin" onclick="window.location.href='admin.html'">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+        Crear Admin
+      </button>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
   </div>
 
   <div class="table-container">
     <table id="tabla">
       <thead>
         <tr>
-          <th>Nombre Completo</th>
+          <th>Estado</th>
+          <th>Nombre</th>
           <th>Correo</th>
           <th>Cédula</th>
           <th>Placa</th>
-          <th>Documentos</th>
-          <th>Acción</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -61,6 +777,12 @@
 
 <div id="modalEdit">
   <div class="modal-content">
+    <button class="btn-close-modal" onclick="cerrarModal()" title="Cerrar">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+
     <h3>Editar Conductor</h3>
     <label>Correo registrado</label><input type="email" id="editEmail" readonly>
     <label>Nombres</label><input type="text" id="editNombres">
@@ -78,23 +800,55 @@
     <label>Motivo desactivación (opcional)</label>
     <input type="text" id="editMotivo" placeholder="Solo si deshabilita el perfil">
     <hr>
-    <h4>Documentos actuales</h4>
+    <h4>Documentos Cargados</h4>
     <div id="documentosExistentes" style="margin-bottom:15px;"></div>
-    <label>Cédula (doc)</label><input type="file" id="editCedulaDoc">
-    <label>Licencia (doc)</label><input type="file" id="editLicenciaDoc">
-    <label>Registro Vehicular</label><input type="file" id="editRegistroDoc">
-    <label>Póliza</label><input type="file" id="editPolizaDoc">
-    <label>Foto Vehículo</label><input type="file" id="editFotoVehiculo">
-    <label>Foto Conductor</label><input type="file" id="editFotoConductor">
-    <label>Autorización Propietario</label><input type="file" id="editAuthPropietario">
+    <h4>Subir Nuevos Documentos</h4>
+    
+    <div class="file-input-group">
+      <label for="editCedulaDoc">Cédula (doc)</label>
+      <input type="file" id="editCedulaDoc" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
+    
+    <div class="file-input-group">
+      <label for="editLicenciaDoc">Licencia (doc)</label>
+      <input type="file" id="editLicenciaDoc" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
+    
+    <div class="file-input-group">
+      <label for="editRegistroDoc">Registro Vehicular</label>
+      <input type="file" id="editRegistroDoc" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
+    
+    <div class="file-input-group">
+      <label for="editPolizaDoc">Póliza</label>
+      <input type="file" id="editPolizaDoc" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
+    
+    <div class="file-input-group">
+      <label for="editFotoVehiculo">Foto Vehículo</label>
+      <input type="file" id="editFotoVehiculo" accept=".jpg,.jpeg,.png">
+    </div>
+    
+    <div class="file-input-group">
+      <label for="editFotoConductor">Foto Conductor</label>
+      <input type="file" id="editFotoConductor" accept=".jpg,.jpeg,.png">
+    </div>
+    
+    <div class="file-input-group">
+      <label for="editAuthPropietario">Autorización Propietario</label>
+      <input type="file" id="editAuthPropietario" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
+    
     <div class="modal-buttons">
-      <button onclick="cerrarModal()">Cancelar</button>
-      <button onclick="guardarEdicion()">Guardar Cambios</button>
-      <button onclick="toggleActivo(conductorEditId, false)">Deshabilitar/Habilitar</button>
-      <button onclick="eliminar(conductorEditId)">Eliminar</button>
+      <button class="btn-action" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-action" onclick="guardarEdicion()">Guardar Cambios</button>
+      <button class="btn-action toggle" id="btnToggleModal" onclick="toggleDesdeModal()">Activar/Desactivar</button>
+      <button class="btn-action danger" onclick="eliminar(conductorEditId)">Eliminar</button>
     </div>
   </div>
 </div>
+
+<div id="toast" class="toast"></div>
 
 <script>
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
@@ -103,13 +857,24 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let conductorEditId = null;
+let conductorEditActivo = null;
+const emailCache = new Map();
 
-// Verificar admin
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast ${type}`;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
 async function verificarAdmin(){
   const { data } = await supabaseClient.auth.getUser();
   const user = data?.user;
   if(!user){ window.location.href="dashboard.html"; return; }
-  document.getElementById("correoAdmin").textContent = "Usuario: " + user.email;
+  document.getElementById("correoAdmin").textContent = user.email;
 
   const { data: perfil } = await supabaseClient.from("admins").select("*").eq("email", user.email).single();
   if(!perfil){ alert("Acceso denegado."); window.location.href="dashboard.html"; return; }
@@ -117,43 +882,123 @@ async function verificarAdmin(){
   cargarConductores();
 }
 
-// Cerrar sesión
-async function cerrarSesion(){ await supabaseClient.auth.signOut(); window.location.href="dashboard.html"; }
+async function cerrarSesion(){ 
+  await supabaseClient.auth.signOut(); 
+  window.location.href="dashboard.html"; 
+}
 
-// Cargar conductores
+async function obtenerEmailDesdeAuth(authUserId) {
+  if (!authUserId) return "No registrado";
+  
+  if (emailCache.has(authUserId)) {
+    return emailCache.get(authUserId);
+  }
+
+  try {
+    const { data, error } = await supabaseClient.rpc('get_user_email', {
+      user_id: authUserId
+    });
+    
+    if (error) {
+      console.error("Error RPC:", error);
+      const { data: conductorData } = await supabaseClient
+        .from("conductores")
+        .select("email")
+        .eq("auth_user_id", authUserId)
+        .single();
+      
+      const email = conductorData?.email || "No disponible";
+      emailCache.set(authUserId, email);
+      return email;
+    }
+    
+    const email = data || "No disponible";
+    emailCache.set(authUserId, email);
+    return email;
+    
+  } catch (e) {
+    console.error("Error obteniendo email:", e);
+    return "Error al obtener";
+  }
+}
+
+// SIMPLIFICADA: Ahora estado es booleano nativo en PostgreSQL
+function obtenerEstadoConductor(c) {
+  // Si es exactamente false, está inactivo. Todo lo demás (true, null, undefined) = activo
+  return c.estado !== false;
+}
+
 async function cargarConductores(){
   const { data, error } = await supabaseClient.from("conductores").select("*");
-  if(error){ console.error(error); return; }
+  if(error){ 
+    console.error("Error cargando conductores:", error); 
+    showToast("Error cargando conductores", "error");
+    return; 
+  }
 
   const tbody = document.querySelector("#tabla tbody");
   tbody.innerHTML = "";
 
-  data.forEach(c => {
-    const tr = document.createElement("tr");
-    tr.style.opacity = c.activo===false ? 0.5 : 1;
+  for (const c of data) {
+    let email = "Cargando...";
+    
+    if (c.auth_user_id) {
+      email = await obtenerEmailDesdeAuth(c.auth_user_id);
+    } else {
+      email = c.email || "No registrado";
+    }
 
+    const tr = document.createElement("tr");
+    const isActive = obtenerEstadoConductor(c);
+    
+    const statusClass = isActive ? 'active' : 'inactive';
+    const statusText = isActive ? 'Activo' : 'Inactivo';
+    
+    // CORREGIDO: Ya no pasamos isActive como parámetro, solo el ID
     tr.innerHTML = `
-      <td style="font-weight:500;">${c.nombres} ${c.apellidos}</td>
-      <td>${c.email || ''}</td>
-      <td>${c.cedula}</td>
-      <td style="font-family: monospace; letter-spacing:1px;">${c.placa}</td>
-      <td><button onclick="abrirModal('${c.id}')">Ver/Editar</button></td>
       <td>
-        <button onclick="toggleActivo('${c.id}',${c.activo})">${c.activo? 'Deshabilitar':'Habilitar'}</button>
-        <button onclick="eliminar('${c.id}')">Eliminar</button>
+        <span class="status-indicator ${statusClass}">
+          <span class="status-dot"></span>
+          ${statusText}
+        </span>
+      </td>
+      <td style="font-weight:600;">${c.nombres} ${c.apellidos}</td>
+      <td>
+        <div class="email-cell" title="${email}">${email}</div>
+      </td>
+      <td>${c.cedula}</td>
+      <td style="font-family: monospace; letter-spacing:1px; color: #60a5fa;">${c.placa}</td>
+      <td>
+        <button class="btn-action view" onclick="abrirModal('${c.id}')">Ver/Editar</button>
+        <button class="btn-action toggle ${!isActive ? 'inactive' : ''}" onclick="toggleActivo('${c.id}')">
+          ${isActive ? 'Deshabilitar' : 'Habilitar'}
+        </button>
+        <button class="btn-action danger" onclick="eliminar('${c.id}')">Eliminar</button>
       </td>
     `;
     tbody.appendChild(tr);
-  });
+  }
 }
 
-// Abrir modal
 async function abrirModal(id){
   conductorEditId = id;
-  const { data: c } = await supabaseClient.from("conductores").select("*").eq("id", id).single();
-  if(!c) return;
+  const { data: c, error } = await supabaseClient.from("conductores").select("*").eq("id", id).single();
+  
+  if(error || !c) {
+    showToast("Error cargando conductor", "error");
+    return;
+  }
 
-  document.getElementById("editEmail").value = c.email || "";
+  conductorEditActivo = obtenerEstadoConductor(c);
+
+  let email = "No disponible";
+  if (c.auth_user_id) {
+    email = await obtenerEmailDesdeAuth(c.auth_user_id);
+  } else {
+    email = c.email || "No registrado";
+  }
+
+  document.getElementById("editEmail").value = email;
   document.getElementById("editNombres").value = c.nombres || "";
   document.getElementById("editApellidos").value = c.apellidos || "";
   document.getElementById("editDireccion").value = c.direccion || "";
@@ -167,46 +1012,262 @@ async function abrirModal(id){
   document.getElementById("editPoliza").value = c.poliza_numero || "";
   document.getElementById("editMotivo").value = c.motivo_desactivacion || "";
 
-  // Cargar documentos
-  const { data: docs } = await supabaseClient.from("documentos").select("*").eq("conductor_id", id);
+  const btnToggle = document.getElementById("btnToggleModal");
+  btnToggle.textContent = conductorEditActivo ? "Deshabilitar" : "Habilitar";
+  btnToggle.className = `btn-action toggle ${!conductorEditActivo ? 'inactive' : ''}`;
+
+  await cargarDocumentos(id);
+  
+  const modal = document.getElementById("modalEdit");
+  modal.style.display = "flex";
+  modal.querySelector('.modal-content').scrollTop = 0;
+}
+
+async function toggleDesdeModal() {
+  if (!conductorEditId) return;
+  // Usamos conductorEditActivo que se actualizó al abrir el modal
+  await toggleActivo(conductorEditId, conductorEditActivo);
+}
+
+// CORREGIDA: Ahora lee el estado actual de la BD antes de cambiarlo
+async function toggleActivo(id, estadoDesdeModal = null){
+  console.log("Toggle iniciado - ID:", id);
+  
+  if (!id) {
+    showToast("Error: ID no válido", "error");
+    return;
+  }
+
+  try {
+    // Si viene del modal, usamos ese estado. Si viene de la tabla, consultamos la BD
+    let estadoActual;
+    
+    if (estadoDesdeModal !== null) {
+      estadoActual = estadoDesdeModal;
+      console.log("Usando estado desde modal:", estadoActual);
+    } else {
+      // Leer estado actual directamente de la base de datos
+      console.log("Consultando estado actual en BD...");
+      const { data: conductor, error: fetchError } = await supabaseClient
+        .from("conductores")
+        .select("estado")
+        .eq("id", id)
+        .single();
+      
+      if (fetchError) {
+        console.error("Error al consultar estado:", fetchError);
+        showToast("Error al verificar estado actual", "error");
+        return;
+      }
+      
+      estadoActual = obtenerEstadoConductor(conductor);
+      console.log("Estado actual en BD:", conductor.estado, "-> interpretado como:", estadoActual);
+    }
+
+    let motivo = "";
+    if(estadoActual){
+      motivo = prompt("Ingrese motivo de desactivación:");
+      if(!motivo || motivo.trim() === ""){ 
+        showToast("Debe ingresar un motivo para desactivar", "error"); 
+        return; 
+      }
+    }
+    
+    // Calcular nuevo estado (negación del actual)
+    const nuevoEstado = !estadoActual;
+    console.log("Cambiando estado de", estadoActual, "a", nuevoEstado);
+    
+    const updateData = {
+      estado: nuevoEstado,
+      motivo_desactivacion: estadoActual ? motivo.trim() : null
+    };
+    
+    console.log("Enviando update:", updateData);
+    
+    const { data, error } = await supabaseClient
+      .from("conductores")
+      .update(updateData)
+      .eq("id", id)
+      .select();
+      
+    if(error){ 
+      console.error("Error en toggle:", error);
+      showToast("Error: " + error.message, "error"); 
+      return; 
+    }
+    
+    console.log("Actualizado correctamente:", data);
+    showToast(estadoActual ? "Conductor deshabilitado" : "Conductor habilitado", "success");
+    
+    // Recargar la tabla para mostrar cambios
+    await cargarConductores();
+    
+    // Si el modal está abierto y es el mismo conductor, actualizarlo
+    if (conductorEditId === id) {
+      // Actualizar la variable global para que el próximo toggle use el valor correcto
+      conductorEditActivo = nuevoEstado;
+      // Actualizar el botón del modal
+      const btnToggle = document.getElementById("btnToggleModal");
+      btnToggle.textContent = nuevoEstado ? "Deshabilitar" : "Habilitar";
+      btnToggle.className = `btn-action toggle ${!nuevoEstado ? 'inactive' : ''}`;
+    }
+    
+  } catch (err) {
+    console.error("Error inesperado en toggle:", err);
+    showToast("Error inesperado: " + err.message, "error");
+  }
+}
+
+async function eliminar(id){
+  if(!id) {
+    showToast("Error: ID no válido", "error");
+    return;
+  }
+
+  if(!confirm("¿Seguro de eliminar este conductor permanentemente? Esta acción no se puede deshacer.")) return;
+  
+  showToast("Eliminando conductor...", "success");
+  
+  try {
+    const { data: docs } = await supabaseClient
+      .from("documentos")
+      .select("url_archivo")
+      .eq("conductor_id", id);
+      
+    if (docs && docs.length > 0) {
+      const filesToRemove = docs
+        .filter(d => d.url_archivo)
+        .map(d => d.url_archivo);
+        
+      if (filesToRemove.length > 0) {
+        await supabaseClient.storage
+          .from("documentos-conductores")
+          .remove(filesToRemove);
+      }
+    }
+    
+    await supabaseClient.from("documentos").delete().eq("conductor_id", id);
+    
+    const { error } = await supabaseClient
+      .from("conductores")
+      .delete()
+      .eq("id", id);
+    
+    if(error){ 
+      throw error;
+    }
+    
+    showToast("Conductor eliminado correctamente", "success");
+    
+    if (conductorEditId === id) {
+      cerrarModal();
+    }
+    
+    await cargarConductores();
+    
+  } catch (error) {
+    console.error("Error eliminando:", error);
+    showToast("Error al eliminar: " + error.message, "error");
+  }
+}
+
+async function cargarDocumentos(conductorId) {
+  const { data: docs, error } = await supabaseClient
+    .from("documentos")
+    .select("*")
+    .eq("conductor_id", conductorId);
+    
   const divDocs = document.getElementById("documentosExistentes");
   divDocs.innerHTML = "";
 
-  if(docs && docs.length){
-    docs.forEach(d => {
-      const container = document.createElement("div");
-      container.className = "doc-container";
-      const title = document.createElement("strong");
-      title.textContent = d.tipo;
-      container.appendChild(title);
+  if(error || !docs || docs.length === 0){
+    divDocs.innerHTML = '<div class="no-docs">No hay documentos cargados</div>';
+    return;
+  }
+
+  for (const d of docs) {
+    const container = document.createElement("div");
+    container.className = "doc-container";
+
+    const title = document.createElement("strong");
+    title.textContent = d.tipo.replace(/_/g, ' ');
+    container.appendChild(title);
+
+    if(d.url_archivo){
+      const { data: signedUrl } = await supabaseClient.storage
+        .from("documentos-conductores")
+        .createSignedUrl(d.url_archivo, 3600);
+
+      const url = signedUrl?.signedUrl || d.url_archivo;
+      const ext = d.url_archivo.split('.').pop().toLowerCase();
+      
+      const previewDiv = document.createElement("div");
+      previewDiv.className = "doc-preview";
+
+      if(["png","jpg","jpeg","gif","webp"].includes(ext)){
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = d.tipo;
+        previewDiv.appendChild(img);
+      } else if(ext === "pdf"){
+        const iframe = document.createElement("iframe");
+        iframe.src = url;
+        previewDiv.appendChild(iframe);
+      }
+      
+      if (previewDiv.children.length > 0) {
+        container.appendChild(previewDiv);
+      }
 
       const link = document.createElement("a");
-      link.href = d.url_archivo;
+      link.href = url;
       link.target = "_blank";
-      link.textContent = "Abrir documento";
-      link.style.display = "block";
-      link.style.color = "#ff4d4d";
-      link.style.marginTop = "5px";
+      link.className = "doc-link";
+      link.innerHTML = `
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        </svg>
+        Ver / Descargar
+      `;
       container.appendChild(link);
+    }
 
-      const btnDel = document.createElement("button");
-      btnDel.textContent="Eliminar";
-      btnDel.onclick = async () => {
-        if(!confirm(`Eliminar documento ${d.tipo}?`)) return;
-        const { error } = await supabaseClient.from("documentos").delete().eq("id", d.id);
-        if(error){ alert("Error eliminando: "+error.message); return; }
-        abrirModal(conductorEditId);
-      };
-      container.appendChild(btnDel);
-      divDocs.appendChild(container);
-    });
-  } else divDocs.textContent="No hay documentos cargados.";
-
-  document.getElementById("modalEdit").style.display="flex";
+    const btnDel = document.createElement("button");
+    btnDel.textContent = "Eliminar";
+    btnDel.onclick = async () => {
+      if(!confirm(`¿Eliminar documento ${d.tipo}?`)) return;
+      
+      if (d.url_archivo) {
+        await supabaseClient.storage
+          .from("documentos-conductores")
+          .remove([d.url_archivo]);
+      }
+      
+      const { error } = await supabaseClient
+        .from("documentos")
+        .delete()
+        .eq("id", d.id);
+        
+      if(error){ 
+        showToast("Error eliminando: " + error.message, "error"); 
+        return; 
+      }
+      
+      await cargarDocumentos(conductorEditId);
+      showToast("Documento eliminado", "success");
+    };
+    container.appendChild(btnDel);
+    divDocs.appendChild(container);
+  }
 }
 
-// Guardar edición
 async function guardarEdicion(){
+  if(!conductorEditId) {
+    showToast("Error: No hay conductor seleccionado", "error");
+    return;
+  }
+
   const campos = {
     nombres: document.getElementById("editNombres").value.trim(),
     apellidos: document.getElementById("editApellidos").value.trim(),
@@ -218,36 +1279,95 @@ async function guardarEdicion(){
     modelo: document.getElementById("editModelo").value.trim(),
     marca: document.getElementById("editMarca").value.trim(),
     color: document.getElementById("editColor").value.trim(),
-    poliza_numero: document.getElementById("editPoliza").value.trim(),
-    motivo_desactivacion: document.getElementById("editMotivo").value.trim()
+    poliza_numero: document.getElementById("editPoliza").value.trim()
   };
-  const { error } = await supabaseClient.from("conductores").update(campos).eq("id", conductorEditId);
-  if(error){ alert("Error al guardar: "+error.message); return; }
-  cerrarModal();
-  cargarConductores();
-}
-
-// Toggle activo/desactivo
-async function toggleActivo(id,actual){
-  let motivo="";
-  if(actual){
-    motivo=prompt("Ingrese motivo de desactivación para el conductor:");
-    if(!motivo){ alert("Debe ingresar un motivo."); return; }
+  
+  // Manejar motivo_desactivacion: si está vacío, guardar null
+  const motivo = document.getElementById("editMotivo").value.trim();
+  campos.motivo_desactivacion = motivo || null;
+  
+  const { error } = await supabaseClient
+    .from("conductores")
+    .update(campos)
+    .eq("id", conductorEditId);
+    
+  if(error){ 
+    showToast("Error al guardar: " + error.message, "error"); 
+    return; 
   }
-  const { error } = await supabaseClient.from("conductores").update({activo:!actual, motivo_desactivacion:motivo}).eq("id",id);
-  if(error){ alert("Error actualizando estado: "+error.message); return; }
-  cargarConductores();
+  
+  await subirNuevosDocumentos();
+  
+  showToast("Cambios guardados correctamente", "success");
+  cerrarModal();
+  await cargarConductores();
 }
 
-// Eliminar
-async function eliminar(id){
-  if(!confirm("¿Seguro de eliminar este conductor?")) return;
-  const { error } = await supabaseClient.from("conductores").delete().eq("id",id);
-  if(error){ alert("Error al eliminar: "+error.message); } else { cargarConductores(); }
+async function subirNuevosDocumentos() {
+  const documentos = [
+    { id: 'editCedulaDoc', tipo: 'CEDULA' },
+    { id: 'editLicenciaDoc', tipo: 'LICENCIA' },
+    { id: 'editRegistroDoc', tipo: 'REGISTRO' },
+    { id: 'editPolizaDoc', tipo: 'POLIZA' },
+    { id: 'editFotoVehiculo', tipo: 'FOTO_VEHICULO' },
+    { id: 'editFotoConductor', tipo: 'FOTO_CONDUCTOR' },
+    { id: 'editAuthPropietario', tipo: 'AUTH_PROPIETARIO' }
+  ];
+
+  for (const doc of documentos) {
+    const input = document.getElementById(doc.id);
+    if (input && input.files && input.files[0]) {
+      const file = input.files[0];
+      const path = `${conductorEditId}/${doc.tipo}_${Date.now()}_${file.name}`;
+      
+      const { error: uploadError } = await supabaseClient.storage
+        .from("documentos-conductores")
+        .upload(path, file);
+        
+      if (uploadError) {
+        console.error("Error subiendo " + doc.tipo + ":", uploadError);
+        continue;
+      }
+      
+      const { data: existing } = await supabaseClient
+        .from("documentos")
+        .select("id")
+        .eq("conductor_id", conductorEditId)
+        .eq("tipo", doc.tipo)
+        .single();
+        
+      if (existing) {
+        await supabaseClient
+          .from("documentos")
+          .update({ url_archivo: path })
+          .eq("id", existing.id);
+      } else {
+        await supabaseClient
+          .from("documentos")
+          .insert([{
+            conductor_id: conductorEditId,
+            tipo: doc.tipo,
+            url_archivo: path
+          }]);
+      }
+    }
+  }
 }
 
-// Cerrar modal
-function cerrarModal(){ conductorEditId=null; document.getElementById("modalEdit").style.display="none"; }
+function cerrarModal(){ 
+  conductorEditId = null; 
+  conductorEditActivo = null;
+  document.getElementById("modalEdit").style.display = "none"; 
+  document.querySelectorAll('#modalEdit input[type="file"]').forEach(input => input.value = '');
+}
+
+document.getElementById("modalEdit").addEventListener("click", function(e) {
+  if(e.target === this) cerrarModal();
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") cerrarModal();
+});
 
 verificarAdmin();
 </script>
