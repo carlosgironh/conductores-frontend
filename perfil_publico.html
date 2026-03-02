@@ -289,6 +289,30 @@
     font-weight: 500;
   }
 
+  /* NUEVO: Estilo para indicador de aviso de operaciones */
+  .aviso-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+
+  .aviso-badge.si {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  .aviso-badge.no {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
   /* Contenedor de Fotos */
   .fotos-container {
     display: grid;
@@ -391,6 +415,19 @@
 
   .btn-doc:active {
     transform: translateY(0) scale(0.98);
+  }
+
+  /* NUEVO: Estilo específico para botón de aviso de operaciones */
+  .btn-doc.aviso-operaciones {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+  }
+
+  .btn-doc.aviso-operaciones:hover {
+    background: #8b5cf6;
+    color: white;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
   }
 
   /* QR Container */
@@ -651,6 +688,10 @@ async function cargarPerfilPublico(){
     return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
   }
 
+  // NUEVO: Verificar si tiene aviso de operaciones
+  const tieneAviso = conductor.tiene_aviso_operaciones === true;
+  const avisoUrl = docUrl("AVISO_OPERACIONES");
+
   // Renderizar Datos
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre Completo</strong> <span>${conductor.nombres} ${conductor.apellidos}</span></div>
@@ -660,6 +701,25 @@ async function cargarPerfilPublico(){
     <div class="campo"><strong>Placa</strong> <span>${conductor.placa}</span></div>
     <div class="campo"><strong>Color</strong> <span>${conductor.color}</span></div>
     <div class="campo"><strong>Póliza</strong> <span>${conductor.poliza_numero}</span></div>
+    <div class="campo">
+      <strong>Aviso de Operaciones</strong> 
+      <span>
+        ${tieneAviso ? 
+          `<span class="aviso-badge si">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Sí
+           </span>` : 
+          `<span class="aviso-badge no">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            No
+           </span>`
+        }
+      </span>
+    </div>
   `;
 
   // Renderizar Fotos con wrapper y etiquetas
@@ -709,6 +769,15 @@ async function cargarPerfilPublico(){
       docsDiv.appendChild(btn);
     }
   });
+
+  // NUEVO: Agregar botón de Aviso de Operaciones si tiene el documento
+  if (tieneAviso && avisoUrl) {
+    const btnAviso = document.createElement("button");
+    btnAviso.className = "btn-doc aviso-operaciones";
+    btnAviso.innerHTML = `📋 Aviso de Operaciones`;
+    btnAviso.onclick = () => window.open(avisoUrl, "_blank");
+    docsDiv.appendChild(btnAviso);
+  }
 
   // Generación de QR con Branding
   const qrContainer = document.getElementById("qr-container");

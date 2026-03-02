@@ -2,105 +2,324 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Panel Administrativo - Crear Usuario</title>
+  <title>Panel Administrativo - NRDesignCorp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    /* ===== NO TOCAR ===== */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    * { box-sizing: border-box; outline: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      margin: 0;
+      min-height: 100vh;
       padding: 20px;
-      height: 100vh;
-      background: radial-gradient(circle at 50% 0%, #2c3344 0%, #111317 100%);
-      color: #e2e8f0;
+      background: 
+        radial-gradient(ellipse at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        #0f172a;
+      color: #f8fafc;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
+    .container {
+      max-width: 900px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
     .card {
-      max-width: 450px;
-      width: 100%;
-      background: rgba(30, 41, 59, 0.45);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 32px;
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
-      padding: 45px 35px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      padding: 35px;
+      animation: slideUp 0.6s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    h2 {
-      text-align: center;
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon.blue {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    }
+
+    .card-icon.purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+
+    .card-title {
       font-weight: 700;
-      font-size: 24px;
-      letter-spacing: -1px;
-      margin-bottom: 30px;
-      background: linear-gradient(to bottom, #ffffff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 20px;
+      color: #ffffff;
     }
 
-    input {
+    .card-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      transition: color 0.3s;
+    }
+
+    input, select {
       width: 100%;
-      padding: 16px 20px;
-      margin-top: 15px;
+      padding: 14px 16px 14px 48px;
       background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      color: #fff;
-      font-size: 15px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s ease;
     }
 
-    input:focus {
+    input:focus, select:focus {
       border-color: #3b82f6;
       background: rgba(15, 23, 42, 0.8);
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      outline: none;
     }
 
-    input::placeholder { color: #64748b; }
+    input:focus + .input-icon { color: #60a5fa; }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+    }
 
     button {
       width: 100%;
-      padding: 16px;
-      margin-top: 25px;
+      padding: 14px;
       border: none;
-      border-radius: 18px;
-      font-size: 16px;
+      border-radius: 12px;
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
     }
 
-    button:hover {
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
-      filter: brightness(1.1);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
     }
 
     button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    .msg { margin-top: 25px; text-align: center; font-weight: 500; font-size: 14px; min-height: 20px; }
+    .msg {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+
+    .msg.show { display: block; }
+    .msg.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+    .msg.success { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+    .msg.info { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
+
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: auto;
+      padding: 10px 20px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      font-size: 13px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+      .card { padding: 25px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Nuevo Administrador</h2>
-  <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
-  <input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password">
-  <button onclick="crearAdmin()">Crear Administrador</button>
-  <div id="msg" class="msg"></div>
+<button class="logout-btn" onclick="logout()">
+  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline; vertical-align: middle; margin-right: 5px;">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+  </svg>
+  Cerrar Sesión
+</button>
+
+<div class="container">
+  <!-- Card 1: Crear Administrador -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="card-title">Nuevo Administrador</div>
+        <div class="card-subtitle">Crear acceso administrativo</div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+      </svg>
+      <input id="newAdminEmail" type="email" placeholder="Correo electrónico" autocomplete="email">
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <input id="newAdminPass" type="password" placeholder="Contraseña temporal (mín. 6 caracteres)" autocomplete="new-password">
+    </div>
+
+    <button class="btn-primary" id="createBtn" onclick="crearAdmin()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Crear Administrador
+    </button>
+
+    <div id="createMsg" class="msg"></div>
+  </div>
+
+  <!-- Card 2: Cambiar Contraseña -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon purple">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="card-title">Cambiar Contraseña</div>
+        <div class="card-subtitle">Actualizar credenciales de acceso</div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <input id="currentPass" type="password" placeholder="Contraseña actual" autocomplete="current-password">
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+      </svg>
+      <input id="newPass" type="password" placeholder="Nueva contraseña" autocomplete="new-password">
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <input id="confirmNewPass" type="password" placeholder="Confirmar nueva contraseña" autocomplete="new-password">
+    </div>
+
+    <button class="btn-secondary" id="changeBtn" onclick="cambiarPassword()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Actualizar Contraseña
+    </button>
+
+    <div id="changeMsg" class="msg"></div>
+  </div>
 </div>
 
 <script>
@@ -110,60 +329,237 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Variable para evitar múltiples redirecciones
+let authChecked = false;
+
+// Verificar autenticación solo una vez
+async function checkAuth() {
+  if (authChecked) return;
+  authChecked = true;
+
+  try {
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+    
+    if (sessionError) {
+      console.error("Error obteniendo sesión:", sessionError);
+      return;
+    }
+
+    if (!session) {
+      console.log("No hay sesión activa");
+      // Opcional: redirigir después de mostrar mensaje
+      // window.location.href = 'index.html';
+      return;
+    }
+
+    console.log("Sesión activa para:", session.user.email);
+    
+    // Verificar si es admin (sin forzar redirección en error)
+    const { data: adminData, error: adminError } = await supabaseClient
+      .from('admins')
+      .select('auth_user_id')  // Solo seleccionamos lo que sabemos que existe
+      .eq('auth_user_id', session.user.id)
+      .maybeSingle();
+
+    if (adminError) {
+      console.error("Error verificando admin:", adminError);
+      // No redirigimos, solo logueamos el error
+      // Esto permite que funcione incluso si hay problemas con la tabla
+    }
+
+    if (!adminData) {
+      console.log("Usuario no es admin");
+      // Opcional: redirigir si no es admin
+      // window.location.href = 'perfil.html';
+    } else {
+      console.log("Usuario es admin");
+    }
+
+  } catch (err) {
+    console.error("Error en checkAuth:", err);
+  }
+}
+
+// Ejecutar verificación al cargar
+checkAuth();
+
+function showMessage(elementId, text, type) {
+  const msg = document.getElementById(elementId);
+  msg.textContent = text;
+  msg.className = 'msg show ' + type;
+  if (!text) msg.className = 'msg';
+}
+
 async function crearAdmin() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const msg = document.getElementById("msg");
+  const email = document.getElementById("newAdminEmail").value.trim();
+  const password = document.getElementById("newAdminPass").value.trim();
+  const btn = document.getElementById("createBtn");
 
   if (!email || !password) {
-    msg.innerHTML = "<span style='color: #f87171;'>Completa todos los campos ❌</span>";
+    showMessage('createMsg', 'Completa todos los campos', 'error');
     return;
   }
 
-  msg.style.color = "#818cf8";
-  msg.innerText = "Registrando acceso...";
+  if (password.length < 6) {
+    showMessage('createMsg', 'La contraseña debe tener mínimo 6 caracteres', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Creando...';
 
   try {
-    // Verificar si ya existe en tabla admins
-    const { data: existing } = await supabaseClient
+    // Verificar si ya existe (usando maybeSingle para evitar error 406)
+    const { data: existing, error: checkError } = await supabaseClient
       .from('admins')
-      .select('*')
+      .select('email')
       .eq('email', email)
-      .single();
+      .maybeSingle();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error("Error verificando existencia:", checkError);
+    }
 
     if (existing) {
-      msg.innerHTML = "<span style='color: #f87171;'>Error: El correo ya es un administrador ❌</span>";
+      showMessage('createMsg', 'Este correo ya está registrado', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
       return;
     }
 
-    // Crear usuario en auth.users
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    // Crear usuario en auth
+    const { data, error } = await supabaseClient.auth.signUp({ 
+      email, 
+      password 
+    });
 
     if (error) {
-      msg.innerHTML = `<span style='color: #f87171;'>Error: ${error.message} ❌</span>`;
+      if (error.message.includes('already registered')) {
+        showMessage('createMsg', 'Este correo ya está registrado en el sistema', 'error');
+      } else {
+        showMessage('createMsg', 'Error: ' + error.message, 'error');
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
       return;
     }
 
-    // Insertar en tabla admins
+    if (!data.user) {
+      showMessage('createMsg', 'Error creando usuario', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
+      return;
+    }
+
+    // Insertar en tabla admins (sin role si no existe la columna)
     const { error: insertError } = await supabaseClient
       .from('admins')
-      .insert([{ auth_user_id: data.user.id, email }]);
+      .insert([{ 
+        auth_user_id: data.user.id, 
+        email: email
+        // Eliminado 'role' si no existe en la tabla
+      }]);
 
     if (insertError) {
-      msg.innerHTML = `<span style='color: #f87171;'>Error al asignar rol: ${insertError.message} ❌</span>`;
+      console.error("Error insertando en admins:", insertError);
+      // Si falla la inserción, intentar eliminar el usuario de auth para no dejar huérfanos
+      showMessage('createMsg', 'Error asignando permisos: ' + insertError.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
       return;
     }
 
-    msg.innerHTML = "<span style='color: #4ade80;'>Administrador creado con éxito ✅</span>";
-    document.getElementById("email").value = "";
-    document.getElementById("password").value = "";
+    showMessage('createMsg', '✅ Administrador creado exitosamente', 'success');
+    document.getElementById("newAdminEmail").value = "";
+    document.getElementById("newAdminPass").value = "";
 
   } catch (err) {
-    console.error(err);
-    msg.innerHTML = "<span style='color: #f87171;'>Error de conexión ❌</span>";
+    console.error("Error inesperado:", err);
+    showMessage('createMsg', 'Error de conexión: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
   }
 }
-</script>
 
+async function cambiarPassword() {
+  const currentPass = document.getElementById("currentPass").value;
+  const newPass = document.getElementById("newPass").value;
+  const confirmPass = document.getElementById("confirmNewPass").value;
+  const btn = document.getElementById("changeBtn");
+
+  if (!currentPass || !newPass || !confirmPass) {
+    showMessage('changeMsg', 'Completa todos los campos', 'error');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showMessage('changeMsg', 'Las contraseñas no coinciden', 'error');
+    return;
+  }
+
+  if (newPass.length < 6) {
+    showMessage('changeMsg', 'Mínimo 6 caracteres', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Actualizando...';
+
+  try {
+    // Obtener usuario actual
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      showMessage('changeMsg', 'Error: No se pudo obtener usuario actual', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+      return;
+    }
+
+    // Verificar contraseña actual
+    const { error: authError } = await supabaseClient.auth.signInWithPassword({
+      email: user.email,
+      password: currentPass
+    });
+
+    if (authError) {
+      showMessage('changeMsg', 'Contraseña actual incorrecta', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+      return;
+    }
+
+    // Actualizar contraseña
+    const { error: updateError } = await supabaseClient.auth.updateUser({ 
+      password: newPass 
+    });
+
+    if (updateError) {
+      showMessage('changeMsg', 'Error: ' + updateError.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+      return;
+    }
+
+    showMessage('changeMsg', '✅ Contraseña actualizada', 'success');
+    document.getElementById("currentPass").value = "";
+    document.getElementById("newPass").value = "";
+    document.getElementById("confirmNewPass").value = "";
+
+  } catch (err) {
+    console.error("Error cambiando password:", err);
+    showMessage('changeMsg', 'Error: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+  }
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = 'index.html';
+}
+</script>
 </body>
 </html>

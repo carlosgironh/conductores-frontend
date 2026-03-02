@@ -288,6 +288,30 @@
     font-weight: 500;
   }
 
+  /* NUEVO: Estilo para indicador de aviso de operaciones */
+  .aviso-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+
+  .aviso-badge.si {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  .aviso-badge.no {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
   /* Contenedor de Fotos */
   .fotos-container {
     display: grid;
@@ -342,7 +366,86 @@
     letter-spacing: 1px;
   }
 
-  /* BOTÓN ACTUALIZAR DATOS - NUEVO */
+  /* NUEVO: Sección de documentos del conductor */
+  .documentos-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .documentos-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #60a5fa;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .documentos-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+    border-radius: 2px;
+  }
+
+  .documentos-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn-doc {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-doc:hover {
+    background: #6366f1;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    border-color: transparent;
+  }
+
+  .btn-doc.aviso-operaciones {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+  }
+
+  .btn-doc.aviso-operaciones:hover {
+    background: #8b5cf6;
+    color: white;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+  }
+
+  .btn-doc.missing {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  /* BOTÓN ACTUALIZAR DATOS */
   .btn-update {
     width: 100%;
     padding: 16px 28px;
@@ -554,6 +657,10 @@
       margin: 0 -20px;
       padding: 0 20px 16px 20px;
     }
+
+    .documentos-grid {
+      justify-content: center;
+    }
   }
 
   /* Estado de carga */
@@ -595,7 +702,13 @@
   
   <div class="fotos-container" id="fotos-container"></div>
 
-  <!-- BOTÓN ACTUALIZAR DATOS - NUEVO -->
+  <!-- NUEVO: Sección de documentos -->
+  <div class="documentos-section" id="documentos-section" style="display: none;">
+    <div class="documentos-title">Mis Documentos</div>
+    <div class="documentos-grid" id="documentos-grid"></div>
+  </div>
+
+  <!-- BOTÓN ACTUALIZAR DATOS -->
   <button class="btn-update" onclick="window.location.href='panel-usuario.html'">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -719,10 +832,9 @@ async function cargarPerfil(){
   }
 
   // 2. Renderizar banner de estado según el campo 'estado'
-  // Asumiendo que tienes campos: 'estado' (boolean/texto) y opcionalmente 'motivo_deshabilitado'
   renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_inactivo);
 
-  // 3. Traer documentos (fotos)
+  // 3. Traer documentos (fotos y archivos)
   const { data: documentos } = await supabaseClient
     .from("documentos")
     .select("*")
@@ -734,6 +846,10 @@ async function cargarPerfil(){
     return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
   }
 
+  // NUEVO: Verificar si tiene aviso de operaciones
+  const tieneAviso = conductor.tiene_aviso_operaciones === true;
+  const avisoUrl = docUrl("AVISO_OPERACIONES");
+
   // 4. Renderizar Datos
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre Completo</strong> <span>${conductor.nombres} ${conductor.apellidos}</span></div>
@@ -743,6 +859,25 @@ async function cargarPerfil(){
     <div class="campo"><strong>Placa</strong> <span>${conductor.placa}</span></div>
     <div class="campo"><strong>Color</strong> <span>${conductor.color}</span></div>
     <div class="campo"><strong>Póliza</strong> <span>${conductor.poliza_numero}</span></div>
+    <div class="campo">
+      <strong>Aviso de Operaciones</strong> 
+      <span>
+        ${tieneAviso ? 
+          `<span class="aviso-badge si">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Sí
+           </span>` : 
+          `<span class="aviso-badge no">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            No
+           </span>`
+        }
+      </span>
+    </div>
     <div class="campo"><strong>Correo</strong> <span>${user.email}</span></div>
     <div class="campo"><strong>Teléfono</strong> <span>${conductor.celular}</span></div>
   `;
@@ -774,7 +909,56 @@ async function cargarPerfil(){
     fotosCont.appendChild(wrapper);
   }
 
-  // 6. QR con enlace público dinámico
+  // NUEVO: 6. Renderizar sección de documentos
+  const docSection = document.getElementById("documentos-section");
+  const docGrid = document.getElementById("documentos-grid");
+  docGrid.innerHTML = "";
+
+  const documentosConfig = [
+    { tipo: "CEDULA", label: "Cédula", icon: "📄" },
+    { tipo: "LICENCIA", label: "Licencia", icon: "🪪" },
+    { tipo: "REGISTRO", label: "Registro", icon: "🚗" },
+    { tipo: "POLIZA", label: "Seguro", icon: "🛡️" },
+    { tipo: "AUTH_PROPIETARIO", label: "Autorización", icon: "✉️" }
+  ];
+
+  let tieneDocumentos = false;
+
+  documentosConfig.forEach(doc => {
+    const url = docUrl(doc.tipo);
+    if(url){
+      tieneDocumentos = true;
+      const btn = document.createElement("button");
+      btn.className = "btn-doc";
+      btn.innerHTML = `${doc.icon} ${doc.label}`;
+      btn.onclick = () => window.open(url, "_blank");
+      docGrid.appendChild(btn);
+    }
+  });
+
+  // NUEVO: Agregar botón de Aviso de Operaciones si aplica
+  if (tieneAviso && avisoUrl) {
+    tieneDocumentos = true;
+    const btnAviso = document.createElement("button");
+    btnAviso.className = "btn-doc aviso-operaciones";
+    btnAviso.innerHTML = `📋 Aviso de Operaciones`;
+    btnAviso.onclick = () => window.open(avisoUrl, "_blank");
+    docGrid.appendChild(btnAviso);
+  } else if (tieneAviso && !avisoUrl) {
+    // Tiene marcado que sí tiene aviso pero no subió el documento aún
+    tieneDocumentos = true;
+    const btnAviso = document.createElement("button");
+    btnAviso.className = "btn-doc missing";
+    btnAviso.innerHTML = `⚠️ Aviso de Operaciones (Pendiente)`;
+    btnAviso.disabled = true;
+    docGrid.appendChild(btnAviso);
+  }
+
+  if (tieneDocumentos) {
+    docSection.style.display = "block";
+  }
+
+  // 7. QR con enlace público dinámico
   const publicUrl = `${window.location.origin}/perfil_publico.html?id=${conductor.id}`;
   const canvas = document.getElementById("qr");
 

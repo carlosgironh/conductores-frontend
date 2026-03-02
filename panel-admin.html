@@ -383,6 +383,29 @@
     color: #60a5fa;
     cursor: pointer;
   }
+
+  /* NUEVO: Badge de aviso de operaciones en tabla */
+  .aviso-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  .aviso-badge.si {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  .aviso-badge.no {
+    display: none;
+  }
   
   #modalEdit { 
     display: none; 
@@ -545,6 +568,12 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
+  /* NUEVO: Estilo especial para documento de aviso de operaciones */
+  .doc-container.aviso-doc {
+    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.05);
+  }
+
   .doc-container strong {
     color: #60a5fa;
     font-size: 12px;
@@ -552,6 +581,11 @@
     letter-spacing: 1px;
     display: block;
     margin-bottom: 10px;
+  }
+
+  /* NUEVO: Título especial para aviso */
+  .doc-container.aviso-doc strong {
+    color: #a78bfa;
   }
 
   .doc-preview {
@@ -589,8 +623,20 @@
     border: 1px solid rgba(99, 102, 241, 0.2);
   }
 
+  /* NUEVO: Link especial para aviso */
+  .doc-container.aviso-doc .doc-link {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+    border-color: rgba(139, 92, 246, 0.2);
+  }
+
   .doc-link:hover {
     background: #6366f1;
+    color: white;
+  }
+
+  .doc-container.aviso-doc .doc-link:hover {
+    background: #8b5cf6;
     color: white;
   }
 
@@ -652,6 +698,16 @@
     background: rgba(99, 102, 241, 0.1);
   }
 
+  /* NUEVO: Estilo especial para input de aviso */
+  .file-input-group.aviso-group label {
+    color: #a78bfa;
+  }
+
+  .file-input-group.aviso-group input[type="file"]:hover {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+  }
+
   .toast {
     position: fixed;
     bottom: 30px;
@@ -678,6 +734,57 @@
   .toast.error {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+  }
+
+  /* NUEVO: Toggle de aviso en modal */
+  .aviso-toggle-modal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    margin-bottom: 15px;
+  }
+
+  .aviso-toggle-modal label {
+    color: #a78bfa;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .switch-modal {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .switch-modal.active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: rgba(139, 92, 246, 0.5);
+  }
+
+  .switch-modal-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+
+  .switch-modal.active .switch-modal-thumb {
+    transform: translateX(20px);
   }
 
   @media (max-width: 768px) {
@@ -796,6 +903,20 @@
     <label>Marca</label><input type="text" id="editMarca">
     <label>Color</label><input type="text" id="editColor">
     <label>Número de póliza</label><input type="text" id="editPoliza">
+    
+    <!-- NUEVO: Toggle de Aviso de Operaciones en modal -->
+    <div class="aviso-toggle-modal">
+      <label>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        ¿Tiene Aviso de Operaciones?
+      </label>
+      <div class="switch-modal" id="modalAvisoSwitch" onclick="toggleAvisoModal()">
+        <div class="switch-modal-thumb"></div>
+      </div>
+    </div>
+    
     <hr>
     <label>Motivo desactivación (opcional)</label>
     <input type="text" id="editMotivo" placeholder="Solo si deshabilita el perfil">
@@ -838,6 +959,12 @@
       <label for="editAuthPropietario">Autorización Propietario</label>
       <input type="file" id="editAuthPropietario" accept=".pdf,.jpg,.jpeg,.png">
     </div>
+
+    <!-- NUEVO: Input para Aviso de Operaciones -->
+    <div class="file-input-group aviso-group">
+      <label for="editAvisoOperaciones">📋 Aviso de Operaciones</label>
+      <input type="file" id="editAvisoOperaciones" accept=".pdf,.jpg,.jpeg,.png">
+    </div>
     
     <div class="modal-buttons">
       <button class="btn-action" onclick="cerrarModal()">Cancelar</button>
@@ -858,6 +985,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let conductorEditId = null;
 let conductorEditActivo = null;
+let conductorEditAviso = false; // NUEVO
 const emailCache = new Map();
 
 function showToast(message, type = 'success') {
@@ -922,9 +1050,7 @@ async function obtenerEmailDesdeAuth(authUserId) {
   }
 }
 
-// SIMPLIFICADA: Ahora estado es booleano nativo en PostgreSQL
 function obtenerEstadoConductor(c) {
-  // Si es exactamente false, está inactivo. Todo lo demás (true, null, undefined) = activo
   return c.estado !== false;
 }
 
@@ -950,11 +1076,11 @@ async function cargarConductores(){
 
     const tr = document.createElement("tr");
     const isActive = obtenerEstadoConductor(c);
+    const tieneAviso = c.tiene_aviso_operaciones === true; // NUEVO
     
     const statusClass = isActive ? 'active' : 'inactive';
     const statusText = isActive ? 'Activo' : 'Inactivo';
     
-    // CORREGIDO: Ya no pasamos isActive como parámetro, solo el ID
     tr.innerHTML = `
       <td>
         <span class="status-indicator ${statusClass}">
@@ -962,7 +1088,10 @@ async function cargarConductores(){
           ${statusText}
         </span>
       </td>
-      <td style="font-weight:600;">${c.nombres} ${c.apellidos}</td>
+      <td style="font-weight:600;">
+        ${c.nombres} ${c.apellidos}
+        ${tieneAviso ? '<span class="aviso-badge si" title="Tiene Aviso de Operaciones">📋 Aviso</span>' : ''}
+      </td>
       <td>
         <div class="email-cell" title="${email}">${email}</div>
       </td>
@@ -980,6 +1109,18 @@ async function cargarConductores(){
   }
 }
 
+// NUEVO: Toggle de aviso en modal
+function toggleAvisoModal() {
+  const switchEl = document.getElementById('modalAvisoSwitch');
+  conductorEditAviso = !conductorEditAviso;
+  
+  if (conductorEditAviso) {
+    switchEl.classList.add('active');
+  } else {
+    switchEl.classList.remove('active');
+  }
+}
+
 async function abrirModal(id){
   conductorEditId = id;
   const { data: c, error } = await supabaseClient.from("conductores").select("*").eq("id", id).single();
@@ -990,6 +1131,7 @@ async function abrirModal(id){
   }
 
   conductorEditActivo = obtenerEstadoConductor(c);
+  conductorEditAviso = c.tiene_aviso_operaciones === true; // NUEVO
 
   let email = "No disponible";
   if (c.auth_user_id) {
@@ -1012,6 +1154,14 @@ async function abrirModal(id){
   document.getElementById("editPoliza").value = c.poliza_numero || "";
   document.getElementById("editMotivo").value = c.motivo_desactivacion || "";
 
+  // NUEVO: Configurar toggle de aviso
+  const avisoSwitch = document.getElementById("modalAvisoSwitch");
+  if (conductorEditAviso) {
+    avisoSwitch.classList.add('active');
+  } else {
+    avisoSwitch.classList.remove('active');
+  }
+
   const btnToggle = document.getElementById("btnToggleModal");
   btnToggle.textContent = conductorEditActivo ? "Deshabilitar" : "Habilitar";
   btnToggle.className = `btn-action toggle ${!conductorEditActivo ? 'inactive' : ''}`;
@@ -1025,11 +1175,9 @@ async function abrirModal(id){
 
 async function toggleDesdeModal() {
   if (!conductorEditId) return;
-  // Usamos conductorEditActivo que se actualizó al abrir el modal
   await toggleActivo(conductorEditId, conductorEditActivo);
 }
 
-// CORREGIDA: Ahora lee el estado actual de la BD antes de cambiarlo
 async function toggleActivo(id, estadoDesdeModal = null){
   console.log("Toggle iniciado - ID:", id);
   
@@ -1039,14 +1187,12 @@ async function toggleActivo(id, estadoDesdeModal = null){
   }
 
   try {
-    // Si viene del modal, usamos ese estado. Si viene de la tabla, consultamos la BD
     let estadoActual;
     
     if (estadoDesdeModal !== null) {
       estadoActual = estadoDesdeModal;
       console.log("Usando estado desde modal:", estadoActual);
     } else {
-      // Leer estado actual directamente de la base de datos
       console.log("Consultando estado actual en BD...");
       const { data: conductor, error: fetchError } = await supabaseClient
         .from("conductores")
@@ -1073,7 +1219,6 @@ async function toggleActivo(id, estadoDesdeModal = null){
       }
     }
     
-    // Calcular nuevo estado (negación del actual)
     const nuevoEstado = !estadoActual;
     console.log("Cambiando estado de", estadoActual, "a", nuevoEstado);
     
@@ -1099,14 +1244,10 @@ async function toggleActivo(id, estadoDesdeModal = null){
     console.log("Actualizado correctamente:", data);
     showToast(estadoActual ? "Conductor deshabilitado" : "Conductor habilitado", "success");
     
-    // Recargar la tabla para mostrar cambios
     await cargarConductores();
     
-    // Si el modal está abierto y es el mismo conductor, actualizarlo
     if (conductorEditId === id) {
-      // Actualizar la variable global para que el próximo toggle use el valor correcto
       conductorEditActivo = nuevoEstado;
-      // Actualizar el botón del modal
       const btnToggle = document.getElementById("btnToggleModal");
       btnToggle.textContent = nuevoEstado ? "Deshabilitar" : "Habilitar";
       btnToggle.className = `btn-action toggle ${!nuevoEstado ? 'inactive' : ''}`;
@@ -1188,6 +1329,11 @@ async function cargarDocumentos(conductorId) {
   for (const d of docs) {
     const container = document.createElement("div");
     container.className = "doc-container";
+    
+    // NUEVO: Clase especial para aviso de operaciones
+    if (d.tipo === 'AVISO_OPERACIONES') {
+      container.classList.add('aviso-doc');
+    }
 
     const title = document.createElement("strong");
     title.textContent = d.tipo.replace(/_/g, ' ');
@@ -1279,10 +1425,10 @@ async function guardarEdicion(){
     modelo: document.getElementById("editModelo").value.trim(),
     marca: document.getElementById("editMarca").value.trim(),
     color: document.getElementById("editColor").value.trim(),
-    poliza_numero: document.getElementById("editPoliza").value.trim()
+    poliza_numero: document.getElementById("editPoliza").value.trim(),
+    tiene_aviso_operaciones: conductorEditAviso // NUEVO
   };
   
-  // Manejar motivo_desactivacion: si está vacío, guardar null
   const motivo = document.getElementById("editMotivo").value.trim();
   campos.motivo_desactivacion = motivo || null;
   
@@ -1311,7 +1457,8 @@ async function subirNuevosDocumentos() {
     { id: 'editPolizaDoc', tipo: 'POLIZA' },
     { id: 'editFotoVehiculo', tipo: 'FOTO_VEHICULO' },
     { id: 'editFotoConductor', tipo: 'FOTO_CONDUCTOR' },
-    { id: 'editAuthPropietario', tipo: 'AUTH_PROPIETARIO' }
+    { id: 'editAuthPropietario', tipo: 'AUTH_PROPIETARIO' },
+    { id: 'editAvisoOperaciones', tipo: 'AVISO_OPERACIONES' } // NUEVO
   ];
 
   for (const doc of documentos) {
@@ -1357,8 +1504,10 @@ async function subirNuevosDocumentos() {
 function cerrarModal(){ 
   conductorEditId = null; 
   conductorEditActivo = null;
+  conductorEditAviso = false; // NUEVO
   document.getElementById("modalEdit").style.display = "none"; 
   document.querySelectorAll('#modalEdit input[type="file"]').forEach(input => input.value = '');
+  document.getElementById('modalAvisoSwitch').classList.remove('active'); // NUEVO
 }
 
 document.getElementById("modalEdit").addEventListener("click", function(e) {

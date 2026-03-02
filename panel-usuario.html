@@ -205,6 +205,24 @@
     color: #fbbf24;
   }
 
+  /* NUEVO: Estilo específico para aviso de operaciones (morado) */
+  .file-input-wrapper.aviso-file .file-input-label {
+    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  .file-input-wrapper.aviso-file:hover .file-input-label,
+  .file-input-wrapper.aviso-file:focus-within .file-input-label {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+  }
+
+  .file-input-wrapper.aviso-file.has-file .file-input-label {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+  }
+
   .file-icon {
     width: 24px;
     height: 24px;
@@ -247,7 +265,23 @@
     color: #fbbf24;
   }
 
+  /* NUEVO: Estado para aviso de operaciones */
+  .file-status.aviso-uploaded {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+  }
+
+  /* Toggle de propiedad del vehículo */
   .property-toggle {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 20px 0;
+  }
+
+  /* NUEVO: Toggle de aviso de operaciones */
+  .aviso-toggle {
     background: rgba(15, 23, 42, 0.6);
     border-radius: 16px;
     padding: 20px;
@@ -292,6 +326,12 @@
     border-color: rgba(34, 197, 94, 0.5);
   }
 
+  /* NUEVO: Switch activo morado para aviso */
+  .switch.aviso-active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: rgba(139, 92, 246, 0.5);
+  }
+
   .switch-thumb {
     position: absolute;
     top: 2px;
@@ -304,7 +344,8 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
-  .switch.active .switch-thumb {
+  .switch.active .switch-thumb,
+  .switch.aviso-active .switch-thumb {
     transform: translateX(24px);
   }
 
@@ -318,6 +359,11 @@
 
   .switch.active + .switch-text {
     color: #4ade80;
+  }
+
+  /* NUEVO: Texto morado cuando aviso está activo */
+  .switch.aviso-active + .switch-text {
+    color: #a78bfa;
   }
 
   .auth-upload {
@@ -335,12 +381,39 @@
     max-height: 300px;
   }
 
+  /* NUEVO: Upload de aviso de operaciones */
+  .aviso-upload {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .aviso-upload.show {
+    opacity: 1;
+    max-height: 300px;
+  }
+
   .auth-upload-header {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 15px;
     color: #fbbf24;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* NUEVO: Header para aviso (morado) */
+  .aviso-upload-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #a78bfa;
     font-size: 13px;
     font-weight: 600;
   }
@@ -403,6 +476,46 @@
   </div>
   
   <input id="poliza" placeholder="Número de Póliza">
+
+  <!-- NUEVO: Toggle de Aviso de Operaciones -->
+  <div class="aviso-toggle">
+    <div class="toggle-header">
+      <div class="toggle-label">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #8b5cf6;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        ¿Cuenta con Aviso de Operaciones?
+      </div>
+      <div class="switch-container">
+        <div class="switch" id="avisoSwitch">
+          <div class="switch-thumb"></div>
+        </div>
+        <span class="switch-text" id="avisoSwitchText">No</span>
+      </div>
+    </div>
+
+    <div class="aviso-upload" id="avisoUpload">
+      <div class="aviso-upload-header">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <span>Debe subir el documento de Aviso de Operaciones</span>
+      </div>
+      <div class="file-input-wrapper aviso-file" id="avisoFileWrapper" data-doc-type="AVISO_OPERACIONES">
+        <input type="file" id="aviso_operaciones" accept=".pdf,.jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Aviso de Operaciones</span>
+            <span class="file-hint">PDF, JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-aviso">Pendiente</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="property-toggle">
     <div class="toggle-header">
@@ -548,6 +661,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentConductorId = null;
 let currentAuthUserId = null;
 let isOwner = true;
+let tieneAvisoOperaciones = false; // NUEVO
 
 const inputs = {
   nombres: document.getElementById("nombres"),
@@ -565,9 +679,15 @@ const inputs = {
 const progressBar = document.getElementById("progressBar");
 const btnGuardar = document.getElementById("btnGuardar");
 
+// Toggle de propiedad del vehículo
 const propertySwitch = document.getElementById("propertySwitch");
 const switchText = document.getElementById("switchText");
 const authUpload = document.getElementById("authUpload");
+
+// NUEVO: Toggle de aviso de operaciones
+const avisoSwitch = document.getElementById("avisoSwitch");
+const avisoSwitchText = document.getElementById("avisoSwitchText");
+const avisoUpload = document.getElementById("avisoUpload");
 
 propertySwitch.addEventListener("click", () => {
   isOwner = !isOwner;
@@ -585,6 +705,26 @@ propertySwitch.addEventListener("click", () => {
     setTimeout(() => {
       authUpload.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 100);
+  }
+});
+
+// NUEVO: Event listener para toggle de aviso de operaciones
+avisoSwitch.addEventListener("click", () => {
+  tieneAvisoOperaciones = !tieneAvisoOperaciones;
+  
+  if (tieneAvisoOperaciones) {
+    avisoSwitch.classList.add("aviso-active");
+    avisoSwitchText.textContent = "Sí";
+    avisoSwitchText.style.color = "#a78bfa";
+    avisoUpload.classList.add("show");
+    setTimeout(() => {
+      avisoUpload.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 100);
+  } else {
+    avisoSwitch.classList.remove("aviso-active");
+    avisoSwitchText.textContent = "No";
+    avisoSwitchText.style.color = "#94a3b8";
+    avisoUpload.classList.remove("show");
   }
 });
 
@@ -635,11 +775,17 @@ function actualizarEstadoDocumento(tipo, subido) {
   if (statusEl) {
     if (subido) {
       statusEl.textContent = 'Subido';
-      statusEl.classList.remove('pending');
-      statusEl.classList.add('uploaded');
+      // NUEVO: Clase especial para aviso de operaciones
+      if (tipo === 'AVISO_OPERACIONES') {
+        statusEl.classList.remove('pending');
+        statusEl.classList.add('aviso-uploaded');
+      } else {
+        statusEl.classList.remove('pending');
+        statusEl.classList.add('uploaded');
+      }
     } else {
       statusEl.textContent = 'Pendiente';
-      statusEl.classList.remove('uploaded');
+      statusEl.classList.remove('uploaded', 'aviso-uploaded');
       statusEl.classList.add('pending');
     }
   }
@@ -692,12 +838,22 @@ async function cargarDatos(userId){
     inputs.color.value = data.color || "";
     inputs.poliza.value = data.poliza_numero || data.poliza || "";
 
+    // Toggle de propiedad
     isOwner = data.es_propietario !== false;
     if (!isOwner) {
       propertySwitch.classList.remove("active");
       switchText.textContent = "No";
       switchText.style.color = "#94a3b8";
       authUpload.classList.add("show");
+    }
+
+    // NUEVO: Toggle de aviso de operaciones
+    tieneAvisoOperaciones = data.tiene_aviso_operaciones === true;
+    if (tieneAvisoOperaciones) {
+      avisoSwitch.classList.add("aviso-active");
+      avisoSwitchText.textContent = "Sí";
+      avisoSwitchText.style.color = "#a78bfa";
+      avisoUpload.classList.add("show");
     }
 
     await cargarDocumentosExistentes(data.id);
@@ -739,7 +895,8 @@ function getInputIdByTipo(tipo) {
     'POLIZA': 'poliza_doc',
     'FOTO_VEHICULO': 'foto_vehiculo',
     'FOTO_CONDUCTOR': 'foto_conductor',
-    'AUTH_PROPIETARIO': 'auth_propietario'
+    'AUTH_PROPIETARIO': 'auth_propietario',
+    'AVISO_OPERACIONES': 'aviso_operaciones' // NUEVO
   };
   return map[tipo] || tipo.toLowerCase();
 }
@@ -795,6 +952,7 @@ async function guardar(){
   progressBar.style.width = '30%';
 
   try {
+    // Validar autorización si no es propietario
     if (!isOwner) {
       const { data: authDoc, error: authError } = await supabaseClient
         .from("documentos")
@@ -808,6 +966,20 @@ async function guardar(){
       }
     }
 
+    // NUEVO: Validar aviso de operaciones si lo tiene activado
+    if (tieneAvisoOperaciones) {
+      const { data: avisoDoc, error: avisoError } = await supabaseClient
+        .from("documentos")
+        .select("id")
+        .eq("conductor_id", currentConductorId)
+        .eq("tipo", "AVISO_OPERACIONES")
+        .single();
+      
+      if (avisoError || !avisoDoc) {
+        throw new Error("Debe subir el Aviso de Operaciones antes de guardar");
+      }
+    }
+
     const updateData = {
       nombres: inputs.nombres.value,
       apellidos: inputs.apellidos.value,
@@ -818,7 +990,8 @@ async function guardar(){
       placa: inputs.placa.value,
       color: inputs.color.value,
       poliza_numero: inputs.poliza.value,
-      es_propietario: isOwner
+      es_propietario: isOwner,
+      tiene_aviso_operaciones: tieneAvisoOperaciones // NUEVO
     };
 
     const { error } = await supabaseClient

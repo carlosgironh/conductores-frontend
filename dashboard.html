@@ -2,40 +2,31 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Ingreso Usuario</title>
+<title>Ingreso Usuario - NRDesignCorp</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-  * { 
-    box-sizing: border-box; 
-    margin: 0;
-    padding: 0;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body { 
-    font-family: 'Inter', -apple-system, sans-serif; 
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     padding: 20px;
-    
-    /* Fondo dinámico premium */
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
-    
-    color: #f8fafc; 
-    display: flex; 
-    justify-content: center; 
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
     align-items: center;
     position: relative;
     overflow: hidden;
   }
 
-  /* Partículas flotantes */
   body::before {
     content: '';
     position: fixed;
@@ -45,8 +36,7 @@
     height: 100%;
     background-image: 
       radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
-      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%),
-      radial-gradient(circle at 40% 40%, rgba(255,255,255,0.02) 0%, transparent 1.5%);
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%);
     background-size: 150px 150px;
     animation: float 25s ease-in-out infinite;
     pointer-events: none;
@@ -59,39 +49,29 @@
     66% { transform: translate(-20px, 20px) rotate(240deg); }
   }
 
-  /* Tarjeta principal con efecto 3D */
-  .card { 
-    max-width: 420px; 
-    width: 100%; 
-    background: rgba(30, 41, 59, 0.4); 
+  .card {
+    max-width: 420px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.4);
     backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px); 
+    -webkit-backdrop-filter: blur(30px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 32px; 
+    border-radius: 32px;
     box-shadow: 
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-      0 1px 1px rgba(255, 255, 255, 0.05) inset;
-    padding: 50px 40px; 
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    padding: 50px 40px;
     position: relative;
     z-index: 1;
     animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
-    transform-style: preserve-3d;
   }
 
   @keyframes cardEntry {
-    from {
-      opacity: 0;
-      transform: translateY(40px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* Efecto de brillo dinámico */
   .card::before {
     content: '';
     position: absolute;
@@ -99,22 +79,14 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.05),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
     transition: left 0.7s;
     pointer-events: none;
     border-radius: 32px;
   }
 
-  .card:hover::before {
-    left: 100%;
-  }
+  .card:hover::before { left: 100%; }
 
-  /* Icono de header */
   .header-icon {
     width: 70px;
     height: 70px;
@@ -140,72 +112,56 @@
     color: #818cf8;
   }
 
-  h2 { 
-    text-align: center; 
-    font-weight: 800; 
-    font-size: 32px; 
-    letter-spacing: -0.5px; 
+  h2 {
+    text-align: center;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.5px;
     margin-bottom: 35px;
     background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-    -webkit-background-clip: text; 
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Grupo de inputs */
   .input-group {
     position: relative;
     margin-bottom: 20px;
   }
 
-  .input-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #cbd5e1;
-    margin-bottom: 8px;
-    margin-left: 4px;
-    transition: color 0.3s;
-  }
-
-  input { 
-    width: 100%; 
-    padding: 16px 20px; 
+  input {
+    width: 100%;
+    padding: 16px 20px;
     background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-    border-radius: 16px; 
-    color: #ffffff; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    color: #ffffff;
     font-size: 15px;
     font-family: inherit;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  input::placeholder {
-    color: #64748b;
-  }
+  input::placeholder { color: #64748b; }
 
   input:hover {
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(15, 23, 42, 0.8);
   }
 
-  input:focus { 
-    border-color: #6366f1; 
+  input:focus {
+    border-color: #6366f1;
     background: rgba(15, 23, 42, 0.9);
-    box-shadow: 
-      0 0 0 4px rgba(99, 102, 241, 0.15),
-      0 4px 20px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 4px 20px rgba(99, 102, 241, 0.1);
     outline: none;
   }
 
-  /* Botón principal premium */
-  .btn-login { 
+  .btn-login {
     width: 100%;
     padding: 18px 28px;
     margin-top: 10px;
     border: none;
     border-radius: 16px;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%); 
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
     color: white;
     font-size: 16px;
     font-weight: 700;
@@ -213,10 +169,7 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    box-shadow: 
-      0 4px 6px -1px rgba(79, 70, 229, 0.2),
-      0 10px 20px -5px rgba(79, 70, 229, 0.4),
-      inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 10px 20px -5px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -231,31 +184,24 @@
     transition: left 0.6s;
   }
 
-  .btn-login:hover { 
-    transform: translateY(-2px) scale(1.02); 
-    box-shadow: 
-      0 10px 25px -5px rgba(79, 70, 229, 0.5),
-      0 8px 10px -6px rgba(79, 70, 229, 0.3);
+  .btn-login:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.5), 0 8px 10px -6px rgba(79, 70, 229, 0.3);
   }
 
-  .btn-login:hover::before {
-    left: 100%;
-  }
+  .btn-login:hover::before { left: 100%; }
+  .btn-login:active { transform: translateY(0) scale(0.98); }
+  .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  .btn-login:active { 
-    transform: translateY(0) scale(0.98); 
-  }
-
-  /* Botón secundario */
-  .btn-reset { 
+  .btn-reset {
     width: 100%;
     padding: 14px 24px;
     margin-top: 15px;
     border: none;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.05); 
-    color: #94a3b8; 
-    font-weight: 600; 
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-weight: 600;
     font-size: 14px;
     font-family: inherit;
     cursor: pointer;
@@ -264,23 +210,18 @@
     transition: all 0.3s ease;
   }
 
-  .btn-reset:hover { 
-    background: rgba(255, 255, 255, 0.1); 
+  .btn-reset:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
     border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
   }
 
-  .btn-reset:active {
-    transform: translateY(0) scale(0.98);
-  }
-
-  /* Mensaje de estado */
-  .msg { 
-    margin-top: 25px; 
-    text-align: center; 
-    font-weight: 600; 
-    font-size: 14px; 
+  .msg {
+    margin-top: 25px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
     min-height: 24px;
     padding: 12px;
     border-radius: 12px;
@@ -312,7 +253,6 @@
     color: #818cf8;
   }
 
-  /* Divider */
   .divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
@@ -332,21 +272,10 @@
     border-radius: 3px;
   }
 
-  /* Responsive */
   @media (max-width: 480px) {
-    .card {
-      padding: 40px 25px;
-      border-radius: 24px;
-    }
-    
-    h2 {
-      font-size: 26px;
-    }
-    
-    .header-icon {
-      width: 60px;
-      height: 60px;
-    }
+    .card { padding: 40px 25px; border-radius: 24px; }
+    h2 { font-size: 26px; }
+    .header-icon { width: 60px; height: 60px; }
   }
 </style>
 </head>
@@ -362,14 +291,14 @@
   <h2>Ingreso Usuario</h2>
 
   <div class="input-group">
-    <input id="email" type="email" placeholder="Correo electrónico">
+    <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
   </div>
   
   <div class="input-group">
-    <input id="password" type="password" placeholder="Contraseña">
+    <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
   </div>
 
-  <button class="btn-login" onclick="login()">Ingresar</button>
+  <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
   
   <div class="divider"></div>
   
@@ -379,6 +308,7 @@
 </div>
 
 <script>
+// Configuración - Eliminar espacios en blanco al final de las URLs
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
@@ -398,6 +328,7 @@ function showMessage(text, type = '') {
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const btn = document.getElementById("loginBtn");
 
   if(!email || !password){
     showMessage("Completa todos los campos", "error");
@@ -405,37 +336,65 @@ async function login() {
   }
 
   showMessage("Verificando credenciales...", "loading");
+  btn.disabled = true;
 
-  const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
+  try {
+    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ 
+      email, 
+      password 
+    });
 
-  if(authError){
-    showMessage("Correo o contraseña incorrectos", "error");
-    return;
-  }
-
-  // Verificar si es admin
-  const { data: adminData, error: adminError } = await supabaseClient
-    .from('admins')
-    .select('auth_user_id')
-    .eq('auth_user_id', authData.user.id)
-    .single();
-
-  if(adminError && adminError.code !== 'PGRST116'){
-    console.error(adminError);
-    showMessage("Error verificando permisos", "error");
-    return;
-  }
-
-  showMessage("¡Ingreso exitoso! Redirigiendo...", "success");
-
-  setTimeout(() => {
-    if(adminData){ 
-      window.location.href="panel-admin.html";
-    } else {
-      // Redirige a perf.html para usuarios normales (conductores)
-      window.location.href="perfil.html";
+    if(authError){
+      showMessage("Correo o contraseña incorrectos", "error");
+      btn.disabled = false;
+      return;
     }
-  }, 1200);
+
+    // Verificar si es admin - Usando solo auth_user_id (sin role)
+    const { data: adminData, error: adminError } = await supabaseClient
+      .from('admins')
+      .select('auth_user_id')
+      .eq('auth_user_id', authData.user.id)
+      .maybeSingle(); // Cambiado a maybeSingle para manejar mejor el caso de no encontrado
+
+    // Manejo de errores específico
+    if(adminError){
+      console.error("Error en consulta admin:", adminError);
+      
+      // Si el error es de permisos o tabla no existe, intentar sin filtro
+      if(adminError.code === 'PGRST104' || adminError.code === '42P01' || adminError.code === '42501') {
+        console.log("Posible problema de permisos o tabla, continuando como usuario normal");
+        showMessage("¡Ingreso exitoso! Redirigiendo...", "success");
+        
+        setTimeout(() => {
+          window.location.href = "perfil.html";
+        }, 1200);
+        return;
+      }
+      
+      // Otros errores graves
+      if(adminError.code !== 'PGRST116') { // PGRST116 = no encontrado (esto es normal)
+        showMessage("Error verificando permisos: " + adminError.message, "error");
+        btn.disabled = false;
+        return;
+      }
+    }
+
+    showMessage("¡Ingreso exitoso! Redirigiendo...", "success");
+
+    setTimeout(() => {
+      if(adminData && adminData.auth_user_id){ 
+        window.location.href = "panel-admin.html";
+      } else {
+        window.location.href = "perfil.html";
+      }
+    }, 1200);
+
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    showMessage("Error de conexión: " + err.message, "error");
+    btn.disabled = false;
+  }
 }
 
 async function recuperar(){
@@ -444,16 +403,25 @@ async function recuperar(){
 
   showMessage("Enviando correo de recuperación...", "loading");
 
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email,{
-    redirectTo: window.location.origin + "/reset-password.html"
-  });
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password.html"
+    });
 
-  if(error){
-    showMessage("Error al enviar el correo", "error");
-  } else {
-    showMessage("Si el correo existe, recibirás un enlace de recuperación", "success");
+    if(error){
+      showMessage("Error al enviar el correo: " + error.message, "error");
+    } else {
+      showMessage("Si el correo existe, recibirás un enlace de recuperación", "success");
+    }
+  } catch (err) {
+    showMessage("Error de conexión", "error");
   }
 }
+
+// Permitir login con Enter
+document.getElementById('password').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') login();
+});
 </script>
 </body>
 </html>
