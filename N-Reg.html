@@ -268,15 +268,6 @@
     margin-top: 20px;
   }
 
-  /* NUEVO: Toggle de aviso de operaciones - mismo estilo */
-  .aviso-toggle {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 20px;
-  }
-
   .toggle-header {
     display: flex;
     align-items: center;
@@ -296,11 +287,6 @@
     width: 20px;
     height: 20px;
     color: #22c55e;
-  }
-
-  /* NUEVO: Icono específico para aviso de operaciones */
-  .toggle-label .icon-aviso {
-    color: #8b5cf6;
   }
 
   /* Switch moderno */
@@ -326,12 +312,6 @@
     border-color: rgba(34, 197, 94, 0.5);
   }
 
-  /* NUEVO: Estilo específico para switch de aviso (morado cuando activo) */
-  .switch.aviso-active {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    border-color: rgba(139, 92, 246, 0.5);
-  }
-
   .switch-thumb {
     position: absolute;
     top: 2px;
@@ -344,8 +324,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
-  .switch.active .switch-thumb,
-  .switch.aviso-active .switch-thumb {
+  .switch.active .switch-thumb {
     transform: translateX(24px);
   }
 
@@ -359,11 +338,6 @@
 
   .switch.active + .switch-text {
     color: #4ade80;
-  }
-
-  /* NUEVO: Texto morado cuando aviso está activo */
-  .switch.aviso-active + .switch-text {
-    color: #a78bfa;
   }
 
   /* Upload de autorización */
@@ -382,22 +356,6 @@
     max-height: 300px;
   }
 
-  /* NUEVO: Upload de aviso de operaciones */
-  .aviso-upload {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .aviso-upload.show {
-    opacity: 1;
-    max-height: 300px;
-  }
-
   .auth-upload-header {
     display: flex;
     align-items: center;
@@ -408,19 +366,7 @@
     font-weight: 600;
   }
 
-  /* NUEVO: Header para aviso de operaciones (color morado) */
-  .aviso-upload-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-    color: #a78bfa;
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .auth-upload-header svg,
-  .aviso-upload-header svg {
+  .auth-upload-header svg {
     width: 20px;
     height: 20px;
     animation: pulse 2s infinite;
@@ -466,13 +412,6 @@
     color: #ffffff;
   }
 
-  /* NUEVO: Hover específico para aviso de operaciones */
-  .aviso-upload .file-input-wrapper:hover .file-input-label,
-  .aviso-upload .file-input-wrapper:focus-within .file-input-label {
-    border-color: #8b5cf6;
-    background: rgba(139, 92, 246, 0.1);
-  }
-
   .file-input-wrapper.has-file .file-input-label {
     border-style: solid;
     border-color: #22c55e;
@@ -513,6 +452,41 @@
   .file-hint {
     font-size: 12px;
     color: #64748b;
+  }
+
+  /* NUEVO: Estilos para Aviso de Operaciones - SIEMPRE VISIBLE */
+  .aviso-section {
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    margin-top: 20px;
+  }
+
+  .aviso-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #a78bfa;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .aviso-header svg {
+    width: 22px;
+    height: 22px;
+    color: #8b5cf6;
+  }
+
+  .aviso-upload {
+    margin-top: 15px;
+  }
+
+  .aviso-upload .file-input-wrapper:hover .file-input-label,
+  .aviso-upload .file-input-wrapper:focus-within .file-input-label {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
   }
 
   .divider {
@@ -913,46 +887,6 @@
             <input id="licencia" type="text" placeholder="Tipo B" required>
           </div>
         </div>
-
-        <!-- NUEVO: Toggle de Aviso de Operaciones (en sección de Datos Personales) -->
-        <div class="aviso-toggle">
-          <div class="toggle-header">
-            <div class="toggle-label">
-              <svg class="icon-aviso" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              ¿Cuenta con Aviso de Operaciones?
-            </div>
-            <div class="switch-container">
-              <div class="switch" id="avisoSwitch">
-                <div class="switch-thumb"></div>
-              </div>
-              <span class="switch-text" id="avisoSwitchText">No</span>
-            </div>
-          </div>
-
-          <!-- Upload de Aviso de Operaciones - aparece cuando SÍ tiene aviso -->
-          <div class="aviso-upload" id="avisoUpload">
-            <div class="aviso-upload-header">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-              </svg>
-              <span>Debe subir el documento de Aviso de Operaciones</span>
-            </div>
-            <div class="file-input-wrapper" id="avisoFileWrapper">
-              <input type="file" id="aviso_operaciones" accept=".pdf,.jpg,.jpeg,.png">
-              <div class="file-input-label">
-                <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <div class="file-text">
-                  <span class="file-name">Aviso de Operaciones</span>
-                  <span class="file-hint">PDF, JPG o PNG - Obligatorio si aplica</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="divider"></div>
@@ -1016,6 +950,30 @@
                 </svg>
                 <div class="file-text">
                   <span class="file-name">Carta de Autorización del Propietario</span>
+                  <span class="file-hint">PDF, JPG o PNG - Obligatorio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NUEVO: Aviso de Operaciones - SIEMPRE REQUERIDO (sin toggle) -->
+        <div class="aviso-section">
+          <div class="aviso-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Aviso de Operaciones (Requerido)
+          </div>
+          <div class="aviso-upload">
+            <div class="file-input-wrapper" id="avisoFileWrapper">
+              <input type="file" id="aviso_operaciones" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="file-input-label">
+                <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <div class="file-text">
+                  <span class="file-name">Documento de Aviso de Operaciones</span>
                   <span class="file-hint">PDF, JPG o PNG - Obligatorio</span>
                 </div>
               </div>
@@ -1143,15 +1101,11 @@ const authUpload = document.getElementById("authUpload");
 const authFileInput = document.getElementById("auth_propietario");
 const authFileWrapper = document.getElementById("authFileWrapper");
 
-// NUEVO: Elementos de Aviso de Operaciones
-const avisoSwitch = document.getElementById("avisoSwitch");
-const avisoSwitchText = document.getElementById("avisoSwitchText");
-const avisoUpload = document.getElementById("avisoUpload");
+// NUEVO: Elementos de Aviso de Operaciones (siempre requerido)
 const avisoOperacionesInput = document.getElementById("aviso_operaciones");
 const avisoFileWrapper = document.getElementById("avisoFileWrapper");
 
 let isOwner = true; // Por defecto SÍ es propietario (switch activo)
-let tieneAvisoOperaciones = false; // NUEVO: Por defecto NO tiene aviso (switch inactivo)
 let formData = null; // Almacena datos del formulario para procesar después del acuerdo
 
 // Cargar términos desde archivo
@@ -1249,43 +1203,6 @@ propertySwitch.addEventListener("click", () => {
   }
 });
 
-// NUEVO: Manejar toggle de Aviso de Operaciones
-avisoSwitch.addEventListener("click", () => {
-  tieneAvisoOperaciones = !tieneAvisoOperaciones;
-  
-  if (tieneAvisoOperaciones) {
-    // SÍ tiene aviso - Switch activo (morado)
-    avisoSwitch.classList.add("aviso-active");
-    avisoSwitchText.textContent = "Sí";
-    avisoSwitchText.style.color = "#a78bfa";
-    avisoUpload.classList.add("show");
-    
-    // Hacer obligatorio el archivo de aviso de operaciones
-    avisoOperacionesInput.required = true;
-    
-    // Scroll suave al upload
-    setTimeout(() => {
-      avisoUpload.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }, 100);
-  } else {
-    // NO tiene aviso - Switch inactivo (gris)
-    avisoSwitch.classList.remove("aviso-active");
-    avisoSwitchText.textContent = "No";
-    avisoSwitchText.style.color = "#94a3b8";
-    avisoUpload.classList.remove("show");
-    
-    // Hacer opcional el archivo de aviso de operaciones
-    avisoOperacionesInput.required = false;
-    avisoFileWrapper.classList.remove("required");
-    
-    // Limpiar archivo si existe
-    avisoOperacionesInput.value = '';
-    avisoFileWrapper.classList.remove('has-file');
-    avisoFileWrapper.querySelector('.file-name').textContent = 'Aviso de Operaciones';
-    avisoFileWrapper.querySelector('.file-hint').textContent = 'PDF, JPG o PNG - Obligatorio si aplica';
-  }
-});
-
 // Manejar visualización de archivos seleccionados
 document.querySelectorAll('input[type="file"]').forEach(input => {
   input.addEventListener('change', function() {
@@ -1305,8 +1222,8 @@ document.querySelectorAll('input[type="file"]').forEach(input => {
         label.textContent = 'Carta de Autorización del Propietario';
         hint.textContent = 'PDF, JPG o PNG - Obligatorio';
       } else if (this.id === 'aviso_operaciones') {
-        label.textContent = 'Aviso de Operaciones';
-        hint.textContent = 'PDF, JPG o PNG - Obligatorio si aplica';
+        label.textContent = 'Documento de Aviso de Operaciones';
+        hint.textContent = 'PDF, JPG o PNG - Obligatorio';
       } else if (this.id === 'cedula_doc') {
         label.textContent = 'Cédula de Identidad';
         hint.textContent = 'PDF, JPG o PNG';
@@ -1421,7 +1338,7 @@ async function processRegistration() {
         poliza_numero: document.getElementById('poliza_numero').value,
         es_propietario: isOwner,
         tipo_propiedad: isOwner ? "propio" : "tercero",
-        tiene_aviso_operaciones: tieneAvisoOperaciones // NUEVO: Guardar estado del toggle
+        tiene_aviso_operaciones: true // SIEMPRE true ahora
       }])
       .select()
       .single();
@@ -1438,13 +1355,13 @@ async function processRegistration() {
       ["REGISTRO","registro_doc"],
       ["POLIZA","poliza_doc"],
       ["FOTO_VEHICULO","foto_vehiculo"],
-      ["FOTO_CONDUCTOR","foto_conductor"]
+      ["FOTO_CONDUCTOR","foto_conductor"],
+      ["AVISO_OPERACIONES","aviso_operaciones"] // NUEVO: Siempre se sube
     ];
 
     // Calcular total de documentos a subir
     const totalDocumentos = documentosObligatorios.length + 
-                           (isOwner ? 0 : 1) + 
-                           (tieneAvisoOperaciones ? 1 : 0);
+                           (isOwner ? 0 : 1);
 
     for (let i = 0; i < documentosObligatorios.length; i++) {
       showMessage(`Subiendo documento ${i + 1} de ${totalDocumentos}...`, "busy");
@@ -1456,12 +1373,6 @@ async function processRegistration() {
     if (!isOwner) {
       showMessage("Subiendo autorización del propietario...", "busy");
       await subirDocumento(conductorId, "AUTH_PROPIETARIO", "auth_propietario");
-    }
-
-    // NUEVO: 6️⃣ Subir Aviso de Operaciones solo si SÍ tiene aviso
-    if (tieneAvisoOperaciones) {
-      showMessage("Subiendo aviso de operaciones...", "busy");
-      await subirDocumento(conductorId, "AVISO_OPERACIONES", "aviso_operaciones");
     }
 
     updateProgress(100);
@@ -1492,10 +1403,10 @@ form.addEventListener("submit", async (e) => {
     return;
   }
   
-  // NUEVO: Validación: si tiene aviso de operaciones, debe subir el documento
-  if (tieneAvisoOperaciones && !avisoOperacionesInput.files[0]) {
+  // NUEVO: Validación obligatoria de Aviso de Operaciones (siempre requerido)
+  if (!avisoOperacionesInput.files[0]) {
     avisoFileWrapper.classList.add('required');
-    showMessage("Debe subir el Aviso de Operaciones", "error");
+    showMessage("El Aviso de Operaciones es obligatorio", "error");
     avisoFileWrapper.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
