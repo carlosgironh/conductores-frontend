@@ -24,7 +24,7 @@
     "@capacitor/status-bar": "^5.0.8"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.1.0",
+    "@capacitor/cli": "^5.7.8",
     "supabase": "^2.76.15"
   }
 }
