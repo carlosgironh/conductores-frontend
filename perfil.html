@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Mi Perfil - Conductor</title>
-<!-- Viewport optimizado para Capacitor -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -22,7 +21,6 @@
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
-    /* Safe areas para Capacitor */
     padding: 40px 20px;
     padding-top: max(40px, env(safe-area-inset-top));
     padding-bottom: max(40px, env(safe-area-inset-bottom));
@@ -42,7 +40,6 @@
     overflow-x: hidden;
   }
 
-  /* Prevenir bounce en iOS */
   body::before {
     content: '';
     position: fixed;
@@ -77,14 +74,12 @@
     box-shadow: 
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
       0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    /* Ajuste de padding para safe area */
     padding: 50px 45px;
     padding-top: max(50px, env(safe-area-inset-top));
     position: relative;
     z-index: 1;
     animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
     overflow: hidden;
-    /* Mejoras táctiles */
     touch-action: pan-y;
   }
 
@@ -99,7 +94,6 @@
     }
   }
 
-  /* Banner de estado con safe area */
   .status-banner {
     position: relative;
     margin: calc(-1 * max(50px, env(safe-area-inset-top))) -45px 30px -45px;
@@ -330,7 +324,6 @@
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     transition: all 0.3s ease;
-    /* Optimización táctil */
     touch-action: manipulation;
   }
 
@@ -345,7 +338,6 @@
     display: block;
     cursor: pointer;
     transition: transform 0.3s;
-    /* Prevenir selección de imagen */
     -webkit-user-select: none;
     user-select: none;
   }
@@ -412,10 +404,9 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    /* Optimizaciones táctiles */
     touch-action: manipulation;
     -webkit-touch-callout: none;
-    min-height: 44px; /* Tamaño mínimo táctil */
+    min-height: 44px;
   }
 
   .btn-doc:active {
@@ -474,7 +465,6 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    /* Optimizaciones táctiles */
     touch-action: manipulation;
     min-height: 44px;
   }
@@ -483,34 +473,7 @@
     transform: scale(0.96);
   }
 
-  #qr-container {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 35px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-  }
-
-  #qr-container::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #6366f1, transparent);
-  }
-
-  #qr {
-    background: white;
-    padding: 20px;
-    border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-    margin-bottom: 25px;
-    display: inline-block;
-    max-width: 100%;
-  }
+  /* ELIMINADO: Estilos del QR container */
 
   button {
     background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
@@ -548,7 +511,6 @@
     align-items: center;
     cursor: zoom-out;
     animation: fadeIn 0.3s ease;
-    /* Safe area para modal */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
@@ -564,7 +526,6 @@
     box-shadow: 0 0 60px rgba(0,0,0,0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: scaleIn 0.3s ease;
-    /* Prevenir arrastre accidental */
     -webkit-user-drag: none;
   }
 
@@ -579,7 +540,6 @@
     }
   }
 
-  /* Offline indicator */
   .offline-indicator {
     position: fixed;
     top: max(10px, env(safe-area-inset-top));
@@ -603,7 +563,6 @@
     gap: 8px;
   }
 
-  /* Responsive */
   @media(max-width: 640px){
     .card {
       padding: 30px 20px;
@@ -670,7 +629,6 @@
     to { transform: rotate(360deg); }
   }
 
-  /* Toast notifications */
   .toast {
     position: fixed;
     bottom: max(20px, env(safe-area-inset-bottom));
@@ -698,7 +656,6 @@
 
 <body>
 
-<!-- Offline indicator -->
 <div class="offline-indicator" id="offlineIndicator">
   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
@@ -706,7 +663,6 @@
   Sin conexión
 </div>
 
-<!-- Toast container -->
 <div class="toast" id="toast"></div>
 
 <div class="card" id="mainCard">
@@ -733,10 +689,7 @@
     Actualizar Datos
   </button>
 
-  <div id="qr-container">
-    <canvas id="qr"></canvas><br>
-    <button onclick="descargarQR()">Descargar Código QR</button>
-  </div>
+  <!-- ELIMINADO: QR container -->
 </div>
 
 <div id="modalFoto" class="modal" onclick="cerrarModal()">
@@ -750,11 +703,9 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Cache de datos para offline
 let perfilCache = null;
 let documentosCache = null;
 
-// Detectar modo offline/online
 function initConnectivity() {
   const indicator = document.getElementById('offlineIndicator');
   
@@ -762,7 +713,6 @@ function initConnectivity() {
     if (navigator.onLine) {
       indicator.classList.remove('show');
       showToast('Conexión restaurada');
-      // Recargar datos si estaba offline
       if (perfilCache === null) {
         cargarPerfil();
       }
@@ -775,7 +725,6 @@ function initConnectivity() {
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
   
-  // Estado inicial
   if (!navigator.onLine) {
     indicator.classList.add('show');
   }
@@ -856,7 +805,6 @@ function renderStatusBanner(estado, motivoDeshabilitado = '') {
 
 async function cargarPerfil() {
   try {
-    // Verificar sesión
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     
     if (userError || !user) {
@@ -864,13 +812,11 @@ async function cargarPerfil() {
       return;
     }
 
-    // Si hay caché y estamos offline, usar caché
     if (!navigator.onLine && perfilCache) {
       renderPerfil(perfilCache, documentosCache, user);
       return;
     }
 
-    // Cargar conductor
     const { data: conductor, error: condError } = await supabaseClient
       .from("conductores")
       .select("*")
@@ -881,13 +827,11 @@ async function cargarPerfil() {
       throw new Error('No se encontró el perfil');
     }
 
-    // Cargar documentos
     const { data: documentos } = await supabaseClient
       .from("documentos")
       .select("*")
       .eq("conductor_id", conductor.id);
 
-    // Guardar en caché
     perfilCache = conductor;
     documentosCache = documentos;
 
@@ -896,7 +840,6 @@ async function cargarPerfil() {
   } catch (error) {
     console.error('Error cargando perfil:', error);
     
-    // Si hay caché, mostrarla incluso si hay error
     if (perfilCache) {
       showToast('Error de conexión - Mostrando datos guardados');
       renderPerfil(perfilCache, documentosCache, { email: perfilCache.email || 'Usuario' });
@@ -913,10 +856,8 @@ async function cargarPerfil() {
 }
 
 function renderPerfil(conductor, documentos, user) {
-  // Renderizar banner
   renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
 
-  // Helper para URLs
   function docUrl(tipo) {
     const doc = documentos?.find(d => d.tipo === tipo);
     if (!doc) return null;
@@ -926,7 +867,6 @@ function renderPerfil(conductor, documentos, user) {
   const tieneAviso = conductor.tiene_aviso_operaciones === true;
   const avisoUrl = docUrl("AVISO_OPERACIONES");
 
-  // Renderizar datos
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre</strong> <span>${conductor.nombres} ${conductor.apellidos}</span></div>
     <div class="campo"><strong>Cédula</strong> <span>${conductor.cedula}</span></div>
@@ -948,7 +888,6 @@ function renderPerfil(conductor, documentos, user) {
     <div class="campo"><strong>Teléfono</strong> <span>${conductor.celular}</span></div>
   `;
 
-  // Renderizar fotos
   const fotosCont = document.getElementById("fotos-container");
   fotosCont.innerHTML = "";
 
@@ -973,7 +912,6 @@ function renderPerfil(conductor, documentos, user) {
     `;
   }
 
-  // Renderizar documentos
   const docSection = document.getElementById("documentos-section");
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
@@ -1011,55 +949,16 @@ function renderPerfil(conductor, documentos, user) {
 
   docSection.style.display = tieneDocumentos ? "block" : "none";
 
-  // Generar QR
-  generarQR(conductor.id);
+  // ELIMINADO: generarQR(conductor.id);
 }
 
-async function generarQR(conductorId) {
-  try {
-    const publicUrl = `${window.location.origin}/perfil_publico.html?id=${conductorId}`;
-    const canvas = document.getElementById("qr");
-
-    await QRCode.toCanvas(canvas, publicUrl, {
-      width: 220,
-      margin: 2,
-      color: { dark: '#1e293b', light: '#ffffff' },
-      errorCorrectionLevel: 'H'
-    });
-
-    // Logo centrado
-    const ctx = canvas.getContext("2d");
-    const logo = new Image();
-    logo.src = "logo.png";
-    logo.crossOrigin = "anonymous";
-
-    logo.onload = () => {
-      const size = canvas.width * 0.22;
-      const x = (canvas.width - size) / 2;
-      const y = (canvas.height - size) / 2;
-      
-      ctx.fillStyle = "white";
-      ctx.beginPath();
-      ctx.arc(canvas.width/2, canvas.height/2, size/2 + 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.drawImage(logo, x, y, size, size);
-    };
-    
-    logo.onerror = () => {
-      console.log('Logo no cargado');
-    };
-  } catch (error) {
-    console.error('Error generando QR:', error);
-  }
-}
+// ELIMINADAS: funciones generarQR() y descargarQR()
 
 function mostrarModal(src) {
   const modal = document.getElementById("modalFoto");
   const img = document.getElementById("modalImg");
   img.src = src;
   modal.style.display = "flex";
-  
-  // Prevenir scroll del body
   document.body.style.overflow = "hidden";
 }
 
@@ -1068,28 +967,13 @@ function cerrarModal() {
   document.body.style.overflow = "";
 }
 
-function descargarQR() {
-  try {
-    const canvas = document.getElementById("qr");
-    const link = document.createElement("a");
-    link.download = `credencial_${new Date().getTime()}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-    showToast('QR descargado');
-  } catch (error) {
-    showToast('Error al descargar');
-  }
-}
-
 function irAPanel() {
-  // Transición suave antes de navegar
   document.body.style.opacity = "0.5";
   setTimeout(() => {
     window.location.href = "panel-usuario.html";
   }, 200);
 }
 
-// Manejo de teclado en Capacitor
 if (window.Capacitor) {
   window.addEventListener('keyboardWillShow', () => {
     document.body.style.height = window.innerHeight + 'px';
@@ -1100,13 +984,11 @@ if (window.Capacitor) {
   });
 }
 
-// Inicialización
 document.addEventListener("DOMContentLoaded", () => {
   initConnectivity();
   cargarPerfil();
 });
 
-// Prevenir zoom en double-tap (iOS)
 let lastTouchEnd = 0;
 document.addEventListener('touchend', (e) => {
   const now = Date.now();
