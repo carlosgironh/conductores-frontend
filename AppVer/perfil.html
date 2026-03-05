@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Mi Perfil - Road To</title>
+<title>Mi Perfil - Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -18,26 +18,20 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  :root {
-    --safe-top: env(safe-area-inset-top);
-    --safe-bottom: env(safe-area-inset-bottom);
-    --primary: #3b82f6;
-    --accent: #8b5cf6;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-  }
-
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     padding: 40px 20px;
-    padding-top: calc(80px + var(--safe-top));
-    padding-bottom: calc(20px + var(--safe-bottom));
+    padding-top: max(40px, env(safe-area-inset-top));
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+    
     color: #f8fafc;
     display: flex;
     justify-content: center;
@@ -68,73 +62,6 @@
     66% { transform: translate(-20px, 20px) rotate(240deg); }
   }
 
-  /* Header con navegación */
-  .app-header {
-    position: fixed;
-    top: calc(10px + var(--safe-top));
-    left: calc(10px + env(safe-area-inset-left));
-    right: calc(10px + env(safe-area-inset-right));
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-    padding: 10px;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .brand-small {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 14px;
-    color: #f8fafc;
-    text-decoration: none;
-  }
-
-  .brand-small svg {
-    width: 24px;
-    height: 24px;
-    color: var(--primary);
-  }
-
-  .nav-buttons {
-    display: flex;
-    gap: 8px;
-  }
-
-  .nav-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-  }
-
-  .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-  }
-
-  .nav-btn:active {
-    transform: scale(0.95);
-  }
-
-  .nav-btn svg {
-    width: 20px;
-    height: 20px;
-  }
-
   .card {
     max-width: 720px;
     width: 100%;
@@ -148,7 +75,7 @@
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
       0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     padding: 50px 45px;
-    padding-top: max(50px, var(--safe-top));
+    padding-top: max(50px, env(safe-area-inset-top));
     position: relative;
     z-index: 1;
     animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
@@ -157,15 +84,21 @@
   }
 
   @keyframes cardEntry {
-    from { opacity: 0; transform: translateY(40px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .status-banner {
     position: relative;
-    margin: calc(-1 * max(50px, var(--safe-top))) -45px 30px -45px;
+    margin: calc(-1 * max(50px, env(safe-area-inset-top))) -45px 30px -45px;
     padding: 20px 45px;
-    padding-top: max(20px, var(--safe-top));
+    padding-top: max(20px, env(safe-area-inset-top));
     display: flex;
     align-items: center;
     gap: 15px;
@@ -176,8 +109,14 @@
   }
 
   @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .status-banner.active {
@@ -204,7 +143,9 @@
     flex-shrink: 0;
   }
 
-  .status-content { flex: 1; }
+  .status-content {
+    flex: 1;
+  }
 
   .status-title {
     font-weight: 700;
@@ -263,9 +204,18 @@
   }
 
   @keyframes pulse-dot {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+    }
   }
 
   h2 {
@@ -484,6 +434,14 @@
     box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
   }
 
+  .btn-doc.missing {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
   .btn-update {
     width: 100%;
     padding: 16px 28px;
@@ -515,29 +473,27 @@
     transform: scale(0.96);
   }
 
-  .btn-logout {
-    width: 100%;
-    padding: 14px 28px;
-    margin-top: 12px;
+  /* ELIMINADO: Estilos del QR container */
+
+  button {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
+    color: white;
     border: none;
-    border-radius: 14px;
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
+    padding: 16px 32px;
+    border-radius: 16px;
     cursor: pointer;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.2s;
+    box-shadow: 
+      0 4px 6px -1px rgba(79, 70, 229, 0.2),
+      0 10px 20px -5px rgba(79, 70, 229, 0.4);
+    touch-action: manipulation;
+    min-height: 44px;
   }
 
-  .btn-logout:hover {
-    background: rgba(239, 68, 68, 0.2);
-    transform: translateY(-1px);
+  button:active {
+    transform: scale(0.96);
   }
 
   .modal {
@@ -574,13 +530,19 @@
   }
 
   @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+    from { 
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .offline-indicator {
     position: fixed;
-    top: max(70px, calc(60px + var(--safe-top)));
+    top: max(10px, env(safe-area-inset-top));
     left: 50%;
     transform: translateX(-50%);
     background: rgba(239, 68, 68, 0.9);
@@ -604,37 +566,47 @@
   @media(max-width: 640px){
     .card {
       padding: 30px 20px;
-      padding-top: max(30px, var(--safe-top));
+      padding-top: max(30px, env(safe-area-inset-top));
       border-radius: 24px;
     }
     
     .status-banner {
-      margin: calc(-1 * max(30px, var(--safe-top))) -20px 25px -20px;
+      margin: calc(-1 * max(30px, env(safe-area-inset-top))) -20px 25px -20px;
       padding: 15px 20px;
-      padding-top: max(15px, var(--safe-top));
+      padding-top: max(15px, env(safe-area-inset-top));
       flex-direction: column;
       text-align: center;
       gap: 10px;
     }
     
-    .status-banner.active::after { display: none; }
+    .status-banner.active::after {
+      display: none;
+    }
     
-    h2 { font-size: 26px; }
+    h2 {
+      font-size: 26px;
+    }
     
-    #contenido { padding: 20px; }
+    #contenido {
+      padding: 20px;
+    }
     
     .campo {
       flex-direction: column;
       gap: 5px;
     }
     
-    .campo strong { width: 100%; }
+    .campo strong {
+      width: 100%;
+    }
 
-    .fotos-container { grid-template-columns: 1fr; }
+    .fotos-container {
+      grid-template-columns: 1fr;
+    }
 
-    .documentos-grid { justify-content: center; }
-
-    .app-header { padding: 8px; }
+    .documentos-grid {
+      justify-content: center;
+    }
   }
 
   .loading {
@@ -659,7 +631,7 @@
 
   .toast {
     position: fixed;
-    bottom: max(20px, var(--safe-bottom));
+    bottom: max(20px, env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%) translateY(100px);
     background: rgba(30, 41, 59, 0.95);
@@ -683,28 +655,6 @@
 </head>
 
 <body>
-
-  <!-- Header con navegación -->
-  <header class="app-header">
-    <a href="home.html" class="brand-small">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
-      </svg>
-      Road To
-    </a>
-    <div class="nav-buttons">
-      <button class="nav-btn" onclick="goBack()" title="Regresar">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-      </button>
-      <button class="nav-btn" onclick="goHome()" title="Inicio">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-        </svg>
-      </button>
-    </div>
-  </header>
 
 <div class="offline-indicator" id="offlineIndicator">
   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -739,12 +689,7 @@
     Actualizar Datos
   </button>
 
-  <button class="btn-logout" onclick="logout()">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-    </svg>
-    Cerrar Sesión
-  </button>
+  <!-- ELIMINADO: QR container -->
 </div>
 
 <div id="modalFoto" class="modal" onclick="cerrarModal()">
@@ -760,19 +705,6 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let perfilCache = null;
 let documentosCache = null;
-
-// Funciones de navegación
-function goBack() {
-  if (window.history.length > 1) {
-    window.history.back();
-  } else {
-    window.location.href = 'home.html';
-  }
-}
-
-function goHome() {
-  window.location.href = 'home.html';
-}
 
 function initConnectivity() {
   const indicator = document.getElementById('offlineIndicator');
@@ -876,7 +808,7 @@ async function cargarPerfil() {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     
     if (userError || !user) {
-      window.location.href = "home.html";
+      window.location.href = "index.html";
       return;
     }
 
@@ -917,7 +849,7 @@ async function cargarPerfil() {
     document.getElementById("contenido").innerHTML = `
       <div style="text-align: center; padding: 40px; color: #f87171;">
         <p>Error al cargar el perfil. Intente nuevamente.</p>
-        <button onclick="cargarPerfil()" style="margin-top: 20px; padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">Reintentar</button>
+        <button onclick="cargarPerfil()" style="margin-top: 20px;">Reintentar</button>
       </div>
     `;
   }
@@ -1016,7 +948,11 @@ function renderPerfil(conductor, documentos, user) {
   }
 
   docSection.style.display = tieneDocumentos ? "block" : "none";
+
+  // ELIMINADO: generarQR(conductor.id);
 }
+
+// ELIMINADAS: funciones generarQR() y descargarQR()
 
 function mostrarModal(src) {
   const modal = document.getElementById("modalFoto");
@@ -1036,13 +972,6 @@ function irAPanel() {
   setTimeout(() => {
     window.location.href = "panel-usuario.html";
   }, 200);
-}
-
-async function logout() {
-  if (confirm('¿Deseas cerrar sesión?')) {
-    await supabaseClient.auth.signOut();
-    window.location.href = 'home.html';
-  }
 }
 
 if (window.Capacitor) {

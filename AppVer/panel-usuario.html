@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <title>Actualizar Perfil - Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -15,16 +16,25 @@
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-left: env(safe-area-inset-left);
+    --safe-right: env(safe-area-inset-right);
   }
 
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
     padding: 40px 20px;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: max(20px, env(safe-area-inset-left));
-    padding-right: max(20px, env(safe-area-inset-right));
+    padding-top: calc(20px + var(--safe-top));
+    padding-bottom: calc(20px + var(--safe-bottom));
+    padding-left: max(20px, var(--safe-left));
+    padding-right: max(20px, var(--safe-right));
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
@@ -35,6 +45,7 @@
     align-items: flex-start;
     position: relative;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   body::before {
@@ -72,7 +83,7 @@
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
       0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     padding: 50px 45px;
-    padding-top: max(50px, env(safe-area-inset-top));
+    padding-top: max(50px, var(--safe-top));
     margin: auto;
     position: relative;
     z-index: 1;
@@ -227,7 +238,7 @@
   }
 
   /* Toggle sections */
-  .property-toggle, .aviso-toggle {
+  .property-toggle {
     background: rgba(15, 23, 42, 0.6);
     border-radius: 16px;
     padding: 20px;
@@ -235,9 +246,53 @@
     margin: 20px 0;
   }
 
-  .aviso-toggle {
-    border-color: rgba(139, 92, 246, 0.3);
-    background: rgba(139, 92, 246, 0.05);
+  /* NUEVO: Estilo para requisito obligatorio (Aviso de Operaciones) */
+  .aviso-requisito {
+    background: rgba(139, 92, 246, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    margin: 20px 0;
+  }
+
+  .aviso-requisito-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    color: #a78bfa;
+  }
+
+  .aviso-requisito-header svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .aviso-requisito-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #a78bfa;
+  }
+
+  .aviso-requisito-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a78bfa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: auto;
+  }
+
+  .aviso-requisito-badge::before {
+    content: '★';
+    color: #a78bfa;
   }
 
   .toggle-header {
@@ -277,11 +332,6 @@
     border-color: rgba(34, 197, 94, 0.5);
   }
 
-  .switch.aviso-active {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    border-color: rgba(139, 92, 246, 0.5);
-  }
-
   .switch-thumb {
     position: absolute;
     top: 2px;
@@ -294,8 +344,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
-  .switch.active .switch-thumb,
-  .switch.aviso-active .switch-thumb {
+  .switch.active .switch-thumb {
     transform: translateX(24px);
   }
 
@@ -308,10 +357,9 @@
   }
 
   .switch.active + .switch-text { color: #4ade80; }
-  .switch.aviso-active + .switch-text { color: #a78bfa; }
 
   /* Upload sections */
-  .auth-upload, .aviso-upload {
+  .auth-upload {
     margin-top: 20px;
     padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -321,9 +369,16 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .auth-upload.show, .aviso-upload.show {
+  .auth-upload.show {
     opacity: 1;
     max-height: 300px;
+  }
+
+  /* NUEVO: Upload de aviso siempre visible */
+  .aviso-upload {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(139, 92, 246, 0.2);
   }
 
   .auth-upload-header {
@@ -336,6 +391,7 @@
     font-weight: 600;
   }
 
+  /* NUEVO: Header para aviso obligatorio */
   .aviso-upload-header {
     display: flex;
     align-items: center;
@@ -344,6 +400,11 @@
     color: #a78bfa;
     font-size: 13px;
     font-weight: 600;
+  }
+
+  .aviso-upload-header svg {
+    width: 20px;
+    height: 20px;
   }
 
   /* File inputs */
@@ -383,10 +444,17 @@
     color: #ffffff;
   }
 
+  /* NUEVO: Estilo especial para archivo obligatorio */
+  .file-input-wrapper.aviso-file .file-input-label {
+    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.05);
+  }
+
   .file-input-wrapper.aviso-file:hover .file-input-label,
   .file-input-wrapper.aviso-file:focus-within .file-input-label {
     border-color: #8b5cf6;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(139, 92, 246, 0.15);
+    color: #ffffff;
   }
 
   .file-input-wrapper.has-file .file-input-label {
@@ -396,6 +464,7 @@
     color: #4ade80;
   }
 
+  /* NUEVO: Estado subido para aviso */
   .file-input-wrapper.aviso-file.has-file .file-input-label {
     border-color: #8b5cf6;
     background: rgba(139, 92, 246, 0.15);
@@ -450,6 +519,7 @@
     color: #fbbf24;
   }
 
+  /* NUEVO: Estado para aviso subido */
   .file-status.aviso-uploaded {
     background: rgba(139, 92, 246, 0.2);
     color: #a78bfa;
@@ -494,6 +564,8 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: 10px;
     touch-action: manipulation;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   button[type="submit"]::before {
@@ -545,6 +617,8 @@
     border: 1px solid rgba(239, 68, 68, 0.2);
     transition: all 0.3s ease;
     touch-action: manipulation;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   .btn-logout:hover {
@@ -637,12 +711,49 @@
     z-index: 9999;
     display: none;
     backdrop-filter: blur(10px);
+    -webkit-touch-callout: none;
   }
 
   .offline-indicator.show {
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.9);
+    z-index: 9998;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+  }
+
+  .loading-overlay.show {
+    display: flex;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(99, 102, 241, 0.3);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .loading-text {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
   }
 
   @media (max-width: 640px) {
@@ -658,6 +769,11 @@
       width: 60px;
       height: 60px;
     }
+
+    .aviso-requisito-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
   }
 </style>
 </head>
@@ -672,6 +788,12 @@
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
   </svg>
   Sin conexión
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Cargando...</div>
 </div>
 
 <div class="card">
@@ -738,47 +860,43 @@
         </div>
       </div>
 
-      <!-- Toggle Aviso de Operaciones -->
-      <div class="aviso-toggle">
-        <div class="toggle-header">
-          <div class="toggle-label">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #8b5cf6;">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            ¿Cuenta con Aviso de Operaciones?
+      <!-- NUEVO: Aviso de Operaciones como requisito obligatorio (sin toggle) -->
+      <div class="aviso-requisito">
+        <div class="aviso-requisito-header">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <div>
+            <div class="aviso-requisito-title">Aviso de Operaciones</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Documento requerido por regulación</div>
           </div>
-          <div class="switch-container">
-            <div class="switch" id="avisoSwitch">
-              <div class="switch-thumb"></div>
-            </div>
-            <span class="switch-text" id="avisoSwitchText">No</span>
-          </div>
+          <span class="aviso-requisito-badge">Requisito</span>
         </div>
 
         <div class="aviso-upload" id="avisoUpload">
           <div class="aviso-upload-header">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <span>Subir documento de Aviso de Operaciones</span>
+            <span>Subir documento de Aviso de Operaciones (Obligatorio)</span>
           </div>
           <div class="file-input-wrapper aviso-file" id="avisoFileWrapper" data-doc-type="AVISO_OPERACIONES">
-            <input type="file" id="aviso_operaciones" accept=".pdf,.jpg,.jpeg,.png">
+            <input type="file" id="aviso_operaciones" accept=".pdf,.jpg,.jpeg,.png" required>
             <div class="file-input-label">
               <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               <div class="file-text">
                 <span class="file-name">Aviso de Operaciones</span>
-                <span class="file-hint">PDF, JPG o PNG</span>
+                <span class="file-hint">PDF, JPG o PNG (Obligatorio)</span>
               </div>
-              <span class="file-status pending" id="status-aviso">Pendiente</span>
+              <span class="file-status pending" id="status-aviso-operaciones">Pendiente</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Toggle Propiedad -->
+      <!-- Toggle Propiedad (se mantiene opcional) -->
       <div class="property-toggle">
         <div class="toggle-header">
           <div class="toggle-label">
@@ -800,7 +918,7 @@
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
-            <span>Autorización del propietario (obligatorio)</span>
+            <span>Autorización del propietario (obligatorio si no es propietario)</span>
           </div>
           <div class="file-input-wrapper" id="authFileWrapper" data-doc-type="AUTH_PROPIETARIO">
             <input type="file" id="auth_propietario" accept=".pdf,.jpg,.jpeg,.png">
@@ -812,7 +930,7 @@
                 <span class="file-name">Carta de Autorización</span>
                 <span class="file-hint">PDF, JPG o PNG</span>
               </div>
-              <span class="file-status pending" id="status-auth">Pendiente</span>
+              <span class="file-status pending" id="status-auth-propietario">Pendiente</span>
             </div>
           </div>
         </div>
@@ -942,13 +1060,10 @@ const propertySwitch = document.getElementById("propertySwitch");
 const switchText = document.getElementById("switchText");
 const authUpload = document.getElementById("authUpload");
 
-const avisoSwitch = document.getElementById("avisoSwitch");
-const avisoSwitchText = document.getElementById("avisoSwitchText");
-const avisoUpload = document.getElementById("avisoUpload");
-
 let currentConductorId = null;
 let isOwner = true;
-let tieneAviso = false;
+// NUEVO: Siempre true, no hay toggle
+let tieneAviso = true;
 
 // Offline detection
 function initConnectivity() {
@@ -965,6 +1080,21 @@ function initConnectivity() {
   window.addEventListener('online', updateStatus);
   window.addEventListener('offline', updateStatus);
   if (!navigator.onLine) indicator.classList.add('show');
+}
+
+function showLoading(text = 'Cargando...') {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.querySelector('.loading-text').textContent = text;
+    overlay.classList.add('show');
+  }
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
 }
 
 function showMessage(text, type="") {
@@ -984,7 +1114,7 @@ function setLoading(state) {
   }
 }
 
-// Toggle handlers
+// Toggle handler para propiedad (único toggle que queda)
 propertySwitch.addEventListener("click", () => {
   isOwner = !isOwner;
   if (isOwner) {
@@ -998,22 +1128,6 @@ propertySwitch.addEventListener("click", () => {
     switchText.style.color = "#94a3b8";
     authUpload.classList.add("show");
     setTimeout(() => authUpload.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
-  }
-});
-
-avisoSwitch.addEventListener("click", () => {
-  tieneAviso = !tieneAviso;
-  if (tieneAviso) {
-    avisoSwitch.classList.add("aviso-active");
-    avisoSwitchText.textContent = "Sí";
-    avisoSwitchText.style.color = "#a78bfa";
-    avisoUpload.classList.add("show");
-    setTimeout(() => avisoUpload.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
-  } else {
-    avisoSwitch.classList.remove("aviso-active");
-    avisoSwitchText.textContent = "No";
-    avisoSwitchText.style.color = "#94a3b8";
-    avisoUpload.classList.remove("show");
   }
 });
 
@@ -1039,7 +1153,7 @@ document.querySelectorAll('input[type="file"]').forEach(input => {
         wrapper.classList.add('has-file');
         hint.textContent = 'Subido correctamente ✓';
         actualizarEstadoDocumento(docType, true);
-        showMessage(`${docType} actualizado`, "ok");
+        showMessage(`${docType.replace(/_/g, ' ')} actualizado`, "ok");
       } catch (error) {
         wrapper.classList.remove('uploading');
         hint.textContent = 'Error al subir';
@@ -1055,7 +1169,9 @@ function actualizarEstadoDocumento(tipo, subido) {
   const el = document.getElementById(statusId);
   if (el) {
     el.textContent = subido ? 'Subido' : 'Pendiente';
-    el.className = 'file-status ' + (subido ? (tipo === 'AVISO_OPERACIONES' ? 'aviso-uploaded' : 'uploaded') : 'pending');
+    // NUEVO: Clase especial para aviso
+    const isAviso = tipo === 'AVISO_OPERACIONES';
+    el.className = 'file-status ' + (subido ? (isAviso ? 'aviso-uploaded' : 'uploaded') : 'pending');
   }
 }
 
@@ -1083,6 +1199,8 @@ async function subirDocumento(conductorId, tipo, file) {
 }
 
 async function cargarDatos() {
+  showLoading('Cargando datos...');
+  
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
@@ -1111,7 +1229,7 @@ async function cargarDatos() {
     document.getElementById('color').value = conductor.color || '';
     document.getElementById('poliza_numero').value = conductor.poliza_numero || '';
 
-    // Set toggles
+    // Set toggle propiedad
     isOwner = conductor.es_propietario !== false;
     if (!isOwner) {
       propertySwitch.classList.remove("active");
@@ -1120,13 +1238,9 @@ async function cargarDatos() {
       authUpload.classList.add("show");
     }
 
-    tieneAviso = conductor.tiene_aviso_operaciones === true;
-    if (tieneAviso) {
-      avisoSwitch.classList.add("aviso-active");
-      avisoSwitchText.textContent = "Sí";
-      avisoSwitchText.style.color = "#a78bfa";
-      avisoUpload.classList.add("show");
-    }
+    // NUEVO: El aviso siempre se carga como true, no hay toggle
+    // pero verificamos si ya tiene documento subido
+    tieneAviso = true; // Siempre true para Supabase
 
     // Load existing documents
     const { data: docs } = await supabase
@@ -1148,8 +1262,10 @@ async function cargarDatos() {
       });
     }
 
-    showMessage("Datos cargados", "ok");
+    hideLoading();
+    showMessage("Datos cargados correctamente", "ok");
   } catch (err) {
+    hideLoading();
     showMessage("Error cargando datos: " + err.message, "error");
   }
 }
@@ -1177,7 +1293,21 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  // Validations
+  // Validación: Aviso de Operaciones es OBLIGATORIO
+  const { data: avisoDoc } = await supabase
+    .from("documentos")
+    .select("id")
+    .eq("conductor_id", currentConductorId)
+    .eq("tipo", "AVISO_OPERACIONES")
+    .single();
+    
+  if (!avisoDoc) {
+    showMessage("Debe subir el Aviso de Operaciones (documento obligatorio)", "error");
+    document.getElementById('aviso_operaciones').scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  // Validación: Autorización si no es propietario
   if (!isOwner) {
     const { data: authDoc } = await supabase
       .from("documentos")
@@ -1188,20 +1318,6 @@ form.addEventListener("submit", async (e) => {
     if (!authDoc) {
       showMessage("Debe subir autorización del propietario", "error");
       authUpload.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-  }
-
-  if (tieneAviso) {
-    const { data: avisoDoc } = await supabase
-      .from("documentos")
-      .select("id")
-      .eq("conductor_id", currentConductorId)
-      .eq("tipo", "AVISO_OPERACIONES")
-      .single();
-    if (!avisoDoc) {
-      showMessage("Debe subir el Aviso de Operaciones", "error");
-      avisoUpload.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
   }
@@ -1221,7 +1337,8 @@ form.addEventListener("submit", async (e) => {
       poliza_numero: document.getElementById('poliza_numero').value,
       es_propietario: isOwner,
       tipo_propiedad: isOwner ? "propio" : "tercero",
-      tiene_aviso_operaciones: tieneAviso
+      // NUEVO: Siempre true, hardcodeado
+      tiene_aviso_operaciones: true
     };
 
     const { error } = await supabase
