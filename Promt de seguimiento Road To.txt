@@ -1,0 +1,103 @@
+🚗 ROAD TO APP - CONTEXTO PARA CONTINUAR (EXPLICADO PARA PRINCIPIANTES)
+
+=== ¿QUÉ TENGO HASTA AHORA? ===
+- Una app que funciona en teléfonos Android
+- Los conductores pueden ver un mapa y su ubicación en tiempo real
+- PERO: Si el conductor abre WhatsApp o Spotify, la app deja de rastrearlo
+- Necesito que siga funcionando aunque el conductor use otras apps
+
+=== ¿QUÉ NECESITO HACER? ===
+
+PRIORIDAD #1: QUE LA APP NO SE "DUERMA" (Background Tracking)
+Problema actual: El GPS se apaga cuando la app no está en pantalla
+Solución: Crear un "servicio persistente" que Android no pueda matar fácilmente
+
+PASOS QUE NECESITO (explicados mañana):
+1. Abrir Android Studio (el programa para editar la parte de Android)
+2. Crear un archivo nuevo en Kotlin (lenguaje de programación de Android)
+3. Copiar código que me darán para mantener el GPS siempre activo
+4. Modificar 2-3 archivos para conectar todo
+5. Probar en un teléfono real
+
+PRIORIDAD #2: ZONAS ESPECIALES (Geofencing)
+Problema actual: El admin no sabe cuándo un conductor llega a un punto importante
+Solución: Dibujar círculos en el mapa. Cuando el conductor entra, avisar al admin
+
+PASOS QUE NECESITO:
+1. Crear tabla nueva en Supabase (mi base de datos) llamada "zonas"
+2. Agregar en el panel del admin: un mapa para dibujar zonas
+3. Cuando el conductor entre a una zona: enviar notificación al admin
+4. El admin ve una lista: "Juan Pérez quiere entrar a Zona Norte"
+5. El admin aprieta "Aceptar" y el conductor entra a la fila de espera
+
+=== MI ESTRUCTURA ACTUAL (archivos importantes) ===
+
+Carpeta del proyecto:
+road-to-app/
+├── src/                          (aquí está mi código web)
+│   ├── tracking.js               (el GPS actual - NECESITA CAMBIOS)
+│   ├── mapa.html                 (lo ven los conductores)
+│   ├── dashboard-supervisor.html (lo ven los supervisores)
+│   └── panel-admin.html          (configuración general)
+├── android/                      (aquí está el código de Android)
+│   └── app/src/main/java/...     (aquí agregaremos archivos nuevos)
+└── www/                          (se genera automático, no tocar)
+
+=== QUÉ NO SÉ HACER (y necesito que me enseñen mañana) ===
+- Programar en Kotlin (nunca lo he visto)
+- Crear servicios de Android
+- Compilar la app desde Android Studio
+- Subir cambios a la Play Store (eso es después)
+
+=== MI SUPABASE (base de datos) ===
+URL: https://ugchmuhjzzyofoogprlr.supabase.co
+Tablas que ya existen:
+- conductores (info de cada chofer)
+- driver_locations (donde se guarda el GPS)
+- tracking_sessions (cuándo empezó y terminó cada viaje)
+
+Tablas que NECESITO crear mañana:
+- zonas_geofence (las áreas especiales en el mapa)
+- lista_espera (conductores esperando aprobación)
+- notificaciones (mensajes entre admin y conductor)
+
+=== COMANDOS QUE SÍ SÉ USAR ===
+Abro la terminal en Visual Studio Code y escribo:
+npm run build          (prepara la app)
+npx cap sync           (manda cambios a Android)
+npx cap open android   (abre Android Studio)
+
+=== LO QUE QUIERO QUE ME DEN MAÑANA ===
+1. Código listo para copiar y pegar (sin escribir nada a mano)
+2. Instrucciones del tipo: "Abre este archivo, busca esta línea, pega aquí"
+3. Explicación de QUÉ hace cada cosa (no solo cómo)
+4. Capturas de pantalla o descripción de dónde hacer clic
+5. Plan de "si esto falla, prueba esto otro"
+
+=== PREGUNTAS QUE TENGO ===
+- ¿Necesito un teléfono físico o puedo probar en el emulador?
+- ¿Esto va a hacer que la batería se gaste más rápido?
+- ¿Qué pasa si el conductor apaga el teléfono y lo prende después?
+- ¿Cómo sé si el background tracking está funcionando realmente?
+
+=== MI NIVEL ACTUAL ===
+- Sé hacer páginas web básicas (HTML, CSS, un poco de JavaScript)
+- Sé usar Supabase (tablas, autenticación)
+- NUNCA he tocado código de Android nativo
+- NUNCA he usado Android Studio (lo instalé pero me da miedo abrirlo)
+- Sé seguir instrucciones paso a paso si están bien explicadas
+
+=== OBJETIVO FINAL ===
+Un conductor puede:
+1. Abrir la app y empezar su turno
+2. Minimizar la app (ir a WhatsApp, llamadas, etc.)
+3. Yo (el admin) sigo viendo su ubicación en tiempo real en el mapa
+4. Cuando entra a una "zona especial", me llega una alerta
+5. Yo confirmo y él entra automáticamente a la lista de espera para el siguiente viaje
+
+=== NOTAS PARA EL ASISTENTE ===
+- Explicar TODO como si tuviera 15 años y nunca hubiera programado para móviles
+- Usar analogías (ej: "el servicio de Android es como un conserje que nunca duerme")
+- Anticipar errores comunes de principiantes
+- No usar siglas sin explicarlas primero
+- Si algo requiere 10 pasos, dame los 10 pasos, no resumir en 3

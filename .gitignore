@@ -1,0 +1,8 @@
+## Ignora subir el directorio www, ya que es generado automáticamente a partir de src y no es necesario subirlo al repositorio. Además, esto evitará conflictos innecesarios al trabajar en equipo.
+## Ignora también los archivos de configuración de Android e iOS generados por Capacitor, ya que estos pueden variar entre desarrolladores y no es necesario compartirlos.
+## Ignora los archivos de configuración de Capacitor, ya que estos pueden contener información específica del entorno de desarrollo y no es necesario compartirlos.
+www/
+android/
+ios/
+capacitor.config.json
+capacitor.config.ts
