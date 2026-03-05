@@ -2,43 +2,48 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Perfil Público del Conductor</title>
+<title>Perfil del Conductor - Road To</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
   * { 
     box-sizing: border-box; 
-    margin: 0;
-    padding: 0;
+    margin: 0; 
+    padding: 0; 
     -webkit-tap-highlight-color: transparent;
+  }
+
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --primary: #3b82f6;
+    --accent: #8b5cf6;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
   }
 
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     padding: 40px 20px;
-    padding-top: max(40px, env(safe-area-inset-top));
-    padding-bottom: max(40px, env(safe-area-inset-bottom));
-    padding-left: max(20px, env(safe-area-inset-left));
-    padding-right: max(20px, env(safe-area-inset-right));
-    
+    padding-top: calc(80px + var(--safe-top));
+    padding-bottom: calc(20px + var(--safe-bottom));
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
-    
     color: #f8fafc;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     position: relative;
     overflow-x: hidden;
-    overscroll-behavior-y: none;
   }
 
   body::before {
@@ -63,6 +68,73 @@
     66% { transform: translate(-20px, 20px) rotate(240deg); }
   }
 
+  /* Header con navegación */
+  .app-header {
+    position: fixed;
+    top: calc(10px + var(--safe-top));
+    left: calc(10px + env(safe-area-inset-left));
+    right: calc(10px + env(safe-area-inset-right));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .brand-small {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #f8fafc;
+    text-decoration: none;
+  }
+
+  .brand-small svg {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .nav-btn:active {
+    transform: scale(0.95);
+  }
+
+  .nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .card {
     max-width: 720px;
     width: 100%;
@@ -76,125 +148,14 @@
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
       0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     padding: 50px 45px;
-    padding-top: max(50px, env(safe-area-inset-top));
-    margin-bottom: 50px;
     position: relative;
     z-index: 1;
     animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
-    overflow: hidden;
-    touch-action: pan-y;
   }
 
   @keyframes cardEntry {
     from { opacity: 0; transform: translateY(40px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .status-banner {
-    position: relative;
-    margin: calc(-1 * max(50px, env(safe-area-inset-top))) -45px 30px -45px;
-    padding: 20px 45px;
-    padding-top: max(20px, env(safe-area-inset-top));
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    animation: slideDown 0.6s ease-out backwards;
-  }
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .status-banner.active {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(21, 128, 61, 0.3) 100%);
-    border-bottom: 1px solid rgba(34, 197, 94, 0.3);
-    color: #4ade80;
-  }
-
-  .status-banner.inactive {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%);
-    border-bottom: 1px solid rgba(239, 68, 68, 0.3);
-    color: #f87171;
-  }
-
-  .status-banner.pending {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(180, 83, 9, 0.3) 100%);
-    border-bottom: 1px solid rgba(245, 158, 11, 0.3);
-    color: #fbbf24;
-  }
-
-  .status-icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-  }
-
-  .status-content { flex: 1; }
-
-  .status-title {
-    font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .status-message {
-    font-size: 13px;
-    opacity: 0.9;
-    line-height: 1.5;
-  }
-
-  .status-check {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-  }
-
-  .status-banner.active .status-check {
-    background: rgba(34, 197, 94, 0.2);
-    color: #4ade80;
-  }
-
-  .status-banner.inactive .status-check {
-    background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
-  }
-
-  .status-banner.pending .status-check {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-  }
-
-  .status-banner.active::after {
-    content: '';
-    position: absolute;
-    right: 45px;
-    width: 8px;
-    height: 8px;
-    background: #4ade80;
-    border-radius: 50%;
-    animation: pulse-dot 2s infinite;
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
-  }
-
-  @keyframes pulse-dot {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
   }
 
   h2 {
@@ -215,18 +176,6 @@
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 25px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #contenido::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
   }
 
   .campo {
@@ -236,18 +185,12 @@
     align-items: flex-start;
     padding-bottom: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s;
   }
 
   .campo:last-child {
     border-bottom: none;
     margin-bottom: 0;
     padding-bottom: 0;
-  }
-
-  .campo:active {
-    background: rgba(255, 255, 255, 0.05);
-    transform: scale(0.98);
   }
 
   .campo strong {
@@ -267,27 +210,32 @@
     word-break: break-word;
   }
 
-  .aviso-badge {
+  .status-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    margin-left: 8px;
   }
 
-  .aviso-badge.si {
-    background: rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    border: 1px solid rgba(139, 92, 246, 0.3);
+  .status-badge.active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
   }
 
-  .aviso-badge.no {
-    background: rgba(148, 163, 184, 0.1);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+  .status-badge.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .status-badge.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
   }
 
   .fotos-container {
@@ -303,7 +251,6 @@
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     transition: all 0.3s ease;
-    touch-action: manipulation;
   }
 
   .foto-wrapper:active {
@@ -312,13 +259,11 @@
 
   .foto {
     width: 100%;
-    aspect-ratio: 4/3;
+    aspect-ratio: 16/10;
     object-fit: cover;
     display: block;
+    cursor: pointer;
     transition: transform 0.3s;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-user-drag: none;
   }
 
   .foto-label {
@@ -335,36 +280,55 @@
     letter-spacing: 1px;
   }
 
-  #documentos {
-    margin-top: 35px;
+  .documentos-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .documentos-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #60a5fa;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .documentos-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+    border-radius: 2px;
+  }
+
+  .documentos-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
+    gap: 10px;
   }
 
   .btn-doc {
     background: rgba(255, 255, 255, 0.05);
     color: #f1f5f9;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 14px 24px;
-    border-radius: 14px;
+    padding: 12px 20px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
     transition: all 0.2s;
     backdrop-filter: blur(10px);
-    touch-action: manipulation;
-    -webkit-touch-callout: none;
-    min-height: 44px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-  }
-
-  .btn-doc:active {
-    transform: scale(0.95);
-    opacity: 0.8;
+    text-decoration: none;
   }
 
   .btn-doc:hover {
@@ -387,65 +351,93 @@
     box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
   }
 
-  /* ELIMINADO: Estilos del QR container */
-
-  .error-message {
-    text-align: center;
-    padding: 40px;
-    color: #f87171;
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
   }
 
-  .error-message svg {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 15px;
-    opacity: 0.5;
-  }
-
-  .offline-indicator {
-    position: fixed;
-    top: max(10px, env(safe-area-inset-top));
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(239, 68, 68, 0.9);
+  .btn-primary {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 9999;
-    display: none;
-    backdrop-filter: blur(10px);
-    animation: slideDown 0.3s ease;
-  }
-
-  .offline-indicator.show {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    text-decoration: none;
   }
 
-  .toast {
-    position: fixed;
-    bottom: max(20px, env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: rgba(30, 41, 59, 0.95);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 12px;
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+  }
+
+  .btn-secondary {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
     font-size: 14px;
-    font-weight: 500;
-    z-index: 10000;
-    opacity: 0;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
   }
 
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; 
+    top: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(10, 15, 25, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.3s ease;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal img {
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: scaleIn 0.3s ease;
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   .loading {
@@ -468,26 +460,14 @@
     to { transform: rotate(360deg); }
   }
 
-  @media(max-width: 640px){
+  @media (max-width: 640px) {
     .card {
       padding: 30px 20px;
-      padding-top: max(30px, env(safe-area-inset-top));
       border-radius: 24px;
     }
     
-    .status-banner {
-      margin: calc(-1 * max(30px, env(safe-area-inset-top))) -20px 25px -20px;
-      padding: 15px 20px;
-      padding-top: max(15px, env(safe-area-inset-top));
-      flex-direction: column;
-      text-align: center;
-      gap: 10px;
-    }
-    
-    .status-banner.active::after { display: none; }
-    
     h2 { font-size: 26px; }
-    
+
     #contenido { padding: 20px; }
     
     .campo {
@@ -498,36 +478,74 @@
     .campo strong { width: 100%; }
 
     .fotos-container { grid-template-columns: 1fr; }
+
+    .documentos-grid { justify-content: center; }
+
+    .app-header { padding: 8px; }
   }
 </style>
 </head>
 
 <body>
 
-<div class="offline-indicator" id="offlineIndicator">
-  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
-  </svg>
-  Sin conexión
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div class="card" id="mainCard">
-  <h2>Perfil del Conductor</h2>
-  
-  <div id="contenido">
-    <div class="loading">
-      <div class="loading-spinner"></div>
-      Cargando perfil seguro...
+  <!-- Header con navegación -->
+  <header class="app-header">
+    <a href="home.html" class="brand-small">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+      </svg>
+      Road To
+    </a>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goBack()" title="Regresar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </button>
+      <button class="nav-btn" onclick="goHome()" title="Inicio">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+      </button>
     </div>
+  </header>
+
+  <div class="card">
+    <h2>Perfil del Conductor</h2>
+    
+    <div id="contenido">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Cargando datos...
+      </div>
+    </div>
+    
+    <div class="fotos-container" id="fotos-container"></div>
+
+    <div class="documentos-section" id="documentos-section" style="display: none;">
+      <div class="documentos-title">Documentos</div>
+      <div class="documentos-grid" id="documentos-grid"></div>
+    </div>
+
+    <div class="btn-group">
+      <a href="panel-admin.html" class="btn-primary">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+        </svg>
+        Volver al Panel
+      </a>
+      <button class="btn-secondary" onclick="goBack()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Regresar
+      </button>
+    </div>
+
   </div>
-  
-  <div class="fotos-container" id="fotos-container"></div>
-  
-  <div id="documentos"></div>
-  
-  <!-- ELIMINADO: QR container -->
+
+<div id="modalFoto" class="modal" onclick="cerrarModal()">
+  <img id="modalImg" src="" alt="Vista ampliada">
 </div>
 
 <script>
@@ -537,116 +555,33 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let perfilCache = null;
-
-function initConnectivity() {
-  const indicator = document.getElementById('offlineIndicator');
-  
-  function updateOnlineStatus() {
-    if (navigator.onLine) {
-      indicator.classList.remove('show');
-      showToast('Conexión restaurada');
-    } else {
-      indicator.classList.add('show');
-      showToast('Modo offline');
-    }
-  }
-
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-  
-  if (!navigator.onLine) {
-    indicator.classList.add('show');
-  }
-}
-
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function renderStatusBanner(estado, motivoDeshabilitado = '') {
-  const card = document.getElementById('mainCard');
-  const existingBanner = document.querySelector('.status-banner');
-  
-  if (existingBanner) {
-    existingBanner.remove();
-  }
-  
-  let bannerHTML = '';
-  const estadoStr = String(estado).toLowerCase();
-  
-  if (estadoStr === 'true' || estadoStr === 'activo') {
-    bannerHTML = `
-      <div class="status-banner active">
-        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div class="status-content">
-          <div class="status-title">
-            Conductor Verificado
-            <span class="status-check">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Activo
-            </span>
-          </div>
-          <div class="status-message">Este conductor está habilitado y autorizado para prestar servicios.</div>
-        </div>
-      </div>
-    `;
-  } else if (estadoStr === 'pendiente' || estadoStr === 'revision') {
-    bannerHTML = `
-      <div class="status-banner pending">
-        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div class="status-content">
-          <div class="status-title">
-            Verificación Pendiente
-            <span class="status-check">En Revisión</span>
-          </div>
-          <div class="status-message">Este perfil está pendiente de verificación por parte del equipo administrativo.</div>
-        </div>
-      </div>
-    `;
+// Funciones de navegación
+function goBack() {
+  if (window.history.length > 1) {
+    window.history.back();
   } else {
-    bannerHTML = `
-      <div class="status-banner inactive">
-        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-        </svg>
-        <div class="status-content">
-          <div class="status-title">
-            Conductor No Disponible
-            <span class="status-check">Inactivo</span>
-          </div>
-          <div class="status-message">${motivoDeshabilitado || 'Este conductor no está disponible actualmente.'}</div>
-        </div>
-      </div>
-    `;
+    window.location.href = 'home.html';
   }
-  
-  card.insertAdjacentHTML('afterbegin', bannerHTML);
 }
 
-async function cargarPerfilPublico() {
+function goHome() {
+  window.location.href = 'home.html';
+}
+
+async function cargarPerfil() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const conductorId = urlParams.get('id');
+  
+  if (!conductorId) {
+    document.getElementById("contenido").innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #f87171;">
+        <p>ID de conductor no especificado</p>
+      </div>
+    `;
+    return;
+  }
+
   try {
-    const params = new URLSearchParams(window.location.search);
-    const conductorId = params.get("id");
-
-    if (!conductorId) {
-      throw new Error('ID de conductor no proporcionado');
-    }
-
-    if (!navigator.onLine && perfilCache && perfilCache.id === conductorId) {
-      renderPerfil(perfilCache.conductor, perfilCache.documentos, conductorId);
-      return;
-    }
-
     const { data: conductor, error } = await supabaseClient
       .from("conductores")
       .select("*")
@@ -654,7 +589,7 @@ async function cargarPerfilPublico() {
       .single();
 
     if (error || !conductor) {
-      throw new Error('Perfil no encontrado');
+      throw new Error('Conductor no encontrado');
     }
 
     const { data: documentos } = await supabaseClient
@@ -662,38 +597,35 @@ async function cargarPerfilPublico() {
       .select("*")
       .eq("conductor_id", conductor.id);
 
-    perfilCache = { id: conductorId, conductor, documentos };
-
-    renderPerfil(conductor, documentos || [], conductorId);
+    renderPerfil(conductor, documentos);
 
   } catch (error) {
     console.error('Error:', error);
-    
-    if (perfilCache) {
-      showToast('Mostrando datos guardados');
-      renderPerfil(perfilCache.conductor, perfilCache.documentos, perfilCache.id);
-      return;
-    }
-    
     document.getElementById("contenido").innerHTML = `
-      <div class="error-message">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <p>${error.message}</p>
-        <button onclick="cargarPerfilPublico()" style="margin-top: 20px; padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer;">Reintentar</button>
+      <div style="text-align: center; padding: 40px; color: #f87171;">
+        <p>Error al cargar el perfil</p>
       </div>
     `;
   }
 }
 
-function renderPerfil(conductor, documentos, conductorId) {
-  renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
-
+function renderPerfil(conductor, documentos) {
   function docUrl(tipo) {
-    const doc = documentos.find(d => d.tipo === tipo);
+    const doc = documentos?.find(d => d.tipo === tipo);
     if (!doc) return null;
     return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
+  }
+
+  let statusClass, statusText;
+  if (conductor.estado === 'activo' || conductor.estado === true) {
+    statusClass = 'active';
+    statusText = 'Activo';
+  } else if (conductor.estado === 'pendiente') {
+    statusClass = 'pending';
+    statusText = 'Pendiente';
+  } else {
+    statusClass = 'inactive';
+    statusText = 'Inactivo';
   }
 
   const tieneAviso = conductor.tiene_aviso_operaciones === true;
@@ -709,12 +641,13 @@ function renderPerfil(conductor, documentos, conductorId) {
     <div class="campo"><strong>Póliza</strong> <span>${conductor.poliza_numero}</span></div>
     <div class="campo">
       <strong>Aviso Operaciones</strong> 
-      <span>
-        ${tieneAviso ? 
-          `<span class="aviso-badge si">✓ Sí</span>` : 
-          `<span class="aviso-badge no">✕ No</span>`
-        }
-      </span>
+      <span>${tieneAviso ? 'Sí' : 'No'}</span>
+    </div>
+    <div class="campo"><strong>Correo</strong> <span>${conductor.email}</span></div>
+    <div class="campo"><strong>Teléfono</strong> <span>${conductor.celular}</span></div>
+    <div class="campo">
+      <strong>Estado</strong> 
+      <span class="status-badge ${statusClass}">${statusText}</span>
     </div>
   `;
 
@@ -724,26 +657,27 @@ function renderPerfil(conductor, documentos, conductorId) {
   const fotoVeh = docUrl("FOTO_VEHICULO");
   const fotoCond = docUrl("FOTO_CONDUCTOR");
 
-  if (fotoCond) {
-    fotosCont.innerHTML += `
-      <div class="foto-wrapper">
-        <img src="${fotoCond}" class="foto" alt="Conductor" loading="lazy">
-        <div class="foto-label">Conductor</div>
-      </div>
-    `;
-  }
-
   if (fotoVeh) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper">
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoVeh}')">
         <img src="${fotoVeh}" class="foto" alt="Vehículo" loading="lazy">
         <div class="foto-label">Vehículo</div>
       </div>
     `;
   }
 
-  const docsDiv = document.getElementById("documentos");
-  docsDiv.innerHTML = "";
+  if (fotoCond) {
+    fotosCont.innerHTML += `
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoCond}')">
+        <img src="${fotoCond}" class="foto" alt="Conductor" loading="lazy">
+        <div class="foto-label">Conductor</div>
+      </div>
+    `;
+  }
+
+  const docSection = document.getElementById("documentos-section");
+  const docGrid = document.getElementById("documentos-grid");
+  docGrid.innerHTML = "";
 
   const documentosConfig = [
     { tipo: "CEDULA", label: "Cédula", icon: "📄" },
@@ -753,29 +687,46 @@ function renderPerfil(conductor, documentos, conductorId) {
     { tipo: "AUTH_PROPIETARIO", label: "Autorización", icon: "✉️" }
   ];
 
+  let tieneDocumentos = false;
+
   documentosConfig.forEach(doc => {
     const url = docUrl(doc.tipo);
     if (url) {
-      docsDiv.innerHTML += `
-        <button class="btn-doc" onclick="window.open('${url}', '_blank')">
+      tieneDocumentos = true;
+      docGrid.innerHTML += `
+        <a href="${url}" target="_blank" class="btn-doc">
           ${doc.icon} ${doc.label}
-        </button>
+        </a>
       `;
     }
   });
 
   if (tieneAviso && avisoUrl) {
-    docsDiv.innerHTML += `
-      <button class="btn-doc aviso-operaciones" onclick="window.open('${avisoUrl}', '_blank')">
+    tieneDocumentos = true;
+    docGrid.innerHTML += `
+      <a href="${avisoUrl}" target="_blank" class="btn-doc aviso-operaciones">
         📋 Aviso de Operaciones
-      </button>
+      </a>
     `;
   }
 
-  // ELIMINADO: generarQR(conductorId);
+  docSection.style.display = tieneDocumentos ? "block" : "none";
 }
 
-// ELIMINADA: función generarQR()
+function mostrarModal(src) {
+  const modal = document.getElementById("modalFoto");
+  const img = document.getElementById("modalImg");
+  img.src = src;
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModal() {
+  document.getElementById("modalFoto").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+document.addEventListener("DOMContentLoaded", cargarPerfil);
 
 let lastTouchEnd = 0;
 document.addEventListener('touchend', (e) => {
@@ -785,11 +736,6 @@ document.addEventListener('touchend', (e) => {
   }
   lastTouchEnd = now;
 }, false);
-
-document.addEventListener("DOMContentLoaded", () => {
-  initConnectivity();
-  cargarPerfilPublico();
-});
 </script>
 
 </body>

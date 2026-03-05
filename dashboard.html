@@ -2,19 +2,36 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Ingreso Usuario - NRDesignCorp</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingreso - Road To</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --accent: #8b5cf6;
+  }
 
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
-    padding: 20px;
+    padding: 40px 20px;
+    padding-top: calc(80px + var(--safe-top));
+    padding-bottom: calc(20px + var(--safe-bottom));
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
@@ -49,6 +66,73 @@
     66% { transform: translate(-20px, 20px) rotate(240deg); }
   }
 
+  /* Header con navegación */
+  .app-header {
+    position: fixed;
+    top: calc(10px + var(--safe-top));
+    left: calc(10px + env(safe-area-inset-left));
+    right: calc(10px + env(safe-area-inset-right));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .brand-small {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #f8fafc;
+    text-decoration: none;
+  }
+
+  .brand-small svg {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .nav-btn:active {
+    transform: scale(0.95);
+  }
+
+  .nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .card {
     max-width: 420px;
     width: 100%;
@@ -71,21 +155,6 @@
     from { opacity: 0; transform: translateY(40px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    transition: left 0.7s;
-    pointer-events: none;
-    border-radius: 32px;
-  }
-
-  .card:hover::before { left: 100%; }
 
   .header-icon {
     width: 70px;
@@ -129,9 +198,19 @@
     margin-bottom: 20px;
   }
 
+  .input-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    transition: color 0.3s;
+    pointer-events: none;
+  }
+
   input {
     width: 100%;
-    padding: 16px 20px;
+    padding: 16px 20px 16px 50px;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
@@ -154,6 +233,8 @@
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 4px 20px rgba(99, 102, 241, 0.1);
     outline: none;
   }
+
+  input:focus + .input-icon { color: #818cf8; }
 
   .btn-login {
     width: 100%;
@@ -273,13 +354,39 @@
   }
 
   @media (max-width: 480px) {
-    .card { padding: 40px 25px; border-radius: 24px; }
+    .card { 
+      padding: 40px 25px; 
+      border-radius: 24px; 
+    }
     h2 { font-size: 26px; }
     .header-icon { width: 60px; height: 60px; }
+    .app-header { padding: 8px; }
   }
 </style>
 </head>
 <body>
+
+  <!-- Header con navegación -->
+  <header class="app-header">
+    <a href="home.html" class="brand-small">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+      </svg>
+      Road To
+    </a>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goBack()" title="Regresar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </button>
+      <button class="nav-btn" onclick="goHome()" title="Inicio">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
 
 <div class="card">
   <div class="header-icon">
@@ -288,13 +395,19 @@
     </svg>
   </div>
   
-  <h2>Ingreso Usuario</h2>
+  <h2>Ingreso a Road To</h2>
 
   <div class="input-group">
+    <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+    </svg>
     <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
   </div>
   
   <div class="input-group">
+    <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+    </svg>
     <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
   </div>
 
@@ -308,12 +421,25 @@
 </div>
 
 <script>
-// Configuración - Eliminar espacios en blanco al final de las URLs
+// Configuración de Supabase
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Funciones de navegación
+function goBack() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location.href = 'home.html';
+  }
+}
+
+function goHome() {
+  window.location.href = 'home.html';
+}
 
 function showMessage(text, type = '') {
   const msg = document.getElementById("msg");
@@ -350,34 +476,15 @@ async function login() {
       return;
     }
 
-    // Verificar si es admin - Usando solo auth_user_id (sin role)
+    // Verificar si es admin
     const { data: adminData, error: adminError } = await supabaseClient
       .from('admins')
       .select('auth_user_id')
       .eq('auth_user_id', authData.user.id)
-      .maybeSingle(); // Cambiado a maybeSingle para manejar mejor el caso de no encontrado
+      .maybeSingle();
 
-    // Manejo de errores específico
-    if(adminError){
+    if(adminError && adminError.code !== 'PGRST116') {
       console.error("Error en consulta admin:", adminError);
-      
-      // Si el error es de permisos o tabla no existe, intentar sin filtro
-      if(adminError.code === 'PGRST104' || adminError.code === '42P01' || adminError.code === '42501') {
-        console.log("Posible problema de permisos o tabla, continuando como usuario normal");
-        showMessage("¡Ingreso exitoso! Redirigiendo...", "success");
-        
-        setTimeout(() => {
-          window.location.href = "perfil.html";
-        }, 1200);
-        return;
-      }
-      
-      // Otros errores graves
-      if(adminError.code !== 'PGRST116') { // PGRST116 = no encontrado (esto es normal)
-        showMessage("Error verificando permisos: " + adminError.message, "error");
-        btn.disabled = false;
-        return;
-      }
     }
 
     showMessage("¡Ingreso exitoso! Redirigiendo...", "success");
@@ -422,6 +529,17 @@ async function recuperar(){
 document.getElementById('password').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') login();
 });
+
+// Prevenir zoom en double-tap (iOS)
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
 </script>
+
 </body>
 </html>
