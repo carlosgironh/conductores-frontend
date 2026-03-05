@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Road To - Inicio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Capacitor 7 -->
+  <script type="module">
+    import { SplashScreen } from '@capacitor/splash-screen';
+    import { StatusBar } from '@capacitor/status-bar';
+    import { App } from '@capacitor/app';
+    import { Preferences } from '@capacitor/preferences';
+    
+    window.CapacitorPlugins = { SplashScreen, StatusBar, App, Preferences };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    :root {
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --accent: #8b5cf6;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      padding-top: calc(20px + var(--safe-top));
+      padding-bottom: calc(20px + var(--safe-bottom));
+      padding-left: calc(20px + env(safe-area-inset-left));
+      padding-right: calc(20px + env(safe-area-inset-right));
+      
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      color: #f8fafc;
+      overflow: hidden;
+      position: relative;
+      overscroll-behavior: none;
+    }
+
+    /* Efecto de partículas */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%);
+      background-size: 100px 100px;
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(20px, -20px) rotate(120deg); }
+      66% { transform: translate(-15px, 15px) rotate(240deg); }
+    }
+
+    /* Header con navegación */
+    .app-header {
+      position: fixed;
+      top: calc(10px + var(--safe-top));
+      left: calc(10px + env(safe-area-inset-left));
+      right: calc(10px + env(safe-area-inset-right));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      padding: 10px;
+    }
+
+    .brand-small {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #f8fafc;
+      text-decoration: none;
+    }
+
+    .brand-small svg {
+      width: 24px;
+      height: 24px;
+      color: var(--primary);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn:active {
+      transform: scale(0.95);
+    }
+
+    .nav-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Tarjeta principal */
+    .card {
+      max-width: 400px;
+      width: 100%;
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      animation: cardEntry 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+      transform: translateZ(0);
+      will-change: transform;
+      margin-top: 60px;
+    }
+
+    @keyframes cardEntry {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Logo */
+    .logo-wrapper {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 30px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid rgba(59, 130, 246, 0.3);
+      box-shadow: 
+        inset 0 0 20px rgba(255, 255, 255, 0.05),
+        0 8px 30px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(59, 130, 246, 0.2);
+      overflow: hidden;
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
+      }
+      50% { 
+        transform: scale(1.02); 
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(59, 130, 246, 0.3);
+      }
+    }
+
+    .logo-inner svg {
+      width: 50px;
+      height: 50px;
+      color: var(--primary);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-weight: 800;
+      font-size: 28px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 35px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      font-family: inherit;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      min-height: 56px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 
+        0 4px 15px rgba(37, 99, 235, 0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.9;
+      transition: transform 0.2s;
+    }
+
+    button:hover .icon {
+      transform: translateX(3px);
+    }
+
+    /* Versión */
+    .version {
+      position: fixed;
+      bottom: calc(10px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #475569;
+      opacity: 0.7;
+    }
+
+    /* Offline indicator */
+    .offline-badge {
+      position: fixed;
+      top: calc(60px + var(--safe-top));
+      left: 50%;
+      transform: translateX(-50%) translateY(-50px);
+      background: #f59e0b;
+      color: #000;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .offline-badge.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 380px) {
+      .card {
+        padding: 35px 25px;
+        border-radius: 24px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      .logo-wrapper {
+        width: 100px;
+        height: 100px;
+      }
+
+      .logo-inner svg {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    /* Modo claro */
+    @media (prefers-color-scheme: light) {
+      body {
+        background: 
+          radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
+        color: #0f172a;
+      }
+      
+      .card {
+        background: rgba(255, 255, 255, 0.7);
+        border-color: rgba(0, 0, 0, 0.08);
+        border-top-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 
+          0 20px 40px rgba(0, 0, 0, 0.1),
+          0 0 0 1px rgba(0, 0, 0, 0.05) inset;
+      }
+      
+      h2 {
+        background: linear-gradient(135deg, #0f172a 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      
+      .brand-small {
+        color: #0f172a;
+      }
+      
+      .nav-btn {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #475569;
+      }
+      
+      .nav-btn:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      
+      .btn-secondary {
+        background: rgba(0, 0, 0, 0.05);
+        color: #475569;
+        border-color: rgba(0, 0, 0, 0.1);
+      }
+      
+      .subtitle {
+        color: #64748b;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header con navegación -->
+  <header class="app-header">
+    <a href="index.html" class="brand-small">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+      </svg>
+      Road To
+    </a>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goBack()" title="Regresar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </button>
+      <button class="nav-btn" onclick="goHome()" title="Inicio">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="offline-badge" id="offlineBadge">
+    ⚠️ Sin conexión
+  </div>
+
+  <div class="card">
+    <div class="logo-wrapper">
+      <div class="logo-inner">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+        </svg>
+      </div>
+    </div>
+    
+    <h2>Road To</h2>
+    <p class="subtitle">Tu camino, tu destino</p>
+    
+    <div class="button-group">
+      <button class="btn-primary" onclick="navigateTo('N-Reg.html')">
+        Crear Cuenta
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </button>
+      
+      <button class="btn-secondary" onclick="navigateTo('dashboard.html')">
+        Iniciar Sesión
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="version">v2.0.0</div>
+
+  <script>
+    // Inicialización de Capacitor
+    document.addEventListener('DOMContentLoaded', async () => {
+      
+      // Ocultar splash screen después de cargar
+      if (window.CapacitorPlugins?.SplashScreen) {
+        setTimeout(() => {
+          window.CapacitorPlugins.SplashScreen.hide();
+        }, 1500);
+      }
+
+      // Configurar status bar
+      if (window.CapacitorPlugins?.StatusBar) {
+        await window.CapacitorPlugins.StatusBar.setStyle({ style: 'Dark' });
+        await window.CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#0f172a' });
+      }
+
+      // Manejar botón de atrás en Android
+      if (window.CapacitorPlugins?.App) {
+        window.CapacitorPlugins.App.addListener('backButton', ({ canGoBack }) => {
+          if (!canGoBack) {
+            window.CapacitorPlugins.App.exitApp();
+          } else {
+            window.history.back();
+          }
+        });
+      }
+
+      // Verificar conexión
+      updateConnectionStatus();
+      window.addEventListener('online', updateConnectionStatus);
+      window.addEventListener('offline', updateConnectionStatus);
+
+      // Verificar sesión guardada
+      checkSavedSession();
+    });
+
+    // Navegación
+    function navigateTo(url) {
+      if (navigator.vibrate) navigator.vibrate(10);
+      window.location.href = url;
+    }
+
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        navigateTo('index.html');
+      }
+    }
+
+    function goHome() {
+      navigateTo('home.html');
+    }
+
+    // Actualizar indicador de conexión
+    function updateConnectionStatus() {
+      const badge = document.getElementById('offlineBadge');
+      if (!navigator.onLine) {
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
+    }
+
+    // Verificar si hay sesión guardada
+    async function checkSavedSession() {
+      try {
+        if (window.CapacitorPlugins?.Preferences) {
+          const { value: savedEmail } = await window.CapacitorPlugins.Preferences.get({ key: 'savedEmail' });
+          if (savedEmail) {
+            console.log('Sesión guardada encontrada para:', savedEmail);
+          }
+        }
+      } catch (e) {
+        console.log('No hay sesión guardada');
+      }
+    }
+
+    // Prevenir zoom en double-tap (iOS)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  </script>
+
+</body>
+</html>

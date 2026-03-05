@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Actualizar Perfil - Conductor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    background: 
+      radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at top left, #1e293b, #0f172a);
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%);
+    background-size: 150px 150px;
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+
+  .card {
+    max-width: 640px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    padding: 50px 45px;
+    padding-top: max(50px, env(safe-area-inset-top));
+    margin: auto;
+    position: relative;
+    z-index: 1;
+    animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+    touch-action: pan-y;
+  }
+
+  @keyframes cardEntry {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    box-shadow: 0 10px 30px rgba(217, 119, 6, 0.2);
+    animation: iconPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes iconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(217, 119, 6, 0.2); }
+    50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(217, 119, 6, 0.3); }
+  }
+
+  .header-icon svg {
+    width: 35px;
+    height: 35px;
+    color: #fbbf24;
+  }
+
+  h2 {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 400;
+  }
+
+  .form-section {
+    margin-bottom: 35px;
+    animation: fadeInUp 0.6s ease-out backwards;
+  }
+
+  .form-section:nth-child(2) { animation-delay: 0.1s; }
+  .form-section:nth-child(3) { animation-delay: 0.2s; }
+  .form-section:nth-child(4) { animation-delay: 0.3s; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #60a5fa;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+    border-radius: 2px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  .form-group {
+    position: relative;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    margin-left: 4px;
+    transition: color 0.3s;
+  }
+
+  .form-group:focus-within label {
+    color: #60a5fa;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 16px;
+    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-appearance: none;
+  }
+
+  input::placeholder { color: #64748b; }
+  
+  input:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    background: rgba(15, 23, 42, 0.9);
+    outline: none;
+  }
+
+  /* Toggle sections */
+  .property-toggle, .aviso-toggle {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 20px 0;
+  }
+
+  .aviso-toggle {
+    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.05);
+  }
+
+  .toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .toggle-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .switch.active {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border-color: rgba(34, 197, 94, 0.5);
+  }
+
+  .switch.aviso-active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: rgba(139, 92, 246, 0.5);
+  }
+
+  .switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .switch.active .switch-thumb,
+  .switch.aviso-active .switch-thumb {
+    transform: translateX(24px);
+  }
+
+  .switch-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    transition: color 0.3s;
+    min-width: 25px;
+  }
+
+  .switch.active + .switch-text { color: #4ade80; }
+  .switch.aviso-active + .switch-text { color: #a78bfa; }
+
+  /* Upload sections */
+  .auth-upload, .aviso-upload {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .auth-upload.show, .aviso-upload.show {
+    opacity: 1;
+    max-height: 300px;
+  }
+
+  .auth-upload-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #fbbf24;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .aviso-upload-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #a78bfa;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* File inputs */
+  .file-input-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .file-input-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    font-size: 14px;
+    transition: all 0.3s;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .file-input-wrapper:hover .file-input-label,
+  .file-input-wrapper:focus-within .file-input-label {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    color: #ffffff;
+  }
+
+  .file-input-wrapper.aviso-file:hover .file-input-label,
+  .file-input-wrapper.aviso-file:focus-within .file-input-label {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+  }
+
+  .file-input-wrapper.has-file .file-input-label {
+    border-style: solid;
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+  }
+
+  .file-input-wrapper.aviso-file.has-file .file-input-label {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+  }
+
+  .file-input-wrapper.uploading .file-input-label {
+    border-color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+  }
+
+  .file-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .file-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .file-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 14px;
+  }
+
+  .file-hint {
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .file-status {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+  }
+
+  .file-status.uploaded {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+  }
+
+  .file-status.pending {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+  }
+
+  .file-status.aviso-uploaded {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 35px 0;
+    position: relative;
+  }
+
+  .divider::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 3px;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 18px 28px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 4px 6px -1px rgba(245, 158, 11, 0.2),
+      0 10px 20px -5px rgba(245, 158, 11, 0.4),
+      inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 10px;
+    touch-action: manipulation;
+  }
+
+  button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+
+  button[type="submit"]:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      0 10px 25px -5px rgba(245, 158, 11, 0.5),
+      0 8px 10px -6px rgba(245, 158, 11, 0.3);
+  }
+
+  button[type="submit"]:hover::before {
+    left: 100%;
+  }
+
+  button[type="submit"]:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  button[type="submit"]:disabled {
+    background: #334155;
+    color: #64748b;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .btn-logout {
+    width: 100%;
+    padding: 16px 28px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 16px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+  }
+
+  .btn-logout:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .btn-logout:active {
+    transform: scale(0.98);
+  }
+
+  #mensaje {
+    margin-top: 25px;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+  }
+
+  #mensaje.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #mensaje.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  #mensaje.ok {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+
+  #mensaje.busy {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+  }
+
+  .loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .upload-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    z-index: 1000;
+    transition: width 0.3s;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  }
+
+  /* Offline indicator */
+  .offline-indicator {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(10px);
+  }
+
+  .offline-indicator.show {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .card {
+      padding: 35px 25px;
+      padding-top: max(35px, env(safe-area-inset-top));
+      border-radius: 24px;
+    }
+    
+    h2 { font-size: 26px; }
+    
+    .header-icon {
+      width: 60px;
+      height: 60px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="upload-progress" id="progressBar"></div>
+
+<!-- Offline indicator -->
+<div class="offline-indicator" id="offlineIndicator">
+  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
+  </svg>
+  Sin conexión
+</div>
+
+<div class="card">
+  <div class="header">
+    <div class="header-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+    </div>
+    <h2>Actualizar Perfil</h2>
+    <p class="subtitle">Modifique sus datos y documentos</p>
+  </div>
+
+  <form id="formUpdate">
+    
+    <!-- Sección: Datos Personales -->
+    <div class="form-section">
+      <div class="section-title">Datos Personales</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombres</label>
+          <input id="nombres" type="text" placeholder="Juan" required>
+        </div>
+        <div class="form-group">
+          <label>Apellidos</label>
+          <input id="apellidos" type="text" placeholder="Pérez" required>
+        </div>
+        <div class="form-group">
+          <label>Cédula</label>
+          <input id="cedula" type="text" placeholder="1234567890" required>
+        </div>
+        <div class="form-group">
+          <label>Licencia</label>
+          <input id="licencia" type="text" placeholder="Tipo B" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Sección: Vehículo -->
+    <div class="form-section">
+      <div class="section-title">Información del Vehículo</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Marca</label>
+          <input id="marca" type="text" placeholder="Toyota" required>
+        </div>
+        <div class="form-group">
+          <label>Modelo</label>
+          <input id="modelo" type="text" placeholder="2023" required>
+        </div>
+        <div class="form-group">
+          <label>Placa</label>
+          <input id="placa" type="text" placeholder="ABC-1234" required>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <input id="color" type="text" placeholder="Blanco" required>
+        </div>
+        <div class="form-group full-width">
+          <label>Número de Póliza</label>
+          <input id="poliza_numero" type="text" placeholder="POL-123456" required>
+        </div>
+      </div>
+
+      <!-- Toggle Aviso de Operaciones -->
+      <div class="aviso-toggle">
+        <div class="toggle-header">
+          <div class="toggle-label">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #8b5cf6;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            ¿Cuenta con Aviso de Operaciones?
+          </div>
+          <div class="switch-container">
+            <div class="switch" id="avisoSwitch">
+              <div class="switch-thumb"></div>
+            </div>
+            <span class="switch-text" id="avisoSwitchText">No</span>
+          </div>
+        </div>
+
+        <div class="aviso-upload" id="avisoUpload">
+          <div class="aviso-upload-header">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span>Subir documento de Aviso de Operaciones</span>
+          </div>
+          <div class="file-input-wrapper aviso-file" id="avisoFileWrapper" data-doc-type="AVISO_OPERACIONES">
+            <input type="file" id="aviso_operaciones" accept=".pdf,.jpg,.jpeg,.png">
+            <div class="file-input-label">
+              <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <div class="file-text">
+                <span class="file-name">Aviso de Operaciones</span>
+                <span class="file-hint">PDF, JPG o PNG</span>
+              </div>
+              <span class="file-status pending" id="status-aviso">Pendiente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toggle Propiedad -->
+      <div class="property-toggle">
+        <div class="toggle-header">
+          <div class="toggle-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            ¿Es propietario del vehículo?
+          </div>
+          <div class="switch-container">
+            <div class="switch active" id="propertySwitch">
+              <div class="switch-thumb"></div>
+            </div>
+            <span class="switch-text" id="switchText" style="color: #4ade80;">Sí</span>
+          </div>
+        </div>
+
+        <div class="auth-upload" id="authUpload">
+          <div class="auth-upload-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span>Autorización del propietario (obligatorio)</span>
+          </div>
+          <div class="file-input-wrapper" id="authFileWrapper" data-doc-type="AUTH_PROPIETARIO">
+            <input type="file" id="auth_propietario" accept=".pdf,.jpg,.jpeg,.png">
+            <div class="file-input-label">
+              <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <div class="file-text">
+                <span class="file-name">Carta de Autorización</span>
+                <span class="file-hint">PDF, JPG o PNG</span>
+              </div>
+              <span class="file-status pending" id="status-auth">Pendiente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Sección: Documentos -->
+    <div class="form-section">
+      <div class="section-title">Actualizar Documentos</div>
+      
+      <div class="file-input-wrapper" data-doc-type="CEDULA">
+        <input type="file" id="cedula_doc" accept=".pdf,.jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Cédula de Identidad</span>
+            <span class="file-hint">PDF, JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-cedula">Pendiente</span>
+        </div>
+      </div>
+
+      <div class="file-input-wrapper" data-doc-type="LICENCIA">
+        <input type="file" id="licencia_doc" accept=".pdf,.jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Licencia de Conducir</span>
+            <span class="file-hint">PDF, JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-licencia">Pendiente</span>
+        </div>
+      </div>
+
+      <div class="file-input-wrapper" data-doc-type="REGISTRO">
+        <input type="file" id="registro_doc" accept=".pdf,.jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Registro Vehicular</span>
+            <span class="file-hint">PDF, JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-registro">Pendiente</span>
+        </div>
+      </div>
+
+      <div class="file-input-wrapper" data-doc-type="POLIZA">
+        <input type="file" id="poliza_doc" accept=".pdf,.jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Póliza de Seguro</span>
+            <span class="file-hint">PDF, JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-poliza">Pendiente</span>
+        </div>
+      </div>
+
+      <div class="file-input-wrapper" data-doc-type="FOTO_VEHICULO">
+        <input type="file" id="foto_vehiculo" accept=".jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Foto del Vehículo</span>
+            <span class="file-hint">JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-foto-vehiculo">Pendiente</span>
+        </div>
+      </div>
+
+      <div class="file-input-wrapper" data-doc-type="FOTO_CONDUCTOR">
+        <input type="file" id="foto_conductor" accept=".jpg,.jpeg,.png">
+        <div class="file-input-label">
+          <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <div class="file-text">
+            <span class="file-name">Foto del Conductor</span>
+            <span class="file-hint">JPG o PNG</span>
+          </div>
+          <span class="file-status pending" id="status-foto-conductor">Pendiente</span>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" id="btnGuardar">
+      <span>Guardar Cambios</span>
+    </button>
+    
+    <button type="button" class="btn-logout" onclick="logout()">
+      Cerrar Sesión
+    </button>
+
+    <div id="mensaje"></div>
+
+  </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const form = document.getElementById("formUpdate");
+const mensaje = document.getElementById("mensaje");
+const btn = document.getElementById("btnGuardar");
+const progressBar = document.getElementById("progressBar");
+
+// Toggles
+const propertySwitch = document.getElementById("propertySwitch");
+const switchText = document.getElementById("switchText");
+const authUpload = document.getElementById("authUpload");
+
+const avisoSwitch = document.getElementById("avisoSwitch");
+const avisoSwitchText = document.getElementById("avisoSwitchText");
+const avisoUpload = document.getElementById("avisoUpload");
+
+let currentConductorId = null;
+let isOwner = true;
+let tieneAviso = false;
+
+// Offline detection
+function initConnectivity() {
+  const indicator = document.getElementById('offlineIndicator');
+  
+  function updateStatus() {
+    if (navigator.onLine) {
+      indicator.classList.remove('show');
+    } else {
+      indicator.classList.add('show');
+    }
+  }
+
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+  if (!navigator.onLine) indicator.classList.add('show');
+}
+
+function showMessage(text, type="") {
+  mensaje.textContent = text;
+  mensaje.className = type + ' show';
+  setTimeout(() => mensaje.classList.remove('show'), 5000);
+}
+
+function setLoading(state) {
+  btn.disabled = state;
+  if (state) {
+    btn.innerHTML = '<div class="loader"></div><span>Guardando...</span>';
+    progressBar.style.width = '30%';
+  } else {
+    btn.innerHTML = '<span>Guardar Cambios</span>';
+    progressBar.style.width = '0%';
+  }
+}
+
+// Toggle handlers
+propertySwitch.addEventListener("click", () => {
+  isOwner = !isOwner;
+  if (isOwner) {
+    propertySwitch.classList.add("active");
+    switchText.textContent = "Sí";
+    switchText.style.color = "#4ade80";
+    authUpload.classList.remove("show");
+  } else {
+    propertySwitch.classList.remove("active");
+    switchText.textContent = "No";
+    switchText.style.color = "#94a3b8";
+    authUpload.classList.add("show");
+    setTimeout(() => authUpload.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
+  }
+});
+
+avisoSwitch.addEventListener("click", () => {
+  tieneAviso = !tieneAviso;
+  if (tieneAviso) {
+    avisoSwitch.classList.add("aviso-active");
+    avisoSwitchText.textContent = "Sí";
+    avisoSwitchText.style.color = "#a78bfa";
+    avisoUpload.classList.add("show");
+    setTimeout(() => avisoUpload.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
+  } else {
+    avisoSwitch.classList.remove("aviso-active");
+    avisoSwitchText.textContent = "No";
+    avisoSwitchText.style.color = "#94a3b8";
+    avisoUpload.classList.remove("show");
+  }
+});
+
+// File input handlers
+document.querySelectorAll('input[type="file"]').forEach(input => {
+  input.addEventListener('change', async function() {
+    const wrapper = this.closest('.file-input-wrapper');
+    const label = wrapper.querySelector('.file-name');
+    const hint = wrapper.querySelector('.file-hint');
+    const docType = wrapper.dataset.docType;
+    
+    if (this.files && this.files[0]) {
+      const file = this.files[0];
+      label.textContent = file.name;
+      hint.textContent = 'Subiendo...';
+      wrapper.classList.add('uploading');
+      wrapper.classList.remove('has-file');
+      
+      try {
+        if (!currentConductorId) throw new Error("No se ha cargado el perfil");
+        await subirDocumento(currentConductorId, docType, file);
+        wrapper.classList.remove('uploading');
+        wrapper.classList.add('has-file');
+        hint.textContent = 'Subido correctamente ✓';
+        actualizarEstadoDocumento(docType, true);
+        showMessage(`${docType} actualizado`, "ok");
+      } catch (error) {
+        wrapper.classList.remove('uploading');
+        hint.textContent = 'Error al subir';
+        showMessage(`Error: ${error.message}`, "error");
+        this.value = '';
+      }
+    }
+  });
+});
+
+function actualizarEstadoDocumento(tipo, subido) {
+  const statusId = 'status-' + tipo.toLowerCase().replace(/_/g, '-');
+  const el = document.getElementById(statusId);
+  if (el) {
+    el.textContent = subido ? 'Subido' : 'Pendiente';
+    el.className = 'file-status ' + (subido ? (tipo === 'AVISO_OPERACIONES' ? 'aviso-uploaded' : 'uploaded') : 'pending');
+  }
+}
+
+async function subirDocumento(conductorId, tipo, file) {
+  const path = `${conductorId}/${tipo}_${Date.now()}_${file.name}`;
+  
+  const { error: uploadError } = await supabase.storage
+    .from("documentos-conductores")
+    .upload(path, file);
+  
+  if (uploadError) throw uploadError;
+
+  const { data: existing } = await supabase
+    .from("documentos")
+    .select("id")
+    .eq("conductor_id", conductorId)
+    .eq("tipo", tipo)
+    .single();
+
+  if (existing) {
+    await supabase.from("documentos").update({ url_archivo: path }).eq("id", existing.id);
+  } else {
+    await supabase.from("documentos").insert([{ conductor_id: conductorId, tipo: tipo, url_archivo: path }]);
+  }
+}
+
+async function cargarDatos() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const { data: conductor, error } = await supabase
+      .from("conductores")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (error || !conductor) throw new Error("Perfil no encontrado");
+
+    currentConductorId = conductor.id;
+
+    // Fill inputs
+    document.getElementById('nombres').value = conductor.nombres || '';
+    document.getElementById('apellidos').value = conductor.apellidos || '';
+    document.getElementById('cedula').value = conductor.cedula || '';
+    document.getElementById('licencia').value = conductor.licencia || '';
+    document.getElementById('marca').value = conductor.marca || '';
+    document.getElementById('modelo').value = conductor.modelo || '';
+    document.getElementById('placa').value = conductor.placa || '';
+    document.getElementById('color').value = conductor.color || '';
+    document.getElementById('poliza_numero').value = conductor.poliza_numero || '';
+
+    // Set toggles
+    isOwner = conductor.es_propietario !== false;
+    if (!isOwner) {
+      propertySwitch.classList.remove("active");
+      switchText.textContent = "No";
+      switchText.style.color = "#94a3b8";
+      authUpload.classList.add("show");
+    }
+
+    tieneAviso = conductor.tiene_aviso_operaciones === true;
+    if (tieneAviso) {
+      avisoSwitch.classList.add("aviso-active");
+      avisoSwitchText.textContent = "Sí";
+      avisoSwitchText.style.color = "#a78bfa";
+      avisoUpload.classList.add("show");
+    }
+
+    // Load existing documents
+    const { data: docs } = await supabase
+      .from("documentos")
+      .select("tipo")
+      .eq("conductor_id", conductor.id);
+
+    if (docs) {
+      docs.forEach(doc => actualizarEstadoDocumento(doc.tipo, true));
+      docs.forEach(doc => {
+        const inputId = getInputIdByTipo(doc.tipo);
+        const input = document.getElementById(inputId);
+        if (input) {
+          const wrapper = input.closest('.file-input-wrapper');
+          wrapper.classList.add('has-file');
+          wrapper.querySelector('.file-name').textContent = 'Documento registrado';
+          wrapper.querySelector('.file-hint').textContent = 'Reemplazar archivo';
+        }
+      });
+    }
+
+    showMessage("Datos cargados", "ok");
+  } catch (err) {
+    showMessage("Error cargando datos: " + err.message, "error");
+  }
+}
+
+function getInputIdByTipo(tipo) {
+  const map = {
+    'CEDULA': 'cedula_doc',
+    'LICENCIA': 'licencia_doc',
+    'REGISTRO': 'registro_doc',
+    'POLIZA': 'poliza_doc',
+    'FOTO_VEHICULO': 'foto_vehiculo',
+    'FOTO_CONDUCTOR': 'foto_conductor',
+    'AUTH_PROPIETARIO': 'auth_propietario',
+    'AVISO_OPERACIONES': 'aviso_operaciones'
+  };
+  return map[tipo] || tipo.toLowerCase();
+}
+
+// Form submit
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  if (!currentConductorId) {
+    showMessage("Error: No se ha cargado el perfil", "error");
+    return;
+  }
+
+  // Validations
+  if (!isOwner) {
+    const { data: authDoc } = await supabase
+      .from("documentos")
+      .select("id")
+      .eq("conductor_id", currentConductorId)
+      .eq("tipo", "AUTH_PROPIETARIO")
+      .single();
+    if (!authDoc) {
+      showMessage("Debe subir autorización del propietario", "error");
+      authUpload.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+  }
+
+  if (tieneAviso) {
+    const { data: avisoDoc } = await supabase
+      .from("documentos")
+      .select("id")
+      .eq("conductor_id", currentConductorId)
+      .eq("tipo", "AVISO_OPERACIONES")
+      .single();
+    if (!avisoDoc) {
+      showMessage("Debe subir el Aviso de Operaciones", "error");
+      avisoUpload.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+  }
+
+  setLoading(true);
+
+  try {
+    const updateData = {
+      nombres: document.getElementById('nombres').value,
+      apellidos: document.getElementById('apellidos').value,
+      cedula: document.getElementById('cedula').value,
+      licencia: document.getElementById('licencia').value,
+      marca: document.getElementById('marca').value,
+      modelo: document.getElementById('modelo').value,
+      placa: document.getElementById('placa').value,
+      color: document.getElementById('color').value,
+      poliza_numero: document.getElementById('poliza_numero').value,
+      es_propietario: isOwner,
+      tipo_propiedad: isOwner ? "propio" : "tercero",
+      tiene_aviso_operaciones: tieneAviso
+    };
+
+    const { error } = await supabase
+      .from("conductores")
+      .update(updateData)
+      .eq("id", currentConductorId);
+
+    if (error) throw error;
+
+    progressBar.style.width = '100%';
+    showMessage("Cambios guardados correctamente ✅", "ok");
+    
+    setTimeout(() => {
+      progressBar.style.width = '0%';
+      window.location.href = "perfil.html";
+    }, 1500);
+
+  } catch (error) {
+    showMessage("Error: " + error.message, "error");
+    progressBar.style.width = '0%';
+  } finally {
+    setLoading(false);
+  }
+});
+
+window.logout = async function() {
+  await supabase.auth.signOut();
+  window.location.href = "index.html";
+};
+
+// Capacitor keyboard handling
+if (window.Capacitor) {
+  window.addEventListener('keyboardWillShow', () => {
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  });
+  window.addEventListener('keyboardWillHide', () => {
+    document.body.style.position = '';
+    document.body.style.width = '';
+  });
+}
+
+// Prevent double-tap zoom
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
+
+// Initialize
+initConnectivity();
+cargarDatos();
+
+});
+</script>
+
+</body>
+</html>
