@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Bienvenido a Road To</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Capacitor 7 -->
+  <script type="module">
+    import { SplashScreen } from '@capacitor/splash-screen';
+    import { StatusBar } from '@capacitor/status-bar';
+    import { App } from '@capacitor/app';
+    import { Preferences } from '@capacitor/preferences';
+    
+    window.CapacitorPlugins = { SplashScreen, StatusBar, App, Preferences };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    :root {
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+      --safe-right: env(safe-area-inset-right);
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --accent: #8b5cf6;
+      --success: #22c55e;
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.6);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-dark);
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    /* Fondo animado con gradientes */
+    .bg-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      z-index: -2;
+    }
+
+    /* Efecto de carretera/path animada */
+    .road-container {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      height: 60%;
+      perspective: 1000px;
+      z-index: -1;
+      opacity: 0;
+      animation: fadeInRoad 1.5s ease forwards 0.5s;
+    }
+
+    @keyframes fadeInRoad {
+      to { opacity: 1; }
+    }
+
+    .road {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) rotateX(60deg);
+      width: 200px;
+      height: 100%;
+      background: linear-gradient(to bottom, 
+        transparent 0%,
+        rgba(59, 130, 246, 0.1) 20%,
+        rgba(59, 130, 246, 0.2) 100%
+      );
+      transform-origin: bottom center;
+    }
+
+    .road-lines {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(59, 130, 246, 0.8) 0px,
+        rgba(59, 130, 246, 0.8) 40px,
+        transparent 40px,
+        transparent 80px
+      );
+      animation: moveLines 2s linear infinite;
+      box-shadow: 
+        -60px 0 0 rgba(139, 92, 246, 0.4),
+        60px 0 0 rgba(139, 92, 246, 0.4);
+    }
+
+    @keyframes moveLines {
+      from { background-position: 0 0; }
+      to { background-position: 0 80px; }
+    }
+
+    /* Partículas flotantes */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: float-particle 15s infinite;
+    }
+
+    .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 12s; }
+    .particle:nth-child(2) { left: 20%; animation-delay: 1s; animation-duration: 15s; }
+    .particle:nth-child(3) { left: 30%; animation-delay: 2s; animation-duration: 10s; }
+    .particle:nth-child(4) { left: 40%; animation-delay: 0.5s; animation-duration: 18s; }
+    .particle:nth-child(5) { left: 50%; animation-delay: 3s; animation-duration: 14s; }
+    .particle:nth-child(6) { left: 60%; animation-delay: 1.5s; animation-duration: 16s; }
+    .particle:nth-child(7) { left: 70%; animation-delay: 2.5s; animation-duration: 11s; }
+    .particle:nth-child(8) { left: 80%; animation-delay: 0.8s; animation-duration: 13s; }
+    .particle:nth-child(9) { left: 90%; animation-delay: 3.5s; animation-duration: 17s; }
+    .particle:nth-child(10) { left: 5%; animation-delay: 4s; animation-duration: 19s; }
+
+    @keyframes float-particle {
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    /* Contenedor principal */
+    .welcome-container {
+      text-align: center;
+      z-index: 1;
+      padding: 40px 30px;
+    }
+
+    /* Logo animado */
+    .logo-wrapper {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 40px;
+    }
+
+    .logo-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border: 3px solid transparent;
+      border-top-color: var(--primary);
+      border-right-color: var(--accent);
+      border-radius: 50%;
+      animation: spin-ring 3s linear infinite;
+    }
+
+    .logo-ring:nth-child(2) {
+      width: 85%;
+      height: 85%;
+      border-top-color: var(--accent);
+      border-right-color: var(--primary);
+      animation: spin-ring-reverse 2.5s linear infinite;
+    }
+
+    .logo-ring:nth-child(3) {
+      width: 70%;
+      height: 70%;
+      border-top-color: var(--success);
+      border-right-color: var(--primary);
+      animation: spin-ring 2s linear infinite;
+    }
+
+    @keyframes spin-ring {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes spin-ring-reverse {
+      from { transform: translate(-50%, -50%) rotate(360deg); }
+      to { transform: translate(-50%, -50%) rotate(0deg); }
+    }
+
+    .logo-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 55%;
+      height: 55%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 
+        0 0 40px rgba(59, 130, 246, 0.5),
+        0 0 80px rgba(139, 92, 246, 0.3);
+      animation: pulse-logo 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-logo {
+      0%, 100% { 
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.5), 0 0 80px rgba(139, 92, 246, 0.3);
+      }
+      50% { 
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 0 60px rgba(59, 130, 246, 0.7), 0 0 100px rgba(139, 92, 246, 0.5);
+      }
+    }
+
+    .logo-inner svg {
+      width: 50%;
+      height: 50%;
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    /* Texto Road To con efecto de escritura */
+    .brand-text {
+      margin-bottom: 20px;
+    }
+
+    .brand-name {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 50%, #ffffff 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease forwards 0.3s, shimmer 3s linear infinite 1s;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shimmer {
+      to { background-position: 200% center; }
+    }
+
+    .brand-tagline {
+      font-size: 16px;
+      font-weight: 500;
+      color: #94a3b8;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease forwards 0.6s;
+    }
+
+    /* Barra de progreso */
+    .progress-container {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 40px auto;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards 0.9s;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent), var(--success));
+      background-size: 200% 100%;
+      border-radius: 2px;
+      animation: loading 2.5s ease-in-out forwards 1s, gradient-shift 2s linear infinite;
+    }
+
+    @keyframes loading {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    /* Texto de carga */
+    .loading-text {
+      font-size: 14px;
+      color: #64748b;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards 1.2s;
+    }
+
+    .loading-text::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+      100% { content: ''; }
+    }
+
+    /* Versión */
+    .version {
+      position: fixed;
+      bottom: calc(20px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #475569;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards 1.5s;
+    }
+
+    /* Responsive */
+    @media (max-width: 380px) {
+      .logo-wrapper {
+        width: 120px;
+        height: 120px;
+      }
+      .brand-name {
+        font-size: 36px;
+        letter-spacing: 6px;
+      }
+      .brand-tagline {
+        font-size: 14px;
+        letter-spacing: 3px;
+      }
+    }
+
+    /* Modo claro (preferencia del sistema) */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-dark: #f8fafc;
+      }
+      .bg-gradient {
+        background: 
+          radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
+      }
+      .brand-name {
+        background: linear-gradient(135deg, #0f172a 0%, #475569 50%, #0f172a 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .brand-tagline {
+        color: #64748b;
+      }
+      .loading-text {
+        color: #94a3b8;
+      }
+      .version {
+        color: #94a3b8;
+      }
+      .particle {
+        background: rgba(15, 23, 42, 0.2);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-gradient"></div>
+  
+  <!-- Efecto de carretera -->
+  <div class="road-container">
+    <div class="road">
+      <div class="road-lines"></div>
+    </div>
+  </div>
+
+  <!-- Partículas -->
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="welcome-container">
+    <div class="logo-wrapper">
+      <div class="logo-ring"></div>
+      <div class="logo-ring"></div>
+      <div class="logo-ring"></div>
+      <div class="logo-inner">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="brand-text">
+      <h1 class="brand-name">Road To</h1>
+      <p class="brand-tagline">Tu camino, tu destino</p>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+
+    <p class="loading-text">Cargando</p>
+  </div>
+
+  <div class="version">v2.0.0</div>
+
+  <script>
+    // Inicialización de Capacitor
+    document.addEventListener('DOMContentLoaded', async () => {
+      
+      // Ocultar splash screen nativa
+      if (window.CapacitorPlugins?.SplashScreen) {
+        await window.CapacitorPlugins.SplashScreen.hide();
+      }
+
+      // Configurar status bar
+      if (window.CapacitorPlugins?.StatusBar) {
+        await window.CapacitorPlugins.StatusBar.setStyle({ style: 'Dark' });
+        await window.CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#0f172a' });
+      }
+
+      // Verificar si es primera vez
+      await checkFirstLaunch();
+
+      // Redirigir después de la animación
+      setTimeout(() => {
+        window.location.href = 'home.html';
+      }, 3500);
+    });
+
+    async function checkFirstLaunch() {
+      try {
+        if (window.CapacitorPlugins?.Preferences) {
+          const { value } = await window.CapacitorPlugins.Preferences.get({ key: 'firstLaunch' });
+          if (!value) {
+            await window.CapacitorPlugins.Preferences.set({ key: 'firstLaunch', value: 'false' });
+          }
+        }
+      } catch (e) {
+        console.log('First launch check skipped');
+      }
+    }
+
+    // Prevenir zoom en double-tap (iOS)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  </script>
+
+</body>
+</html>
