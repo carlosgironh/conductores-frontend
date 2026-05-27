@@ -182,6 +182,37 @@
       text-align: center;
       z-index: 1;
       padding: 40px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 32px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #ffffff;
+      box-shadow: 0 16px 40px rgba(59, 130, 246, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 40px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 1.8s;
+    }
+
+    .action-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 50px rgba(59, 130, 246, 0.35);
+    }
+
+    /* Ocultar el botón 'Entrar a la plataforma' en el index via CSS */
+    .welcome-container .action-button {
+      display: none !important;
     }
 
     /* Logo animado */
@@ -189,7 +220,7 @@
       position: relative;
       width: 150px;
       height: 150px;
-      margin: 0 auto 40px;
+      margin: 0 0 40px;
     }
 
     .logo-ring {
@@ -460,9 +491,7 @@
       <div class="logo-ring"></div>
       <div class="logo-ring"></div>
       <div class="logo-inner">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
-        </svg>
+        <img src="logo.png" alt="Road To Logo" style="width: 60%; height: 60%; object-fit: contain;">
       </div>
     </div>
 
@@ -476,6 +505,8 @@
     </div>
 
     <p class="loading-text">Cargando</p>
+
+    <a href="web-empresa.html" class="action-button">Entrar a la plataforma</a>
   </div>
 
   <div class="version">v2.0.0</div>
@@ -498,9 +529,12 @@
       // Verificar si es primera vez
       await checkFirstLaunch();
 
-      // Redirigir después de la animación
+      // Si hay sesión guardada, redirigir al dashboard inmediatamente
+      await checkSavedSession();
+
+      // Redirigir automáticamente después de las animaciones
       setTimeout(() => {
-        window.location.href = 'home.html';
+        window.location.href = 'web-empresa.html';
       }, 3500);
     });
 
@@ -514,6 +548,31 @@
         }
       } catch (e) {
         console.log('First launch check skipped');
+      }
+    }
+
+    // Detectar sesión guardada (Preferences o localStorage) y redirigir a dashboard
+    async function checkSavedSession() {
+      try {
+        // Preferir Capacitor Preferences cuando esté disponible
+        if (window.CapacitorPlugins?.Preferences) {
+          const { value: savedEmail } = await window.CapacitorPlugins.Preferences.get({ key: 'savedEmail' });
+          if (savedEmail) {
+            const qs = window.location.search || '';
+            window.location.replace('dashboard.html' + qs);
+            return;
+          }
+        }
+
+        // Fallback a localStorage (por ejemplo auth token)
+        const token = localStorage.getItem('authToken') || localStorage.getItem('savedEmail');
+        if (token) {
+          const qs = window.location.search || '';
+          window.location.replace('dashboard.html' + qs);
+          return;
+        }
+      } catch (e) {
+        console.warn('checkSavedSession failed', e);
       }
     }
 
