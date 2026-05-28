@@ -31,13 +31,23 @@
       --logo-green-dark: #448414;
       --logo-green-lime: #9ad93a;
       --logo-green-light: #b8e85c;
+      --corp-blue: #2563eb;
+      --corp-blue-dark: #1e40af;
+      --corp-blue-light: #3b82f6;
+      --corp-blue-soft: #60a5fa;
+      --corp-orange: #f97316;
+      --corp-orange-dark: #ea580c;
+      --corp-orange-light: #fb923c;
+      --corp-orange-soft: #fdba74;
       --road-gray: #7d7d7d;
       --road-dark: #4a4a4a;
       --road-light: #9e9e9e;
 
       --primary: var(--logo-green);
-      --primary-dark: var(--logo-green-dark);
+      --secondary: var(--corp-blue);
+      --secondary-dark: var(--corp-blue-dark);
       --accent: var(--logo-green-lime);
+      --warning: var(--corp-orange);
       --highlight: var(--logo-green-light);
       --success: #5a9e1c;
 
@@ -76,8 +86,8 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(ellipse at 15% 15%, rgba(138, 199, 37, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 85%, rgba(154, 217, 58, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 15% 15%, rgba(37, 99, 235, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 85%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 50% 0%, #0c1a0a 0%, #0a1208 100%);
       z-index: -2;
     }
@@ -90,8 +100,8 @@
       width: 100%;
       height: 100%;
       background-image: 
-        radial-gradient(circle at 20% 80%, rgba(138, 199, 37, 0.04) 0%, transparent 2%),
-        radial-gradient(circle at 80% 20%, rgba(154, 217, 58, 0.03) 0%, transparent 2%);
+        radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.05) 0%, transparent 2%),
+        radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.04) 0%, transparent 2%);
       background-size: 150px 150px;
       animation: float 25s ease-in-out infinite;
       pointer-events: none;
@@ -127,7 +137,7 @@
 
     header.scrolled {
       background: rgba(10, 18, 8, 0.92);
-      border-bottom-color: rgba(138, 199, 37, 0.15);
+      border-bottom-color: rgba(37, 99, 235, 0.15);
       box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
 
@@ -176,25 +186,25 @@
 
     .btn-login {
       background: transparent;
-      border: 1px solid rgba(138, 199, 37, 0.25);
+      border: 1px solid rgba(37, 99, 235, 0.25);
       color: var(--text-light);
     }
 
     .btn-login:hover {
-      background: rgba(138, 199, 37, 0.08);
-      border-color: rgba(138, 199, 37, 0.5);
-      box-shadow: 0 0 20px rgba(138, 199, 37, 0.1);
+      background: rgba(37, 99, 235, 0.1);
+      border-color: rgba(37, 99, 235, 0.55);
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.12);
     }
 
     .btn-register {
-      background: linear-gradient(135deg, var(--logo-green-dark), var(--logo-green));
+      background: linear-gradient(135deg, var(--corp-orange), var(--logo-green));
       color: #ffffff;
-      box-shadow: 0 8px 25px rgba(138, 199, 37, 0.2);
+      box-shadow: 0 8px 25px rgba(249, 115, 22, 0.22);
     }
 
     .btn-register:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(138, 199, 37, 0.35);
+      box-shadow: 0 12px 35px rgba(249, 115, 22, 0.35);
     }
 
     .btn-large {
@@ -226,7 +236,7 @@
       transform: translateX(-50%);
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(138, 199, 37, 0.08) 0%, transparent 60%);
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
@@ -242,12 +252,12 @@
       align-items: center;
       gap: 8px;
       padding: 8px 18px;
-      background: rgba(138, 199, 37, 0.1);
-      border: 1px solid rgba(138, 199, 37, 0.2);
+      background: rgba(37, 99, 235, 0.1);
+      border: 1px solid rgba(37, 99, 235, 0.2);
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
-      color: var(--logo-green-lime);
+      color: var(--corp-blue-light);
       margin-bottom: 28px;
       animation: fadeInUp 0.8s ease forwards;
     }
@@ -256,9 +266,9 @@
       content: '';
       width: 8px;
       height: 8px;
-      background: var(--logo-green);
+      background: var(--corp-orange);
       border-radius: 50%;
-      box-shadow: 0 0 8px var(--logo-green);
+      box-shadow: 0 0 8px var(--corp-orange);
       animation: pulse-dot 2s ease-in-out infinite;
     }
 
@@ -273,7 +283,7 @@
       letter-spacing: -2px;
       line-height: 1.1;
       margin-bottom: 24px;
-      background: linear-gradient(135deg, #ffffff 0%, var(--logo-green-lime) 50%, var(--logo-green) 100%);
+      background: linear-gradient(135deg, #ffffff 0%, var(--corp-blue-light) 35%, var(--corp-orange) 75%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -307,14 +317,14 @@
 
     .btn-outline {
       background: transparent;
-      border: 1.5px solid rgba(138, 199, 37, 0.4);
+      border: 1.5px solid rgba(37, 99, 235, 0.4);
       color: var(--text-light);
     }
 
     .btn-outline:hover {
-      background: rgba(138, 199, 37, 0.1);
-      border-color: var(--logo-green);
-      box-shadow: 0 0 25px rgba(138, 199, 37, 0.15);
+      background: rgba(37, 99, 235, 0.12);
+      border-color: var(--corp-blue);
+      box-shadow: 0 0 25px rgba(37, 99, 235, 0.15);
     }
 
     /* DESCUBRE MÁS - AUMENTADO */
@@ -345,7 +355,7 @@
     .scroll-indicator svg {
       width: 28px;
       height: 28px;
-      stroke: var(--logo-green);
+      stroke: var(--corp-blue);
       stroke-width: 2.5;
       fill: none;
     }
@@ -389,7 +399,7 @@
       font-size: clamp(28px, 4vw, 40px);
       font-weight: 800;
       margin-bottom: 16px;
-      background: linear-gradient(135deg, #ffffff 0%, var(--logo-green-lime) 100%);
+      background: linear-gradient(135deg, var(--corp-blue-light) 0%, var(--corp-orange) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -408,7 +418,7 @@
        ═══════════════════════════════════════════════ */
     .about-card {
       background: var(--bg-elevated);
-      border: 1px solid rgba(138, 199, 37, 0.1);
+      border: 1px solid rgba(37, 99, 235, 0.12);
       border-radius: 24px;
       padding: 50px 45px;
       position: relative;
@@ -423,7 +433,7 @@
       left: 0;
       width: 100%;
       height: 3px;
-      background: linear-gradient(90deg, var(--logo-green-dark), var(--logo-green), var(--logo-green-lime));
+      background: linear-gradient(90deg, var(--corp-blue), var(--corp-orange));
     }
 
     .about-card::after {
@@ -433,7 +443,7 @@
       right: 30px;
       font-size: 120px;
       font-weight: 900;
-      color: rgba(138, 199, 37, 0.06);
+      color: rgba(37, 99, 235, 0.07);
       line-height: 1;
       font-family: Georgia, serif;
     }
@@ -443,7 +453,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 3px;
-      color: var(--logo-green);
+      color: var(--corp-blue);
       margin-bottom: 20px;
     }
 
@@ -475,23 +485,23 @@
     }
 
     .about-detail-item {
-      background: rgba(138, 199, 37, 0.04);
-      border: 1px solid rgba(138, 199, 37, 0.08);
+      background: rgba(125, 125, 125, 0.08);
+      border: 1px solid rgba(125, 125, 125, 0.16);
       border-radius: 16px;
       padding: 24px;
       transition: all 0.3s ease;
     }
 
     .about-detail-item:hover {
-      background: rgba(138, 199, 37, 0.08);
-      border-color: rgba(138, 199, 37, 0.2);
+      background: rgba(37, 99, 235, 0.08);
+      border-color: rgba(37, 99, 235, 0.18);
       transform: translateY(-4px);
     }
 
     .about-detail-item h4 {
       font-size: 16px;
       font-weight: 700;
-      color: var(--logo-green-lime);
+      color: var(--corp-blue);
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -502,7 +512,7 @@
       content: '';
       width: 8px;
       height: 8px;
-      background: var(--logo-green);
+      background: var(--corp-orange);
       border-radius: 50%;
       flex-shrink: 0;
     }
@@ -541,7 +551,7 @@
 
     .role-card:hover {
       transform: translateY(-6px);
-      border-color: rgba(138, 199, 37, 0.2);
+      border-color: rgba(37, 99, 235, 0.2);
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
     }
 
@@ -552,7 +562,7 @@
       left: 0;
       width: 100%;
       height: 4px;
-      background: linear-gradient(90deg, var(--logo-green-dark), var(--logo-green));
+      background: linear-gradient(90deg, var(--corp-blue-dark), var(--corp-blue-light));
     }
 
     .role-card.driver::before {
@@ -562,7 +572,7 @@
       left: 0;
       width: 100%;
       height: 4px;
-      background: linear-gradient(90deg, var(--logo-green), var(--logo-green-lime));
+      background: linear-gradient(90deg, var(--corp-orange-dark), var(--corp-orange));
     }
 
     .role-icon {
@@ -577,13 +587,13 @@
     }
 
     .role-card.passenger .role-icon {
-      background: rgba(138, 199, 37, 0.1);
-      border: 1px solid rgba(138, 199, 37, 0.2);
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(37, 99, 235, 0.18);
     }
 
     .role-card.driver .role-icon {
-      background: rgba(154, 217, 58, 0.1);
-      border: 1px solid rgba(154, 217, 58, 0.2);
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.22);
     }
 
     .role-card h3 {
@@ -622,7 +632,7 @@
 
     .role-features li::before {
       content: '✓';
-      color: var(--logo-green);
+      color: var(--corp-blue-light);
       font-weight: 800;
       flex-shrink: 0;
       margin-top: 1px;
@@ -652,9 +662,9 @@
     }
 
     .feature-item:hover {
-      border-color: rgba(138, 199, 37, 0.15);
+      border-color: rgba(37, 99, 235, 0.18);
       transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
     }
 
     .feature-item::after {
@@ -664,7 +674,7 @@
       left: 0;
       width: 100%;
       height: 2px;
-      background: linear-gradient(90deg, var(--logo-green), transparent);
+      background: linear-gradient(90deg, var(--corp-orange), transparent);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
@@ -677,8 +687,8 @@
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      background: rgba(138, 199, 37, 0.08);
-      border: 1px solid rgba(138, 199, 37, 0.15);
+      background: rgba(125, 125, 125, 0.12);
+      border: 1px solid rgba(125, 125, 125, 0.18);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -704,8 +714,8 @@
        ═══════════════════════════════════════════════ */
     .cta-final {
       text-align: center;
-      background: linear-gradient(135deg, rgba(68, 132, 20, 0.1) 0%, rgba(138, 199, 37, 0.08) 50%, rgba(154, 217, 58, 0.05) 100%);
-      border: 1px solid rgba(138, 199, 37, 0.12);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(249, 115, 22, 0.08) 45%, rgba(138, 199, 37, 0.05) 100%);
+      border: 1px solid rgba(37, 99, 235, 0.12);
       border-radius: 32px;
       padding: 60px 40px;
       position: relative;
@@ -719,7 +729,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(138, 199, 37, 0.03) 0%, transparent 50%);
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 50%);
       animation: rotate 20s linear infinite;
     }
 
@@ -906,8 +916,8 @@
 
       body::before {
         background: 
-          radial-gradient(ellipse at 15% 15%, rgba(138, 199, 37, 0.08) 0%, transparent 50%),
-          radial-gradient(ellipse at 85% 85%, rgba(154, 217, 58, 0.05) 0%, transparent 50%),
+          radial-gradient(ellipse at 15% 15%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+          radial-gradient(ellipse at 85% 85%, rgba(249, 115, 22, 0.05) 0%, transparent 50%),
           radial-gradient(circle at 50% 0%, #ffffff 0%, #f0f7ec 100%);
       }
 
@@ -926,18 +936,18 @@
 
       .btn-login {
         color: #1a2e14;
-        border-color: rgba(68, 132, 20, 0.2);
+        border-color: rgba(37, 99, 235, 0.2);
       }
 
       .hero h1 {
-        background: linear-gradient(135deg, #1a2e14 0%, #5a8e3a 50%, #1a2e14 100%);
+        background: linear-gradient(135deg, #1a2e14 0%, #3b82f6 50%, #f97316 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
 
       .section-header h2 {
-        background: linear-gradient(135deg, #1a2e14 0%, #5a8e3a 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #f97316 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -969,13 +979,13 @@
       }
 
       .about-detail-item {
-        background: rgba(138, 199, 37, 0.04);
-        border-color: rgba(138, 199, 37, 0.08);
+        background: rgba(125, 125, 125, 0.06);
+        border-color: rgba(37, 99, 235, 0.08);
       }
 
       .cta-final {
-        background: linear-gradient(135deg, rgba(68, 132, 20, 0.06) 0%, rgba(138, 199, 37, 0.04) 50%, rgba(154, 217, 58, 0.03) 100%);
-        border-color: rgba(138, 199, 37, 0.1);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(249, 115, 22, 0.04) 50%, rgba(125, 125, 125, 0.03) 100%);
+        border-color: rgba(37, 99, 235, 0.1);
       }
 
       footer {
@@ -999,7 +1009,7 @@
     </a>
     <nav class="nav-buttons">
       <a href="dashboard.html" class="btn btn-login" onclick="preserveQs(event, 'dashboard.html')">Iniciar sesión</a>
-      <a href="N-Reg.html" class="btn btn-register" onclick="preserveQs(event, 'N-Reg.html')">Registrarse</a>
+      <a href="P-Reg.html" class="btn btn-register" onclick="preserveQs(event, 'P-Reg.html')">Registrarse</a>
     </nav>
   </header>
 
@@ -1012,7 +1022,7 @@
         Road To es una plataforma de transporte que permite al usuario <em>"reservar su asiento"</em> bajo una trazabilidad de ruta ya establecida. Seguridad, puntualidad y confianza en cada viaje.
       </p>
       <div class="hero-cta">
-        <a href="N-Reg.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'N-Reg.html')">Reservar ahora</a>
+        <a href="P-Reg.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'P-Reg.html')">Reservar ahora</a>
         <a href="#como-funciona" class="btn btn-outline btn-large">Cómo funciona</a>
       </div>
     </div>
@@ -1071,7 +1081,7 @@
             <li>Califica tu experiencia de viaje</li>
             <li>Historial de todos tus trayectos</li>
           </ul>
-          <a href="N-Reg.html" class="btn btn-register" onclick="preserveQs(event, 'N-Reg.html')">Regístrate como pasajero</a>
+          <a href="P-Reg.html" class="btn btn-register" onclick="preserveQs(event, 'P-Reg.html')">Regístrate como pasajero</a>
         </div>
 
         <!-- Tarjeta Conductor -->
@@ -1138,7 +1148,7 @@
         <h2>Comienza tu viaje con Road To</h2>
         <p>Únete a la comunidad de pasajeros y conductores que ya confían en una forma más segura y organizada de transportarse.</p>
         <div class="cta-buttons">
-          <a href="N-Reg.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'N-Reg.html')">Crear cuenta gratis</a>
+          <a href="P-Reg.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'P-Reg.html')">Crear cuenta gratis</a>
           <a href="dashboard.html" class="btn btn-login btn-large" onclick="preserveQs(event, 'dashboard.html')">Ya tengo cuenta</a>
         </div>
       </div>
