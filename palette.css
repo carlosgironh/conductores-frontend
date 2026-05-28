@@ -14,10 +14,23 @@
   /* ─────────────────────────────────────────────────────────────────────────
      COLORES DEL LOGO (Fuente de verdad única)
      ───────────────────────────────────────────────────────────────────────── */
-  --logo-green: #8ac725;           /* Verde principal del logo */
-  --logo-green-dark: #448414;      /* Verde oscuro (sombra) */
-  --logo-green-lime: #9ad93a;      /* Verde lima/claro (acento) */
-  --logo-green-light: #b8e85c;     /* Verde muy claro (highlights) */
+  --corp-green: #8ac725;           /* Verde principal del logo */
+  --corp-green-dark: #448414;      /* Verde oscuro (sombra) */
+  --corp-green-lime: #9ad93a;      /* Verde lima/claro (acento) */
+  --corp-green-light: #b8e85c;     /* Verde muy claro (highlights) */
+  --corp-blue: #2563eb;            /* Azul corporativo de índice */
+  --corp-blue-dark: #1e40af;
+  --corp-blue-light: #3b82f6;
+  --corp-blue-soft: #60a5fa;
+  --corp-orange: #f97316;
+  --corp-orange-dark: #ea580c;
+  --corp-orange-light: #fb923c;
+  --corp-orange-soft: #fdba74;
+
+  --logo-green: var(--corp-green);
+  --logo-green-dark: var(--corp-green-dark);
+  --logo-green-lime: var(--corp-green-lime);
+  --logo-green-light: var(--corp-green-light);
   
   /* ─────────────────────────────────────────────────────────────────────────
      GRISES DE LA CARRETERA

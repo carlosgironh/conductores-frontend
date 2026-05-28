@@ -36,28 +36,34 @@
       --safe-left: env(safe-area-inset-left);
       --safe-right: env(safe-area-inset-right);
 
-      /* ─── Paleta exacta del logo ─── */
-      --logo-green: #8ac725;
-      --logo-green-dark: #448414;
-      --logo-green-lime: #9ad93a;
-      --logo-green-light: #b8e85c;
-      --road-gray: #7d7d7d;
-      --road-dark: #4a4a4a;
-      --road-light: #9e9e9e;
+      /* ─── Colores corporativos ─── */
+      /* Verde (del logo) */
+      --corp-green: #8ac725;
+      --corp-green-dark: #448414;
+      --corp-green-lime: #9ad93a;
+      --corp-green-light: #b8e85c;
 
-      /* ─── Derivados para UI ─── */
-      --primary: var(--logo-green);
-      --primary-dark: var(--logo-green-dark);
-      --accent: var(--logo-green-lime);
-      --highlight: var(--logo-green-light);
-      --success: #5a9e1c;
+      /* Gris (carretera del logo) */
+      --corp-gray: #7d7d7d;
+      --corp-gray-dark: #4a4a4a;
+      --corp-gray-light: #9e9e9e;
+      --corp-gray-dim: #6b6b6b;
 
-      /* ─── Fondos ─── */
+      /* Azul (corporativo nuevo) */
+      --corp-blue: #2563eb;
+      --corp-blue-dark: #1e40af;
+      --corp-blue-light: #3b82f6;
+      --corp-blue-soft: #60a5fa;
+
+      /* Naranja (corporativo nuevo) */
+      --corp-orange: #f97316;
+      --corp-orange-dark: #ea580c;
+      --corp-orange-light: #fb923c;
+      --corp-orange-soft: #fdba74;
+
+      /* ─── Derivados UI ─── */
       --bg-dark: #0a1208;
       --bg-card: rgba(12, 20, 10, 0.92);
-      --bg-overlay: rgba(68, 132, 20, 0.08);
-
-      /* ─── Textos ─── */
       --text-light: #eef8e4;
       --text-muted: #8a9e7d;
     }
@@ -71,10 +77,11 @@
       align-items: center;
       overflow: hidden;
       position: relative;
-      background: 
-        radial-gradient(circle at top center, rgba(138, 199, 37, 0.12), transparent 20%),
-        radial-gradient(circle at 28% 8%, rgba(154, 217, 58, 0.06), transparent 30%),
-        linear-gradient(180deg, #0c1a0a 0%, #0a1208 30%, #081008 100%);
+      background:
+        radial-gradient(circle at top center, rgba(138, 199, 37, 0.10), transparent 22%),
+        radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.08), transparent 28%),
+        radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.06), transparent 30%),
+        linear-gradient(180deg, #0c1a0a 0%, #0a1208 35%, #081008 100%);
       color: var(--text-light);
       padding-top: var(--safe-top);
       padding-bottom: var(--safe-bottom);
@@ -87,74 +94,113 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: 
-        radial-gradient(ellipse at 18% 18%, rgba(138, 199, 37, 0.22) 0%, transparent 40%),
-        radial-gradient(ellipse at 82% 82%, rgba(154, 217, 58, 0.16) 0%, transparent 40%),
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(138, 199, 37, 0.18) 0%, transparent 42%),
+        radial-gradient(ellipse at 85% 25%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 85%, rgba(249, 115, 22, 0.10) 0%, transparent 40%),
         radial-gradient(circle at 50% 0%, rgba(10, 18, 8, 0.98) 0%, rgba(8, 16, 8, 1) 100%);
       background-blend-mode: screen;
-      filter: saturate(1.15);
       opacity: 0.95;
       z-index: -2;
     }
 
-    /* ─── Efecto de carretera ─── */
+    /* ═══════════════════════════════════════════════
+       CARRETERA CON FORMA DE ARCO / CURVA
+       ═══════════════════════════════════════════════ */
     .road-container {
       position: fixed;
-      bottom: 0;
+      bottom: -120px;
       left: 50%;
       transform: translateX(-50%);
-      width: 100%;
-      height: 60%;
-      perspective: 1000px;
+      width: 140%;
+      height: 350px;
       z-index: -1;
       opacity: 0;
       animation: fadeInRoad 1.5s ease forwards 0.5s;
+      pointer-events: none;
     }
 
     @keyframes fadeInRoad {
       to { opacity: 1; }
     }
 
+    /* Carretera principal con forma de arco */
     .road {
       position: absolute;
       bottom: 0;
       left: 50%;
-      transform: translateX(-50%) rotateX(60deg);
-      width: 200px;
+      transform: translateX(-50%);
+      width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, 
-        transparent 0%,
-        rgba(74, 74, 74, 0.15) 18%,
-        rgba(125, 125, 125, 0.35) 48%,
-        rgba(74, 74, 74, 0.18) 100%
+      background: linear-gradient(to top,
+        rgba(74, 74, 74, 0.45) 0%,
+        rgba(60, 60, 60, 0.25) 40%,
+        transparent 100%
       );
-      box-shadow: inset 0 0 60px rgba(10, 18, 8, 0.4);
-      transform-origin: bottom center;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      border-top: 3px solid rgba(125, 125, 125, 0.3);
+      box-shadow:
+        0 -10px 40px rgba(0, 0, 0, 0.3),
+        inset 0 20px 60px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
     }
 
+    /* Líneas de carretera con movimiento horizontal (parallax) */
     .road-lines {
       position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 100%;
+      top: 30%;
+      left: 0;
+      width: 200%;
+      height: 4px;
       background: repeating-linear-gradient(
-        to bottom,
-        rgba(158, 158, 158, 0.9) 0px,
-        rgba(158, 158, 158, 0.9) 32px,
-        transparent 32px,
-        transparent 64px
+        to right,
+        rgba(158, 158, 158, 0.85) 0px,
+        rgba(158, 158, 158, 0.85) 40px,
+        transparent 40px,
+        transparent 80px
       );
+      animation: moveLines 3s linear infinite;
+    }
+
+    .road-lines:nth-child(2) {
+      top: 50%;
       animation: moveLines 2s linear infinite;
-      box-shadow: 
-        -60px 0 0 rgba(138, 199, 37, 0.18),
-        60px 0 0 rgba(138, 199, 37, 0.18);
+      opacity: 0.6;
+    }
+
+    .road-lines:nth-child(3) {
+      top: 70%;
+      animation: moveLines 2.5s linear infinite;
+      opacity: 0.4;
     }
 
     @keyframes moveLines {
-      from { background-position: 0 0; }
-      to { background-position: 0 80px; }
+      from { transform: translateX(0); }
+      to { transform: translateX(-80px); }
+    }
+
+    /* Bordes de carretera curvos */
+    .road-edge-left,
+    .road-edge-right {
+      position: absolute;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(to top,
+        rgba(138, 199, 37, 0.5) 0%,
+        rgba(138, 199, 37, 0.2) 60%,
+        transparent 100%
+      );
+    }
+
+    .road-edge-left {
+      left: 25%;
+      border-radius: 2px;
+    }
+
+    .road-edge-right {
+      right: 25%;
+      border-radius: 2px;
     }
 
     /* ─── Partículas flotantes ─── */
@@ -173,38 +219,27 @@
       position: absolute;
       width: 4px;
       height: 4px;
-      background: rgba(138, 199, 37, 0.6);
-      box-shadow: 0 0 12px rgba(138, 199, 37, 0.35);
       border-radius: 50%;
       animation: float-particle 15s infinite;
     }
 
-    .particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 12s; }
-    .particle:nth-child(2) { left: 20%; animation-delay: 1s; animation-duration: 15s; }
-    .particle:nth-child(3) { left: 30%; animation-delay: 2s; animation-duration: 10s; }
-    .particle:nth-child(4) { left: 40%; animation-delay: 0.5s; animation-duration: 18s; }
-    .particle:nth-child(5) { left: 50%; animation-delay: 3s; animation-duration: 14s; }
-    .particle:nth-child(6) { left: 60%; animation-delay: 1.5s; animation-duration: 16s; }
-    .particle:nth-child(7) { left: 70%; animation-delay: 2.5s; animation-duration: 11s; }
-    .particle:nth-child(8) { left: 80%; animation-delay: 0.8s; animation-duration: 13s; }
-    .particle:nth-child(9) { left: 90%; animation-delay: 3.5s; animation-duration: 17s; }
-    .particle:nth-child(10) { left: 5%; animation-delay: 4s; animation-duration: 19s; }
+    /* Partículas en colores corporativos */
+    .particle:nth-child(1) { left: 10%; background: rgba(138, 199, 37, 0.6); box-shadow: 0 0 12px rgba(138, 199, 37, 0.35); animation-delay: 0s; animation-duration: 12s; }
+    .particle:nth-child(2) { left: 25%; background: rgba(37, 99, 235, 0.5); box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); animation-delay: 1s; animation-duration: 15s; }
+    .particle:nth-child(3) { left: 40%; background: rgba(249, 115, 22, 0.5); box-shadow: 0 0 12px rgba(249, 115, 22, 0.3); animation-delay: 2s; animation-duration: 10s; }
+    .particle:nth-child(4) { left: 55%; background: rgba(158, 158, 158, 0.5); box-shadow: 0 0 12px rgba(158, 158, 158, 0.3); animation-delay: 0.5s; animation-duration: 18s; }
+    .particle:nth-child(5) { left: 70%; background: rgba(138, 199, 37, 0.5); box-shadow: 0 0 12px rgba(138, 199, 37, 0.3); animation-delay: 3s; animation-duration: 14s; }
+    .particle:nth-child(6) { left: 85%; background: rgba(37, 99, 235, 0.5); box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); animation-delay: 1.5s; animation-duration: 16s; }
+    .particle:nth-child(7) { left: 15%; background: rgba(249, 115, 22, 0.5); box-shadow: 0 0 12px rgba(249, 115, 22, 0.3); animation-delay: 2.5s; animation-duration: 11s; }
+    .particle:nth-child(8) { left: 45%; background: rgba(158, 158, 158, 0.5); box-shadow: 0 0 12px rgba(158, 158, 158, 0.3); animation-delay: 0.8s; animation-duration: 13s; }
+    .particle:nth-child(9) { left: 60%; background: rgba(138, 199, 37, 0.5); box-shadow: 0 0 12px rgba(138, 199, 37, 0.3); animation-delay: 3.5s; animation-duration: 17s; }
+    .particle:nth-child(10) { left: 90%; background: rgba(37, 99, 235, 0.5); box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); animation-delay: 4s; animation-duration: 19s; }
 
     @keyframes float-particle {
-      0% {
-        transform: translateY(100vh) scale(0);
-        opacity: 0;
-      }
-      10% {
-        opacity: 1;
-      }
-      90% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100vh) scale(1.5);
-        opacity: 0;
-      }
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
     }
 
     /* ─── Contenedor principal ─── */
@@ -226,8 +261,9 @@
       margin: auto;
       width: min(100%, 620px);
       height: min(100%, 480px);
-      background: radial-gradient(circle at 50% 30%, rgba(154, 217, 58, 0.14), transparent 42%),
-                  radial-gradient(circle at 50% 70%, rgba(184, 232, 92, 0.08), transparent 38%);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(249, 115, 22, 0.12), transparent 42%),
+        radial-gradient(circle at 50% 70%, rgba(37, 99, 235, 0.08), transparent 38%);
       filter: blur(30px);
       opacity: 0.5;
       pointer-events: none;
@@ -243,9 +279,9 @@
       border-radius: 999px;
       font-weight: 700;
       text-decoration: none;
-      background: linear-gradient(135deg, var(--logo-green-dark), var(--logo-green));
+      background: linear-gradient(135deg, var(--corp-orange-dark), var(--corp-orange));
       color: #ffffff;
-      box-shadow: 0 16px 40px rgba(138, 199, 37, 0.28);
+      box-shadow: 0 16px 40px rgba(249, 115, 22, 0.28);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       margin-top: 40px;
       opacity: 0;
@@ -254,7 +290,7 @@
 
     .action-button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 20px 50px rgba(138, 199, 37, 0.4);
+      box-shadow: 0 20px 50px rgba(249, 115, 22, 0.4);
     }
 
     /* Ocultar el botón en el index */
@@ -263,7 +299,7 @@
     }
 
     /* ═══════════════════════════════════════════════
-       LOGO REDISEÑADO - respeta transparencia
+       LOGO - 4 ANILLOS CORPORATIVOS
        ═══════════════════════════════════════════════ */
     .logo-wrapper {
       position: relative;
@@ -272,35 +308,30 @@
       margin: 0 0 48px;
     }
 
-    /* Glow sutil difuso - NO un círculo sólido */
+    /* Glow multicolor sutil */
     .logo-wrapper::before {
       content: '';
       position: absolute;
       inset: -40px;
       border-radius: 50%;
-      background: radial-gradient(circle, 
-        rgba(138, 199, 37, 0.15) 0%, 
-        rgba(154, 217, 58, 0.08) 40%, 
+      background: radial-gradient(circle,
+        rgba(249, 115, 22, 0.12) 0%,
+        rgba(37, 99, 235, 0.08) 30%,
+        rgba(138, 199, 37, 0.08) 55%,
         transparent 70%
       );
       filter: blur(20px);
-      opacity: 0.8;
+      opacity: 0.9;
       z-index: -1;
-      animation: pulse-glow 3s ease-in-out infinite;
+      animation: pulse-glow 4s ease-in-out infinite;
     }
 
     @keyframes pulse-glow {
-      0%, 100% { 
-        opacity: 0.6; 
-        transform: scale(1);
-      }
-      50% { 
-        opacity: 1; 
-        transform: scale(1.05);
-      }
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
     }
 
-    /* Anillos orbitales sutiles - transparencia baja */
+    /* 4 Anillos orbitales en colores corporativos */
     .logo-ring {
       position: absolute;
       top: 50%;
@@ -308,27 +339,35 @@
       transform: translate(-50%, -50%);
       width: 100%;
       height: 100%;
-      border: 2px solid transparent;
-      border-top-color: rgba(138, 199, 37, 0.4);
-      border-right-color: rgba(154, 217, 58, 0.3);
+      border: 2.5px solid transparent;
+      border-top-color: var(--corp-green);
+      border-right-color: var(--corp-green-lime);
       border-radius: 50%;
-      animation: spin-ring 4s linear infinite;
+      animation: spin-ring 3.5s linear infinite;
     }
 
     .logo-ring:nth-child(2) {
       width: 88%;
       height: 88%;
-      border-top-color: rgba(154, 217, 58, 0.3);
-      border-right-color: rgba(68, 132, 20, 0.35);
-      animation: spin-ring-reverse 3.5s linear infinite;
+      border-top-color: var(--corp-blue);
+      border-right-color: var(--corp-blue-light);
+      animation: spin-ring-reverse 3s linear infinite;
     }
 
     .logo-ring:nth-child(3) {
       width: 76%;
       height: 76%;
-      border-top-color: rgba(68, 132, 20, 0.3);
-      border-right-color: rgba(138, 199, 37, 0.4);
-      animation: spin-ring 3s linear infinite;
+      border-top-color: var(--corp-orange);
+      border-right-color: var(--corp-orange-light);
+      animation: spin-ring 2.5s linear infinite;
+    }
+
+    .logo-ring:nth-child(4) {
+      width: 64%;
+      height: 64%;
+      border-top-color: var(--corp-gray-light);
+      border-right-color: var(--corp-gray);
+      animation: spin-ring-reverse 2s linear infinite;
     }
 
     @keyframes spin-ring {
@@ -341,7 +380,7 @@
       to { transform: translate(-50%, -50%) rotate(0deg); }
     }
 
-    /* Contenedor del logo: fondo oscuro semi-transparente */
+    /* Contenedor del logo */
     .logo-inner {
       position: absolute;
       top: 50%;
@@ -349,8 +388,8 @@
       transform: translate(-50%, -50%);
       width: 68%;
       height: 68%;
-      background: radial-gradient(circle at 30% 30%, 
-        rgba(20, 35, 12, 0.6) 0%, 
+      background: radial-gradient(circle at 30% 30%,
+        rgba(20, 35, 12, 0.6) 0%,
         rgba(10, 18, 8, 0.85) 100%
       );
       border-radius: 50%;
@@ -358,13 +397,12 @@
       justify-content: center;
       align-items: center;
       border: 1px solid rgba(125, 125, 125, 0.15);
-      box-shadow: 
+      box-shadow:
         0 0 30px rgba(0, 0, 0, 0.4),
         inset 0 0 20px rgba(0, 0, 0, 0.3);
       overflow: hidden;
     }
 
-    /* Logo más grande y sin filtros que alteren colores */
     .logo-inner img {
       width: 85%;
       height: 85%;
@@ -378,7 +416,7 @@
       transform: scale(1.05);
     }
 
-    /* ─── Texto Road To ─── */
+    /* ─── Texto Road To - NARANJA ─── */
     .brand-text {
       margin-bottom: 20px;
     }
@@ -387,7 +425,7 @@
       font-size: 48px;
       font-weight: 900;
       letter-spacing: 8px;
-      background: linear-gradient(135deg, #eef8e4 0%, var(--logo-green-lime) 45%, var(--logo-green) 100%);
+      background: linear-gradient(135deg, var(--corp-orange-light) 0%, var(--corp-orange) 45%, var(--corp-orange-dark) 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -398,10 +436,7 @@
     }
 
     @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes shimmer {
@@ -411,7 +446,7 @@
     .brand-tagline {
       font-size: 16px;
       font-weight: 500;
-      color: var(--highlight);
+      color: var(--corp-gray-light);
       letter-spacing: 4px;
       text-transform: uppercase;
       opacity: 0;
@@ -438,10 +473,10 @@
     .progress-bar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--logo-green-dark), var(--logo-green), var(--road-gray));
-      background-size: 200% 100%;
+      background: linear-gradient(90deg, var(--corp-orange-dark), var(--corp-orange), var(--corp-green), var(--corp-blue));
+      background-size: 300% 100%;
       border-radius: 2px;
-      animation: loading 2.5s ease-in-out forwards 1s, gradient-shift 2s linear infinite;
+      animation: loading 2.5s ease-in-out forwards 1s, gradient-shift 3s linear infinite;
     }
 
     @keyframes loading {
@@ -452,13 +487,13 @@
 
     @keyframes gradient-shift {
       0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
+      100% { background-position: 300% 50%; }
     }
 
     /* ─── Texto de carga ─── */
     .loading-text {
       font-size: 14px;
-      color: rgba(184, 232, 92, 0.9);
+      color: rgba(158, 158, 158, 0.9);
       opacity: 0;
       animation: fadeIn 0.5s ease forwards 1.2s;
     }
@@ -483,85 +518,78 @@
       left: 50%;
       transform: translateX(-50%);
       font-size: 12px;
-      color: rgba(184, 232, 92, 0.85);
+      color: rgba(158, 158, 158, 0.85);
       opacity: 0;
       animation: fadeIn 0.5s ease forwards 1.5s;
     }
 
     /* ─── Responsive ─── */
     @media (max-width: 380px) {
-      .logo-wrapper {
-        width: 180px;
-        height: 180px;
-      }
-      .brand-name {
-        font-size: 36px;
-        letter-spacing: 6px;
-      }
-      .brand-tagline {
-        font-size: 14px;
-        letter-spacing: 3px;
-      }
+      .logo-wrapper { width: 180px; height: 180px; }
+      .brand-name { font-size: 36px; letter-spacing: 6px; }
+      .brand-tagline { font-size: 14px; letter-spacing: 3px; }
     }
 
     /* ─── Modo claro ─── */
     @media (prefers-color-scheme: light) {
-      :root {
-        --bg-dark: #f5faf2;
-      }
+      :root { --bg-dark: #f5faf2; }
       body {
-        background: 
-          radial-gradient(circle at top center, rgba(138, 199, 37, 0.1), transparent 20%),
-          radial-gradient(circle at 28% 8%, rgba(154, 217, 58, 0.05), transparent 30%),
-          linear-gradient(180deg, #f0f7ec 0%, #eef5ea 30%, #e8f0e4 100%);
+        background:
+          radial-gradient(circle at top center, rgba(138, 199, 37, 0.08), transparent 22%),
+          radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.06), transparent 28%),
+          radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.05), transparent 30%),
+          linear-gradient(180deg, #f0f7ec 0%, #eef5ea 35%, #e8f0e4 100%);
       }
       .bg-gradient {
-        background: 
-          radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.1) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 80%, rgba(154, 217, 58, 0.08) 0%, transparent 50%),
+        background:
+          radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.10) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 80%, rgba(249, 115, 22, 0.06) 0%, transparent 50%),
           radial-gradient(circle at 50% 0%, #f8fbf5 0%, #eef7e8 100%);
       }
       .brand-name {
-        background: linear-gradient(135deg, #1a2e14 0%, #5a8e3a 50%, #1a2e14 100%);
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 45%, #c2410c 100%);
         background-size: 200% auto;
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
-      .brand-tagline {
-        color: #6a8a5a;
-      }
-      .loading-text {
-        color: #7a9a6a;
-      }
-      .version {
-        color: #8aaa7a;
-      }
-      .particle {
-        background: rgba(138, 199, 37, 0.15);
-      }
+      .brand-tagline { color: #7a8a6a; }
+      .loading-text { color: #8a9a7a; }
+      .version { color: #9aaa8a; }
+      .particle:nth-child(1),
+      .particle:nth-child(5),
+      .particle:nth-child(9) { background: rgba(138, 199, 37, 0.15); box-shadow: 0 0 12px rgba(138, 199, 37, 0.15); }
+      .particle:nth-child(2),
+      .particle:nth-child(6),
+      .particle:nth-child(10) { background: rgba(37, 99, 235, 0.15); box-shadow: 0 0 12px rgba(37, 99, 235, 0.15); }
+      .particle:nth-child(3),
+      .particle:nth-child(7) { background: rgba(249, 115, 22, 0.15); box-shadow: 0 0 12px rgba(249, 115, 22, 0.15); }
+      .particle:nth-child(4),
+      .particle:nth-child(8) { background: rgba(158, 158, 158, 0.2); box-shadow: 0 0 12px rgba(158, 158, 158, 0.15); }
       .road {
-        background: linear-gradient(to bottom, 
-          transparent 0%,
-          rgba(74, 74, 74, 0.08) 18%,
-          rgba(125, 125, 125, 0.2) 48%,
-          rgba(74, 74, 74, 0.1) 100%
+        background: linear-gradient(to top,
+          rgba(74, 74, 74, 0.15) 0%,
+          rgba(60, 60, 60, 0.08) 40%,
+          transparent 100%
         );
+        border-top: 3px solid rgba(125, 125, 125, 0.15);
       }
       .logo-inner {
-        background: radial-gradient(circle at 30% 30%, 
-          rgba(240, 247, 236, 0.7) 0%, 
+        background: radial-gradient(circle at 30% 30%,
+          rgba(240, 247, 236, 0.7) 0%,
           rgba(232, 240, 228, 0.9) 100%
         );
         border: 1px solid rgba(125, 125, 125, 0.2);
-        box-shadow: 
+        box-shadow:
           0 0 30px rgba(0, 0, 0, 0.1),
           inset 0 0 20px rgba(0, 0, 0, 0.05);
       }
       .logo-wrapper::before {
-        background: radial-gradient(circle, 
-          rgba(138, 199, 37, 0.1) 0%, 
-          rgba(154, 217, 58, 0.05) 40%, 
+        background: radial-gradient(circle,
+          rgba(249, 115, 22, 0.08) 0%,
+          rgba(37, 99, 235, 0.06) 30%,
+          rgba(138, 199, 37, 0.06) 55%,
           transparent 70%
         );
       }
@@ -573,14 +601,18 @@
 
   <div class="bg-gradient"></div>
 
-  <!-- Efecto de carretera -->
+  <!-- Carretera con forma de arco / curva -->
   <div class="road-container">
     <div class="road">
       <div class="road-lines"></div>
+      <div class="road-lines"></div>
+      <div class="road-lines"></div>
+      <div class="road-edge-left"></div>
+      <div class="road-edge-right"></div>
     </div>
   </div>
 
-  <!-- Partículas -->
+  <!-- Partículas corporativas -->
   <div class="particles">
     <div class="particle"></div>
     <div class="particle"></div>
@@ -597,6 +629,7 @@
   <!-- Contenido principal -->
   <div class="welcome-container">
     <div class="logo-wrapper">
+      <div class="logo-ring"></div>
       <div class="logo-ring"></div>
       <div class="logo-ring"></div>
       <div class="logo-ring"></div>

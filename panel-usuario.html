@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Actualizar Perfil - Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a1208">
 <meta name="color-scheme" content="dark">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -24,6 +25,21 @@
     --safe-bottom: env(safe-area-inset-bottom);
     --safe-left: env(safe-area-inset-left);
     --safe-right: env(safe-area-inset-right);
+    --corp-green: #8ac725;
+    --corp-green-dark: #448414;
+    --corp-green-lime: #9ad93a;
+    --corp-green-light: #b8e85c;
+    --corp-blue: #2563eb;
+    --corp-blue-dark: #1e40af;
+    --corp-blue-light: #3b82f6;
+    --corp-orange: #f97316;
+    --corp-orange-light: #fb923c;
+    --primary: var(--corp-green);
+    --primary-dark: var(--corp-green-dark);
+    --accent: var(--corp-green-lime);
+    --bg-dark: #0a1208;
+    --text-light: #eef8e4;
+    --text-muted: #8a9e7d;
   }
 
   body {
@@ -36,10 +52,10 @@
     padding-left: max(20px, var(--safe-left));
     padding-right: max(20px, var(--safe-right));
     background: 
-      radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at top left, #1e293b, #0f172a);
-    color: #f8fafc;
+      radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at top left, #0a1208, #0a1208);
+    color: var(--text-light);
     display: flex;
     justify-content: center;
     align-items: flex-start;

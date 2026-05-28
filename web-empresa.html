@@ -317,6 +317,7 @@
       box-shadow: 0 0 25px rgba(138, 199, 37, 0.15);
     }
 
+    /* DESCUBRE MÁS - AUMENTADO */
     .scroll-indicator {
       position: absolute;
       bottom: 30px;
@@ -325,10 +326,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       color: var(--text-dim);
-      font-size: 12px;
-      letter-spacing: 2px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 3px;
       text-transform: uppercase;
       animation: fadeInUp 1s ease forwards 1.5s, bounce 2s ease-in-out infinite 2s;
       opacity: 0;
@@ -337,14 +339,14 @@
 
     @keyframes bounce {
       0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(8px); }
+      50% { transform: translateX(-50%) translateY(10px); }
     }
 
     .scroll-indicator svg {
-      width: 20px;
-      height: 20px;
+      width: 28px;
+      height: 28px;
       stroke: var(--logo-green);
-      stroke-width: 2;
+      stroke-width: 2.5;
       fill: none;
     }
 
@@ -1030,16 +1032,12 @@
       <div class="about-card">
         <h3>Concepto</h3>
         <p class="definition">
-          <strong>Road To</strong> es una plataforma de <strong>transporte reglamentario</strong> que permite al usuario <em>"reservar su asiento"</em> bajo una <strong>trazabilidad de ruta</strong> ya establecida. Conectamos pasajeros con conductores verificados en rutas predefinidas, garantizando seguridad, puntualidad y una experiencia de viaje transparente de principio a fin.
+          <strong>Road To</strong> es una plataforma de <strong>transporte reglamentario</strong> que permite al usuario <em>"reservar su asiento"</em> bajo una <strong>trazabilidad de ruta</strong> ya establecida.
         </p>
         <div class="about-details">
           <div class="about-detail-item">
             <h4>Reserva garantizada</h4>
             <p>Tu asiento está asegurado antes de iniciar el viaje. Sin sorpresas, sin overbooking.</p>
-          </div>
-          <div class="about-detail-item">
-            <h4>Rutas trazables</h4>
-            <p>Cada ruta está preestablecida y monitoreada en tiempo real para tu tranquilidad.</p>
           </div>
           <div class="about-detail-item">
             <h4>Transporte reglamentado</h4>
