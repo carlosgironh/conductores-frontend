@@ -22,6 +22,10 @@
   --corp-blue-dark: #1e40af;
   --corp-blue-light: #3b82f6;
   --corp-blue-soft: #60a5fa;
+  --corp-gray: #7d7d7d;            /* Gris corporativo */
+  --corp-gray-dark: #4a4a4a;
+  --corp-gray-light: #9e9e9e;
+  --corp-gray-soft: #cbd5e1;
   --corp-orange: #f97316;
   --corp-orange-dark: #ea580c;
   --corp-orange-light: #fb923c;
