@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <title>Bienvenido a Road To</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0a1208">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
+
   <!-- Capacitor 7 -->
   <script type="module">
     import { SplashScreen } from '@capacitor/splash-screen';
     import { StatusBar } from '@capacitor/status-bar';
     import { App } from '@capacitor/app';
     import { Preferences } from '@capacitor/preferences';
-    
+
     window.CapacitorPlugins = { SplashScreen, StatusBar, App, Preferences };
   </script>
 
@@ -30,16 +30,36 @@
     }
 
     :root {
+      /* ─── Safe areas ─── */
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
       --safe-left: env(safe-area-inset-left);
       --safe-right: env(safe-area-inset-right);
-      --primary: #3b82f6;
-      --primary-dark: #1d4ed8;
-      --accent: #8b5cf6;
-      --success: #22c55e;
-      --bg-dark: #0f172a;
-      --bg-card: rgba(30, 41, 59, 0.6);
+
+      /* ─── Paleta exacta del logo ─── */
+      --logo-green: #8ac725;
+      --logo-green-dark: #448414;
+      --logo-green-lime: #9ad93a;
+      --logo-green-light: #b8e85c;
+      --road-gray: #7d7d7d;
+      --road-dark: #4a4a4a;
+      --road-light: #9e9e9e;
+
+      /* ─── Derivados para UI ─── */
+      --primary: var(--logo-green);
+      --primary-dark: var(--logo-green-dark);
+      --accent: var(--logo-green-lime);
+      --highlight: var(--logo-green-light);
+      --success: #5a9e1c;
+
+      /* ─── Fondos ─── */
+      --bg-dark: #0a1208;
+      --bg-card: rgba(12, 20, 10, 0.92);
+      --bg-overlay: rgba(68, 132, 20, 0.08);
+
+      /* ─── Textos ─── */
+      --text-light: #eef8e4;
+      --text-muted: #8a9e7d;
     }
 
     body {
@@ -51,12 +71,16 @@
       align-items: center;
       overflow: hidden;
       position: relative;
-      background: var(--bg-dark);
+      background: 
+        radial-gradient(circle at top center, rgba(138, 199, 37, 0.12), transparent 20%),
+        radial-gradient(circle at 28% 8%, rgba(154, 217, 58, 0.06), transparent 30%),
+        linear-gradient(180deg, #0c1a0a 0%, #0a1208 30%, #081008 100%);
+      color: var(--text-light);
       padding-top: var(--safe-top);
       padding-bottom: var(--safe-bottom);
     }
 
-    /* Fondo animado con gradientes */
+    /* ─── Fondo animado ─── */
     .bg-gradient {
       position: fixed;
       top: 0;
@@ -64,13 +88,16 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+        radial-gradient(ellipse at 18% 18%, rgba(138, 199, 37, 0.22) 0%, transparent 40%),
+        radial-gradient(ellipse at 82% 82%, rgba(154, 217, 58, 0.16) 0%, transparent 40%),
+        radial-gradient(circle at 50% 0%, rgba(10, 18, 8, 0.98) 0%, rgba(8, 16, 8, 1) 100%);
+      background-blend-mode: screen;
+      filter: saturate(1.15);
+      opacity: 0.95;
       z-index: -2;
     }
 
-    /* Efecto de carretera/path animada */
+    /* ─── Efecto de carretera ─── */
     .road-container {
       position: fixed;
       bottom: 0;
@@ -97,9 +124,11 @@
       height: 100%;
       background: linear-gradient(to bottom, 
         transparent 0%,
-        rgba(59, 130, 246, 0.1) 20%,
-        rgba(59, 130, 246, 0.2) 100%
+        rgba(74, 74, 74, 0.15) 18%,
+        rgba(125, 125, 125, 0.35) 48%,
+        rgba(74, 74, 74, 0.18) 100%
       );
+      box-shadow: inset 0 0 60px rgba(10, 18, 8, 0.4);
       transform-origin: bottom center;
     }
 
@@ -112,15 +141,15 @@
       height: 100%;
       background: repeating-linear-gradient(
         to bottom,
-        rgba(59, 130, 246, 0.8) 0px,
-        rgba(59, 130, 246, 0.8) 40px,
-        transparent 40px,
-        transparent 80px
+        rgba(158, 158, 158, 0.9) 0px,
+        rgba(158, 158, 158, 0.9) 32px,
+        transparent 32px,
+        transparent 64px
       );
       animation: moveLines 2s linear infinite;
       box-shadow: 
-        -60px 0 0 rgba(139, 92, 246, 0.4),
-        60px 0 0 rgba(139, 92, 246, 0.4);
+        -60px 0 0 rgba(138, 199, 37, 0.18),
+        60px 0 0 rgba(138, 199, 37, 0.18);
     }
 
     @keyframes moveLines {
@@ -128,7 +157,7 @@
       to { background-position: 0 80px; }
     }
 
-    /* Partículas flotantes */
+    /* ─── Partículas flotantes ─── */
     .particles {
       position: fixed;
       top: 0;
@@ -144,7 +173,8 @@
       position: absolute;
       width: 4px;
       height: 4px;
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(138, 199, 37, 0.6);
+      box-shadow: 0 0 12px rgba(138, 199, 37, 0.35);
       border-radius: 50%;
       animation: float-particle 15s infinite;
     }
@@ -177,8 +207,9 @@
       }
     }
 
-    /* Contenedor principal */
+    /* ─── Contenedor principal ─── */
     .welcome-container {
+      position: relative;
       text-align: center;
       z-index: 1;
       padding: 40px 30px;
@@ -188,6 +219,22 @@
       justify-content: center;
     }
 
+    .welcome-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: min(100%, 620px);
+      height: min(100%, 480px);
+      background: radial-gradient(circle at 50% 30%, rgba(154, 217, 58, 0.14), transparent 42%),
+                  radial-gradient(circle at 50% 70%, rgba(184, 232, 92, 0.08), transparent 38%);
+      filter: blur(30px);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ─── Botón de acción ─── */
     .action-button {
       display: inline-flex;
       align-items: center;
@@ -196,9 +243,9 @@
       border-radius: 999px;
       font-weight: 700;
       text-decoration: none;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      background: linear-gradient(135deg, var(--logo-green-dark), var(--logo-green));
       color: #ffffff;
-      box-shadow: 0 16px 40px rgba(59, 130, 246, 0.25);
+      box-shadow: 0 16px 40px rgba(138, 199, 37, 0.28);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       margin-top: 40px;
       opacity: 0;
@@ -207,22 +254,53 @@
 
     .action-button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 20px 50px rgba(59, 130, 246, 0.35);
+      box-shadow: 0 20px 50px rgba(138, 199, 37, 0.4);
     }
 
-    /* Ocultar el botón 'Entrar a la plataforma' en el index via CSS */
+    /* Ocultar el botón en el index */
     .welcome-container .action-button {
       display: none !important;
     }
 
-    /* Logo animado */
+    /* ═══════════════════════════════════════════════
+       LOGO REDISEÑADO - respeta transparencia
+       ═══════════════════════════════════════════════ */
     .logo-wrapper {
       position: relative;
-      width: 150px;
-      height: 150px;
-      margin: 0 0 40px;
+      width: 240px;
+      height: 240px;
+      margin: 0 0 48px;
     }
 
+    /* Glow sutil difuso - NO un círculo sólido */
+    .logo-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      border-radius: 50%;
+      background: radial-gradient(circle, 
+        rgba(138, 199, 37, 0.15) 0%, 
+        rgba(154, 217, 58, 0.08) 40%, 
+        transparent 70%
+      );
+      filter: blur(20px);
+      opacity: 0.8;
+      z-index: -1;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { 
+        opacity: 0.6; 
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 1; 
+        transform: scale(1.05);
+      }
+    }
+
+    /* Anillos orbitales sutiles - transparencia baja */
     .logo-ring {
       position: absolute;
       top: 50%;
@@ -230,27 +308,27 @@
       transform: translate(-50%, -50%);
       width: 100%;
       height: 100%;
-      border: 3px solid transparent;
-      border-top-color: var(--primary);
-      border-right-color: var(--accent);
+      border: 2px solid transparent;
+      border-top-color: rgba(138, 199, 37, 0.4);
+      border-right-color: rgba(154, 217, 58, 0.3);
       border-radius: 50%;
-      animation: spin-ring 3s linear infinite;
+      animation: spin-ring 4s linear infinite;
     }
 
     .logo-ring:nth-child(2) {
-      width: 85%;
-      height: 85%;
-      border-top-color: var(--accent);
-      border-right-color: var(--primary);
-      animation: spin-ring-reverse 2.5s linear infinite;
+      width: 88%;
+      height: 88%;
+      border-top-color: rgba(154, 217, 58, 0.3);
+      border-right-color: rgba(68, 132, 20, 0.35);
+      animation: spin-ring-reverse 3.5s linear infinite;
     }
 
     .logo-ring:nth-child(3) {
-      width: 70%;
-      height: 70%;
-      border-top-color: var(--success);
-      border-right-color: var(--primary);
-      animation: spin-ring 2s linear infinite;
+      width: 76%;
+      height: 76%;
+      border-top-color: rgba(68, 132, 20, 0.3);
+      border-right-color: rgba(138, 199, 37, 0.4);
+      animation: spin-ring 3s linear infinite;
     }
 
     @keyframes spin-ring {
@@ -263,43 +341,44 @@
       to { transform: translate(-50%, -50%) rotate(0deg); }
     }
 
+    /* Contenedor del logo: fondo oscuro semi-transparente */
     .logo-inner {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 55%;
-      height: 55%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      width: 68%;
+      height: 68%;
+      background: radial-gradient(circle at 30% 30%, 
+        rgba(20, 35, 12, 0.6) 0%, 
+        rgba(10, 18, 8, 0.85) 100%
+      );
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
+      border: 1px solid rgba(125, 125, 125, 0.15);
       box-shadow: 
-        0 0 40px rgba(59, 130, 246, 0.5),
-        0 0 80px rgba(139, 92, 246, 0.3);
-      animation: pulse-logo 2s ease-in-out infinite;
+        0 0 30px rgba(0, 0, 0, 0.4),
+        inset 0 0 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
     }
 
-    @keyframes pulse-logo {
-      0%, 100% { 
-        transform: translate(-50%, -50%) scale(1);
-        box-shadow: 0 0 40px rgba(59, 130, 246, 0.5), 0 0 80px rgba(139, 92, 246, 0.3);
-      }
-      50% { 
-        transform: translate(-50%, -50%) scale(1.05);
-        box-shadow: 0 0 60px rgba(59, 130, 246, 0.7), 0 0 100px rgba(139, 92, 246, 0.5);
-      }
+    /* Logo más grande y sin filtros que alteren colores */
+    .logo-inner img {
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+      filter: none;
+      transform: scale(1);
+      transition: transform 0.3s ease;
     }
 
-    .logo-inner svg {
-      width: 50%;
-      height: 50%;
-      color: white;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    .logo-wrapper:hover .logo-inner img {
+      transform: scale(1.05);
     }
 
-    /* Texto Road To con efecto de escritura */
+    /* ─── Texto Road To ─── */
     .brand-text {
       margin-bottom: 20px;
     }
@@ -308,12 +387,11 @@
       font-size: 48px;
       font-weight: 900;
       letter-spacing: 8px;
-      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 50%, #ffffff 100%);
+      background: linear-gradient(135deg, #eef8e4 0%, var(--logo-green-lime) 45%, var(--logo-green) 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: shimmer 3s linear infinite;
       opacity: 0;
       transform: translateY(20px);
       animation: fadeInUp 0.8s ease forwards 0.3s, shimmer 3s linear infinite 1s;
@@ -333,7 +411,7 @@
     .brand-tagline {
       font-size: 16px;
       font-weight: 500;
-      color: #94a3b8;
+      color: var(--highlight);
       letter-spacing: 4px;
       text-transform: uppercase;
       opacity: 0;
@@ -341,7 +419,7 @@
       animation: fadeInUp 0.8s ease forwards 0.6s;
     }
 
-    /* Barra de progreso */
+    /* ─── Barra de progreso ─── */
     .progress-container {
       width: 200px;
       height: 4px;
@@ -360,7 +438,7 @@
     .progress-bar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--primary), var(--accent), var(--success));
+      background: linear-gradient(90deg, var(--logo-green-dark), var(--logo-green), var(--road-gray));
       background-size: 200% 100%;
       border-radius: 2px;
       animation: loading 2.5s ease-in-out forwards 1s, gradient-shift 2s linear infinite;
@@ -377,10 +455,10 @@
       100% { background-position: 200% 50%; }
     }
 
-    /* Texto de carga */
+    /* ─── Texto de carga ─── */
     .loading-text {
       font-size: 14px;
-      color: #64748b;
+      color: rgba(184, 232, 92, 0.9);
       opacity: 0;
       animation: fadeIn 0.5s ease forwards 1.2s;
     }
@@ -398,23 +476,23 @@
       100% { content: ''; }
     }
 
-    /* Versión */
+    /* ─── Versión ─── */
     .version {
       position: fixed;
       bottom: calc(20px + var(--safe-bottom));
       left: 50%;
       transform: translateX(-50%);
       font-size: 12px;
-      color: #475569;
+      color: rgba(184, 232, 92, 0.85);
       opacity: 0;
       animation: fadeIn 0.5s ease forwards 1.5s;
     }
 
-    /* Responsive */
+    /* ─── Responsive ─── */
     @media (max-width: 380px) {
       .logo-wrapper {
-        width: 120px;
-        height: 120px;
+        width: 180px;
+        height: 180px;
       }
       .brand-name {
         font-size: 36px;
@@ -426,43 +504,75 @@
       }
     }
 
-    /* Modo claro (preferencia del sistema) */
+    /* ─── Modo claro ─── */
     @media (prefers-color-scheme: light) {
       :root {
-        --bg-dark: #f8fafc;
+        --bg-dark: #f5faf2;
+      }
+      body {
+        background: 
+          radial-gradient(circle at top center, rgba(138, 199, 37, 0.1), transparent 20%),
+          radial-gradient(circle at 28% 8%, rgba(154, 217, 58, 0.05), transparent 30%),
+          linear-gradient(180deg, #f0f7ec 0%, #eef5ea 30%, #e8f0e4 100%);
       }
       .bg-gradient {
         background: 
-          radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-          radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
+          radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.1) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(154, 217, 58, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 50% 0%, #f8fbf5 0%, #eef7e8 100%);
       }
       .brand-name {
-        background: linear-gradient(135deg, #0f172a 0%, #475569 50%, #0f172a 100%);
+        background: linear-gradient(135deg, #1a2e14 0%, #5a8e3a 50%, #1a2e14 100%);
         background-size: 200% auto;
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
       .brand-tagline {
-        color: #64748b;
+        color: #6a8a5a;
       }
       .loading-text {
-        color: #94a3b8;
+        color: #7a9a6a;
       }
       .version {
-        color: #94a3b8;
+        color: #8aaa7a;
       }
       .particle {
-        background: rgba(15, 23, 42, 0.2);
+        background: rgba(138, 199, 37, 0.15);
+      }
+      .road {
+        background: linear-gradient(to bottom, 
+          transparent 0%,
+          rgba(74, 74, 74, 0.08) 18%,
+          rgba(125, 125, 125, 0.2) 48%,
+          rgba(74, 74, 74, 0.1) 100%
+        );
+      }
+      .logo-inner {
+        background: radial-gradient(circle at 30% 30%, 
+          rgba(240, 247, 236, 0.7) 0%, 
+          rgba(232, 240, 228, 0.9) 100%
+        );
+        border: 1px solid rgba(125, 125, 125, 0.2);
+        box-shadow: 
+          0 0 30px rgba(0, 0, 0, 0.1),
+          inset 0 0 20px rgba(0, 0, 0, 0.05);
+      }
+      .logo-wrapper::before {
+        background: radial-gradient(circle, 
+          rgba(138, 199, 37, 0.1) 0%, 
+          rgba(154, 217, 58, 0.05) 40%, 
+          transparent 70%
+        );
       }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
 
   <div class="bg-gradient"></div>
-  
+
   <!-- Efecto de carretera -->
   <div class="road-container">
     <div class="road">
@@ -491,7 +601,7 @@
       <div class="logo-ring"></div>
       <div class="logo-ring"></div>
       <div class="logo-inner">
-        <img src="logo.png" alt="Road To Logo" style="width: 60%; height: 60%; object-fit: contain;">
+        <img src="logo.png" alt="Road To Logo">
       </div>
     </div>
 
@@ -512,27 +622,20 @@
   <div class="version">v2.0.0</div>
 
   <script>
-    // Inicialización de Capacitor
     document.addEventListener('DOMContentLoaded', async () => {
-      
-      // Ocultar splash screen nativa
+
       if (window.CapacitorPlugins?.SplashScreen) {
         await window.CapacitorPlugins.SplashScreen.hide();
       }
 
-      // Configurar status bar
       if (window.CapacitorPlugins?.StatusBar) {
         await window.CapacitorPlugins.StatusBar.setStyle({ style: 'Dark' });
-        await window.CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#0f172a' });
+        await window.CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#0a1208' });
       }
 
-      // Verificar si es primera vez
       await checkFirstLaunch();
-
-      // Si hay sesión guardada, redirigir al dashboard inmediatamente
       await checkSavedSession();
 
-      // Redirigir automáticamente después de las animaciones
       setTimeout(() => {
         window.location.href = 'web-empresa.html';
       }, 3500);
@@ -551,10 +654,8 @@
       }
     }
 
-    // Detectar sesión guardada (Preferences o localStorage) y redirigir a dashboard
     async function checkSavedSession() {
       try {
-        // Preferir Capacitor Preferences cuando esté disponible
         if (window.CapacitorPlugins?.Preferences) {
           const { value: savedEmail } = await window.CapacitorPlugins.Preferences.get({ key: 'savedEmail' });
           if (savedEmail) {
@@ -564,7 +665,6 @@
           }
         }
 
-        // Fallback a localStorage (por ejemplo auth token)
         const token = localStorage.getItem('authToken') || localStorage.getItem('savedEmail');
         if (token) {
           const qs = window.location.search || '';
@@ -576,7 +676,6 @@
       }
     }
 
-    // Prevenir zoom en double-tap (iOS)
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = Date.now();
