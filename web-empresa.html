@@ -715,6 +715,204 @@
       .footer-logo {
         color: #1a2e14;
       }
+
+      /* ═══════════════════════════════════════════════
+         OVERRIDE CORPORATIVO SÓLIDO
+         ═══════════════════════════════════════════════ */
+      body {
+        background:
+          radial-gradient(circle at 12% 12%, rgba(118, 179, 44, 0.10) 0%, transparent 26%),
+          radial-gradient(circle at 88% 18%, rgba(37, 99, 235, 0.08) 0%, transparent 24%),
+          radial-gradient(circle at 18% 84%, rgba(247, 123, 29, 0.06) 0%, transparent 22%),
+          linear-gradient(180deg, #0f1814 0%, #09100d 38%, #07100c 100%);
+        color: #eef6e8;
+      }
+
+      header,
+      .app-header,
+      .contact-card,
+      .cta-final,
+      .hero-badge,
+      .section-header,
+      .footer-logo,
+      .form-group input,
+      .form-group textarea,
+      .btn,
+      .btn-login,
+      .btn-register,
+      .btn-outline,
+      .btn-large,
+      .btn-primary,
+      .btn-secondary {
+        background-image: none !important;
+      }
+
+      header {
+        background: rgba(17, 24, 20, 0.96);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      header.scrolled {
+        background: rgba(17, 24, 20, 0.98);
+        border-bottom-color: rgba(118, 179, 44, 0.18);
+      }
+
+      .logo,
+      .footer-logo {
+        color: #eef6e8;
+      }
+
+      .logo img,
+      .footer-logo img {
+        filter: none;
+      }
+
+      .hero h1,
+      .section-header h2 {
+        color: #eef6e8;
+      }
+
+      .hero-subtitle,
+      .section-header p,
+      .subtitle,
+      .cta-final p,
+      footer p,
+      .contact-info-item p {
+        color: #a7b3bb;
+      }
+
+      .hero-badge {
+        background: rgba(37, 99, 235, 0.12);
+        border: 1px solid rgba(37, 99, 235, 0.22);
+        color: #b9d3ff;
+      }
+
+      .btn-register,
+      .btn-cta,
+      .btn-primary {
+        background: #76b32c;
+        color: #08100c;
+        box-shadow: 0 10px 24px rgba(118, 179, 44, 0.22);
+      }
+
+      .btn-register:hover,
+      .btn-cta:hover,
+      .btn-primary:hover {
+        background: #8bc53a;
+      }
+
+      .btn-login,
+      .btn-outline,
+      .btn-secondary {
+        background: rgba(17, 24, 20, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        color: #eef6e8;
+      }
+
+      .btn-login:hover,
+      .btn-outline:hover,
+      .btn-secondary:hover {
+        background: rgba(22, 32, 27, 0.98);
+        border-color: rgba(91, 139, 244, 0.24);
+      }
+
+      .contact-card,
+      .cta-final {
+        background: rgba(17, 24, 20, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .contact-card::before {
+        background: #2563eb;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        background: rgba(15, 23, 42, 0.68);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        color: #eef6e8;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border-color: #2563eb;
+        background: rgba(15, 23, 42, 0.86);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+      }
+
+      .hero::before {
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 60%);
+      }
+
+      .section-header h2,
+      .contact-info-item h4 {
+        color: #5b8bf4;
+      }
+
+      .contact-info-item {
+        background: rgba(17, 24, 20, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .contact-info-item:hover {
+        background: rgba(22, 32, 27, 0.98);
+        border-color: rgba(118, 179, 44, 0.18);
+      }
+
+      .contact-info-item a:hover,
+      .footer-links a:hover {
+        color: #b8d958;
+      }
+
+      footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      @media (prefers-color-scheme: light) {
+        body {
+          background:
+            radial-gradient(circle at 12% 12%, rgba(118, 179, 44, 0.08) 0%, transparent 26%),
+            radial-gradient(circle at 88% 18%, rgba(37, 99, 235, 0.06) 0%, transparent 24%),
+            radial-gradient(circle at 18% 84%, rgba(247, 123, 29, 0.05) 0%, transparent 22%),
+            linear-gradient(180deg, #f5faf2 0%, #eef5ea 38%, #e9efe5 100%);
+          color: #17311f;
+        }
+
+        header {
+          background: rgba(255, 255, 255, 0.92);
+        }
+
+        .logo,
+        .footer-logo,
+        .cta-final h2 {
+          color: #17311f;
+        }
+
+        .hero-subtitle,
+        .section-header p,
+        .subtitle,
+        .cta-final p,
+        footer p,
+        .contact-info-item p {
+          color: #4d5b53;
+        }
+
+        .contact-card,
+        .cta-final,
+        .contact-info-item,
+        .form-group input,
+        .form-group textarea {
+          background: rgba(255, 255, 255, 0.94);
+          color: #17311f;
+        }
+
+        .btn-login,
+        .btn-outline,
+        .btn-secondary {
+          background: rgba(255, 255, 255, 0.92);
+          color: #17311f;
+        }
+      }
     }
   </style>
 <base target="_blank">
@@ -753,16 +951,13 @@
   </section>
 
   <main>
-    <!-- Contacta con nosotros -->
+    <!-- Contacta con nosotros (simplificado) -->
     <section class="section" id="contactemos">
-      <div class="section-header">
-        <h2>¿Tienes alguna pregunta?</h2>
-        <p>Nos encantaría escucharte. Envíanos tu consulta y nuestro equipo te responderá pronto.</p>
-      </div>
       <div style="display:flex;justify-content:center;margin:24px 0">
         <a href="consultas.html" class="btn btn-register btn-large" style="padding:14px 24px">Contáctanos</a>
       </div>
     </section>
+
 
     <!-- CTA Final -->
     <section class="section">
