@@ -36,9 +36,26 @@
   --color-orange-light: #ff9d52;
   --color-orange-soft: #fcd1a2;
 
+  --corp-orange: var(--color-orange-primary);
+  --corp-orange-dark: var(--color-orange-dark);
+  --corp-orange-light: var(--color-orange-light);
+  --corp-orange-soft: var(--color-orange-soft);
+
+  --corp-green: var(--color-green-primary);
+  --corp-green-dark: var(--color-green-dark);
+  --corp-green-light: var(--color-green-light);
+  --corp-green-lime: var(--color-green-lighter);
+
+  --logo-green: var(--color-green-primary);
+  --logo-green-dark: var(--color-green-dark);
+  --logo-green-light: var(--color-green-light);
+  --logo-green-lime: var(--color-green-lighter);
+
   /* ─── FONDOS / SUPERFICIES ─── */
   --bg-base: #09100d;
   --bg-base-alt: #0b130e;
+  /* Intensify base for a pure black-styled theme */
+  --bg-black: #050505;
   --bg-elevated: #111814;
   --bg-card: rgba(17, 24, 20, 0.95);
   --bg-input: rgba(15, 23, 42, 0.65);
@@ -49,6 +66,7 @@
   --text-secondary: #a7b3bb;
   --text-tertiary: #7f8a91;
   --text-muted: #6e767f;
+  --text-light: #ffffff;
   --text-inverse: #08100c;
 
   /* ─── BORDES ─── */
@@ -142,15 +160,142 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
-  background:
-    radial-gradient(circle at 12% 12%, rgba(118, 179, 44, 0.12) 0%, transparent 28%),
-    radial-gradient(circle at 88% 18%, rgba(37, 99, 235, 0.10) 0%, transparent 26%),
-    radial-gradient(circle at 18% 84%, rgba(247, 123, 29, 0.08) 0%, transparent 24%),
-    linear-gradient(180deg, #0f1814 0%, var(--bg-base) 35%, #07100c 100%);
+  background-color: var(--bg-black);
+  background-image:
+    radial-gradient(circle at 14% 14%, rgba(118, 179, 44, 0.04) 0%, transparent 20%),
+    radial-gradient(circle at 86% 18%, rgba(37, 99, 235, 0.04) 0%, transparent 18%);
+  background-repeat: no-repeat;
+  background-size: 320px 320px, 280px 280px;
+  background-position: left top, right top;
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
+}
+
+header,
+.app-header,
+.public-header,
+.header,
+.main-header,
+.navbar {
+  background: rgba(6, 10, 7, 0.72);
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+header.scrolled,
+.app-header.scrolled,
+.public-header.scrolled,
+.header.scrolled,
+.main-header.scrolled,
+.navbar.scrolled {
+  background: rgba(8, 12, 9, 0.84);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+header a,
+.app-header a,
+.public-header a,
+.header a,
+.main-header a,
+.navbar a,
+.logo,
+.logo * {
+  color: var(--text-primary);
+}
+
+.logo {
+  color: var(--corp-orange);
+  text-shadow: 0 0 10px rgba(247, 123, 29, 0.24);
+}
+
+/* ==============================
+   OVERRIDES FOR BLACK-STYLED THEME
+   Mobile-first responsive rules
+   ============================== */
+
+/* Neutralize decorative text gradients and enforce solid colors */
+.hero h1,
+.section-header h2,
+h1, h2, h3, h4, h5, h6 {
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: initial !important;
+  color: var(--text-primary) !important;
+}
+
+.brand-name,
+.brand-name * {
+  color: var(--corp-orange) !important;
+  text-shadow: 0 0 18px rgba(247, 123, 29, 0.20);
+}
+
+/* Primary call-to-action: solid corporate green on black */
+.btn-primary,
+.btn-register,
+.btn-cta,
+.btn-submit {
+  background: linear-gradient(180deg, var(--color-green-primary), var(--color-green-dark)) !important;
+  color: var(--text-inverse) !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 30px rgba(118, 179, 44, 0.20) !important;
+}
+
+/* Outline / secondary on dark */
+.btn-outline,
+.btn-secondary {
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Hero tuning */
+.hero {
+  padding: 110px 20px 80px;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-content { max-width: 820px; }
+
+/* Improve container sizing for mobile-first */
+.container { padding-left: 16px; padding-right: 16px; }
+
+/* Fluid typography for small screens */
+h1 { font-size: clamp(28px, 6.5vw, 56px); }
+h2 { font-size: clamp(20px, 5vw, 36px); }
+
+/* Accessibility: increase contrast for inputs on deep black backgrounds */
+input, textarea, select {
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Desktop breakpoints */
+@media (min-width: 769px) {
+  .container { max-width: 1100px; }
+  .section { padding: var(--sp-2xl) var(--sp-lg); }
+  h1 { font-size: clamp(36px, 6vw, 64px); }
+  .hero { min-height: 84vh; padding: 140px 40px 100px; }
+}
+
+@media (min-width: 1200px) {
+  .container { max-width: 1300px; }
+  h1 { font-size: clamp(40px, 5.6vw, 72px); }
+}
+
+/* Small adjustments for very small screens */
+@media (max-width: 420px) {
+  .hero { padding: 100px 14px 60px; }
+  .btn, .btn-large { padding: 12px 16px; }
 }
 
 body::before {
@@ -175,7 +320,14 @@ body::before {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    TIPOGRAFÍA
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
+.brand-name,
+.brand-name strong,
+.brand-name span {
+  color: var(--color-orange-primary);
+  letter-spacing: 0.08em;
+  font-weight: var(--font-weight-black);
+  text-shadow: 0 0 18px rgba(247, 123, 29, 0.15);
+}
 h1, .h1 {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-black);

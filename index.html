@@ -431,14 +431,11 @@
       font-size: 48px;
       font-weight: 900;
       letter-spacing: 8px;
-      background: linear-gradient(135deg, var(--corp-orange-light) 0%, var(--corp-orange) 45%, var(--corp-orange-dark) 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--corp-orange);
+      text-shadow: 0 0 18px rgba(247, 123, 29, 0.18);
       opacity: 0;
       transform: translateY(20px);
-      animation: fadeInUp 0.8s ease forwards 0.3s, shimmer 3s linear infinite 1s;
+      animation: fadeInUp 0.8s ease forwards 0.3s;
     }
 
     @keyframes fadeInUp {
@@ -652,7 +649,7 @@
 
     <p class="loading-text">Cargando</p>
 
-    <a href="web-empresa.html" class="action-button">Entrar a la plataforma</a>
+    <a href="empresa.html" class="action-button">Entrar a la plataforma</a>
   </div>
 
   <div class="version">v2.0.0</div>
@@ -673,7 +670,7 @@
       await checkSavedSession();
 
       setTimeout(() => {
-        window.location.href = 'web-empresa.html';
+        window.location.href = 'empresa.html';
       }, 3500);
     });
 

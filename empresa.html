@@ -11,7 +11,7 @@
   
   <link rel="stylesheet" href="theme.css">
   <style>
-    /* Estilos específicos de web-empresa.html - Los estilos base están en theme.css */
+    /* Estilos específicos de empresa.html - Los estilos base están en theme.css */
 
     /* ═══════════════════════════════════════════════
        HEADER / NAVBAR
@@ -24,19 +24,19 @@
       z-index: 1000;
       padding: 16px 30px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(7, 10, 8, 0.58);
+      background: rgba(7, 10, 8, 0.64);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 20px;
       transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
     }
 
     header.scrolled {
-      background: rgba(9, 13, 9, 0.72);
+      background: rgba(9, 13, 9, 0.82);
       border-bottom-color: rgba(255, 255, 255, 0.10);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
     }
 
     .logo {
@@ -96,14 +96,14 @@
     }
 
     .btn-register {
-      background: linear-gradient(135deg, var(--corp-orange), var(--logo-green));
-      color: #ffffff;
-      box-shadow: 0 8px 25px rgba(249, 115, 22, 0.22);
+      background: linear-gradient(180deg, var(--color-green-primary), var(--color-green-dark));
+      color: var(--text-inverse);
+      box-shadow: 0 10px 28px rgba(118, 179, 44, 0.22);
     }
 
     .btn-register:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(249, 115, 22, 0.35);
+      box-shadow: 0 14px 38px rgba(118, 179, 44, 0.30);
     }
 
     .btn-large {
@@ -929,7 +929,7 @@
     </a>
     <nav class="nav-buttons">
       <a href="dashboard.html" class="btn btn-login" onclick="preserveQs(event, 'dashboard.html')">Iniciar sesión</a>
-      <a href="registro-eleccion.html" class="btn btn-register" onclick="preserveQs(event, 'registro-eleccion.html')">Registrarse</a>
+      <a href="registro.html" class="btn btn-register" onclick="preserveQs(event, 'registro.html')">Registrarse</a>
     </nav>
   </header>
 
@@ -942,7 +942,7 @@
         Road To es una plataforma de transporte que permite al usuario <em>"reservar su asiento"</em> bajo una trazabilidad de ruta ya establecida. Seguridad, puntualidad y confianza en cada viaje.
       </p>
       <div class="hero-cta">
-        <a href="registro-eleccion.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'registro-eleccion.html')">Reservar ahora</a>
+        <a href="registro.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'registro.html')">Reservar ahora</a>
         <a href="consultas.html" class="btn btn-outline btn-large">Contactemos</a>
       </div>
     </div>
@@ -967,7 +967,7 @@
         <h2>Comienza tu viaje con Road To</h2>
         <p>Únete a la comunidad de pasajeros y conductores que ya confían en una forma más segura y organizada de transportarse.</p>
         <div class="cta-buttons">
-          <a href="registro-eleccion.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'registro-eleccion.html')">Crear cuenta gratis</a>
+          <a href="registro.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'registro.html')">Crear cuenta gratis</a>
           <a href="dashboard.html" class="btn btn-login btn-large" onclick="preserveQs(event, 'dashboard.html')">Ya tengo cuenta</a>
         </div>
       </div>
