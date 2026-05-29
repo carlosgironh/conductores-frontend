@@ -84,21 +84,7 @@
 /* ═════════════════════════════════════════════════════════════════════════════
    MODO CLARO
    ═════════════════════════════════════════════════════════════════════════════ */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-dark: #f5faf2;                           /* Fondo claro */
-    --bg-card: rgba(226, 242, 224, 0.6);          /* Tarjeta clara */
-    --bg-elevated: rgba(255, 255, 255, 0.85);     /* Elemento elevado */
-    --bg-overlay: rgba(68, 132, 20, 0.04);        /* Overlay más tenue */
 
-    --text-light: #1a2e14;                        /* Texto oscuro */
-    --text-muted: #5a7a4a;                        /* Texto tenue oscuro */
-    --text-dim: #8aaa7a;                          /* Texto muy tenue */
-
-    --border-light: rgba(15, 23, 42, 0.08);       /* Borde oscuro */
-    --border-muted: rgba(15, 23, 42, 0.04);       /* Borde muy tenue */
-  }
-}
 
 /* ═════════════════════════════════════════════════════════════════════════════
    GRADIENTES PREDEFINIDOS

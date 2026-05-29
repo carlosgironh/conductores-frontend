@@ -179,7 +179,7 @@ header,
 .header,
 .main-header,
 .navbar {
-  background: rgba(6, 10, 7, 0.72);
+  background: rgba(18, 28, 14, 0.85);
   color: var(--text-primary);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
@@ -193,7 +193,7 @@ header.scrolled,
 .header.scrolled,
 .main-header.scrolled,
 .navbar.scrolled {
-  background: rgba(8, 12, 9, 0.84);
+  background: rgba(12, 20, 10, 0.95);
   border-bottom-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
 }
@@ -823,52 +823,4 @@ tr:hover td {
   h3, .h3 { font-size: var(--font-size-lg); }
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MODO CLARO
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-base: #f4f7f5;
-    --bg-base-alt: #eef2ef;
-    --bg-elevated: #ffffff;
-    --bg-card: rgba(255, 255, 255, 0.96);
-    --bg-input: rgba(255, 255, 255, 0.92);
-    --bg-overlay: rgba(244, 247, 245, 0.82);
-
-    --text-primary: #17311f;
-    --text-secondary: #4d5b53;
-    --text-tertiary: #6b776f;
-    --text-muted: #7c8780;
-
-    --border-light: rgba(23, 49, 31, 0.10);
-    --border-lighter: rgba(23, 49, 31, 0.06);
-  }
-
-  body {
-    background:
-      radial-gradient(circle at 12% 12%, rgba(118, 179, 44, 0.08) 0%, transparent 28%),
-      radial-gradient(circle at 88% 18%, rgba(37, 99, 235, 0.06) 0%, transparent 26%),
-      radial-gradient(circle at 18% 84%, rgba(247, 123, 29, 0.05) 0%, transparent 24%),
-      var(--bg-base) !important;
-  }
-
-  .card,
-  .modal-content,
-  .table-container,
-  .status-banner,
-  .status-hero,
-  .contact-card,
-  .form-side,
-  .cta-final {
-    background: rgba(255, 255, 255, 0.96);
-    color: var(--text-primary);
-  }
-
-  input,
-  textarea,
-  select {
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--text-primary);
-  }
-}

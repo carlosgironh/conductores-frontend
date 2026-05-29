@@ -531,69 +531,7 @@
     }
 
     /* ─── Modo claro ─── */
-    @media (prefers-color-scheme: light) {
-      :root { --bg-dark: #f5faf2; }
-      body {
-        background:
-          radial-gradient(circle at top center, rgba(118, 179, 44, 0.08), transparent 22%),
-          radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.06), transparent 28%),
-          radial-gradient(circle at 20% 80%, rgba(247, 123, 29, 0.05), transparent 30%),
-          linear-gradient(180deg, #f2f8ec 0%, #eef5ea 35%, #eef0e7 100%);
-      }
-      .bg-gradient {
-        background:
-          radial-gradient(ellipse at 20% 20%, rgba(118, 179, 44, 0.08) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 80%, rgba(247, 123, 29, 0.06) 0%, transparent 50%),
-          radial-gradient(circle at 50% 0%, #f8fbf5 0%, #eff3ec 100%);
-      }
-      .brand-name {
-        background: linear-gradient(135deg, var(--corp-orange-light) 0%, var(--corp-orange) 45%, var(--corp-orange-dark) 100%);
-        background-size: 200% auto;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .brand-tagline { color: var(--text-muted); }
-      .loading-text { color: var(--text-muted); }
-      .version { color: var(--text-dim); }
-      .particle:nth-child(1),
-      .particle:nth-child(5),
-      .particle:nth-child(9) { background: rgba(118, 179, 44, 0.12); box-shadow: 0 0 10px rgba(118, 179, 44, 0.12); }
-      .particle:nth-child(2),
-      .particle:nth-child(6),
-      .particle:nth-child(10) { background: rgba(37, 99, 235, 0.12); box-shadow: 0 0 10px rgba(37, 99, 235, 0.12); }
-      .particle:nth-child(3),
-      .particle:nth-child(7) { background: rgba(247, 123, 29, 0.12); box-shadow: 0 0 10px rgba(247, 123, 29, 0.12); }
-      .particle:nth-child(4),
-      .particle:nth-child(8) { background: rgba(158, 158, 158, 0.18); box-shadow: 0 0 10px rgba(158, 158, 158, 0.12); }
-      .road {
-        background: linear-gradient(to top,
-          rgba(74, 74, 74, 0.15) 0%,
-          rgba(60, 60, 60, 0.08) 40%,
-          transparent 100%
-        );
-        border-top: 3px solid rgba(125, 125, 125, 0.15);
-      }
-      .logo-inner {
-        background: radial-gradient(circle at 30% 30%,
-          rgba(240, 247, 236, 0.7) 0%,
-          rgba(232, 240, 228, 0.9) 100%
-        );
-        border: 1px solid rgba(125, 125, 125, 0.2);
-        box-shadow:
-          0 0 30px rgba(0, 0, 0, 0.1),
-          inset 0 0 20px rgba(0, 0, 0, 0.05);
-      }
-      .logo-wrapper::before {
-        background: radial-gradient(circle,
-          rgba(247, 123, 29, 0.08) 0%,
-          rgba(37, 99, 235, 0.06) 30%,
-          rgba(118, 179, 44, 0.06) 55%,
-          transparent 70%
-        );
-      }
-    }
+    
   </style>
 <base target="_blank">
 </head>
