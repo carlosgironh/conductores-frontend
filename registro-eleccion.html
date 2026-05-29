@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registro - Elige tu opción | Road To</title>
+  <meta name="theme-color" content="#09100d">
+  
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* Estilos específicos de la página de elección - Base en theme.css */
+    html, body { height: 100%; background: linear-gradient(180deg, #0f1814 0%, var(--bg-base) 100%); }
+    
+    .container {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-2xl);
+    }
+
+    .card {
+      width: 920px;
+      max-width: 96%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-lg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12));
+      border-radius: var(--radius-lg);
+      padding: var(--sp-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-lighter);
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-md);
+      padding: var(--sp-md);
+    }
+
+    .side:first-child {
+      align-items: flex-start;
+      padding-left: var(--sp-xl);
+    }
+
+    .side:last-child {
+      align-items: stretch;
+    }
+
+    .kicker {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: var(--sp-md);
+    }
+
+    h1 {
+      font-size: var(--font-size-3xl);
+      margin: 0 0 var(--sp-lg);
+    }
+
+    p.lead {
+      color: var(--text-secondary);
+      max-width: 42ch;
+      line-height: 1.6;
+    }
+
+    .option {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
+      border-radius: var(--radius-md);
+      padding: var(--sp-md);
+      text-align: center;
+      border: 1px solid var(--border-lighter);
+      margin-bottom: var(--sp-md);
+    }
+
+    .option .emoji {
+      font-size: 48px;
+      margin-bottom: var(--sp-md);
+    }
+
+    .option h3 {
+      margin: 0 0 var(--sp-sm);
+      font-size: var(--font-size-lg);
+    }
+
+    .option p {
+      color: var(--text-secondary);
+      margin: 0 0 var(--sp-md);
+      font-size: var(--font-size-sm);
+    }
+
+    .btn-cta {
+      background: linear-gradient(90deg, var(--color-orange-primary), var(--color-green-primary));
+      box-shadow: 0 8px 20px rgba(247, 123, 29, 0.25);
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(247, 123, 29, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-green-primary);
+      background: rgba(118, 179, 44, 0.08);
+    }
+
+    .info {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-top: var(--sp-md);
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+
+    .info a {
+      color: var(--text-secondary);
+    }
+
+    .info a:hover {
+      color: var(--color-green-primary);
+    }
+
+    @media (max-width: 700px) {
+      .card { grid-template-columns: 1fr; }
+      .side:first-child { align-items: center; padding-left: var(--sp-md); }
+      .kicker { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card" role="main" aria-labelledby="reg-title">
+      <div class="side" style="align-items:flex-start;padding-left:36px">
+        <div class="kicker">Registro</div>
+        <h1 id="reg-title">¿Deseas ser cliente o socio?</h1>
+        <p class="lead">Elige cómo quieres participar en Road To. Puedes registrarte como cliente para reservar viajes, o como socio para ofrecer tus rutas y generar ingresos.</p>
+      </div>
+
+      <div class="side" style="align-items:stretch">
+        <div class="option">
+          <div class="emoji">🧳</div>
+          <h3>¿Deseas ser cliente?</h3>
+          <p>Reserva tu asiento en rutas establecidas, paga de forma segura y sigue tu viaje en tiempo real.</p>
+          <a class="btn btn-cta" href="P-Reg.html" id="btn-pasajero">Sí, quiero ser cliente</a>
+        </div>
+        <div style="height:12px"></div>
+        <div class="option">
+          <div class="emoji">🚗</div>
+          <h3>¿Deseas ser socio?</h3>
+          <p>Únete como conductor verificado, registra tu vehículo y gestiona reservas y pagos desde tu panel.</p>
+          <a class="btn btn-secondary" href="N-Reg.html" id="btn-socio">Sí, quiero ser socio</a>
+        </div>
+      </div>
+
+      <div class="info">¿No estás seguro? <a href="web-empresa.html" style="color:var(--muted);text-decoration:underline">Más información</a> sobre cómo funciona Road To.</div>
+    </main>
+  </div>
+  <script>
+    // preserve querystrings if present
+    function preserveQsAndGo(evt, href){
+      if(evt){evt.preventDefault();}
+      const qs = location.search || '';
+      location.href = href + qs;
+    }
+    document.getElementById('btn-pasajero').addEventListener('click', function(e){ preserveQsAndGo(e, 'P-Reg.html'); });
+    document.getElementById('btn-socio').addEventListener('click', function(e){ preserveQsAndGo(e, 'N-Reg.html'); });
+  </script>
+</body>
+</html>

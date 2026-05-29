@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Bienvenido a Road To</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0a1208">
+  <meta name="theme-color" content="#09100d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -18,6 +18,7 @@
     window.CapacitorPlugins = { SplashScreen, StatusBar, App, Preferences };
   </script>
 
+  <link rel="stylesheet" href="theme.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -38,34 +39,39 @@
 
       /* ─── Colores corporativos ─── */
       /* Verde (del logo) */
-      --corp-green: #8ac725;
-      --corp-green-dark: #448414;
-      --corp-green-lime: #9ad93a;
-      --corp-green-light: #b8e85c;
+      --corp-green: #76b32c;
+      --corp-green-dark: #3f6d12;
+      --corp-green-lime: #b8d958;
+      --corp-green-light: #d8e693;
 
       /* Gris (carretera del logo) */
-      --corp-gray: #7d7d7d;
-      --corp-gray-dark: #4a4a4a;
-      --corp-gray-light: #9e9e9e;
-      --corp-gray-dim: #6b6b6b;
+      --corp-gray: #8f959d;
+      --corp-gray-dark: #4f555c;
+      --corp-gray-light: #c1c8d0;
+      --corp-gray-dim: #6e767f;
 
       /* Azul (corporativo nuevo) */
       --corp-blue: #2563eb;
-      --corp-blue-dark: #1e40af;
-      --corp-blue-light: #3b82f6;
-      --corp-blue-soft: #60a5fa;
+      --corp-blue-dark: #1f3f91;
+      --corp-blue-light: #5b8bf4;
+      --corp-blue-soft: #7faeff;
 
       /* Naranja (corporativo nuevo) */
-      --corp-orange: #f97316;
-      --corp-orange-dark: #ea580c;
-      --corp-orange-light: #fb923c;
-      --corp-orange-soft: #fdba74;
+      --corp-orange: #f77b1d;
+      --corp-orange-dark: #c25d11;
+      --corp-orange-light: #ff9d52;
+      --corp-orange-soft: #fcd1a2;
 
       /* ─── Derivados UI ─── */
-      --bg-dark: #0a1208;
-      --bg-card: rgba(12, 20, 10, 0.92);
-      --text-light: #eef8e4;
-      --text-muted: #8a9e7d;
+      --bg-dark: #09100d;
+      --bg-card: rgba(17, 24, 20, 0.92);
+      --bg-elevated: rgba(24, 30, 26, 0.96);
+      --text-light: #eef6e8;
+      --text-muted: #a7b3bb;
+      --text-dim: #7f8a91;
+      --border-muted: rgba(255, 255, 255, 0.08);
+
+      --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.18);
     }
 
     body {
@@ -78,10 +84,10 @@
       overflow: hidden;
       position: relative;
       background:
-        radial-gradient(circle at top center, rgba(138, 199, 37, 0.10), transparent 22%),
-        radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.08), transparent 28%),
-        radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.06), transparent 30%),
-        linear-gradient(180deg, #0c1a0a 0%, #0a1208 35%, #081008 100%);
+        radial-gradient(circle at top center, rgba(118, 179, 44, 0.12), transparent 20%),
+        radial-gradient(circle at 82% 18%, rgba(37, 99, 235, 0.10), transparent 24%),
+        radial-gradient(circle at 20% 78%, rgba(247, 123, 29, 0.08), transparent 28%),
+        linear-gradient(180deg, #0f1814 0%, #09100d 35%, #07100c 100%);
       color: var(--text-light);
       padding-top: var(--safe-top);
       padding-bottom: var(--safe-bottom);
@@ -95,12 +101,12 @@
       width: 100%;
       height: 100%;
       background:
-        radial-gradient(ellipse at 15% 15%, rgba(138, 199, 37, 0.18) 0%, transparent 42%),
-        radial-gradient(ellipse at 85% 25%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
-        radial-gradient(ellipse at 50% 85%, rgba(249, 115, 22, 0.10) 0%, transparent 40%),
-        radial-gradient(circle at 50% 0%, rgba(10, 18, 8, 0.98) 0%, rgba(8, 16, 8, 1) 100%);
+        radial-gradient(ellipse at 14% 16%, rgba(118, 179, 44, 0.16) 0%, transparent 42%),
+        radial-gradient(ellipse at 86% 24%, rgba(37, 99, 235, 0.10) 0%, transparent 38%),
+        radial-gradient(ellipse at 50% 84%, rgba(247, 123, 29, 0.08) 0%, transparent 38%),
+        radial-gradient(circle at 50% 0%, rgba(9, 16, 13, 0.95) 0%, rgba(7, 12, 10, 1) 100%);
       background-blend-mode: screen;
-      opacity: 0.95;
+      opacity: 0.93;
       z-index: -2;
     }
 
@@ -133,15 +139,15 @@
       width: 100%;
       height: 100%;
       background: linear-gradient(to top,
-        rgba(74, 74, 74, 0.45) 0%,
-        rgba(60, 60, 60, 0.25) 40%,
+        rgba(72, 74, 81, 0.80) 0%,
+        rgba(94, 99, 108, 0.40) 35%,
         transparent 100%
       );
       border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-      border-top: 3px solid rgba(125, 125, 125, 0.3);
+      border-top: 3px solid rgba(145, 150, 158, 0.24);
       box-shadow:
-        0 -10px 40px rgba(0, 0, 0, 0.3),
-        inset 0 20px 60px rgba(0, 0, 0, 0.2);
+        0 -10px 40px rgba(0, 0, 0, 0.25),
+        inset 0 20px 60px rgba(0, 0, 0, 0.18);
       overflow: hidden;
     }
 
@@ -154,8 +160,8 @@
       height: 4px;
       background: repeating-linear-gradient(
         to right,
-        rgba(158, 158, 158, 0.85) 0px,
-        rgba(158, 158, 158, 0.85) 40px,
+        rgba(193, 200, 208, 0.80) 0px,
+        rgba(193, 200, 208, 0.80) 40px,
         transparent 40px,
         transparent 80px
       );
@@ -165,13 +171,13 @@
     .road-lines:nth-child(2) {
       top: 50%;
       animation: moveLines 2s linear infinite;
-      opacity: 0.6;
+      opacity: 0.55;
     }
 
     .road-lines:nth-child(3) {
       top: 70%;
       animation: moveLines 2.5s linear infinite;
-      opacity: 0.4;
+      opacity: 0.35;
     }
 
     @keyframes moveLines {
@@ -187,8 +193,8 @@
       width: 3px;
       height: 100%;
       background: linear-gradient(to top,
-        rgba(138, 199, 37, 0.5) 0%,
-        rgba(138, 199, 37, 0.2) 60%,
+        rgba(37, 99, 235, 0.40) 0%,
+        rgba(118, 179, 44, 0.20) 50%,
         transparent 100%
       );
     }
@@ -224,16 +230,16 @@
     }
 
     /* Partículas en colores corporativos */
-    .particle:nth-child(1) { left: 10%; background: rgba(138, 199, 37, 0.6); box-shadow: 0 0 12px rgba(138, 199, 37, 0.35); animation-delay: 0s; animation-duration: 12s; }
-    .particle:nth-child(2) { left: 25%; background: rgba(37, 99, 235, 0.5); box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); animation-delay: 1s; animation-duration: 15s; }
-    .particle:nth-child(3) { left: 40%; background: rgba(249, 115, 22, 0.5); box-shadow: 0 0 12px rgba(249, 115, 22, 0.3); animation-delay: 2s; animation-duration: 10s; }
-    .particle:nth-child(4) { left: 55%; background: rgba(158, 158, 158, 0.5); box-shadow: 0 0 12px rgba(158, 158, 158, 0.3); animation-delay: 0.5s; animation-duration: 18s; }
-    .particle:nth-child(5) { left: 70%; background: rgba(138, 199, 37, 0.5); box-shadow: 0 0 12px rgba(138, 199, 37, 0.3); animation-delay: 3s; animation-duration: 14s; }
-    .particle:nth-child(6) { left: 85%; background: rgba(37, 99, 235, 0.5); box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); animation-delay: 1.5s; animation-duration: 16s; }
-    .particle:nth-child(7) { left: 15%; background: rgba(249, 115, 22, 0.5); box-shadow: 0 0 12px rgba(249, 115, 22, 0.3); animation-delay: 2.5s; animation-duration: 11s; }
-    .particle:nth-child(8) { left: 45%; background: rgba(158, 158, 158, 0.5); box-shadow: 0 0 12px rgba(158, 158, 158, 0.3); animation-delay: 0.8s; animation-duration: 13s; }
-    .particle:nth-child(9) { left: 60%; background: rgba(138, 199, 37, 0.5); box-shadow: 0 0 12px rgba(138, 199, 37, 0.3); animation-delay: 3.5s; animation-duration: 17s; }
-    .particle:nth-child(10) { left: 90%; background: rgba(37, 99, 235, 0.5); box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); animation-delay: 4s; animation-duration: 19s; }
+    .particle:nth-child(1) { left: 10%; background: rgba(118, 179, 44, 0.42); box-shadow: 0 0 10px rgba(118, 179, 44, 0.18); animation-delay: 0s; animation-duration: 12s; }
+    .particle:nth-child(2) { left: 25%; background: rgba(37, 99, 235, 0.32); box-shadow: 0 0 10px rgba(37, 99, 235, 0.16); animation-delay: 1s; animation-duration: 15s; }
+    .particle:nth-child(3) { left: 40%; background: rgba(247, 123, 29, 0.30); box-shadow: 0 0 10px rgba(247, 123, 29, 0.14); animation-delay: 2s; animation-duration: 10s; }
+    .particle:nth-child(4) { left: 55%; background: rgba(158, 158, 158, 0.28); box-shadow: 0 0 10px rgba(158, 158, 158, 0.14); animation-delay: 0.5s; animation-duration: 18s; }
+    .particle:nth-child(5) { left: 70%; background: rgba(118, 179, 44, 0.32); box-shadow: 0 0 10px rgba(118, 179, 44, 0.14); animation-delay: 3s; animation-duration: 14s; }
+    .particle:nth-child(6) { left: 85%; background: rgba(37, 99, 235, 0.32); box-shadow: 0 0 10px rgba(37, 99, 235, 0.14); animation-delay: 1.5s; animation-duration: 16s; }
+    .particle:nth-child(7) { left: 15%; background: rgba(247, 123, 29, 0.28); box-shadow: 0 0 10px rgba(247, 123, 29, 0.12); animation-delay: 2.5s; animation-duration: 11s; }
+    .particle:nth-child(8) { left: 45%; background: rgba(158, 158, 158, 0.24); box-shadow: 0 0 10px rgba(158, 158, 158, 0.12); animation-delay: 0.8s; animation-duration: 13s; }
+    .particle:nth-child(9) { left: 60%; background: rgba(118, 179, 44, 0.28); box-shadow: 0 0 10px rgba(118, 179, 44, 0.14); animation-delay: 3.5s; animation-duration: 17s; }
+    .particle:nth-child(10) { left: 90%; background: rgba(37, 99, 235, 0.28); box-shadow: 0 0 10px rgba(37, 99, 235, 0.12); animation-delay: 4s; animation-duration: 19s; }
 
     @keyframes float-particle {
       0% { transform: translateY(100vh) scale(0); opacity: 0; }
@@ -262,7 +268,7 @@
       width: min(100%, 620px);
       height: min(100%, 480px);
       background:
-        radial-gradient(circle at 50% 30%, rgba(249, 115, 22, 0.12), transparent 42%),
+        radial-gradient(circle at 50% 30%, rgba(247, 123, 29, 0.12), transparent 42%),
         radial-gradient(circle at 50% 70%, rgba(37, 99, 235, 0.08), transparent 38%);
       filter: blur(30px);
       opacity: 0.5;
@@ -315,9 +321,9 @@
       inset: -40px;
       border-radius: 50%;
       background: radial-gradient(circle,
-        rgba(249, 115, 22, 0.12) 0%,
+        rgba(247, 123, 29, 0.10) 0%,
         rgba(37, 99, 235, 0.08) 30%,
-        rgba(138, 199, 37, 0.08) 55%,
+        rgba(118, 179, 44, 0.08) 55%,
         transparent 70%
       );
       filter: blur(20px);
@@ -446,10 +452,7 @@
     .brand-tagline {
       font-size: 16px;
       font-weight: 500;
-      color: var(--corp-gray-light);
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      opacity: 0;
+      color: var(--text-muted);
       transform: translateY(20px);
       animation: fadeInUp 0.8s ease forwards 0.6s;
     }
@@ -535,38 +538,38 @@
       :root { --bg-dark: #f5faf2; }
       body {
         background:
-          radial-gradient(circle at top center, rgba(138, 199, 37, 0.08), transparent 22%),
+          radial-gradient(circle at top center, rgba(118, 179, 44, 0.08), transparent 22%),
           radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.06), transparent 28%),
-          radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.05), transparent 30%),
-          linear-gradient(180deg, #f0f7ec 0%, #eef5ea 35%, #e8f0e4 100%);
+          radial-gradient(circle at 20% 80%, rgba(247, 123, 29, 0.05), transparent 30%),
+          linear-gradient(180deg, #f2f8ec 0%, #eef5ea 35%, #eef0e7 100%);
       }
       .bg-gradient {
         background:
-          radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.10) 0%, transparent 50%),
+          radial-gradient(ellipse at 20% 20%, rgba(118, 179, 44, 0.08) 0%, transparent 50%),
           radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 80%, rgba(249, 115, 22, 0.06) 0%, transparent 50%),
-          radial-gradient(circle at 50% 0%, #f8fbf5 0%, #eef7e8 100%);
+          radial-gradient(ellipse at 50% 80%, rgba(247, 123, 29, 0.06) 0%, transparent 50%),
+          radial-gradient(circle at 50% 0%, #f8fbf5 0%, #eff3ec 100%);
       }
       .brand-name {
-        background: linear-gradient(135deg, #ea580c 0%, #f97316 45%, #c2410c 100%);
+        background: linear-gradient(135deg, var(--corp-orange-light) 0%, var(--corp-orange) 45%, var(--corp-orange-dark) 100%);
         background-size: 200% auto;
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
-      .brand-tagline { color: #7a8a6a; }
-      .loading-text { color: #8a9a7a; }
-      .version { color: #9aaa8a; }
+      .brand-tagline { color: var(--text-muted); }
+      .loading-text { color: var(--text-muted); }
+      .version { color: var(--text-dim); }
       .particle:nth-child(1),
       .particle:nth-child(5),
-      .particle:nth-child(9) { background: rgba(138, 199, 37, 0.15); box-shadow: 0 0 12px rgba(138, 199, 37, 0.15); }
+      .particle:nth-child(9) { background: rgba(118, 179, 44, 0.12); box-shadow: 0 0 10px rgba(118, 179, 44, 0.12); }
       .particle:nth-child(2),
       .particle:nth-child(6),
-      .particle:nth-child(10) { background: rgba(37, 99, 235, 0.15); box-shadow: 0 0 12px rgba(37, 99, 235, 0.15); }
+      .particle:nth-child(10) { background: rgba(37, 99, 235, 0.12); box-shadow: 0 0 10px rgba(37, 99, 235, 0.12); }
       .particle:nth-child(3),
-      .particle:nth-child(7) { background: rgba(249, 115, 22, 0.15); box-shadow: 0 0 12px rgba(249, 115, 22, 0.15); }
+      .particle:nth-child(7) { background: rgba(247, 123, 29, 0.12); box-shadow: 0 0 10px rgba(247, 123, 29, 0.12); }
       .particle:nth-child(4),
-      .particle:nth-child(8) { background: rgba(158, 158, 158, 0.2); box-shadow: 0 0 12px rgba(158, 158, 158, 0.15); }
+      .particle:nth-child(8) { background: rgba(158, 158, 158, 0.18); box-shadow: 0 0 10px rgba(158, 158, 158, 0.12); }
       .road {
         background: linear-gradient(to top,
           rgba(74, 74, 74, 0.15) 0%,
@@ -587,9 +590,9 @@
       }
       .logo-wrapper::before {
         background: radial-gradient(circle,
-          rgba(249, 115, 22, 0.08) 0%,
+          rgba(247, 123, 29, 0.08) 0%,
           rgba(37, 99, 235, 0.06) 30%,
-          rgba(138, 199, 37, 0.06) 55%,
+          rgba(118, 179, 44, 0.06) 55%,
           transparent 70%
         );
       }
@@ -663,7 +666,7 @@
 
       if (window.CapacitorPlugins?.StatusBar) {
         await window.CapacitorPlugins.StatusBar.setStyle({ style: 'Dark' });
-        await window.CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#0a1208' });
+        await window.CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#09100d' });
       }
 
       await checkFirstLaunch();
