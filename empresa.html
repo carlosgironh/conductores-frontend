@@ -205,6 +205,18 @@
       opacity: 0;
     }
 
+    /* Resaltar acciones importantes en hero */
+    .highlight {
+      font-weight: 800;
+      color: var(--corp-orange);
+      font-size: 1.12em;
+      background: linear-gradient(90deg, rgba(247,123,29,0.10), rgba(118,179,44,0.04));
+      padding: 4px 8px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-left: 6px;
+    }
+
     .hero-cta {
       display: flex;
       gap: 16px;
@@ -648,7 +660,7 @@
       <div class="hero-badge">Plataforma de Transporte Reglamentario</div>
       <h1>Tu asiento reservado,<br>tu ruta asegurada</h1>
       <p class="hero-subtitle">
-        Road To es una plataforma de transporte que permite al usuario <em>"reservar su asiento"</em> bajo una trazabilidad de ruta ya establecida. Seguridad, puntualidad y confianza en cada viaje.
+        Road To es una plataforma de transporte que permite al usuario <strong class="highlight">reservar tu asiento</strong> bajo una trazabilidad de ruta ya establecida.
       </p>
       <div class="hero-cta">
         <a href="registro.html" class="btn btn-register btn-large" onclick="preserveQs(event, 'registro.html')">Reservar ahora</a>

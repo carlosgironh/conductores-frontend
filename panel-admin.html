@@ -274,7 +274,50 @@
     letter-spacing: 1px;
   }
 
-  /* Filtros */
+    /* Section Tabs */
+  .section-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .section-tab {
+    padding: 12px 28px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  .section-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
+  .section-tab.active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+  }
+  .section-content {
+    display: none;
+    animation: fadeInSection 0.4s ease;
+  }
+  .section-content.active {
+    display: block;
+  }
+  @keyframes fadeInSection {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+/* Filtros */
   .filters {
     display: flex;
     gap: 12px;
@@ -1017,6 +1060,7 @@
     }
   }
 </style>
+<base target="_blank">
 </head>
 
 <body>
@@ -1228,7 +1272,70 @@
     </div>
   </div>
 
-  <div class="card">
+    <!-- Modal Edición Pasajero -->
+  <div class="modal-overlay" id="editModalPasajero">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeEditModalPasajero()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <div class="modal-header">
+        <h3 class="modal-title">Editar Pasajero</h3>
+      </div>
+
+      <form id="editFormPasajero">
+        <input type="hidden" id="editPasajeroId">
+
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="editPasajeroEmail" readonly>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label>Nombres</label>
+            <input type="text" id="editPasajeroNombres" required>
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" id="editPasajeroApellidos" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label>Celular</label>
+            <input type="text" id="editPasajeroCelular" required>
+          </div>
+          <div class="form-group">
+            <label>Cédula</label>
+            <input type="text" id="editPasajeroCedula">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" id="editPasajeroDireccion">
+        </div>
+
+        <div class="form-group">
+          <label>Motivo de Desactivación (opcional)</label>
+          <input type="text" id="editPasajeroMotivo" placeholder="Solo si deshabilita el perfil">
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 20px;">
+          <button type="button" class="btn-secondary" onclick="closeEditModalPasajero()">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Cambios</button>
+          <button type="button" class="btn-warning" id="btnToggleModalPasajero" onclick="toggleEstadoPasajeroDesdeModal()">Deshabilitar</button>
+          <button type="button" class="btn-danger" onclick="deleteCurrentPasajero()">Eliminar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<div class="card">
     <div class="header">
       <div class="header-icon">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1237,7 +1344,17 @@
       </div>
       <h2>Panel de Administración</h2>
       <p class="subtitle">Gestión de conductores registrados</p>
+    <!-- Section Tabs -->
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="switchSection('conductores', this)">🚗 Conductores</button>
+      <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
     </div>
+
+
+    </div>
+
+        <!-- CONDUCTORES SECTION -->
+    <div id="conductoresSection" class="section-content active">
 
     <!-- Stats -->
     <div class="stats-grid">
@@ -1287,7 +1404,65 @@
       </table>
     </div>
 
-    <!-- Botones -->
+        </div>
+
+    <!-- PASAJEROS SECTION -->
+    <div id="pasajerosSection" class="section-content">
+      <div class="header" style="margin-top: 20px;">
+        <h2 style="font-size: 24px;">Pasajeros Registrados</h2>
+        <p class="subtitle">Gestión de usuarios pasajeros</p>
+      </div>
+
+      <!-- Stats Pasajeros -->
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalCountPasajeros">0</div>
+          <div class="stat-label">Total Pasajeros</div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-value" id="activeCountPasajeros">0</div>
+          <div class="stat-label">Activos</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-value" id="pendingCountPasajeros">0</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-card inactive">
+          <div class="stat-value" id="inactiveCountPasajeros">0</div>
+          <div class="stat-label">Inactivos</div>
+        </div>
+      </div>
+
+      <!-- Filtros Pasajeros -->
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterPasajeros('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="filterPasajeros('activo', this)">Activos</button>
+        <button class="filter-btn" onclick="filterPasajeros('pendiente', this)">Pendientes</button>
+        <button class="filter-btn" onclick="filterPasajeros('inactivo', this)">Inactivos</button>
+      </div>
+
+      <!-- Tabla Pasajeros -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Pasajero</th>
+              <th>Correo</th>
+              <th>Celular</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="pasajerosTable">
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Cargando pasajeros...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+<!-- Botones -->
     <div class="btn-group">
       <button class="btn-primary" onclick="refreshData()">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
@@ -1368,6 +1543,11 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allConductores = [];
+let allPasajeros = [];
+let currentFilterPasajeros = 'todos';
+let pasajeroEditId = null;
+let pasajeroEditActivo = null;
+
 let currentFilter = 'todos';
 let conductorEditId = null;
 let conductorEditActivo = null;
@@ -1432,6 +1612,381 @@ function goToCreateAdmin() {
   window.location.href = 'admin.html';
 }
 
+
+// ==================== SECCIÓN PASAJEROS ====================
+
+function switchSection(section, btn) {
+  document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+  document.getElementById(section + 'Section').classList.add('active');
+}
+
+function obtenerEstadoPasajero(p) {
+  if (p.estado === 'activo' || p.estado === true) return 'activo';
+  if (p.estado === 'pendiente') return 'pendiente';
+  if (p.estado === 'inactivo' || p.estado === false) return 'inactivo';
+  return 'pendiente';
+}
+
+async function cargarPasajeros() {
+  try {
+    const { data: pasajeros, error } = await supabaseClient
+      .from('passengers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    allPasajeros = pasajeros || [];
+    updateStatsPasajeros();
+    renderTablePasajeros();
+
+  } catch (error) {
+    console.error('Error cargando pasajeros:', error);
+    showToast('Error al cargar pasajeros', 'error');
+  }
+}
+
+function updateStatsPasajeros() {
+  const total = allPasajeros.length;
+  const active = allPasajeros.filter(p => obtenerEstadoPasajero(p) === 'activo').length;
+  const pending = allPasajeros.filter(p => obtenerEstadoPasajero(p) === 'pendiente').length;
+  const inactive = allPasajeros.filter(p => obtenerEstadoPasajero(p) === 'inactivo').length;
+
+  document.getElementById('totalCountPasajeros').textContent = total;
+  document.getElementById('activeCountPasajeros').textContent = active;
+  document.getElementById('pendingCountPasajeros').textContent = pending;
+  document.getElementById('inactiveCountPasajeros').textContent = inactive;
+}
+
+async function renderTablePasajeros() {
+  const tbody = document.getElementById('pasajerosTable');
+
+  let filtered = allPasajeros;
+  if (currentFilterPasajeros !== 'todos') {
+    filtered = allPasajeros.filter(p => obtenerEstadoPasajero(p) === currentFilterPasajeros);
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+          No hay pasajeros ${currentFilterPasajeros !== 'todos' ? 'con este filtro' : 'registrados'}
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  for (const p of filtered) {
+    const estado = obtenerEstadoPasajero(p);
+    const statusClass = estado;
+    const statusText = estado.charAt(0).toUpperCase() + estado.slice(1);
+
+    let email = "Cargando...";
+    if (p.auth_user_id) {
+      email = await obtenerEmailDesdeAuth(p.auth_user_id);
+    } else {
+      email = p.email || "No registrado";
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <span class="status-badge ${statusClass}">
+          ${statusText}
+        </span>
+      </td>
+      <td>
+        <div class="conductor-name">${p.nombres || ''} ${p.apellidos || ''}</div>
+      </td>
+      <td>
+        <div class="conductor-email" title="${email}">${email}</div>
+      </td>
+      <td style="color: #60a5fa;">
+        ${p.celular || '-'}
+      </td>
+      <td>
+        <div class="actions">
+          <button class="action-btn view" onclick="viewPasajero('${p.id}')" title="Ver Perfil">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+          <button class="action-btn edit" onclick="openEditModalPasajero('${p.id}')" title="Editar">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </button>
+          <button class="action-btn toggle ${estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstadoPasajero('${p.id}')" title="${estado === 'activo' ? 'Deshabilitar' : 'Habilitar'}">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              ${estado === 'activo' 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+              }
+            </svg>
+          </button>
+          <button class="action-btn delete" onclick="deletePasajero('${p.id}')" title="Eliminar">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function filterPasajeros(filter, btn) {
+  currentFilterPasajeros = filter;
+
+  document.querySelectorAll('#pasajerosSection .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  renderTablePasajeros();
+}
+
+function viewPasajero(id) {
+  window.open(`perfil_publico.html?id=${id}&tipo=pasajero`, '_blank');
+}
+
+async function toggleEstadoPasajero(id) {
+  const pasajero = allPasajeros.find(p => p.id === id);
+  if (!pasajero) return;
+
+  const estadoActual = obtenerEstadoPasajero(pasajero);
+  let nuevoEstado;
+  let motivo = null;
+
+  if (estadoActual === 'activo') {
+    if (isCapacitor && Dialog) {
+      const { value } = await Dialog.prompt({
+        title: 'Desactivar Pasajero',
+        message: 'Ingrese motivo de desactivación:',
+        inputPlaceholder: 'Motivo...'
+      });
+      if (!value || value.trim() === '') {
+        showToast('Debe ingresar un motivo para desactivar', 'error');
+        return;
+      }
+      motivo = value.trim();
+      nuevoEstado = 'inactivo';
+    } else {
+      const motivoInput = prompt('Ingrese motivo de desactivación:');
+      if (!motivoInput || motivoInput.trim() === '') {
+        showToast('Debe ingresar un motivo para desactivar', 'error');
+        return;
+      }
+      motivo = motivoInput.trim();
+      nuevoEstado = 'inactivo';
+    }
+  } else {
+    nuevoEstado = 'activo';
+  }
+
+  try {
+    const updateData = {
+      estado: nuevoEstado,
+      motivo_desactivacion: motivo,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabaseClient
+      .from('passengers')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+
+    showToast(`Estado actualizado a ${nuevoEstado}`, 'success');
+
+    if (pasajeroEditId === id) {
+      pasajeroEditActivo = nuevoEstado === 'activo';
+      const btnToggle = document.getElementById('btnToggleModalPasajero');
+      if (btnToggle) {
+        btnToggle.textContent = nuevoEstado === 'activo' ? 'Deshabilitar' : 'Habilitar';
+        btnToggle.className = nuevoEstado === 'activo' ? 'btn-warning' : 'btn-success';
+      }
+    }
+
+    cargarPasajeros();
+
+  } catch (error) {
+    showToast('Error al actualizar estado: ' + error.message, 'error');
+  }
+}
+
+async function openEditModalPasajero(id) {
+  pasajeroEditId = id;
+  showLoading('Cargando datos...');
+
+  try {
+    const { data: p, error } = await supabaseClient
+      .from("passengers")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !p) {
+      hideLoading();
+      showToast("Error cargando pasajero", "error");
+      return;
+    }
+
+    pasajeroEditActivo = obtenerEstadoPasajero(p) === 'activo';
+
+    let email = "No disponible";
+    if (p.auth_user_id) {
+      email = await obtenerEmailDesdeAuth(p.auth_user_id);
+    } else {
+      email = p.email || "No registrado";
+    }
+
+    document.getElementById('editPasajeroId').value = p.id;
+    document.getElementById('editPasajeroEmail').value = email;
+    document.getElementById('editPasajeroNombres').value = p.nombres || '';
+    document.getElementById('editPasajeroApellidos').value = p.apellidos || '';
+    document.getElementById('editPasajeroCelular').value = p.celular || '';
+    document.getElementById('editPasajeroCedula').value = p.cedula || '';
+    document.getElementById('editPasajeroDireccion').value = p.direccion || '';
+    document.getElementById('editPasajeroMotivo').value = p.motivo_desactivacion || '';
+
+    const btnToggle = document.getElementById('btnToggleModalPasajero');
+    if (btnToggle) {
+      btnToggle.textContent = pasajeroEditActivo ? 'Deshabilitar' : 'Habilitar';
+      btnToggle.className = pasajeroEditActivo ? 'btn-warning' : 'btn-success';
+    }
+
+    hideLoading();
+
+    const modal = document.getElementById('editModalPasajero');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    if (isCapacitor && Keyboard) {
+      Keyboard.hide().catch(() => {});
+    }
+  } catch (err) {
+    hideLoading();
+    showToast("Error al abrir modal", "error");
+    console.error(err);
+  }
+}
+
+function closeEditModalPasajero() {
+  const modal = document.getElementById('editModalPasajero');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+
+  pasajeroEditId = null;
+  pasajeroEditActivo = null;
+
+  if (isCapacitor && Keyboard) {
+    Keyboard.hide().catch(() => {});
+  }
+}
+
+async function toggleEstadoPasajeroDesdeModal() {
+  if (!pasajeroEditId) return;
+  await toggleEstadoPasajero(pasajeroEditId);
+}
+
+async function deleteCurrentPasajero() {
+  if (!pasajeroEditId) return;
+  await deletePasajero(pasajeroEditId);
+  closeEditModalPasajero();
+}
+
+async function deletePasajero(id) {
+  let confirmado = false;
+
+  if (isCapacitor && Dialog) {
+    const { value } = await Dialog.confirm({
+      title: 'Eliminar Pasajero',
+      message: '¿Seguro de eliminar este pasajero permanentemente? Esta acción no se puede deshacer.',
+      okButtonTitle: 'Eliminar',
+      cancelButtonTitle: 'Cancelar'
+    });
+    confirmado = value;
+  } else {
+    confirmado = confirm("¿Seguro de eliminar este pasajero permanentemente? Esta acción no se puede deshacer.");
+  }
+
+  if (!confirmado) return;
+
+  showLoading("Eliminando...");
+
+  try {
+    const { error } = await supabaseClient
+      .from("passengers")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    showToast("Pasajero eliminado correctamente", "success");
+    await cargarPasajeros();
+
+  } catch (error) {
+    console.error("Error eliminando:", error);
+    showToast("Error al eliminar: " + error.message, "error");
+  } finally {
+    hideLoading();
+  }
+}
+
+// Event listener para modal pasajero
+document.getElementById('editModalPasajero').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeEditModalPasajero();
+});
+
+// Form pasajero
+document.getElementById('editFormPasajero').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!pasajeroEditId) return;
+
+  showLoading("Guardando cambios...");
+
+  try {
+    const campos = {
+      nombres: document.getElementById("editPasajeroNombres").value.trim(),
+      apellidos: document.getElementById("editPasajeroApellidos").value.trim(),
+      celular: document.getElementById("editPasajeroCelular").value.trim(),
+      cedula: document.getElementById("editPasajeroCedula").value.trim(),
+      direccion: document.getElementById("editPasajeroDireccion").value.trim(),
+      motivo_desactivacion: document.getElementById("editPasajeroMotivo").value.trim() || null,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabaseClient
+      .from("passengers")
+      .update(campos)
+      .eq("id", pasajeroEditId);
+
+    if (error) { 
+      hideLoading();
+      showToast("Error al guardar: " + error.message, "error"); 
+      return; 
+    }
+
+    hideLoading();
+    showToast("Cambios guardados correctamente", "success");
+    closeEditModalPasajero();
+    await cargarPasajeros();
+  } catch (err) {
+    hideLoading();
+    showToast("Error al guardar", "error");
+    console.error(err);
+  }
+});
+
 // Verificación de admin
 async function verificarAdmin() {
   showLoading('Verificando acceso...');
@@ -1456,6 +2011,7 @@ async function verificarAdmin() {
     }
 
     await cargarConductores();
+    await cargarPasajeros();
     hideLoading();
     
     if (isCapacitor && SplashScreen) {
@@ -2267,6 +2823,7 @@ async function sendQRByEmail() {
 
 function refreshData() {
   cargarConductores();
+  cargarPasajeros();
   showToast('Datos actualizados', 'success');
 }
 
@@ -2314,6 +2871,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeEditModal();
+      closeEditModalPasajero();
       closeQrModal();
     }
   });
