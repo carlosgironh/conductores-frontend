@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Contacta con nosotros | Road To</title>
+  <title>Sugerencias y opiniones | Road To</title>
   <meta name="theme-color" content="#09100d">
-  
+
   <link rel="stylesheet" href="theme.css">
   <style>
-    /* Estilos específicos de la página de contacto - Base en theme.css */
+    /* Estilos específicos de la página de sugerencias - Base en theme.css */
     html, body { height: 100%; background: linear-gradient(180deg, #0f1814 0%, var(--bg-base) 100%); }
 
     .container {
@@ -185,6 +185,7 @@
       .form-side { padding: var(--sp-lg); }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
   <div class="container">
@@ -192,45 +193,24 @@
       <div class="info-side">
         <a href="empresa.html" class="back-link">← Volver</a>
         <div>
-          <div class="kicker">Contacta con nosotros</div>
-          <h1>¿Tienes alguna consulta?</h1>
-          <p class="lead">Nuestro equipo está aquí para ayudarte. Cuéntanos cómo podemos mejorar tu experiencia en Road To o responder cualquier pregunta que tengas.</p>
+          <div class="kicker">Sugerencias y opiniones</div>
+          <h1>¿Quieres ayudarnos a mejorar?</h1>
+          <p class="lead">Tu opinión es muy importante para nosotros. Cuéntanos qué te gustaría ver en Road To, qué podemos hacer mejor o cualquier idea que tengas para mejorar la plataforma.</p>
         </div>
         <div class="contact-items">
           <div class="contact-item">
             <div class="icon">📧</div>
             <div>
               <h4>Correo electrónico</h4>
-              <p><a href="mailto:soporte@roadto.com">soporte@roadto.com</a></p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="icon">📱</div>
-            <div>
-              <h4>Teléfono</h4>
-              <p><a href="tel:+1234567890">+1 234 567 890</a></p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="icon">🌐</div>
-            <div>
-              <h4>Centro de soporte</h4>
-              <p><a href="https://soporte.myftp.org" target="_blank">soporte.myftp.org</a></p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <div class="icon">⏱️</div>
-            <div>
-              <h4>Tiempo de respuesta</h4>
-              <p>Respondemos en máximo 24 horas laborales</p>
+              <p><a href="mailto:admin.roadto@gmail.com">admin.roadto@gmail.com</a></p>
             </div>
           </div>
         </div>
       </div>
 
       <form class="form-side" onsubmit="handleSubmit(event)">
-        <div class="success-message" id="successMsg">✓ Gracias por tu consulta. Nos pondremos en contacto pronto.</div>
-        
+        <div class="success-message" id="successMsg">✓ Gracias por tu sugerencia. La tendremos en cuenta.</div>
+
         <div class="form-group">
           <label for="nombre">Nombre completo</label>
           <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
@@ -242,16 +222,16 @@
         </div>
 
         <div class="form-group">
-          <label for="asunto">Asunto</label>
-          <input type="text" id="asunto" name="asunto" placeholder="¿Sobre qué es tu consulta?" required>
+          <label for="asunto">Tema de la sugerencia</label>
+          <input type="text" id="asunto" name="asunto" placeholder="¿Sobre qué quieres darnos tu opinión?" required>
         </div>
 
         <div class="form-group">
-          <label for="mensaje">Mensaje</label>
-          <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos más detalles sobre tu consulta..." required></textarea>
+          <label for="mensaje">Tu sugerencia u opinión</label>
+          <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos en detalle tu idea, sugerencia o opinión..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-submit">Enviar consulta</button>
+        <button type="submit" class="btn btn-submit">Enviar sugerencia</button>
       </form>
     </div>
   </div>
@@ -261,14 +241,14 @@
       e.preventDefault();
       const form = e.target;
       const successMsg = document.getElementById('successMsg');
-      
+
       // Show success message
       successMsg.style.display = 'block';
-      
+
       // Reset form
       form.reset();
-      
-      // Hide message after 4 seconds and optionally redirect
+
+      // Hide message after 4 seconds
       setTimeout(() => {
         successMsg.style.display = 'none';
       }, 4000);
