@@ -197,6 +197,44 @@
     content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: 40px; height: 3px; background: linear-gradient(90deg, var(--corp-green), var(--corp-green-lime)); border-radius: 3px;
   }
+  
+  /* Formulario de completar perfil */
+  .complete-profile {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  .complete-profile.show { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .complete-profile h3 {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--corp-green-light);
+  }
+  .complete-profile p {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+  .form-group input {
+    padding: 14px 16px;
+  }
+  
   @media (max-width: 480px) {
     .card { padding: 40px 25px; border-radius: 24px; }
     h2 { font-size: 26px; }
@@ -228,29 +266,60 @@
     </div>
   </header>
 
-<div class="card">
-  <div class="header-icon">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-    </svg>
+<div class="card" id="mainCard">
+  <!-- LOGIN FORM -->
+  <div id="loginForm">
+    <div class="header-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+      </svg>
+    </div>
+    <h2>Ingreso a Road To</h2>
+    <div class="input-group">
+      <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+      </svg>
+      <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
+    </div>
+    <div class="input-group">
+      <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
+    <div class="divider"></div>
+    <button class="btn-reset" onclick="recuperar()">¿Olvidaste tu contraseña?</button>
+    <div id="msg" class="msg"></div>
   </div>
-  <h2>Ingreso a Road To</h2>
-  <div class="input-group">
-    <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
-    </svg>
-    <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
+
+  <!-- COMPLETAR PERFIL FORM (oculto inicialmente) -->
+  <div id="completeProfileForm" class="complete-profile">
+    <div class="header-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+      </svg>
+    </div>
+    <h2>Completar Perfil</h2>
+    <p>Es tu primera vez. Completa tus datos para continuar.</p>
+    
+    <div class="form-group">
+      <label>Nombres</label>
+      <input id="cp-nombres" type="text" placeholder="Tu nombre">
+    </div>
+    <div class="form-group">
+      <label>Apellidos</label>
+      <input id="cp-apellidos" type="text" placeholder="Tu apellido">
+    </div>
+    <div class="form-group">
+      <label>Celular</label>
+      <input id="cp-celular" type="text" placeholder="0999999999">
+    </div>
+    
+    <button class="btn-login" id="cpBtn" onclick="createPassengerProfile()">Guardar y Continuar</button>
+    <button class="btn-reset" onclick="logoutAndReturn()">Cancelar</button>
+    <div id="cp-msg" class="msg"></div>
   </div>
-  <div class="input-group">
-    <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-    </svg>
-    <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
-  </div>
-  <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
-  <div class="divider"></div>
-  <button class="btn-reset" onclick="recuperar()">¿Olvidaste tu contraseña?</button>
-  <div id="msg" class="msg"></div>
 </div>
 
 <script>
@@ -260,17 +329,36 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+let currentUserId = null;
+let currentUserEmail = null;
+
 function goBack() {
   if (window.history.length > 1) window.history.back();
   else window.location.href = 'index.html';
 }
 function goHome() { window.location.href = 'index.html'; }
 
-function showMessage(text, type = '') {
-  const msg = document.getElementById("msg");
+function showMessage(text, type = '', targetId = 'msg') {
+  const msg = document.getElementById(targetId);
   msg.textContent = text;
   msg.className = 'msg show ' + type;
   if (!text) msg.classList.remove('show');
+}
+
+function showLoginForm() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('completeProfileForm').classList.remove('show');
+}
+
+function showCompleteProfileForm() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('completeProfileForm').classList.add('show');
+}
+
+async function logoutAndReturn() {
+  await supabaseClient.auth.signOut();
+  showLoginForm();
+  showMessage("Ingresa nuevamente para registrarte", "", "msg");
 }
 
 async function login() {
@@ -301,6 +389,8 @@ async function login() {
     }
 
     const userId = authData.user.id;
+    currentUserId = userId;
+    currentUserEmail = email;
     console.log("[LOGIN] Usuario autenticado:", userId);
 
     // 1. Verificar si es admin
@@ -339,28 +429,59 @@ async function login() {
       return;
     }
 
-    // 4. AUTO-CREAR PASAJERO si no existe en ninguna tabla
-    console.log("[LOGIN] Usuario no encontrado en tablas. Intentando auto-crear pasajero...");
-    showMessage("Creando perfil de pasajero...", "loading");
-
-    const { error: insertError } = await supabaseClient
-      .from('passengers')
-      .insert({ id: userId, status: 'active' });
-
-    if(insertError) {
-      console.error("[LOGIN] Error auto-creando pasajero:", insertError);
-      showMessage("Error al crear perfil: " + insertError.message, "error");
-      btn.disabled = false;
-      return;
-    }
-
-    console.log("[LOGIN] Pasajero auto-creado exitosamente");
-    showMessage("¡Perfil creado! Redirigiendo...", "success");
-    setTimeout(() => window.location.href = "reservar-viaje.html", 1500);
+    // 4. NO ESTÁ EN NINGUNA TABLA -> Mostrar formulario de completar perfil
+    console.log("[LOGIN] Usuario no encontrado en tablas. Mostrando formulario de completar perfil.");
+    showMessage("Es necesario completar tu perfil", "success");
+    showCompleteProfileForm();
+    btn.disabled = false;
 
   } catch (err) {
     console.error("[LOGIN] Error inesperado:", err);
     showMessage("Error de conexión: " + err.message, "error");
+    btn.disabled = false;
+  }
+}
+
+async function createPassengerProfile() {
+  const nombres = document.getElementById('cp-nombres').value.trim();
+  const apellidos = document.getElementById('cp-apellidos').value.trim();
+  const celular = document.getElementById('cp-celular').value.trim();
+  const btn = document.getElementById('cpBtn');
+
+  if(!nombres || !apellidos || !celular){
+    showMessage("Completa todos los campos obligatorios", "error", "cp-msg");
+    return;
+  }
+
+  showMessage("Creando tu perfil...", "loading", "cp-msg");
+  btn.disabled = true;
+
+  try {
+    const { error: insertError } = await supabaseClient
+      .from('passengers')
+      .insert({ 
+        id: currentUserId,
+        nombres: nombres,
+        apellidos: apellidos,
+        celular: celular,
+        email: currentUserEmail,
+        status: 'active'
+      });
+
+    if(insertError) {
+      console.error("[LOGIN] Error creando pasajero:", insertError);
+      showMessage("Error: " + insertError.message, "error", "cp-msg");
+      btn.disabled = false;
+      return;
+    }
+
+    console.log("[LOGIN] Perfil de pasajero creado exitosamente");
+    showMessage("¡Perfil creado! Redirigiendo...", "success", "cp-msg");
+    setTimeout(() => window.location.href = "reservar-viaje.html", 1500);
+
+  } catch (err) {
+    console.error("[LOGIN] Error inesperado:", err);
+    showMessage("Error de conexión: " + err.message, "error", "cp-msg");
     btn.disabled = false;
   }
 }
