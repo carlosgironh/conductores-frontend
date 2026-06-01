@@ -489,16 +489,18 @@
                     throw new Error('Completa todos los campos obligatorios');
                 }
 
+                // CORREGIDO: Solo insertar columnas que existen en la tabla
+                const insertData = {
+                    pasajero_id: currentUser.id,
+                    origen,
+                    destino,
+                    fecha_hora: fechaHora,
+                    estado: 'pendiente'
+                };
+
                 const { data: viaje, error: insertError } = await supabaseClient
                     .from('viajes_reservados')
-                    .insert({
-                        pasajero_id: currentUser.id,
-                        origen,
-                        destino,
-                        fecha_hora: fechaHora,
-                        notas: notas || null,
-                        estado: 'pendiente'
-                    })
+                    .insert(insertData)
                     .select()
                     .single();
 
@@ -524,11 +526,9 @@
                     
                     if (!response.ok) {
                         console.warn('Edge Function warning:', result.error || 'Unknown error');
-                        // No lanzar error, el viaje ya se creó
                     }
                 } catch (edgeErr) {
                     console.warn('Edge Function no disponible:', edgeErr);
-                    // No bloquear, el viaje ya está creado
                 }
 
                 showToast('¡Viaje solicitado! Buscando conductor... 🚗');
@@ -548,7 +548,6 @@
             const container = document.getElementById('lista-mis-viajes');
 
             try {
-                // Consulta simple sin JOIN
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
@@ -566,7 +565,6 @@
                     return;
                 }
 
-                // Obtener info de conductores en paralelo
                 const viajesConductor = await Promise.all(
                     viajes.map(async (viaje) => {
                         const conductor = await getConductorInfo(viaje.conductor_asignado_id);
