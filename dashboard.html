@@ -197,44 +197,17 @@
     content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: 40px; height: 3px; background: linear-gradient(90deg, var(--corp-green), var(--corp-green-lime)); border-radius: 3px;
   }
-  
-  /* Formulario de completar perfil */
-  .complete-profile {
-    display: none;
-    animation: fadeIn 0.4s ease;
-  }
+  .complete-profile { display: none; animation: fadeIn 0.4s ease; }
   .complete-profile.show { display: block; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .complete-profile h3 {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--corp-green-light);
-  }
-  .complete-profile p {
-    text-align: center;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-  }
+  .complete-profile h3 { text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--corp-green-light); }
+  .complete-profile p { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
   .form-group { margin-bottom: 16px; }
-  .form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-muted);
-  }
-  .form-group input {
-    padding: 14px 16px;
-  }
-  
+  .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+  .form-group input { padding: 14px 16px; }
   @media (max-width: 480px) {
     .card { padding: 40px 25px; border-radius: 24px; }
     h2 { font-size: 26px; }
@@ -267,7 +240,6 @@
   </header>
 
 <div class="card" id="mainCard">
-  <!-- LOGIN FORM -->
   <div id="loginForm">
     <div class="header-icon">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,7 +265,6 @@
     <div id="msg" class="msg"></div>
   </div>
 
-  <!-- COMPLETAR PERFIL FORM (oculto inicialmente) -->
   <div id="completeProfileForm" class="complete-profile">
     <div class="header-icon">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +273,6 @@
     </div>
     <h2>Completar Perfil</h2>
     <p>Es tu primera vez. Completa tus datos para continuar.</p>
-    
     <div class="form-group">
       <label>Nombres</label>
       <input id="cp-nombres" type="text" placeholder="Tu nombre">
@@ -315,7 +285,6 @@
       <label>Celular</label>
       <input id="cp-celular" type="text" placeholder="0999999999">
     </div>
-    
     <button class="btn-login" id="cpBtn" onclick="createPassengerProfile()">Guardar y Continuar</button>
     <button class="btn-reset" onclick="logoutAndReturn()">Cancelar</button>
     <div id="cp-msg" class="msg"></div>
@@ -403,9 +372,9 @@ async function login() {
       return;
     }
 
-    // 2. Verificar si es conductor
+    // 2. Verificar si es conductor (CORREGIDO: busca por auth_user_id, no por id)
     const { data: conductorData } = await supabaseClient
-      .from('conductores').select('id').eq('id', userId).maybeSingle();
+      .from('conductores').select('id').eq('auth_user_id', userId).maybeSingle();
 
     if(conductorData) {
       showMessage("¡Bienvenido conductor! Redirigiendo...", "success");
@@ -429,7 +398,7 @@ async function login() {
       return;
     }
 
-    // 4. NO ESTÁ EN NINGUNA TABLA -> Mostrar formulario de completar perfil
+    // 4. NO ESTA EN NINGUNA TABLA -> Mostrar formulario de completar perfil
     console.log("[LOGIN] Usuario no encontrado en tablas. Mostrando formulario de completar perfil.");
     showMessage("Es necesario completar tu perfil", "success");
     showCompleteProfileForm();
