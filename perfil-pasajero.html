@@ -751,7 +751,7 @@ function renderStatusBanner(estado) {
   const existing = card.querySelector('.status-banner');
   if (existing) existing.remove();
 
-  const s = String(status || '').toLowerCase();
+  const s = String(estado || '').toLowerCase();
   let html = '';
 
   if (s === 'active' || s === 'true') {

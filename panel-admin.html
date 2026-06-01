@@ -2034,12 +2034,11 @@ async function obtenerEmailDesdeAuth(authUserId) {
       emailCache.set(authUserId, email);
       return email;
     }
-    }
-    
+
     const email = data || "No disponible";
     emailCache.set(authUserId, email);
     return email;
-    
+
   } catch (e) {
     return "Error al obtener";
   }
