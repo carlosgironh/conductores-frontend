@@ -348,6 +348,7 @@
         }
     </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -424,7 +425,7 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
         const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
 
         function showToast(message, type = 'success') {
@@ -467,7 +468,7 @@
                     throw new Error('Completa todos los campos obligatorios');
                 }
 
-                const { data: viaje, error: insertError } = await supabase
+                const { data: viaje, error: insertError } = await supabaseClient
                     .from('viajes_reservados')
                     .insert({
                         pasajero_id: currentUser.id,
@@ -480,7 +481,7 @@
 
                 if (insertError) throw insertError;
 
-                const session = await supabase.auth.getSession();
+                const session = await supabaseClient.auth.getSession();
                 const response = await fetch(EDGE_FUNCTION_URL, {
                     method: 'POST',
                     headers: {
@@ -513,7 +514,7 @@
             const container = document.getElementById('lista-mis-viajes');
 
             try {
-                const { data: viajes, error } = await supabase
+                const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select(`
                         *,
@@ -562,7 +563,7 @@
         }
 
         function iniciarRealtime() {
-            supabase
+            supabaseClient
                 .channel('mis-reservas-pasajero')
                 .on('postgres_changes', {
                     event: '*',
@@ -581,12 +582,12 @@
         }
 
         async function logout() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'dashboard.html';
         }
 
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
 
             if (!session) {
                 window.location.href = 'dashboard.html';
