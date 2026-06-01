@@ -348,7 +348,6 @@
         }
     </style>
 <base target="_blank">
-<base target="_blank">
 </head>
 <body>
 
@@ -452,6 +451,27 @@
             return badges[estado] || estado;
         }
 
+        // Obtener info del conductor por ID
+        async function getConductorInfo(conductorId) {
+            if (!conductorId) return null;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('conductores')
+                    .select('nombres, apellidos, celular, nombre')
+                    .eq('id', conductorId)
+                    .maybeSingle();
+                
+                if (error || !data) return null;
+                
+                return {
+                    nombre: data.nombre || `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+                    telefono: data.celular || 'No disponible'
+                };
+            } catch (e) {
+                return null;
+            }
+        }
+
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -463,6 +483,7 @@
                 const origen = document.getElementById('origen').value.trim();
                 const destino = document.getElementById('destino').value.trim();
                 const fechaHora = document.getElementById('fecha-hora').value;
+                const notas = document.getElementById('notas').value.trim();
 
                 if (!origen || !destino || !fechaHora) {
                     throw new Error('Completa todos los campos obligatorios');
@@ -474,28 +495,41 @@
                         pasajero_id: currentUser.id,
                         origen,
                         destino,
-                        fecha_hora: fechaHora
+                        fecha_hora: fechaHora,
+                        notas: notas || null,
+                        estado: 'pendiente'
                     })
                     .select()
                     .single();
 
                 if (insertError) throw insertError;
 
-                const session = await supabaseClient.auth.getSession();
-                const response = await fetch(EDGE_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.data.session?.access_token}`
-                    },
-                    body: JSON.stringify({
-                        action: 'buscar_candidatos',
-                        viaje_id: viaje.id
-                    })
-                });
+                // Llamar a la Edge Function para notificar conductores
+                try {
+                    const session = await supabaseClient.auth.getSession();
+                    const response = await fetch(EDGE_FUNCTION_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.data.session?.access_token}`
+                        },
+                        body: JSON.stringify({
+                            action: 'buscar_candidatos',
+                            viaje_id: viaje.id
+                        })
+                    });
 
-                const result = await response.json();
-                console.log('Notificación a conductores:', result);
+                    const result = await response.json();
+                    console.log('Notificación a conductores:', result);
+                    
+                    if (!response.ok) {
+                        console.warn('Edge Function warning:', result.error || 'Unknown error');
+                        // No lanzar error, el viaje ya se creó
+                    }
+                } catch (edgeErr) {
+                    console.warn('Edge Function no disponible:', edgeErr);
+                    // No bloquear, el viaje ya está creado
+                }
 
                 showToast('¡Viaje solicitado! Buscando conductor... 🚗');
                 document.getElementById('form-reserva').reset();
@@ -514,16 +548,10 @@
             const container = document.getElementById('lista-mis-viajes');
 
             try {
+                // Consulta simple sin JOIN
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
-                    .select(`
-                        *,
-                        conductor:conductor_asignado_id (
-                            id,
-                            raw_user_meta_data->>nombre as nombre,
-                            raw_user_meta_data->>telefono as telefono
-                        )
-                    `)
+                    .select('*')
                     .eq('pasajero_id', currentUser.id)
                     .order('created_at', { ascending: false });
 
@@ -538,7 +566,15 @@
                     return;
                 }
 
-                container.innerHTML = viajes.map(v => `
+                // Obtener info de conductores en paralelo
+                const viajesConductor = await Promise.all(
+                    viajes.map(async (viaje) => {
+                        const conductor = await getConductorInfo(viaje.conductor_asignado_id);
+                        return { ...viaje, conductor };
+                    })
+                );
+
+                container.innerHTML = viajesConductor.map(v => `
                     <div class="viaje-item">
                         <div class="viaje-route">
                             <span class="origin">📍 ${v.origen}</span>
@@ -550,15 +586,16 @@
                         </div>
                         ${v.conductor ? `
                             <div class="conductor-info">
-                                <strong>👤 Conductor:</strong> ${v.conductor.nombre || 'Sin nombre'}<br>
-                                <strong>📞 Teléfono:</strong> ${v.conductor.telefono || 'No disponible'}
+                                <strong>👤 Conductor:</strong> ${v.conductor.nombre}<br>
+                                <strong>📞 Teléfono:</strong> ${v.conductor.telefono}
                             </div>
                         ` : ''}
                     </div>
                 `).join('');
 
             } catch (err) {
-                container.innerHTML = `<div class="empty-state">Error al cargar reservas</div>`;
+                console.error('Error cargando viajes:', err);
+                container.innerHTML = `<div class="empty-state">Error al cargar reservas: ${err.message}</div>`;
             }
         }
 
