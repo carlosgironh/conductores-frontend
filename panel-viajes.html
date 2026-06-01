@@ -488,13 +488,38 @@
             return badges[estado] || estado;
         }
 
+        // Función para obtener datos del pasajero por ID
+        async function getPasajeroInfo(pasajeroId) {
+            if (!pasajeroId) return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
+            try {
+                const { data, error } = await supabaseClient
+                    .from('passengers')
+                    .select('nombres, apellidos, celular, email')
+                    .eq('id', pasajeroId)
+                    .maybeSingle();
+                
+                if (error || !data) {
+                    return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
+                }
+                
+                return {
+                    nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+                    telefono: data.celular || 'No disponible',
+                    email: data.email || 'No disponible'
+                };
+            } catch (e) {
+                return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
+            }
+        }
+
         async function cargarViajesDisponibles() {
             const container = document.getElementById('lista-disponibles');
 
             try {
+                // Consulta simple sin JOIN
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
-                    .select(`*, pasajero:pasajero_id (id, raw_user_meta_data->>nombre as nombre, raw_user_meta_data->>telefono as telefono)`)
+                    .select('*')
                     .eq('estado', 'pendiente')
                     .order('fecha_hora', { ascending: true });
 
@@ -512,7 +537,15 @@
                     return;
                 }
 
-                container.innerHTML = viajes.map(viaje => `
+                // Obtener info de pasajeros en paralelo
+                const viajesConPasajero = await Promise.all(
+                    viajes.map(async (viaje) => {
+                        const pasajero = await getPasajeroInfo(viaje.pasajero_id);
+                        return { ...viaje, pasajero };
+                    })
+                );
+
+                container.innerHTML = viajesConPasajero.map(viaje => `
                     <div class="viaje-item" data-id="${viaje.id}">
                         <div class="viaje-route">
                             <span class="origin">📍 ${viaje.origen}</span>
@@ -524,8 +557,8 @@
                             <span>${getEstadoBadge(viaje.estado)}</span>
                         </div>
                         <div class="pasajero-info">
-                            <strong>Pasajero:</strong> ${viaje.pasajero?.nombre || 'Sin nombre'}<br>
-                            <strong>Teléfono:</strong> ${viaje.pasajero?.telefono || 'No disponible'}
+                            <strong>Pasajero:</strong> ${viaje.pasajero.nombre}<br>
+                            <strong>Teléfono:</strong> ${viaje.pasajero.telefono}
                         </div>
                         <button class="btn btn-primary" onclick="aceptarViaje('${viaje.id}', this)">
                             ✋ Aceptar Viaje
@@ -535,7 +568,7 @@
 
             } catch (err) {
                 console.error('Error cargando viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error al cargar viajes</p></div>`;
+                container.innerHTML = `<div class="empty-state"><p>Error al cargar viajes: ${err.message}</p></div>`;
             }
         }
 
@@ -543,9 +576,10 @@
             const container = document.getElementById('lista-asignados');
 
             try {
+                // Consulta simple sin JOIN
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
-                    .select(`*, pasajero:pasajero_id (id, raw_user_meta_data->>nombre as nombre, raw_user_meta_data->>telefono as telefono, raw_user_meta_data->>email as email)`)
+                    .select('*')
                     .eq('conductor_asignado_id', currentUser.id)
                     .in('estado', ['asignado', 'completado'])
                     .order('fecha_hora', { ascending: true });
@@ -568,7 +602,15 @@
                     return;
                 }
 
-                container.innerHTML = viajes.map(viaje => `
+                // Obtener info de pasajeros en paralelo
+                const viajesConPasajero = await Promise.all(
+                    viajes.map(async (viaje) => {
+                        const pasajero = await getPasajeroInfo(viaje.pasajero_id);
+                        return { ...viaje, pasajero };
+                    })
+                );
+
+                container.innerHTML = viajesConPasajero.map(viaje => `
                     <div class="viaje-item asignado" data-id="${viaje.id}">
                         <div class="viaje-route">
                             <span class="origin">📍 ${viaje.origen}</span>
@@ -580,9 +622,9 @@
                             <span>${getEstadoBadge(viaje.estado)}</span>
                         </div>
                         <div class="pasajero-info">
-                            <strong>👤 Pasajero:</strong> ${viaje.pasajero?.nombre || 'Sin nombre'}<br>
-                            <strong>📞 Teléfono:</strong> ${viaje.pasajero?.telefono || 'No disponible'}<br>
-                            <strong>✉️ Email:</strong> ${viaje.pasajero?.email || 'No disponible'}
+                            <strong>👤 Pasajero:</strong> ${viaje.pasajero.nombre}<br>
+                            <strong>📞 Teléfono:</strong> ${viaje.pasajero.telefono}<br>
+                            <strong>✉️ Email:</strong> ${viaje.pasajero.email}
                         </div>
                         ${viaje.estado === 'asignado' ? `
                             <button class="btn btn-success" onclick="completarViaje('${viaje.id}')">
@@ -594,7 +636,7 @@
 
             } catch (err) {
                 console.error('Error cargando mis viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error al cargar tus viajes</p></div>`;
+                container.innerHTML = `<div class="empty-state"><p>Error al cargar tus viajes: ${err.message}</p></div>`;
             }
         }
 
@@ -682,7 +724,7 @@
 
             currentUser = session.user;
 
-            // CORREGIDO: Buscar conductor por auth_user_id, no por id
+            // Verificar que sea conductor
             const { data: conductor } = await supabaseClient
                 .from('conductores')
                 .select('id')
