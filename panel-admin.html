@@ -1062,6 +1062,7 @@
 </style>
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -1629,19 +1630,23 @@ function obtenerEstadoPasajero(p) {
 
 async function cargarPasajeros() {
   try {
+    console.log('[PASAJEROS] Iniciando carga...');
     const { data: pasajeros, error } = await supabaseClient
       .from('passengers')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('[PASAJEROS] Error:', error);
+      console.error('[PASAJEROS] Error Supabase:', error);
       const tbody = document.getElementById('pasajerosTable');
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#f87171;">Error cargando pasajeros: ${error.message}</td></tr>`;
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#f87171;">Error cargando pasajeros: ${error.message}<br><small style="color:#64748b;">Revisa las políticas RLS en Supabase</small></td></tr>`;
+      }
       showToast('Error al cargar pasajeros: ' + error.message, 'error');
       return;
     }
 
+    console.log('[PASAJEROS] Datos recibidos:', pasajeros?.length || 0, pasajeros);
     allPasajeros = pasajeros || [];
     updateStatsPasajeros();
     renderTablePasajeros();
@@ -1666,6 +1671,12 @@ function updateStatsPasajeros() {
 
 async function renderTablePasajeros() {
   const tbody = document.getElementById('pasajerosTable');
+  if (!tbody) {
+    console.error('[PASAJEROS] No se encontró el tbody');
+    return;
+  }
+
+  console.log('[PASAJEROS] Renderizando, total:', allPasajeros.length, 'filtro:', currentFilterPasajeros);
 
   let filtered = allPasajeros;
   if (currentFilterPasajeros !== 'todos') {
@@ -1753,7 +1764,7 @@ function filterPasajeros(filter, btn) {
 }
 
 function viewPasajero(id) {
-  window.open(`perfil_publico.html?id=${id}&tipo=pasajero`, '_blank');
+  window.open(`perfil-pasajero.html?id=${id}`, '_blank');
 }
 
 async function toggleEstadoPasajero(id) {
@@ -1973,8 +1984,8 @@ async function verificarAdmin() {
       return;
     }
 
-    await cargarConductores();
-    await cargarPasajeros();
+    try { await cargarConductores(); } catch(e) { console.error('Error conductores:', e); }
+    try { await cargarPasajeros(); } catch(e) { console.error('Error pasajeros:', e); }
     hideLoading();
     
     if (isCapacitor && SplashScreen) {
@@ -2000,15 +2011,29 @@ async function obtenerEmailDesdeAuth(authUserId) {
     });
     
     if (error) {
+      // Fallback 1: buscar en conductores
       const { data: conductorData } = await supabaseClient
         .from("conductores")
         .select("email")
         .eq("auth_user_id", authUserId)
         .single();
-      
-      const email = conductorData?.email || "No disponible";
+
+      if (conductorData?.email) {
+        emailCache.set(authUserId, conductorData.email);
+        return conductorData.email;
+      }
+
+      // Fallback 2: buscar en passengers
+      const { data: passengerData } = await supabaseClient
+        .from("passengers")
+        .select("email")
+        .eq("id", authUserId)
+        .single();
+
+      const email = passengerData?.email || "No disponible";
       emailCache.set(authUserId, email);
       return email;
+    }
     }
     
     const email = data || "No disponible";

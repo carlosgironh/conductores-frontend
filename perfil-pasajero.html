@@ -632,6 +632,7 @@
     .info-block, .documentos-section { padding: 18px; }
   }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -750,10 +751,10 @@ function renderStatusBanner(estado) {
   const existing = card.querySelector('.status-banner');
   if (existing) existing.remove();
 
-  const s = String(estado || '').toLowerCase();
+  const s = String(status || '').toLowerCase();
   let html = '';
 
-  if (s === 'activo' || s === 'true') {
+  if (s === 'active' || s === 'true') {
     html = `
       <div class="status-banner active">
         <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -764,7 +765,7 @@ function renderStatusBanner(estado) {
           <div class="status-message">Tu cuenta está habilitada para realizar reservas.</div>
         </div>
       </div>`;
-  } else if (s === 'pendiente' || s === 'revision') {
+  } else if (s === 'pending' || s === 'revision') {
     html = `
       <div class="status-banner pending">
         <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -795,7 +796,7 @@ function renderStatusBanner(estado) {
 
 /* ── Render profile ─────────────────────────────────────────────── */
 function renderPerfil(pasajero, user) {
-  renderStatusBanner(pasajero.estado);
+  renderStatusBanner(pasajero.status);
 
   // ── Avatar ──────────────────────────────────────────────────────
   const avatarSection = document.getElementById('avatarSection');
@@ -866,11 +867,32 @@ function renderPerfil(pasajero, user) {
 /* ── Load profile from Supabase ─────────────────────────────────── */
 async function cargarPerfil() {
   try {
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    // Detectar si admin está viendo perfil de otro pasajero via ?id=
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('id');
 
-    if (userError || !user) {
-      window.location.href = 'index.html';
-      return;
+    let user = null;
+    let userId = null;
+
+    if (targetId) {
+      // Modo admin: ver perfil de pasajero específico
+      userId = targetId;
+      // Obtener email del pasajero para mostrar
+      const { data: pasajeroData } = await supabaseClient
+        .from('passengers')
+        .select('email')
+        .eq('id', targetId)
+        .single();
+      user = { id: targetId, email: pasajeroData?.email || 'No disponible' };
+    } else {
+      // Modo pasajero: ver mi propio perfil
+      const { data: { user: authUser }, error: userError } = await supabaseClient.auth.getUser();
+      if (userError || !authUser) {
+        window.location.href = 'index.html';
+        return;
+      }
+      user = authUser;
+      userId = authUser.id;
     }
 
     if (!navigator.onLine && perfilCache) {
@@ -879,9 +901,9 @@ async function cargarPerfil() {
     }
 
     const { data: pasajero, error: pasError } = await supabaseClient
-      .from('pasajeros')
+      .from('passengers')
       .select('*')
-      .eq('auth_user_id', user.id)
+      .eq('id', userId)
       .single();
 
     if (pasError || !pasajero) {
