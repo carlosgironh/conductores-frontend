@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Viaje - Pasajero</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: 0 0 1rem 1rem;
+            text-align: center;
+        }
+
+        header h1 { font-size: 1.5rem; }
+        header p { color: var(--text-muted); margin-top: 0.25rem; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 3px solid var(--border);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast-success { background: var(--success); }
+        .toast-error { background: var(--danger); }
+
+        .mis-viajes {
+            margin-top: 2rem;
+        }
+
+        .viaje-item {
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .viaje-route {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .origin { color: var(--warning); }
+        .arrow { color: var(--text-muted); }
+        .destiny { color: var(--success); }
+
+        .viaje-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        .badge-pendiente { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .badge-asignado { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+        .badge-completado { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🚗 Reservar un Viaje</h1>
+        <p>Solicita tu viaje y te conectaremos con un conductor</p>
+        <div class="nav-links">
+            <a href="index.html">← Inicio</a>
+            <a href="#" onclick="logout()">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- FORMULARIO DE RESERVA -->
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem;">📋 Datos del Viaje</h2>
+            
+            <form id="form-reserva">
+                <div class="form-group">
+                    <label for="origen">📍 Origen</label>
+                    <input type="text" id="origen" placeholder="Ej: Centro Comercial, Zona 1, Aeropuerto..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="destino">🏁 Destino</label>
+                    <input type="text" id="destino" placeholder="Ej: Hotel Marriott, Terminal de Buses..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha-hora">📅 Fecha y Hora</label>
+                    <input type="datetime-local" id="fecha-hora" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="notas">📝 Notas adicionales (opcional)</label>
+                    <textarea id="notas" rows="3" placeholder="Número de pasajeros, equipaje especial, etc."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btn-submit">
+                    🚀 Solicitar Viaje
+                </button>
+            </form>
+        </div>
+
+        <!-- MIS VIAJES -->
+        <div class="mis-viajes">
+            <h2 style="margin-bottom: 1rem; font-size: 1.25rem;">📜 Mis Reservas</h2>
+            <div id="lista-mis-viajes">
+                <div class="empty-state">Cargando tus reservas...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN SUPABASE
+        // ============================================
+        const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+        const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+
+        // ============================================
+        // UTILIDADES
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('es-ES', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function getEstadoBadge(estado) {
+            const badges = {
+                'pendiente': '<span class="badge badge-pendiente">⏳ Buscando conductor...</span>',
+                'asignado': '<span class="badge badge-asignado">✅ Conductor asignado</span>',
+                'completado': '<span class="badge badge-completado">🏁 Completado</span>'
+            };
+            return badges[estado] || estado;
+        }
+
+        // ============================================
+        // CREAR RESERVA
+        // ============================================
+        document.getElementById('form-reserva').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Solicitando...';
+
+            try {
+                const origen = document.getElementById('origen').value.trim();
+                const destino = document.getElementById('destino').value.trim();
+                const fechaHora = document.getElementById('fecha-hora').value;
+
+                if (!origen || !destino || !fechaHora) {
+                    throw new Error('Completa todos los campos obligatorios');
+                }
+
+                // 1. Crear el viaje en Supabase
+                const { data: viaje, error: insertError } = await supabase
+                    .from('viajes_reservados')
+                    .insert({
+                        pasajero_id: currentUser.id,
+                        origen,
+                        destino,
+                        fecha_hora: fechaHora
+                    })
+                    .select()
+                    .single();
+
+                if (insertError) throw insertError;
+
+                // 2. Llamar Edge Function para notificar conductores
+                const session = await supabase.auth.getSession();
+                const response = await fetch(EDGE_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.data.session?.access_token}`
+                    },
+                    body: JSON.stringify({
+                        action: 'buscar_candidatos',
+                        viaje_id: viaje.id
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Notificación a conductores:', result);
+
+                showToast('¡Viaje solicitado! Buscando conductor... 🚗');
+
+                // Limpiar formulario
+                document.getElementById('form-reserva').reset();
+                
+                // Recargar lista
+                await cargarMisViajes();
+
+            } catch (err) {
+                console.error('Error:', err);
+                showToast(err.message || 'Error al crear la reserva', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Solicitar Viaje';
+            }
+        });
+
+        // ============================================
+        // CARGAR MIS VIAJES
+        // ============================================
+        async function cargarMisViajes() {
+            const container = document.getElementById('lista-mis-viajes');
+
+            try {
+                const { data: viajes, error } = await supabase
+                    .from('viajes_reservados')
+                    .select(`
+                        *,
+                        conductor:conductor_asignado_id (
+                            id,
+                            raw_user_meta_data->>nombre as nombre,
+                            raw_user_meta_data->>telefono as telefono
+                        )
+                    `)
+                    .eq('pasajero_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!viajes || viajes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>No tienes reservas activas</p>
+                            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Completa el formulario para solicitar tu primer viaje</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = viajes.map(v => `
+                    <div class="viaje-item">
+                        <div class="viaje-route">
+                            <span class="origin">📍 ${v.origen}</span>
+                            <span class="arrow">→</span>
+                            <span class="destiny">🏁 ${v.destino}</span>
+                        </div>
+                        <div class="viaje-meta">
+                            📅 ${formatDate(v.fecha_hora)} · ${getEstadoBadge(v.estado)}
+                        </div>
+                        ${v.conductor ? `
+                            <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(37,99,235,0.1); border-radius: 0.5rem; font-size: 0.9rem;">
+                                <strong>👤 Conductor:</strong> ${v.conductor.nombre || 'Sin nombre'}<<br>
+                                <strong>📞 Teléfono:</strong> ${v.conductor.telefono || 'No disponible'}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                container.innerHTML = `<div class="empty-state">Error al cargar reservas</div>`;
+            }
+        }
+
+        // ============================================
+        // REALTIME: Escuchar cambios en mis viajes
+        // ============================================
+        function iniciarRealtime() {
+            supabase
+                .channel('mis-reservas-pasajero')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'viajes_reservados',
+                    filter: `pasajero_id=eq.${currentUser.id}`
+                }, (payload) => {
+                    console.log('Cambio en mi reserva:', payload);
+                    cargarMisViajes();
+                    
+                    if (payload.new?.estado === 'asignado' && payload.old?.estado === 'pendiente') {
+                        showToast('🎉 ¡Un conductor ha aceptado tu viaje!');
+                    }
+                })
+                .subscribe();
+        }
+
+        // ============================================
+        // LOGOUT
+        // ============================================
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = session.user;
+
+            // Poner fecha mínima = ahora
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('fecha-hora').min = now.toISOString().slice(0, 16);
+
+            await cargarMisViajes();
+            iniciarRealtime();
+        }
+
+        init();
+    </script>
+</body>
+</html>
