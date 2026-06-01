@@ -2,57 +2,165 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Viajes - Conductor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a1208">
+    <title>Panel de Viajes - Conductor | Road To</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ============================================
-           ESTILOS INTEGRADOS (ajusta a tu tema actual)
-           ============================================ */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --corp-green: #8ac725;
+            --corp-green-dark: #448414;
+            --corp-green-lime: #9ad93a;
+            --corp-green-light: #b8e85c;
+            --corp-gray: #7d7d7d;
+            --corp-gray-dark: #4a4a4a;
+            --corp-gray-light: #9e9e9e;
+            --corp-gray-soft: #cbd5e1;
+            --corp-blue: #2563eb;
+            --corp-blue-dark: #1e40af;
+            --corp-blue-light: #3b82f6;
+            --corp-orange: #f97316;
+            --corp-orange-light: #fb923c;
+            --primary: var(--corp-green);
+            --primary-dark: var(--corp-green-dark);
+            --accent: var(--corp-green-lime);
+            --bg-dark: #0a1208;
+            --text-light: #eef8e4;
+            --text-muted: #8a9e7d;
             --danger: #ef4444;
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --surface-light: #334155;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #475569;
+            --warning: #f59e0b;
+            --success: #10b981;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
             min-height: 100vh;
+            background: radial-gradient(ellipse at 10% 20%, rgba(138,199,37,0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 90% 80%, rgba(154,217,58,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
+            color: var(--text-light);
+            padding-top: calc(70px + var(--safe-top));
+            padding-bottom: calc(20px + var(--safe-bottom));
         }
+
+        .app-header {
+            position: fixed;
+            top: calc(10px + var(--safe-top));
+            left: calc(10px + env(safe-area-inset-left));
+            right: calc(10px + env(safe-area-inset-right));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .brand-small {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--corp-orange);
+            text-decoration: none;
+        }
+
+        .brand-small svg { width: 24px; height: 24px; color: var(--corp-orange-light); }
+
+        .nav-buttons { display: flex; gap: 8px; }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn svg { width: 20px; height: 20px; }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem 1rem;
+            padding: 0 16px;
         }
 
-        header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
-            border-radius: 0 0 1rem 1rem;
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        header h1 { font-size: 1.5rem; color: var(--text); }
-        header p { color: var(--text-muted); margin-top: 0.25rem; }
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            border-color: rgba(138, 199, 37, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--corp-green-light);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
         .grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 2rem;
+            gap: 20px;
         }
 
         @media (min-width: 1024px) {
@@ -60,65 +168,71 @@
         }
 
         .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 1.5rem;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
         }
 
         .card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
 
         .badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .badge-pendiente { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .badge-asignado { background: rgba(37, 99, 235, 0.2); color: var(--primary); }
-        .badge-completado { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge-pendiente { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+        .badge-asignado { background: rgba(37,99,235,0.15); color: var(--corp-blue-light); border: 1px solid rgba(37,99,235,0.25); }
+        .badge-completado { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
 
         .viaje-item {
-            background: var(--surface-light);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
         }
 
         .viaje-item:hover {
-            border-color: var(--primary);
+            border-color: rgba(138, 199, 37, 0.3);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
         .viaje-item.asignado {
-            border-left: 4px solid var(--primary);
+            border-left: 3px solid var(--corp-green);
         }
 
         .viaje-route {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .viaje-route .origin { color: var(--warning); }
@@ -127,84 +241,82 @@
 
         .viaje-meta {
             display: flex;
-            gap: 1rem;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 1rem;
-            font-size: 0.85rem;
+            margin-bottom: 12px;
+            font-size: 12px;
             color: var(--text-muted);
         }
 
-        .viaje-meta span {
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
         .pasajero-info {
-            background: rgba(37, 99, 235, 0.1);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+            background: rgba(138, 199, 37, 0.08);
+            border: 1px solid rgba(138, 199, 37, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+            font-size: 13px;
         }
 
-        .pasajero-info strong { color: var(--primary); }
+        .pasajero-info strong { color: var(--corp-green-light); }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
+            gap: 6px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 0.5rem;
-            font-size: 0.95rem;
-            font-weight: 600;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             width: 100%;
+            font-family: inherit;
+            min-height: 44px;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--corp-green) 0%, var(--corp-green-dark) 100%);
+            color: #0a1208;
+            box-shadow: 0 4px 15px rgba(68, 132, 20, 0.35);
         }
 
-        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(68, 132, 20, 0.5);
+        }
 
         .btn-success {
-            background: var(--success);
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
         }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn:active { transform: scale(0.97); }
 
         .empty-state {
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 40px 20px;
             color: var(--text-muted);
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
+        .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            padding: 2rem;
-        }
+        .loading { display: flex; justify-content: center; padding: 30px; }
 
         .spinner {
-            width: 2rem;
-            height: 2rem;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
+            width: 28px; height: 28px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--corp-green);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -213,70 +325,91 @@
 
         .toast {
             position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            color: white;
-            font-weight: 500;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s;
+            bottom: max(20px, var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(10, 18, 8, 0.95);
+            color: var(--text-light);
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
             z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
         }
 
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-success { border-color: rgba(16, 185, 129, 0.3); color: #4ade80; }
+        .toast-error { border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
+
+        .nav-perfil {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: rgba(138, 199, 37, 0.1);
+            border: 1px solid rgba(138, 199, 37, 0.2);
+            border-radius: 12px;
+            color: var(--corp-green-light);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .toast-success { background: var(--success); }
-        .toast-error { background: var(--danger); }
-
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
+        .nav-perfil:hover {
+            background: rgba(138, 199, 37, 0.2);
+            transform: translateY(-1px);
         }
 
-        .stat-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1rem;
-            text-align: center;
-        }
+        .nav-perfil svg { width: 18px; height: 18px; }
 
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
 
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
+        @media (max-width: 640px) {
+            .stats-bar { gap: 8px; }
+            .stat-item { padding: 12px 8px; }
+            .stat-value { font-size: 22px; }
+            .card { padding: 18px; }
         }
-
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 4px; }
     </style>
+<base target="_blank">
 </head>
 <body>
 
-    <header>
-        <div class="container" style="max-width: 1200px; margin: 0 auto;">
-            <h1>🚗 Panel de Viajes</h1>
-            <p>Gestiona tus viajes disponibles y pasajeros asignados</p>
+    <header class="app-header">
+        <a href="index.html" class="brand-small">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+            </svg>
+            Road To
+        </a>
+        <div class="nav-buttons">
+            <a class="nav-perfil" href="perfil.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Mi Perfil
+            </a>
+            <button class="nav-btn" onclick="logout()" title="Cerrar sesión">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+            </button>
         </div>
     </header>
 
     <div class="container">
-        <!-- Stats -->
+        <h1 class="page-title">🚗 Panel de Viajes</h1>
+        <p class="page-subtitle">Gestiona tus viajes disponibles y pasajeros asignados</p>
+
         <div class="stats-bar">
             <div class="stat-item">
                 <div class="stat-value" id="stat-disponibles">0</div>
@@ -293,7 +426,6 @@
         </div>
 
         <div class="grid">
-            <!-- VIAJES DISPONIBLES -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
@@ -306,7 +438,6 @@
                 </div>
             </div>
 
-            <!-- MIS PASAJEROS ASIGNADOS -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
@@ -321,25 +452,18 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
     <script>
-        // ============================================
-        // CONFIGURACIÓN SUPABASE (ajusta con tus credenciales)
-        // ============================================
         const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
         const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let subscriptions = [];
 
-        // ============================================
-        // UTILIDADES
-        // ============================================
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleString('es-ES', {
@@ -364,23 +488,13 @@
             return badges[estado] || estado;
         }
 
-        // ============================================
-        // CARGAR VIAJES DISPONIBLES (Realtime)
-        // ============================================
         async function cargarViajesDisponibles() {
             const container = document.getElementById('lista-disponibles');
-            
+
             try {
                 const { data: viajes, error } = await supabase
                     .from('viajes_reservados')
-                    .select(`
-                        *,
-                        pasajero:pasajero_id (
-                            id,
-                            raw_user_meta_data->>nombre as nombre,
-                            raw_user_meta_data->>telefono as telefono
-                        )
-                    `)
+                    .select(`*, pasajero:pasajero_id (id, raw_user_meta_data->>nombre as nombre, raw_user_meta_data->>telefono as telefono)`)
                     .eq('estado', 'pendiente')
                     .order('fecha_hora', { ascending: true });
 
@@ -394,8 +508,7 @@
                             <div class="empty-state-icon">🛣️</div>
                             <h3>No hay viajes disponibles</h3>
                             <p>Los nuevos viajes aparecerán aquí automáticamente</p>
-                        </div>
-                    `;
+                        </div>`;
                     return;
                 }
 
@@ -426,24 +539,13 @@
             }
         }
 
-        // ============================================
-        // CARGAR MIS VIAJES ASIGNADOS
-        // ============================================
         async function cargarMisViajes() {
             const container = document.getElementById('lista-asignados');
-            
+
             try {
                 const { data: viajes, error } = await supabase
                     .from('viajes_reservados')
-                    .select(`
-                        *,
-                        pasajero:pasajero_id (
-                            id,
-                            raw_user_meta_data->>nombre as nombre,
-                            raw_user_meta_data->>telefono as telefono,
-                            raw_user_meta_data->>email as email
-                        )
-                    `)
+                    .select(`*, pasajero:pasajero_id (id, raw_user_meta_data->>nombre as nombre, raw_user_meta_data->>telefono as telefono, raw_user_meta_data->>email as email)`)
                     .eq('conductor_asignado_id', currentUser.id)
                     .in('estado', ['asignado', 'completado'])
                     .order('fecha_hora', { ascending: true });
@@ -452,7 +554,7 @@
 
                 const asignados = viajes?.filter(v => v.estado === 'asignado') ?? [];
                 const completados = viajes?.filter(v => v.estado === 'completado') ?? [];
-                
+
                 document.getElementById('stat-asignados').textContent = asignados.length;
                 document.getElementById('stat-completados').textContent = completados.length;
 
@@ -462,8 +564,7 @@
                             <div class="empty-state-icon">👤</div>
                             <h3>No tienes pasajeros asignados</h3>
                             <p>Acepta un viaje desde el panel izquierdo</p>
-                        </div>
-                    `;
+                        </div>`;
                     return;
                 }
 
@@ -487,7 +588,7 @@
                             <button class="btn btn-success" onclick="completarViaje('${viaje.id}')">
                                 ✅ Marcar como Completado
                             </button>
-                        ` : '<div style="text-align:center;color:var(--success);font-weight:600;">✓ Viaje Completado</div>'}
+                        ` : '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>'}
                     </div>
                 `).join('');
 
@@ -497,12 +598,9 @@
             }
         }
 
-        // ============================================
-        // ACEPTAR VIAJE (vía Edge Function)
-        // ============================================
         async function aceptarViaje(viajeId, btnElement) {
             btnElement.disabled = true;
-            btnElement.innerHTML = '<div class="spinner" style="width:1rem;height:1rem;border-width:2px;"></div> Procesando...';
+            btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
 
             try {
                 const response = await fetch(EDGE_FUNCTION_URL, {
@@ -519,12 +617,9 @@
                 });
 
                 const result = await response.json();
-
                 if (!response.ok) throw new Error(result.error || 'Error al aceptar viaje');
 
                 showToast('¡Viaje aceptado exitosamente! 🎉');
-                
-                // Recargar ambas listas
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
 
@@ -536,9 +631,6 @@
             }
         }
 
-        // ============================================
-        // COMPLETAR VIAJE
-        // ============================================
         async function completarViaje(viajeId) {
             try {
                 const { error } = await supabase
@@ -548,65 +640,48 @@
                     .eq('conductor_asignado_id', currentUser.id);
 
                 if (error) throw error;
-
                 showToast('Viaje marcado como completado ✅');
                 await cargarMisViajes();
-
             } catch (err) {
                 showToast('Error: ' + err.message, 'error');
             }
         }
 
-        // ============================================
-        // SUSCRIPCIONES REALTIME
-        // ============================================
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = 'dashboard.html';
+        }
+
         function iniciarSuscripciones() {
-            // Escuchar nuevos viajes pendientes
             const sub1 = supabase
                 .channel('viajes-pendientes')
                 .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'viajes_reservados',
+                    event: '*', schema: 'public', table: 'viajes_reservados',
                     filter: 'estado=eq.pendiente'
-                }, (payload) => {
-                    console.log('Cambio en viajes pendientes:', payload);
-                    cargarViajesDisponibles();
-                })
+                }, () => cargarViajesDisponibles())
                 .subscribe();
 
-            // Escuchar cambios en mis viajes asignados
             const sub2 = supabase
                 .channel('mis-viajes')
                 .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'viajes_reservados',
+                    event: '*', schema: 'public', table: 'viajes_reservados',
                     filter: `conductor_asignado_id=eq.${currentUser.id}`
-                }, (payload) => {
-                    console.log('Cambio en mis viajes:', payload);
-                    cargarMisViajes();
-                })
+                }, () => cargarMisViajes())
                 .subscribe();
 
             subscriptions.push(sub1, sub2);
         }
 
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
         async function init() {
-            // Verificar sesión
             const { data: { session } } = await supabase.auth.getSession();
-            
+
             if (!session) {
-                window.location.href = 'login.html'; // Ajusta a tu página de login
+                window.location.href = 'dashboard.html';
                 return;
             }
 
             currentUser = session.user;
 
-            // Verificar que sea conductor (opcional)
             const { data: conductor } = await supabase
                 .from('conductores')
                 .select('id')
@@ -619,20 +694,15 @@
                 return;
             }
 
-            // Cargar datos iniciales
             await cargarViajesDisponibles();
             await cargarMisViajes();
-
-            // Iniciar realtime
             iniciarSuscripciones();
         }
 
-        // Cleanup al salir
         window.addEventListener('beforeunload', () => {
             subscriptions.forEach(sub => sub.unsubscribe());
         });
 
-        // Iniciar
         init();
     </script>
 </body>
