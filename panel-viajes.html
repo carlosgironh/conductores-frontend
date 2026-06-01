@@ -459,7 +459,7 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
         const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let subscriptions = [];
@@ -492,7 +492,7 @@
             const container = document.getElementById('lista-disponibles');
 
             try {
-                const { data: viajes, error } = await supabase
+                const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select(`*, pasajero:pasajero_id (id, raw_user_meta_data->>nombre as nombre, raw_user_meta_data->>telefono as telefono)`)
                     .eq('estado', 'pendiente')
@@ -543,7 +543,7 @@
             const container = document.getElementById('lista-asignados');
 
             try {
-                const { data: viajes, error } = await supabase
+                const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select(`*, pasajero:pasajero_id (id, raw_user_meta_data->>nombre as nombre, raw_user_meta_data->>telefono as telefono, raw_user_meta_data->>email as email)`)
                     .eq('conductor_asignado_id', currentUser.id)
@@ -607,7 +607,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+                        'Authorization': `Bearer ${(await supabaseClient.auth.getSession()).data.session?.access_token}`
                     },
                     body: JSON.stringify({
                         action: 'aceptar_viaje',
@@ -633,7 +633,7 @@
 
         async function completarViaje(viajeId) {
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('viajes_reservados')
                     .update({ estado: 'completado', updated_at: new Date().toISOString() })
                     .eq('id', viajeId)
@@ -648,12 +648,12 @@
         }
 
         async function logout() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'dashboard.html';
         }
 
         function iniciarSuscripciones() {
-            const sub1 = supabase
+            const sub1 = supabaseClient
                 .channel('viajes-pendientes')
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
@@ -661,7 +661,7 @@
                 }, () => cargarViajesDisponibles())
                 .subscribe();
 
-            const sub2 = supabase
+            const sub2 = supabaseClient
                 .channel('mis-viajes')
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
@@ -673,7 +673,7 @@
         }
 
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
 
             if (!session) {
                 window.location.href = 'dashboard.html';
@@ -682,11 +682,12 @@
 
             currentUser = session.user;
 
-            const { data: conductor } = await supabase
+            // CORREGIDO: Buscar conductor por auth_user_id, no por id
+            const { data: conductor } = await supabaseClient
                 .from('conductores')
                 .select('id')
-                .eq('id', currentUser.id)
-                .single();
+                .eq('auth_user_id', currentUser.id)
+                .maybeSingle();
 
             if (!conductor) {
                 showToast('Acceso restringido a conductores', 'error');
