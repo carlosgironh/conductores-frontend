@@ -1061,6 +1061,7 @@
   }
 </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -1318,11 +1319,6 @@
         <div class="form-group">
           <label>Dirección</label>
           <input type="text" id="editPasajeroDireccion">
-        </div>
-
-        <div class="form-group">
-          <label>Motivo de Desactivación (opcional)</label>
-          <input type="text" id="editPasajeroMotivo" placeholder="Solo si deshabilita el perfil">
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 20px;">
@@ -1624,9 +1620,10 @@ function switchSection(section, btn) {
 }
 
 function obtenerEstadoPasajero(p) {
-  if (p.estado === 'activo' || p.estado === true) return 'activo';
-  if (p.estado === 'pendiente') return 'pendiente';
-  if (p.estado === 'inactivo' || p.estado === false) return 'inactivo';
+  const s = (p.status || '').toLowerCase();
+  if (s === 'active') return 'activo';
+  if (s === 'pending') return 'pendiente';
+  if (s === 'inactive' || s === 'banned') return 'inactivo';
   return 'pendiente';
 }
 
@@ -1637,7 +1634,13 @@ async function cargarPasajeros() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[PASAJEROS] Error:', error);
+      const tbody = document.getElementById('pasajerosTable');
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#f87171;">Error cargando pasajeros: ${error.message}</td></tr>`;
+      showToast('Error al cargar pasajeros: ' + error.message, 'error');
+      return;
+    }
 
     allPasajeros = pasajeros || [];
     updateStatsPasajeros();
@@ -1687,11 +1690,10 @@ async function renderTablePasajeros() {
     const statusClass = estado;
     const statusText = estado.charAt(0).toUpperCase() + estado.slice(1);
 
-    let email = "Cargando...";
-    if (p.auth_user_id) {
-      email = await obtenerEmailDesdeAuth(p.auth_user_id);
-    } else {
-      email = p.email || "No registrado";
+    // p.id IS the auth user UUID; email may be stored directly in passengers table
+    let email = p.email || 'No registrado';
+    if (!p.email && p.id) {
+      email = await obtenerEmailDesdeAuth(p.id);
     }
 
     const tr = document.createElement('tr');
@@ -1725,7 +1727,7 @@ async function renderTablePasajeros() {
           </button>
           <button class="action-btn toggle ${estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstadoPasajero('${p.id}')" title="${estado === 'activo' ? 'Deshabilitar' : 'Habilitar'}">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              ${estado === 'activo' 
+              ${estado === 'activo'
                 ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
                 : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
               }
@@ -1745,10 +1747,8 @@ async function renderTablePasajeros() {
 
 function filterPasajeros(filter, btn) {
   currentFilterPasajeros = filter;
-
   document.querySelectorAll('#pasajerosSection .filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-
   renderTablePasajeros();
 }
 
@@ -1761,62 +1761,34 @@ async function toggleEstadoPasajero(id) {
   if (!pasajero) return;
 
   const estadoActual = obtenerEstadoPasajero(pasajero);
-  let nuevoEstado;
-  let motivo = null;
+  let nuevoStatus;
 
   if (estadoActual === 'activo') {
-    if (isCapacitor && Dialog) {
-      const { value } = await Dialog.prompt({
-        title: 'Desactivar Pasajero',
-        message: 'Ingrese motivo de desactivación:',
-        inputPlaceholder: 'Motivo...'
-      });
-      if (!value || value.trim() === '') {
-        showToast('Debe ingresar un motivo para desactivar', 'error');
-        return;
-      }
-      motivo = value.trim();
-      nuevoEstado = 'inactivo';
-    } else {
-      const motivoInput = prompt('Ingrese motivo de desactivación:');
-      if (!motivoInput || motivoInput.trim() === '') {
-        showToast('Debe ingresar un motivo para desactivar', 'error');
-        return;
-      }
-      motivo = motivoInput.trim();
-      nuevoEstado = 'inactivo';
-    }
+    nuevoStatus = 'inactive';
   } else {
-    nuevoEstado = 'activo';
+    nuevoStatus = 'active';
   }
 
   try {
-    const updateData = {
-      estado: nuevoEstado,
-      motivo_desactivacion: motivo,
-      updated_at: new Date().toISOString()
-    };
-
     const { error } = await supabaseClient
       .from('passengers')
-      .update(updateData)
+      .update({ status: nuevoStatus })
       .eq('id', id);
 
     if (error) throw error;
 
-    showToast(`Estado actualizado a ${nuevoEstado}`, 'success');
+    showToast(`Estado actualizado a ${nuevoStatus}`, 'success');
 
     if (pasajeroEditId === id) {
-      pasajeroEditActivo = nuevoEstado === 'activo';
+      pasajeroEditActivo = nuevoStatus === 'active';
       const btnToggle = document.getElementById('btnToggleModalPasajero');
       if (btnToggle) {
-        btnToggle.textContent = nuevoEstado === 'activo' ? 'Deshabilitar' : 'Habilitar';
-        btnToggle.className = nuevoEstado === 'activo' ? 'btn-warning' : 'btn-success';
+        btnToggle.textContent = pasajeroEditActivo ? 'Deshabilitar' : 'Habilitar';
+        btnToggle.className = pasajeroEditActivo ? 'btn-warning' : 'btn-success';
       }
     }
 
     cargarPasajeros();
-
   } catch (error) {
     showToast('Error al actualizar estado: ' + error.message, 'error');
   }
@@ -1839,13 +1811,11 @@ async function openEditModalPasajero(id) {
       return;
     }
 
-    pasajeroEditActivo = obtenerEstadoPasajero(p) === 'activo';
+    pasajeroEditActivo = (p.status || '').toLowerCase() === 'active';
 
-    let email = "No disponible";
-    if (p.auth_user_id) {
-      email = await obtenerEmailDesdeAuth(p.auth_user_id);
-    } else {
-      email = p.email || "No registrado";
+    let email = p.email || 'No disponible';
+    if (!p.email && p.id) {
+      email = await obtenerEmailDesdeAuth(p.id);
     }
 
     document.getElementById('editPasajeroId').value = p.id;
@@ -1855,7 +1825,6 @@ async function openEditModalPasajero(id) {
     document.getElementById('editPasajeroCelular').value = p.celular || '';
     document.getElementById('editPasajeroCedula').value = p.cedula || '';
     document.getElementById('editPasajeroDireccion').value = p.direccion || '';
-    document.getElementById('editPasajeroMotivo').value = p.motivo_desactivacion || '';
 
     const btnToggle = document.getElementById('btnToggleModalPasajero');
     if (btnToggle) {
@@ -1883,10 +1852,8 @@ function closeEditModalPasajero() {
   const modal = document.getElementById('editModalPasajero');
   modal.classList.remove('show');
   document.body.style.overflow = '';
-
   pasajeroEditId = null;
   pasajeroEditActivo = null;
-
   if (isCapacitor && Keyboard) {
     Keyboard.hide().catch(() => {});
   }
@@ -1949,7 +1916,6 @@ document.getElementById('editModalPasajero').addEventListener('click', (e) => {
 // Form pasajero
 document.getElementById('editFormPasajero').addEventListener('submit', async (e) => {
   e.preventDefault();
-
   if (!pasajeroEditId) return;
 
   showLoading("Guardando cambios...");
@@ -1960,9 +1926,7 @@ document.getElementById('editFormPasajero').addEventListener('submit', async (e)
       apellidos: document.getElementById("editPasajeroApellidos").value.trim(),
       celular: document.getElementById("editPasajeroCelular").value.trim(),
       cedula: document.getElementById("editPasajeroCedula").value.trim(),
-      direccion: document.getElementById("editPasajeroDireccion").value.trim(),
-      motivo_desactivacion: document.getElementById("editPasajeroMotivo").value.trim() || null,
-      updated_at: new Date().toISOString()
+      direccion: document.getElementById("editPasajeroDireccion").value.trim()
     };
 
     const { error } = await supabaseClient
@@ -1970,10 +1934,10 @@ document.getElementById('editFormPasajero').addEventListener('submit', async (e)
       .update(campos)
       .eq("id", pasajeroEditId);
 
-    if (error) { 
+    if (error) {
       hideLoading();
-      showToast("Error al guardar: " + error.message, "error"); 
-      return; 
+      showToast("Error al guardar: " + error.message, "error");
+      return;
     }
 
     hideLoading();
@@ -1986,7 +1950,6 @@ document.getElementById('editFormPasajero').addEventListener('submit', async (e)
     console.error(err);
   }
 });
-
 // Verificación de admin
 async function verificarAdmin() {
   showLoading('Verificando acceso...');
@@ -2899,6 +2862,6 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, false);
 </script>
- 
+
 </body>
 </html>
