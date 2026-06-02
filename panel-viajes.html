@@ -830,6 +830,17 @@
             await cargarViajesDisponibles();
             await cargarMisViajes();
             iniciarSuscripciones();
+
+            // Event listeners para modal de cancelación (dentro de init para asegurar DOM listo)
+            const cancelModal = document.getElementById('cancelModal');
+            if (cancelModal) {
+                cancelModal.addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) closeCancelModal();
+                });
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCancelModal();
+            });
         }
 
         window.addEventListener('beforeunload', () => {
