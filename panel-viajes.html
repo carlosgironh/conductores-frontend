@@ -847,16 +847,6 @@
             subscriptions.forEach(sub => sub.unsubscribe());
         });
 
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('cancelModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) closeCancelModal();
-        });
-
-        // Cerrar modal con Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeCancelModal();
-        });
-
         init();
     </script>
 
