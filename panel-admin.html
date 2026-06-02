@@ -1216,6 +1216,90 @@
   .estado-option.active.asignado { background: rgba(99,102,241,0.2); color: #818cf8; border-color: rgba(99,102,241,0.4); }
   .estado-option.active.completado { background: rgba(34,197,94,0.2); color: #4ade80; border-color: rgba(34,197,94,0.4); }
   .estado-option.active.cancelado { background: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.4); }
+
+  /* Modal Asignar Conductor */
+  .conductor-select-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  .conductor-select-item:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.08);
+    transform: translateX(4px);
+  }
+  .conductor-select-item.selected {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+  }
+  .conductor-select-item .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+  .conductor-select-item .info {
+    flex: 1;
+    min-width: 0;
+  }
+  .conductor-select-item .info .name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 2px;
+  }
+  .conductor-select-item .info .vehicle {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .conductor-select-item .info .phone {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  .conductor-select-item .check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  .conductor-select-item.selected .check {
+    background: #22c55e;
+    border-color: #22c55e;
+  }
+  .conductor-select-item.selected .check svg {
+    display: block;
+  }
+  .conductor-select-item .check svg {
+    display: none;
+    width: 14px;
+    height: 14px;
+    color: white;
+  }
+  #conductoresDisponiblesList::-webkit-scrollbar { width: 4px; }
+  #conductoresDisponiblesList::-webkit-scrollbar-track { background: transparent; }
+  #conductoresDisponiblesList::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); border-radius: 2px; }
 </style>
 <base target="_blank">
 <base target="_blank">
@@ -1277,6 +1361,30 @@
           </svg>
           Enviar Email
         </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal Asignar Conductor -->
+  <div class="modal-overlay centered" id="asignarConductorModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="modal-close" onclick="closeAsignarModal()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div class="modal-header" style="justify-content: center; padding-right: 0;">
+        <h3 class="modal-title">Asignar Conductor</h3>
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 20px;">
+        Selecciona un conductor activo para asignar a este viaje
+      </p>
+      <div id="conductoresDisponiblesList" style="max-height: 400px; overflow-y: auto; padding-right: 4px;">
+        <div style="text-align: center; padding: 30px; color: #64748b;">Cargando conductores...</div>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button class="btn-secondary" onclick="closeAsignarModal()">Cancelar</button>
       </div>
     </div>
   </div>
@@ -2484,32 +2592,7 @@ function filterViajes(filter, btn) {
 }
 
 async function asignarConductorManual(viajeId) {
-  const conductorId = prompt('Ingresa el ID del conductor a asignar:');
-  if (!conductorId || conductorId.trim() === '') return;
-
-  showLoading('Asignando conductor...');
-
-  try {
-    const { error } = await supabaseClient
-      .from('viajes_reservados')
-      .update({
-        conductor_asignado_id: conductorId.trim(),
-        estado: 'asignado',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', viajeId);
-
-    if (error) throw error;
-
-    showToast('Conductor asignado correctamente', 'success');
-    closeEditModal();
-    await cargarViajes();
-
-  } catch (error) {
-    showToast('Error al asignar conductor: ' + error.message, 'error');
-  } finally {
-    hideLoading();
-  }
+  openAsignarModal(viajeId);
 }
 
 async function deleteViajeAdmin(id) {
@@ -2736,8 +2819,120 @@ async function revertirViajeAdmin(viajeId) {
 }
 
 async function asignarConductorDesdeAdmin(viajeId) {
-  const conductorId = prompt('Ingresa el ID del conductor a asignar:');
-  if (!conductorId || conductorId.trim() === '') return;
+  openAsignarModal(viajeId);
+}
+
+
+// ==================== MODAL ASIGNAR CONDUCTOR ====================
+let viajeIdParaAsignar = null;
+let conductorSeleccionadoId = null;
+
+function openAsignarModal(viajeId) {
+  viajeIdParaAsignar = viajeId;
+  conductorSeleccionadoId = null;
+  renderConductoresDisponibles();
+  const modal = document.getElementById('asignarConductorModal');
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAsignarModal() {
+  const modal = document.getElementById('asignarConductorModal');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+  viajeIdParaAsignar = null;
+  conductorSeleccionadoId = null;
+}
+
+function renderConductoresDisponibles() {
+  const container = document.getElementById('conductoresDisponiblesList');
+  if (!container) return;
+
+  // Filtrar conductores activos (estado = true o 'activo')
+  const activos = allConductores.filter(c => {
+    const estado = obtenerEstadoConductor(c);
+    return estado === 'activo';
+  });
+
+  if (activos.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 30px; color: #64748b;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🚗</div>
+        <p style="font-weight: 700; color: #e2e8f0; margin-bottom: 4px;">No hay conductores activos</p>
+        <p style="font-size: 12px;">Activa conductores desde la pestaña Conductores</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = '';
+
+  for (const c of activos) {
+    const nombre = `${c.nombres || ''} ${c.apellidos || ''}`.trim() || 'Sin nombre';
+    const iniciales = (c.nombres?.[0] || '') + (c.apellidos?.[0] || '');
+    const vehiculo = `${c.marca || ''} ${c.modelo || ''} ${c.placa ? '(' + c.placa + ')' : ''}`.trim() || 'Sin vehículo';
+    const celular = c.celular || '-';
+
+    const item = document.createElement('div');
+    item.className = 'conductor-select-item';
+    item.dataset.id = c.id;
+    item.onclick = () => seleccionarConductor(c.id, item);
+    item.innerHTML = `
+      <div class="avatar">${iniciales || '👤'}</div>
+      <div class="info">
+        <div class="name">${nombre}</div>
+        <div class="vehicle">🚙 ${vehiculo}</div>
+        <div class="phone">📞 ${celular}</div>
+      </div>
+      <div class="check">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+    `;
+    container.appendChild(item);
+  }
+
+  // Añadir botón de confirmar al final del contenedor (reemplaza el footer)
+  const footer = document.createElement('div');
+  footer.style.cssText = 'display:flex;gap:10px;justify-content:center;margin-top:16px;';
+  footer.innerHTML = `
+    <button class="btn-secondary" onclick="closeAsignarModal()">Cancelar</button>
+    <button class="btn-success" id="btnConfirmarAsignacion" onclick="confirmarAsignacion()" disabled style="opacity:0.5;cursor:not-allowed;">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px;">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      Confirmar Asignación
+    </button>
+  `;
+  container.appendChild(footer);
+}
+
+function seleccionarConductor(id, elemento) {
+  conductorSeleccionadoId = id;
+
+  // Quitar selección de todos
+  document.querySelectorAll('.conductor-select-item').forEach(el => {
+    el.classList.remove('selected');
+  });
+
+  // Seleccionar el clickeado
+  elemento.classList.add('selected');
+
+  // Habilitar botón confirmar
+  const btn = document.getElementById('btnConfirmarAsignacion');
+  if (btn) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  }
+}
+
+async function confirmarAsignacion() {
+  if (!viajeIdParaAsignar || !conductorSeleccionadoId) {
+    showToast('Selecciona un conductor primero', 'error');
+    return;
+  }
 
   showLoading('Asignando conductor...');
 
@@ -2745,18 +2940,21 @@ async function asignarConductorDesdeAdmin(viajeId) {
     const { error } = await supabaseClient
       .from('viajes_reservados')
       .update({
-        conductor_asignado_id: conductorId.trim(),
+        conductor_asignado_id: conductorSeleccionadoId,
         estado: 'asignado',
         updated_at: new Date().toISOString()
       })
-      .eq('id', viajeId);
+      .eq('id', viajeIdParaAsignar);
 
     if (error) throw error;
 
     showToast('Conductor asignado correctamente', 'success');
+    closeAsignarModal();
+    closeEditModal();
     await cargarViajes();
 
   } catch (error) {
+    console.error('Error asignando conductor:', error);
     showToast('Error al asignar conductor: ' + error.message, 'error');
   } finally {
     hideLoading();
