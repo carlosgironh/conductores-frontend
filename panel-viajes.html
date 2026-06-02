@@ -122,7 +122,7 @@
 
         .stats-bar {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 24px;
         }
@@ -206,6 +206,7 @@
         .badge-pendiente { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
         .badge-asignado { background: rgba(37,99,235,0.15); color: var(--corp-blue-light); border: 1px solid rgba(37,99,235,0.25); }
         .badge-completado { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+        .badge-cancelado { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
 
         .viaje-item {
             background: rgba(15, 23, 42, 0.5);
@@ -374,12 +375,13 @@
         ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
 
         @media (max-width: 640px) {
-            .stats-bar { gap: 8px; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
             .stat-item { padding: 12px 8px; }
             .stat-value { font-size: 22px; }
             .card { padding: 18px; }
         }
     </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -422,6 +424,10 @@
             <div class="stat-item">
                 <div class="stat-value" id="stat-completados">0</div>
                 <div class="stat-label">Completados</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-cancelados">0</div>
+                <div class="stat-label">Cancelados</div>
             </div>
         </div>
 
@@ -483,7 +489,8 @@
             const badges = {
                 'pendiente': '<span class="badge badge-pendiente">Pendiente</span>',
                 'asignado': '<span class="badge badge-asignado">Asignado</span>',
-                'completado': '<span class="badge badge-completado">Completado</span>'
+                'completado': '<span class="badge badge-completado">Completado</span>',
+                'cancelado': '<span class="badge badge-cancelado">Cancelado</span>'
             };
             return badges[estado] || estado;
         }
@@ -581,22 +588,24 @@
                     .from('viajes_reservados')
                     .select('*')
                     .eq('conductor_asignado_id', currentUser.id)
-                    .in('estado', ['asignado', 'completado'])
+                    .in('estado', ['asignado', 'completado', 'cancelado'])
                     .order('fecha_hora', { ascending: true });
 
                 if (error) throw error;
 
                 const asignados = viajes?.filter(v => v.estado === 'asignado') ?? [];
                 const completados = viajes?.filter(v => v.estado === 'completado') ?? [];
+                const cancelados = viajes?.filter(v => v.estado === 'cancelado') ?? [];
 
                 document.getElementById('stat-asignados').textContent = asignados.length;
                 document.getElementById('stat-completados').textContent = completados.length;
+                document.getElementById('stat-cancelados').textContent = cancelados.length;
 
                 if (!viajes || viajes.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">👤</div>
-                            <h3>No tienes pasajeros asignados</h3>
+                            <h3>No tienes viajes asignados</h3>
                             <p>Acepta un viaje desde el panel izquierdo</p>
                         </div>`;
                     return;
@@ -627,10 +636,15 @@
                             <strong>✉️ Email:</strong> ${viaje.pasajero.email}
                         </div>
                         ${viaje.estado === 'asignado' ? `
-                            <button class="btn btn-success" onclick="completarViaje('${viaje.id}')">
-                                ✅ Marcar como Completado
-                            </button>
-                        ` : '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>'}
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;">
+                                    ✅ Completar
+                                </button>
+                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">
+                                    ❌ Cancelar
+                                </button>
+                            </div>
+                        ` : viaje.estado === 'completado' ? '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>' : '<div style="text-align:center;color:#f87171;font-weight:600;font-size:14px;">❌ Viaje Cancelado</div>'}
                     </div>
                 `).join('');
 
@@ -675,17 +689,93 @@
 
         async function completarViaje(viajeId) {
             try {
-                const { error } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('viajes_reservados')
                     .update({ estado: 'completado', updated_at: new Date().toISOString() })
                     .eq('id', viajeId)
-                    .eq('conductor_asignado_id', currentUser.id);
+                    .eq('conductor_asignado_id', currentUser.id)
+                    .select();
 
-                if (error) throw error;
+                if (error) {
+                    console.error('[COMPLETAR] Error Supabase:', error);
+                    throw error;
+                }
+                console.log('[COMPLETAR] Update exitoso:', data);
                 showToast('Viaje marcado como completado ✅');
                 await cargarMisViajes();
             } catch (err) {
-                showToast('Error: ' + err.message, 'error');
+                console.error('[COMPLETAR] Error:', err);
+                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
+            }
+        }
+
+        // Variables para el modal de cancelación
+        let cancelViajeId = null;
+
+        function abrirCancelModal(viajeId) {
+            cancelViajeId = viajeId;
+            document.getElementById('cancelMotivo').value = '';
+            const modal = document.getElementById('cancelModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCancelModal() {
+            const modal = document.getElementById('cancelModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            cancelViajeId = null;
+        }
+
+        async function confirmarCancelarViaje(nuevoEstado) {
+            if (!cancelViajeId) return;
+
+            const motivo = document.getElementById('cancelMotivo').value.trim();
+            if (!motivo) {
+                showToast('Debes ingresar un motivo', 'error');
+                return;
+            }
+
+            try {
+                const updateData = {
+                    estado: nuevoEstado,
+                    updated_at: new Date().toISOString()
+                };
+
+                if (nuevoEstado === 'cancelado') {
+                    updateData.motivo_cancelacion = motivo;
+                    updateData.conductor_asignado_id = null; // Liberar conductor
+                } else {
+                    updateData.motivo_revertir = motivo;
+                    updateData.conductor_asignado_id = null; // Liberar conductor para reasignar
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update(updateData)
+                    .eq('id', cancelViajeId)
+                    .eq('conductor_asignado_id', currentUser.id)
+                    .select();
+
+                if (error) {
+                    console.error('[CANCELAR] Error Supabase:', error);
+                    throw error;
+                }
+
+                console.log('[CANCELAR] Update exitoso:', data);
+
+                if (nuevoEstado === 'cancelado') {
+                    showToast('Viaje cancelado definitivamente ❌');
+                } else {
+                    showToast('Viaje devuelto a pendiente 🔄');
+                }
+
+                closeCancelModal();
+                await cargarMisViajes();
+                await cargarViajesDisponibles(); // Recargar disponibles si volvió a pendiente
+            } catch (err) {
+                console.error('[CANCELAR] Error:', err);
+                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
         }
 
@@ -746,7 +836,41 @@
             subscriptions.forEach(sub => sub.unsubscribe());
         });
 
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('cancelModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeCancelModal();
+        });
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCancelModal();
+        });
+
         init();
     </script>
+
+    <!-- Modal Cancelar/Revertir Viaje -->
+    <div class="modal-overlay" id="cancelModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:2000;justify-content:center;align-items:center;padding:20px;">
+        <div class="modal-content" style="max-width:500px;width:100%;background:rgba(30,41,59,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:35px 25px;position:relative;">
+            <button class="modal-close" onclick="closeCancelModal()" style="position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;">×</button>
+
+            <div style="margin-bottom:25px;">
+                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">⚠️ Cancelar Viaje</h3>
+                <p style="color:#94a3b8;font-size:14px;">Por favor, indica el motivo de la cancelación.</p>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:8px;">Motivo de cancelación *</label>
+                <textarea id="cancelMotivo" rows="3" style="width:100%;padding:14px 18px;border-radius:12px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Ej: Problema mecánico, emergencia personal, etc."></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="closeCancelModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Volver</button>
+                <button onclick="confirmarCancelarViaje('pendiente')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">🔄 Dejar en Pendiente</button>
+                <button onclick="confirmarCancelarViaje('cancelado')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">❌ Cancelar Definitivo</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
