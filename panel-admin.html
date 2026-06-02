@@ -1180,7 +1180,44 @@
       padding-bottom: 35px;
     }
   }
+
+  /* Botones de estado para viajes en admin */
+  .viaje-actions .action-btn.asignar { color: #60a5fa; }
+  .viaje-actions .action-btn.asignar:hover { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .viaje-actions .action-btn.completar { color: #4ade80; }
+  .viaje-actions .action-btn.completar:hover { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .viaje-actions .action-btn.cancelar { color: #f87171; }
+  .viaje-actions .action-btn.cancelar:hover { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .viaje-actions .action-btn.revertir { color: #fbbf24; }
+  .viaje-actions .action-btn.revertir:hover { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+  /* Estado selector en modal */
+  .estado-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+  .estado-option {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(15,23,42,0.5);
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  .estado-option:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+  .estado-option.active.pendiente { background: rgba(245,158,11,0.2); color: #fbbf24; border-color: rgba(245,158,11,0.4); }
+  .estado-option.active.asignado { background: rgba(99,102,241,0.2); color: #818cf8; border-color: rgba(99,102,241,0.4); }
+  .estado-option.active.completado { background: rgba(34,197,94,0.2); color: #4ade80; border-color: rgba(34,197,94,0.4); }
+  .estado-option.active.cancelado { background: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.4); }
 </style>
+<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
@@ -2322,6 +2359,25 @@ function renderViajesList() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
             </svg>
           </button>
+          ${v.estado === 'pendiente' ? `
+          <button class="action-btn asignar" onclick="asignarConductorDesdeAdmin('${v.id}')" title="Asignar conductor">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+          </button>
+          <button class="action-btn cancelar" onclick="cancelarViajeAdmin('${v.id}')" title="Cancelar viaje">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </button>
+          ` : v.estado === 'asignado' ? `
+          <button class="action-btn completar" onclick="completarViajeAdmin('${v.id}')" title="Completar viaje">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </button>
+          <button class="action-btn cancelar" onclick="cancelarViajeAdmin('${v.id}')" title="Cancelar viaje">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </button>
+          ` : `
+          <button class="action-btn revertir" onclick="revertirViajeAdmin('${v.id}')" title="Reactivar / Volver a pendiente">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+          `}
           <button class="action-btn delete" onclick="deleteViajeAdmin('${v.id}')" title="Eliminar viaje">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -2395,10 +2451,29 @@ function filterViajes(filter, btn) {
       ` : `<p style="color:#f87171;font-size:13px;">⏳ Sin conductor asignado</p>`}
     </div>
 
+    <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06);">
+      <h4 style="color:#e2e8f0;font-size:14px;font-weight:700;margin-bottom:12px;">🎛️ Cambiar Estado (Admin)</h4>
+      <div class="estado-selector" id="estadoSelectorAdmin">
+        <button class="estado-option ${viaje.estado === 'pendiente' ? 'active pendiente' : ''}" onclick="cambiarEstadoViajeAdmin('${viaje.id}', 'pendiente')" ${viaje.estado === 'pendiente' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>Pendiente</button>
+        <button class="estado-option ${viaje.estado === 'asignado' ? 'active asignado' : ''}" onclick="cambiarEstadoViajeAdmin('${viaje.id}', 'asignado')" ${viaje.estado === 'asignado' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>Asignado</button>
+        <button class="estado-option ${viaje.estado === 'completado' ? 'active completado' : ''}" onclick="cambiarEstadoViajeAdmin('${viaje.id}', 'completado')" ${viaje.estado === 'completado' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>Completado</button>
+        <button class="estado-option ${viaje.estado === 'cancelado' ? 'active cancelado' : ''}" onclick="cancelarViajeAdmin('${viaje.id}')" ${viaje.estado === 'cancelado' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>Cancelado</button>
+      </div>
+      ${viaje.motivo_cancelacion ? `<p style="color:#f87171;font-size:12px;margin-top:8px;"><strong>Motivo cancelación:</strong> ${viaje.motivo_cancelacion}</p>` : ''}
+      ${viaje.motivo_revertir ? `<p style="color:#fbbf24;font-size:12px;margin-top:8px;"><strong>Motivo revertir:</strong> ${viaje.motivo_revertir}</p>` : ''}
+    </div>
+
     <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;">
       <button type="button" class="btn-secondary" onclick="closeEditModal()" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Cerrar</button>
       ${viaje.estado === 'pendiente' ? `
         <button type="button" class="btn-success" onclick="asignarConductorManual('${viaje.id}')" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:white;border:none;">Asignar Conductor</button>
+      ` : ''}
+      ${viaje.estado === 'asignado' ? `
+        <button type="button" class="btn-success" onclick="completarViajeAdmin('${viaje.id}')" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:white;border:none;">Completar Viaje</button>
+        <button type="button" class="btn-danger" onclick="cancelarViajeAdmin('${viaje.id}')" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Cancelar Viaje</button>
+      ` : ''}
+      ${(viaje.estado === 'completado' || viaje.estado === 'cancelado') ? `
+        <button type="button" class="btn-warning" onclick="revertirViajeAdmin('${viaje.id}')" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;border:none;">Reactivar a Pendiente</button>
       ` : ''}
     </div>
   `;
@@ -2457,6 +2532,232 @@ async function deleteViajeAdmin(id) {
   } catch (error) {
     console.error('Error eliminando viaje:', error);
     showToast('Error al eliminar: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+
+// ==================== FUNCIONES ADMIN PARA GESTIÓN DE VIAJES ====================
+
+async function cambiarEstadoViajeAdmin(viajeId, nuevoEstado) {
+  const viaje = allViajes.find(v => v.id === viajeId);
+  if (!viaje) return;
+
+  if (viaje.estado === nuevoEstado) {
+    showToast('El viaje ya está en ese estado', 'warning');
+    return;
+  }
+
+  // Si va a cancelado, pedir motivo
+  if (nuevoEstado === 'cancelado') {
+    await cancelarViajeAdmin(viajeId);
+    return;
+  }
+
+  const confirmado = confirm(`¿Cambiar estado de "${viaje.estado}" a "${nuevoEstado}"?`);
+  if (!confirmado) return;
+
+  showLoading('Actualizando estado...');
+
+  try {
+    const updateData = {
+      estado: nuevoEstado,
+      updated_at: new Date().toISOString()
+    };
+
+    // Si vuelve a pendiente, limpiar conductor
+    if (nuevoEstado === 'pendiente') {
+      updateData.conductor_asignado_id = null;
+    }
+
+    // Si es asignado sin conductor, pedir conductor
+    if (nuevoEstado === 'asignado' && !viaje.conductor_asignado_id) {
+      const conductorId = prompt('Ingresa el ID del conductor a asignar:');
+      if (!conductorId || conductorId.trim() === '') {
+        hideLoading();
+        showToast('Debe asignar un conductor para cambiar a "asignado"', 'error');
+        return;
+      }
+      updateData.conductor_asignado_id = conductorId.trim();
+    }
+
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .update(updateData)
+      .eq('id', viajeId);
+
+    if (error) throw error;
+
+    showToast(`Estado actualizado a "${nuevoEstado}"`, 'success');
+    closeEditModal();
+    await cargarViajes();
+
+  } catch (error) {
+    console.error('Error cambiando estado:', error);
+    showToast('Error al cambiar estado: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function completarViajeAdmin(viajeId) {
+  const viaje = allViajes.find(v => v.id === viajeId);
+  if (!viaje) return;
+
+  const confirmado = confirm('¿Marcar este viaje como COMPLETADO?');
+  if (!confirmado) return;
+
+  showLoading('Completando viaje...');
+
+  try {
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .update({
+        estado: 'completado',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', viajeId);
+
+    if (error) throw error;
+
+    showToast('Viaje marcado como completado', 'success');
+    closeEditModal();
+    await cargarViajes();
+
+  } catch (error) {
+    console.error('Error completando viaje:', error);
+    showToast('Error al completar: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function cancelarViajeAdmin(viajeId) {
+  const viaje = allViajes.find(v => v.id === viajeId);
+  if (!viaje) return;
+
+  let motivo = '';
+  if (isCapacitor && Dialog) {
+    const { value } = await Dialog.prompt({
+      title: 'Cancelar Viaje',
+      message: 'Ingrese motivo de cancelación (obligatorio):',
+      inputPlaceholder: 'Motivo...'
+    });
+    motivo = value || '';
+  } else {
+    motivo = prompt('Ingrese motivo de cancelación (obligatorio):') || '';
+  }
+
+  if (!motivo.trim()) {
+    showToast('Debe ingresar un motivo para cancelar', 'error');
+    return;
+  }
+
+  const confirmado = confirm(`¿Cancelar viaje de "${viaje.origen}" a "${viaje.destino}"?\n\nMotivo: ${motivo}`);
+  if (!confirmado) return;
+
+  showLoading('Cancelando viaje...');
+
+  try {
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .update({
+        estado: 'cancelado',
+        motivo_cancelacion: motivo.trim(),
+        conductor_asignado_id: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', viajeId);
+
+    if (error) throw error;
+
+    showToast('Viaje cancelado correctamente', 'success');
+    closeEditModal();
+    await cargarViajes();
+
+  } catch (error) {
+    console.error('Error cancelando viaje:', error);
+    showToast('Error al cancelar: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function revertirViajeAdmin(viajeId) {
+  const viaje = allViajes.find(v => v.id === viajeId);
+  if (!viaje) return;
+
+  let motivo = '';
+  if (isCapacitor && Dialog) {
+    const { value } = await Dialog.prompt({
+      title: 'Reactivar Viaje',
+      message: 'Ingrese motivo para volver a pendiente (opcional):',
+      inputPlaceholder: 'Motivo...'
+    });
+    motivo = value || '';
+  } else {
+    motivo = prompt('Ingrese motivo para volver a pendiente (opcional):') || '';
+  }
+
+  const confirmado = confirm(`¿Reactivar viaje a estado PENDIENTE?\n\nSe liberará el conductor actual.`);
+  if (!confirmado) return;
+
+  showLoading('Reactivando viaje...');
+
+  try {
+    const updateData = {
+      estado: 'pendiente',
+      conductor_asignado_id: null,
+      updated_at: new Date().toISOString()
+    };
+
+    if (motivo.trim()) {
+      updateData.motivo_revertir = motivo.trim();
+    }
+
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .update(updateData)
+      .eq('id', viajeId);
+
+    if (error) throw error;
+
+    showToast('Viaje reactivado a pendiente', 'success');
+    closeEditModal();
+    await cargarViajes();
+
+  } catch (error) {
+    console.error('Error reactivando viaje:', error);
+    showToast('Error al reactivar: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function asignarConductorDesdeAdmin(viajeId) {
+  const conductorId = prompt('Ingresa el ID del conductor a asignar:');
+  if (!conductorId || conductorId.trim() === '') return;
+
+  showLoading('Asignando conductor...');
+
+  try {
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .update({
+        conductor_asignado_id: conductorId.trim(),
+        estado: 'asignado',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', viajeId);
+
+    if (error) throw error;
+
+    showToast('Conductor asignado correctamente', 'success');
+    await cargarViajes();
+
+  } catch (error) {
+    showToast('Error al asignar conductor: ' + error.message, 'error');
   } finally {
     hideLoading();
   }
