@@ -1015,6 +1015,101 @@
   }
 
   /* Responsive */
+  
+  /* ==================== SECCIÓN VIAJES ==================== */
+  .viaje-item {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .viaje-item:hover {
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+
+  .viaje-item.asignado {
+    border-left: 3px solid #818cf8;
+  }
+
+  .viaje-item.completado {
+    border-left: 3px solid #4ade80;
+  }
+
+  .viaje-route {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .viaje-route .origin { color: #fbbf24; }
+  .viaje-route .arrow { color: #64748b; }
+  .viaje-route .destiny { color: #4ade80; }
+
+  .viaje-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .viaje-pasajero, .viaje-conductor {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .viaje-pasajero strong { color: #60a5fa; }
+  .viaje-conductor strong { color: #a78bfa; }
+
+  .viaje-sin-conductor {
+    color: #64748b;
+    font-style: italic;
+    font-size: 12px;
+    padding: 8px 0;
+  }
+
+  .viaje-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .viaje-actions .action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .viajes-list {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .viajes-list::-webkit-scrollbar { width: 4px; }
+  .viajes-list::-webkit-scrollbar-track { background: transparent; }
+  .viajes-list::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); border-radius: 2px; }
+
+  /* Responsive viajes */
+  @media (max-width: 768px) {
+    .viaje-route { font-size: 13px; flex-wrap: wrap; }
+    .viaje-meta { gap: 6px; font-size: 11px; }
+    .viaje-pasajero, .viaje-conductor { font-size: 11px; padding: 8px; }
+  }
+
   @media (max-width: 768px) {
     .card {
       padding: 30px 20px;
@@ -1060,6 +1155,7 @@
     }
   }
 </style>
+<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
@@ -1345,6 +1441,7 @@
     <div class="section-tabs">
       <button class="section-tab active" onclick="switchSection('conductores', this)">🚗 Conductores</button>
       <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
+      <button class="section-tab" onclick="switchSection('viajes', this)">🚕 Viajes</button>
     </div>
 
 
@@ -1457,6 +1554,49 @@
           </tbody>
         </table>
       </div>
+
+    <!-- VIAJES SECTION -->
+    <div id="viajesSection" class="section-content">
+      <div class="header" style="margin-top: 20px;">
+        <h2 style="font-size: 24px;">Viajes Solicitados</h2>
+        <p class="subtitle">Gestión de todas las reservas de viajes</p>
+      </div>
+
+      <!-- Stats Viajes -->
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalCountViajes">0</div>
+          <div class="stat-label">Total Viajes</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-value" id="pendienteCountViajes">0</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-value" id="asignadoCountViajes">0</div>
+          <div class="stat-label">Asignados</div>
+        </div>
+        <div class="stat-card inactive">
+          <div class="stat-value" id="completadoCountViajes">0</div>
+          <div class="stat-label">Completados</div>
+        </div>
+      </div>
+
+      <!-- Filtros Viajes -->
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterViajes('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="filterViajes('pendiente', this)">Pendientes</button>
+        <button class="filter-btn" onclick="filterViajes('asignado', this)">Asignados</button>
+        <button class="filter-btn" onclick="filterViajes('completado', this)">Completados</button>
+        <button class="filter-btn" onclick="filterViajes('cancelado', this)">Cancelados</button>
+      </div>
+
+      <!-- Lista Viajes -->
+      <div class="viajes-list" id="viajesList">
+        <div style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</div>
+      </div>
+    </div>
+
     </div>
 
 <!-- Botones -->
@@ -1618,6 +1758,11 @@ function switchSection(section, btn) {
 
   document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
   document.getElementById(section + 'Section').classList.add('active');
+
+  // Si cambia a viajes, recargar datos
+  if (section === 'viajes') {
+    cargarViajes();
+  }
 }
 
 function obtenerEstadoPasajero(p) {
@@ -1961,6 +2106,327 @@ document.getElementById('editFormPasajero').addEventListener('submit', async (e)
     console.error(err);
   }
 });
+
+
+// ==================== SECCIÓN VIAJES ====================
+
+let allViajes = [];
+let currentFilterViajes = 'todos';
+const pasajeroCacheViajes = new Map();
+const conductorCacheViajes = new Map();
+
+function formatDateViajes(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleString('es-ES', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+async function getPasajeroInfoViajes(pasajeroId) {
+  if (!pasajeroId) return { nombre: 'Desconocido', celular: '-', email: '-' };
+  if (pasajeroCacheViajes.has(pasajeroId)) return pasajeroCacheViajes.get(pasajeroId);
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('passengers')
+      .select('nombres, apellidos, celular, email')
+      .eq('id', pasajeroId)
+      .maybeSingle();
+
+    if (error || !data) {
+      const fallback = { nombre: 'Usuario ' + pasajeroId.slice(0, 8), celular: '-', email: '-' };
+      pasajeroCacheViajes.set(pasajeroId, fallback);
+      return fallback;
+    }
+
+    const info = {
+      nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+      celular: data.celular || '-',
+      email: data.email || '-'
+    };
+    pasajeroCacheViajes.set(pasajeroId, info);
+    return info;
+
+  } catch (e) {
+    const fallback = { nombre: 'Error', celular: '-', email: '-' };
+    pasajeroCacheViajes.set(pasajeroId, fallback);
+    return fallback;
+  }
+}
+
+async function getConductorInfoViajes(conductorId) {
+  if (!conductorId) return null;
+  if (conductorCacheViajes.has(conductorId)) return conductorCacheViajes.get(conductorId);
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('conductores')
+      .select('nombres, apellidos, celular, nombre, placa, marca, modelo')
+      .eq('id', conductorId)
+      .maybeSingle();
+
+    if (error || !data) {
+      conductorCacheViajes.set(conductorId, null);
+      return null;
+    }
+
+    const info = {
+      nombre: data.nombre || `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+      celular: data.celular || '-',
+      vehiculo: `${data.marca || ''} ${data.modelo || ''} ${data.placa || ''}`.trim() || '-'
+    };
+    conductorCacheViajes.set(conductorId, info);
+    return info;
+
+  } catch (e) {
+    conductorCacheViajes.set(conductorId, null);
+    return null;
+  }
+}
+
+async function cargarViajes() {
+  try {
+    console.log('[VIAJES] Iniciando carga...');
+    const { data: viajes, error } = await supabaseClient
+      .from('viajes_reservados')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[VIAJES] Error Supabase:', error);
+      const list = document.getElementById('viajesList');
+      if (list) {
+        list.innerHTML = `<div style="text-align:center;padding:40px;color:#f87171;">Error cargando viajes: ${error.message}</div>`;
+      }
+      showToast('Error al cargar viajes: ' + error.message, 'error');
+      return;
+    }
+
+    console.log('[VIAJES] Datos recibidos:', viajes?.length || 0);
+    allViajes = viajes || [];
+    updateStatsViajes();
+    await renderViajesList();
+
+  } catch (error) {
+    console.error('Error cargando viajes:', error);
+    showToast('Error al cargar viajes', 'error');
+  }
+}
+
+function updateStatsViajes() {
+  const total = allViajes.length;
+  const pendientes = allViajes.filter(v => v.estado === 'pendiente').length;
+  const asignados = allViajes.filter(v => v.estado === 'asignado').length;
+  const completados = allViajes.filter(v => v.estado === 'completado').length;
+
+  document.getElementById('totalCountViajes').textContent = total;
+  document.getElementById('pendienteCountViajes').textContent = pendientes;
+  document.getElementById('asignadoCountViajes').textContent = asignados;
+  document.getElementById('completadoCountViajes').textContent = completados;
+}
+
+async function renderViajesList() {
+  const list = document.getElementById('viajesList');
+  if (!list) {
+    console.error('[VIAJES] No se encontró el contenedor');
+    return;
+  }
+
+  let filtered = allViajes;
+  if (currentFilterViajes !== 'todos') {
+    filtered = allViajes.filter(v => v.estado === currentFilterViajes);
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #64748b;">
+        <div style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;">🛣️</div>
+        <p style="font-weight: 700; color: #e2e8f0; margin-bottom: 6px;">No hay viajes ${currentFilterViajes !== 'todos' ? 'con este filtro' : 'registrados'}</p>
+        <p style="font-size: 13px;">Los viajes aparecerán aquí automáticamente</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = '';
+
+  for (const v of filtered) {
+    const pasajero = await getPasajeroInfoViajes(v.pasajero_id);
+    const conductor = await getConductorInfoViajes(v.conductor_asignado_id);
+
+    const item = document.createElement('div');
+    item.className = `viaje-item ${v.estado || 'pendiente'}`;
+    item.innerHTML = `
+      <div class="viaje-route">
+        <span class="origin">📍 ${v.origen || '-'}</span>
+        <span class="arrow">→</span>
+        <span class="destiny">🏁 ${v.destino || '-'}</span>
+      </div>
+      <div class="viaje-meta">
+        <span>📅 ${formatDateViajes(v.fecha_hora)}</span>
+        <span class="status-badge ${v.estado || 'pendiente'}">
+          ${(v.estado || 'pendiente').charAt(0).toUpperCase() + (v.estado || 'pendiente').slice(1)}
+        </span>
+      </div>
+      <div class="viaje-pasajero">
+        <strong>👤 Pasajero:</strong> ${pasajero.nombre}<br>
+        <span style="color:#64748b;">📞 ${pasajero.celular} · ✉️ ${pasajero.email}</span>
+      </div>
+      ${conductor ? `
+        <div class="viaje-conductor">
+          <strong>🚗 Conductor:</strong> ${conductor.nombre}<br>
+          <span style="color:#64748b;">📞 ${conductor.celular} · 🚙 ${conductor.vehiculo}</span>
+        </div>
+      ` : `<div class="viaje-sin-conductor">⏳ Sin conductor asignado</div>`}
+      <div class="viaje-actions">
+        <button class="action-btn view" onclick="viewViajeDetailAdmin('${v.id}')" title="Ver detalle completo">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+        </button>
+        <button class="action-btn delete" onclick="deleteViajeAdmin('${v.id}')" title="Eliminar viaje">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+    `;
+    list.appendChild(item);
+  }
+}
+
+function filterViajes(filter, btn) {
+  currentFilterViajes = filter;
+  document.querySelectorAll('#viajesSection .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderViajesList();
+}
+
+async function viewViajeDetailAdmin(viajeId) {
+  const viaje = allViajes.find(v => v.id === viajeId);
+  if (!viaje) return;
+
+  showLoading('Cargando detalle...');
+
+  const pasajero = await getPasajeroInfoViajes(viaje.pasajero_id);
+  const conductor = await getConductorInfoViajes(viaje.conductor_asignado_id);
+
+  // Reutilizar el modal de edición para mostrar detalle
+  const modal = document.getElementById('editModal');
+  const form = document.getElementById('editForm');
+
+  // Crear contenido de detalle
+  form.innerHTML = `
+    <div style="margin-bottom:20px;">
+      <h3 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:16px;">Detalle del Viaje</h3>
+    </div>
+    <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">ID Viaje</span>
+        <span style="color:#e2e8f0;font-family:monospace;font-size:12px;">${viaje.id}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Origen</span>
+        <span style="color:#e2e8f0;">📍 ${viaje.origen || '-'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Destino</span>
+        <span style="color:#e2e8f0;">🏁 ${viaje.destino || '-'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Fecha y Hora</span>
+        <span style="color:#e2e8f0;">📅 ${formatDateViajes(viaje.fecha_hora)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Estado</span>
+        <span class="status-badge ${viaje.estado || 'pendiente'}">${(viaje.estado || 'pendiente').toUpperCase()}</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid rgba(96,165,250,0.2);">
+      <h4 style="color:#60a5fa;font-size:14px;font-weight:700;margin-bottom:12px;">👤 Pasajero</h4>
+      <p style="color:#e2e8f0;font-size:13px;margin-bottom:4px;"><strong>Nombre:</strong> ${pasajero.nombre}</p>
+      <p style="color:#94a3b8;font-size:12px;">📞 ${pasajero.celular} · ✉️ ${pasajero.email}</p>
+    </div>
+
+    <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid ${conductor ? 'rgba(167,139,250,0.2)' : 'rgba(239,68,68,0.2)'};">
+      <h4 style="color:${conductor ? '#a78bfa' : '#f87171'};font-size:14px;font-weight:700;margin-bottom:12px;">🚗 Conductor</h4>
+      ${conductor ? `
+        <p style="color:#e2e8f0;font-size:13px;margin-bottom:4px;"><strong>Nombre:</strong> ${conductor.nombre}</p>
+        <p style="color:#94a3b8;font-size:12px;">📞 ${conductor.celular} · 🚙 ${conductor.vehiculo}</p>
+      ` : `<p style="color:#f87171;font-size:13px;">⏳ Sin conductor asignado</p>`}
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;">
+      <button type="button" class="btn-secondary" onclick="closeEditModal()" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Cerrar</button>
+      ${viaje.estado === 'pendiente' ? `
+        <button type="button" class="btn-success" onclick="asignarConductorManual('${viaje.id}')" style="padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:white;border:none;">Asignar Conductor</button>
+      ` : ''}
+    </div>
+  `;
+
+  hideLoading();
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+async function asignarConductorManual(viajeId) {
+  const conductorId = prompt('Ingresa el ID del conductor a asignar:');
+  if (!conductorId || conductorId.trim() === '') return;
+
+  showLoading('Asignando conductor...');
+
+  try {
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .update({
+        conductor_asignado_id: conductorId.trim(),
+        estado: 'asignado',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', viajeId);
+
+    if (error) throw error;
+
+    showToast('Conductor asignado correctamente', 'success');
+    closeEditModal();
+    await cargarViajes();
+
+  } catch (error) {
+    showToast('Error al asignar conductor: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function deleteViajeAdmin(id) {
+  const confirmado = confirm('¿Seguro de eliminar este viaje permanentemente? Esta acción no se puede deshacer.');
+  if (!confirmado) return;
+
+  showLoading('Eliminando...');
+
+  try {
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    showToast('Viaje eliminado correctamente', 'success');
+    await cargarViajes();
+
+  } catch (error) {
+    console.error('Error eliminando viaje:', error);
+    showToast('Error al eliminar: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
 // Verificación de admin
 async function verificarAdmin() {
   showLoading('Verificando acceso...');
@@ -1986,6 +2452,7 @@ async function verificarAdmin() {
 
     try { await cargarConductores(); } catch(e) { console.error('Error conductores:', e); }
     try { await cargarPasajeros(); } catch(e) { console.error('Error pasajeros:', e); }
+    try { await cargarViajes(); } catch(e) { console.error('Error viajes:', e); }
     hideLoading();
     
     if (isCapacitor && SplashScreen) {
@@ -2811,6 +3278,7 @@ async function sendQRByEmail() {
 function refreshData() {
   cargarConductores();
   cargarPasajeros();
+  cargarViajes();
   showToast('Datos actualizados', 'success');
 }
 

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a1208">
+<meta name="color-scheme" content="dark">
+<title>Panel de Viajes - Admin | Road To</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-left: env(safe-area-inset-left);
+    --safe-right: env(safe-area-inset-right);
+    --corp-green: #8ac725;
+    --corp-green-dark: #448414;
+    --corp-green-lime: #9ad93a;
+    --corp-green-light: #b8e85c;
+    --corp-gray: #7d7d7d;
+    --corp-gray-dark: #4a4a4a;
+    --corp-gray-light: #9e9e9e;
+    --corp-gray-soft: #cbd5e1;
+    --corp-blue: #2563eb;
+    --corp-blue-dark: #1e40af;
+    --corp-blue-light: #3b82f6;
+    --corp-orange: #f97316;
+    --corp-orange-light: #fb923c;
+    --primary: var(--corp-green);
+    --primary-dark: var(--corp-green-dark);
+    --accent: var(--corp-green-lime);
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --bg-dark: #0a1208;
+    --text-light: #eef8e4;
+    --text-muted: #8a9e7d;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    padding: 40px 20px;
+    padding-top: calc(80px + var(--safe-top));
+    padding-bottom: calc(20px + var(--safe-bottom));
+    background: 
+      radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
+    color: var(--text-light);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%);
+    background-size: 150px 150px;
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+
+  .app-header {
+    position: fixed;
+    top: calc(10px + var(--safe-top));
+    left: calc(10px + var(--safe-left));
+    right: calc(10px + var(--safe-right));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .brand-small {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--corp-orange);
+    text-decoration: none;
+  }
+
+  .brand-small svg { width: 24px; height: 24px; color: var(--corp-orange); }
+
+  .nav-buttons { display: flex; gap: 8px; }
+
+  .nav-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-touch-callout: none; user-select: none;
+  }
+
+  .nav-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+  .nav-btn:active { transform: scale(0.95); }
+  .nav-btn svg { width: 20px; height: 20px; }
+
+  .card {
+    max-width: 1200px; width: 100%;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    padding: 50px 45px;
+    position: relative;
+    z-index: 1;
+    animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+    overflow: hidden;
+  }
+
+  @keyframes cardEntry {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .header { text-align: center; margin-bottom: 40px; }
+
+  .header-icon {
+    width: 70px; height: 70px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+    animation: iconPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes iconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2); }
+    50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(139, 92, 246, 0.3); }
+  }
+
+  .header-icon svg { width: 35px; height: 35px; color: #a78bfa; }
+
+  h2 {
+    color: #ffffff; font-weight: 800; font-size: 32px;
+    letter-spacing: -0.5px; margin-bottom: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .subtitle { color: #94a3b8; font-size: 15px; font-weight: 400; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 35px;
+  }
+
+  .stat-card {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 20px;
+    padding: 22px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.15); }
+
+  .stat-value { font-size: 32px; font-weight: 800; margin-bottom: 5px; }
+  .stat-card.total .stat-value { color: #60a5fa; }
+  .stat-card.pendiente .stat-value { color: #fbbf24; }
+  .stat-card.asignado .stat-value { color: #818cf8; }
+  .stat-card.completado .stat-value { color: #4ade80; }
+
+  .stat-label {
+    font-size: 11px; color: #94a3b8; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* Filtros */
+  .filters {
+    display: flex; gap: 10px; margin-bottom: 25px;
+    flex-wrap: wrap; justify-content: center;
+  }
+
+  .filter-btn {
+    padding: 10px 20px; border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.3s ease;
+    -webkit-touch-callout: none; user-select: none;
+  }
+
+  .filter-btn:hover { background: rgba(255, 255, 255, 0.1); color: #e2e8f0; }
+  .filter-btn.active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white; border-color: transparent;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+  }
+
+  /* Tabla */
+  .table-container {
+    overflow-x: auto;
+    border-radius: 20px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 30px;
+  }
+
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+
+  thead { background: rgba(255, 255, 255, 0.05); }
+
+  th {
+    padding: 14px 12px; text-align: left; font-weight: 600;
+    color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  td { padding: 14px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; vertical-align: top; }
+
+  tr:hover td { background: rgba(255, 255, 255, 0.03); }
+
+  .viaje-route { font-weight: 600; color: #e2e8f0; font-size: 13px; line-height: 1.5; }
+  .viaje-route .arrow { color: #64748b; margin: 0 4px; }
+  .viaje-fecha { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  .pasajero-name { font-weight: 600; color: #e2e8f0; font-size: 13px; }
+  .pasajero-contact { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  .conductor-name { font-weight: 600; color: #a78bfa; font-size: 13px; }
+  .conductor-contact { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .sin-conductor { color: #64748b; font-style: italic; font-size: 12px; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .status-badge.pendiente { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .status-badge.asignado { background: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+  .status-badge.completado { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+  .status-badge.cancelado { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .action-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s ease;
+    -webkit-touch-callout: none; user-select: none;
+  }
+
+  .action-btn:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.1); }
+  .action-btn.view:hover { color: #60a5fa; background: rgba(59, 130, 246, 0.15); }
+  .action-btn.delete:hover { color: #f87171; background: rgba(239, 68, 68, 0.15); }
+
+  .action-btn svg { width: 16px; height: 16px; }
+
+  /* Botones */
+  .btn-group {
+    display: flex; gap: 12px; margin-top: 30px;
+    flex-wrap: wrap; justify-content: center;
+  }
+
+  .btn-primary, .btn-secondary, .btn-danger {
+    padding: 14px 28px; border: none; border-radius: 14px;
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.3s ease;
+    display: flex; align-items: center; gap: 10px;
+    -webkit-touch-callout: none; user-select: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.05); color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+
+  .btn-danger {
+    background: rgba(239, 68, 68, 0.1); color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+
+  /* Modal Detalle */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
+    z-index: 2000; display: none; justify-content: center; align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-content {
+    max-width: 500px; width: 100%; max-height: 85vh;
+    background: rgba(30, 41, 59, 0.98); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+    padding: 35px 30px; box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.8);
+    overflow-y: auto; position: relative;
+    animation: scaleIn 0.3s ease;
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+
+  .modal-title { font-size: 22px; font-weight: 700; color: #ffffff; }
+
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s ease; z-index: 10;
+  }
+
+  .modal-close:hover { background: #ef4444; color: white; transform: rotate(90deg); }
+
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .detail-label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; min-width: 120px; }
+  .detail-value { font-size: 14px; color: #e2e8f0; text-align: right; flex: 1; }
+
+  /* Loading */
+  .loading-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.9); z-index: 4000;
+    display: none; justify-content: center; align-items: center;
+    flex-direction: column; gap: 20px; backdrop-filter: blur(10px);
+  }
+
+  .loading-overlay.show { display: flex; }
+
+  .spinner {
+    width: 50px; height: 50px;
+    border: 3px solid rgba(99, 102, 241, 0.3);
+    border-top-color: #6366f1; border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { color: #94a3b8; font-size: 14px; font-weight: 500; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: calc(30px + var(--safe-bottom)); left: 50%;
+    transform: translateX(-50%) translateY(200%);
+    padding: 16px 24px; border-radius: 12px; color: white;
+    font-weight: 600; z-index: 3000; transition: transform 0.3s ease;
+    text-align: center; min-width: 280px; max-width: 90%;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3); }
+  .toast.error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3); }
+
+  /* Empty state */
+  .empty-state-table {
+    text-align: center; padding: 50px 20px; color: #64748b;
+  }
+
+  .empty-state-table svg { width: 48px; height: 48px; color: #475569; margin-bottom: 12px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .card { padding: 30px 20px; border-radius: 24px; }
+    h2 { font-size: 26px; }
+    .header-icon { width: 60px; height: 60px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    th, td { padding: 10px 8px; font-size: 12px; }
+    .modal-content { padding: 25px 20px; }
+    .btn-group { gap: 8px; }
+    .btn-primary, .btn-secondary, .btn-danger { padding: 12px 20px; font-size: 13px; flex: 1; justify-content: center; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-card { padding: 16px 10px; }
+    .stat-value { font-size: 24px; }
+    table { font-size: 11px; }
+    th, td { padding: 8px 6px; }
+  }
+</style>
+<base target="_blank">
+</head>
+
+<body>
+
+  <header class="app-header">
+    <a href="index.html" class="brand-small">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+      </svg>
+      Road To
+    </a>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goBack()" title="Regresar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </button>
+      <button class="nav-btn" onclick="goHome()" title="Inicio">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Modal Detalle Viaje -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeDetailModal()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div class="modal-header">
+        <h3 class="modal-title">Detalle del Viaje</h3>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="header">
+      <div class="header-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+        </svg>
+      </div>
+      <h2>Panel de Viajes</h2>
+      <p class="subtitle">Gestión de todas las reservas de viajes</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-value" id="totalCount">0</div>
+        <div class="stat-label">Total Viajes</div>
+      </div>
+      <div class="stat-card pendiente">
+        <div class="stat-value" id="pendienteCount">0</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+      <div class="stat-card asignado">
+        <div class="stat-value" id="asignadoCount">0</div>
+        <div class="stat-label">Asignados</div>
+      </div>
+      <div class="stat-card completado">
+        <div class="stat-value" id="completadoCount">0</div>
+        <div class="stat-label">Completados</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterViajes('todos', this)">Todos</button>
+      <button class="filter-btn" onclick="filterViajes('pendiente', this)">Pendientes</button>
+      <button class="filter-btn" onclick="filterViajes('asignado', this)">Asignados</button>
+      <button class="filter-btn" onclick="filterViajes('completado', this)">Completados</button>
+      <button class="filter-btn" onclick="filterViajes('cancelado', this)">Cancelados</button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Ruta</th>
+            <th>Pasajero</th>
+            <th>Conductor</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="viajesTable">
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Botones -->
+    <div class="btn-group">
+      <button class="btn-primary" onclick="refreshData()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Actualizar
+      </button>
+      <button class="btn-secondary" onclick="window.location.href='panel-admin.html'">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        Panel Admin
+      </button>
+      <button class="btn-danger" onclick="logout()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Cargando...</div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allViajes = [];
+let currentFilter = 'todos';
+
+// Cache para evitar consultas repetidas
+const pasajeroCache = new Map();
+const conductorCache = new Map();
+
+function showLoading(text = 'Cargando...') {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.querySelector('.loading-text').textContent = text;
+    overlay.classList.add('show');
+  }
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.classList.remove('show');
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.className = `toast ${type}`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function goBack() {
+  if (window.history.length > 1) window.history.back();
+  else window.location.href = 'index.html';
+}
+
+function goHome() {
+  window.location.href = 'index.html';
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleString('es-ES', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+// Obtener info del pasajero (consulta tabla passengers)
+async function getPasajeroInfo(pasajeroId) {
+  if (!pasajeroId) return { nombre: 'Desconocido', celular: '-', email: '-' };
+  if (pasajeroCache.has(pasajeroId)) return pasajeroCache.get(pasajeroId);
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('passengers')
+      .select('nombres, apellidos, celular, email')
+      .eq('id', pasajeroId)
+      .maybeSingle();
+
+    if (error || !data) {
+      const fallback = { nombre: 'Usuario ' + pasajeroId.slice(0, 8), celular: '-', email: '-' };
+      pasajeroCache.set(pasajeroId, fallback);
+      return fallback;
+    }
+
+    const info = {
+      nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+      celular: data.celular || '-',
+      email: data.email || '-'
+    };
+    pasajeroCache.set(pasajeroId, info);
+    return info;
+
+  } catch (e) {
+    const fallback = { nombre: 'Error', celular: '-', email: '-' };
+    pasajeroCache.set(pasajeroId, fallback);
+    return fallback;
+  }
+}
+
+// Obtener info del conductor (consulta tabla conductores)
+async function getConductorInfo(conductorId) {
+  if (!conductorId) return null;
+  if (conductorCache.has(conductorId)) return conductorCache.get(conductorId);
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('conductores')
+      .select('nombres, apellidos, celular, nombre, placa, marca, modelo')
+      .eq('id', conductorId)
+      .maybeSingle();
+
+    if (error || !data) {
+      conductorCache.set(conductorId, null);
+      return null;
+    }
+
+    const info = {
+      nombre: data.nombre || `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+      celular: data.celular || '-',
+      vehiculo: `${data.marca || ''} ${data.modelo || ''} ${data.placa || ''}`.trim() || '-'
+    };
+    conductorCache.set(conductorId, info);
+    return info;
+
+  } catch (e) {
+    conductorCache.set(conductorId, null);
+    return null;
+  }
+}
+
+// Verificar admin
+async function verificarAdmin() {
+  showLoading('Verificando acceso...');
+
+  try {
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const { data: adminData } = await supabaseClient
+      .from('admins')
+      .select('auth_user_id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+
+    if (!adminData) {
+      window.location.href = "perfil.html";
+      return;
+    }
+
+    await cargarViajes();
+    hideLoading();
+
+  } catch (error) {
+    console.error('Error verificando admin:', error);
+    hideLoading();
+    showToast('Error de conexión', 'error');
+  }
+}
+
+// Cargar viajes
+async function cargarViajes() {
+  try {
+    const { data: viajes, error } = await supabaseClient
+      .from('viajes_reservados')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[VIAJES] Error:', error);
+      const tbody = document.getElementById('viajesTable');
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#f87171;">Error cargando viajes: ${error.message}</td></tr>`;
+      showToast('Error al cargar viajes: ' + error.message, 'error');
+      return;
+    }
+
+    allViajes = viajes || [];
+    updateStats();
+    await renderTable();
+
+  } catch (error) {
+    console.error('Error cargando viajes:', error);
+    showToast('Error al cargar viajes', 'error');
+  }
+}
+
+function updateStats() {
+  const total = allViajes.length;
+  const pendientes = allViajes.filter(v => v.estado === 'pendiente').length;
+  const asignados = allViajes.filter(v => v.estado === 'asignado').length;
+  const completados = allViajes.filter(v => v.estado === 'completado').length;
+
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('pendienteCount').textContent = pendientes;
+  document.getElementById('asignadoCount').textContent = asignados;
+  document.getElementById('completadoCount').textContent = completados;
+}
+
+async function renderTable() {
+  const tbody = document.getElementById('viajesTable');
+
+  let filtered = allViajes;
+  if (currentFilter !== 'todos') {
+    filtered = allViajes.filter(v => v.estado === currentFilter);
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="empty-state-table">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+            </svg>
+            <p>No hay viajes ${currentFilter !== 'todos' ? 'con este filtro' : 'registrados'}</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  for (const v of filtered) {
+    const pasajero = await getPasajeroInfo(v.pasajero_id);
+    const conductor = await getConductorInfo(v.conductor_asignado_id);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="viaje-route">
+          <span>📍 ${v.origen || '-'}</span>
+          <span class="arrow">→</span>
+          <span>🏁 ${v.destino || '-'}</span>
+        </div>
+        <div class="viaje-fecha">📅 ${formatDate(v.fecha_hora)}</div>
+      </td>
+      <td>
+        <div class="pasajero-name">👤 ${pasajero.nombre}</div>
+        <div class="pasajero-contact">📞 ${pasajero.celular}</div>
+      </td>
+      <td>
+        ${conductor ? `
+          <div class="conductor-name">🚗 ${conductor.nombre}</div>
+          <div class="conductor-contact">📞 ${conductor.celular}</div>
+          <div class="conductor-contact" style="color:#94a3b8;">${conductor.vehiculo}</div>
+        ` : `<span class="sin-conductor">⏳ Sin conductor asignado</span>`}
+      </td>
+      <td>
+        <span class="status-badge ${v.estado || 'pendiente'}">
+          ${(v.estado || 'pendiente').charAt(0).toUpperCase() + (v.estado || 'pendiente').slice(1)}
+        </span>
+      </td>
+      <td>
+        <div class="actions">
+          <button class="action-btn view" onclick="viewViajeDetail('${v.id}')" title="Ver detalle">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+          <button class="action-btn delete" onclick="deleteViaje('${v.id}')" title="Eliminar viaje">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function filterViajes(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+async function viewViajeDetail(viajeId) {
+  const viaje = allViajes.find(v => v.id === viajeId);
+  if (!viaje) return;
+
+  showLoading('Cargando detalle...');
+
+  const pasajero = await getPasajeroInfo(viaje.pasajero_id);
+  const conductor = await getConductorInfo(viaje.conductor_asignado_id);
+
+  const content = document.getElementById('detailContent');
+  content.innerHTML = `
+    <div class="detail-row">
+      <span class="detail-label">ID Viaje</span>
+      <span class="detail-value" style="font-family:monospace;font-size:12px;">${viaje.id}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Origen</span>
+      <span class="detail-value">📍 ${viaje.origen || '-'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Destino</span>
+      <span class="detail-value">🏁 ${viaje.destino || '-'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Fecha y Hora</span>
+      <span class="detail-value">📅 ${formatDate(viaje.fecha_hora)}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Estado</span>
+      <span class="detail-value"><span class="status-badge ${viaje.estado || 'pendiente'}">${(viaje.estado || 'pendiente').toUpperCase()}</span></span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Pasajero</span>
+      <span class="detail-value">👤 ${pasajero.nombre}<br>📞 ${pasajero.celular}<br>✉️ ${pasajero.email}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Conductor</span>
+      <span class="detail-value">
+        ${conductor ? `🚗 ${conductor.nombre}<br>📞 ${conductor.celular}<br>🚙 ${conductor.vehiculo}` : '<span class="sin-conductor">⏳ Sin conductor asignado</span>'}
+      </span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Creado</span>
+      <span class="detail-value">${formatDate(viaje.created_at)}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Actualizado</span>
+      <span class="detail-value">${formatDate(viaje.updated_at)}</span>
+    </div>
+  `;
+
+  hideLoading();
+  document.getElementById('detailModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+async function deleteViaje(id) {
+  const confirmado = confirm('¿Seguro de eliminar este viaje permanentemente? Esta acción no se puede deshacer.');
+  if (!confirmado) return;
+
+  showLoading('Eliminando...');
+
+  try {
+    const { error } = await supabaseClient
+      .from('viajes_reservados')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    showToast('Viaje eliminado correctamente', 'success');
+    await cargarViajes();
+
+  } catch (error) {
+    console.error('Error eliminando:', error);
+    showToast('Error al eliminar: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+function refreshData() {
+  cargarViajes();
+  showToast('Datos actualizados', 'success');
+}
+
+async function logout() {
+  const confirmado = confirm('¿Deseas cerrar sesión?');
+  if (!confirmado) return;
+
+  showLoading('Cerrando sesión...');
+  await supabaseClient.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  verificarAdmin();
+
+  // Cerrar modal al hacer clic fuera
+  document.getElementById('detailModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDetailModal();
+  });
+
+  // Tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDetailModal();
+  });
+});
+
+// Prevenir doble tap zoom
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
+</script>
+
+</body>
+</html>
