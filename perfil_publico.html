@@ -104,41 +104,74 @@
     font-weight: 500;
   }
 
-  /* Cintillo de cobertura - Panamá Oeste */
+  /* ============================================
+     CINTILLO DE COBERTURA — PANAMÁ OESTE
+     Más grande, más visible, no opacado
+     ============================================ */
   .coverage-banner {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 14px 20px;
-    margin-bottom: 25px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(180, 83, 9, 0.1) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    animation: bannerPulse 2.5s ease-in-out infinite;
+    gap: 14px;
+    padding: 18px 24px;
+    margin-bottom: 28px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.25) 0%, rgba(154, 52, 18, 0.2) 100%);
+    border: 2px solid rgba(251, 146, 60, 0.5);
+    position: relative;
+    overflow: hidden;
+    animation: bannerGlow 3s ease-in-out infinite;
   }
 
-  @keyframes bannerPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); }
-    50% { box-shadow: 0 0 20px 4px rgba(245, 158, 11, 0.1); }
+  .coverage-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes bannerGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.3), inset 0 0 20px rgba(234, 88, 12, 0.05); }
+    50% { box-shadow: 0 0 30px 6px rgba(234, 88, 12, 0.25), inset 0 0 30px rgba(234, 88, 12, 0.1); }
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
   }
 
   .coverage-banner .banner-icon {
-    width: 24px;
-    height: 24px;
-    color: #fbbf24;
+    width: 32px;
+    height: 32px;
+    color: #fb923c;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
   }
 
   .coverage-banner .banner-text {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fbbf24;
-    letter-spacing: 0.3px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffedd5;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
 
-  .coverage-banner .banner-text strong {
-    color: #f59e0b;
+  .coverage-banner .banner-text .highlight {
+    color: #fdba74;
+    font-weight: 900;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
   }
 
   .status-hero {
@@ -387,8 +420,10 @@
     .campo { flex-direction: column; gap: 5px; }
     .campo strong { width: 100%; }
     .status-hero { flex-direction: column; text-align: center; }
-    .coverage-banner { padding: 12px 16px; }
-    .coverage-banner .banner-text { font-size: 13px; }
+    .coverage-banner { padding: 16px 18px; gap: 10px; }
+    .coverage-banner .banner-icon { width: 26px; height: 26px; }
+    .coverage-banner .banner-text { font-size: 14px; }
+    .coverage-banner .banner-text .highlight { font-size: 15px; }
   }
 </style>
 <base target="_blank">
@@ -407,13 +442,15 @@
     <p>Perfil de verificación de conductor</p>
   </div>
 
-  <!-- Cintillo de cobertura: Panamá Oeste -->
+  <!-- Cintillo de cobertura: Panamá Oeste — AHORA MÁS GRANDE Y VISIBLE -->
   <div class="coverage-banner">
     <svg class="banner-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
     </svg>
-    <span class="banner-text">Esta plataforma aplica únicamente para <strong>Panamá Oeste</strong></span>
+    <span class="banner-text">
+      Esta plataforma aplica únicamente para <span class="highlight">Panamá Oeste</span>
+    </span>
   </div>
 
   <div id="statusHero"></div>
@@ -455,7 +492,6 @@ async function cargarPerfil() {
   }
 
   try {
-    // Intentar cargar sin autenticación (requiere RLS público en Supabase)
     const { data: conductor, error } = await supabaseClient
       .from("conductores")
       .select("*")
@@ -463,7 +499,6 @@ async function cargarPerfil() {
       .single();
 
     if (error) {
-      // Detectar específicamente error de permisos/RLS
       if (error.code === 'PGRST116' || error.message?.includes('permission') || error.message?.includes('JWT') || error.message?.includes('auth')) {
         throw new Error('RLS_BLOCK');
       }
@@ -519,7 +554,6 @@ function renderPerfil(conductor, documentos) {
     return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
   }
 
-  // Determinar estado
   let statusClass, statusTitle, statusMsg;
   const estado = String(conductor.estado).toLowerCase();
 
@@ -537,7 +571,6 @@ function renderPerfil(conductor, documentos) {
     statusMsg = 'Este conductor no se encuentra habilitado para operar.';
   }
 
-  // Render status hero
   document.getElementById("statusHero").innerHTML = `
     <div class="status-hero ${statusClass}">
       <div class="status-icon-wrap">
@@ -558,7 +591,6 @@ function renderPerfil(conductor, documentos) {
   const tieneAviso = conductor.tiene_aviso_operaciones === true;
   const avisoUrl = docUrl("AVISO_OPERACIONES");
 
-  // Render datos
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre completo</strong> <span>${conductor.nombres || ''} ${conductor.apellidos || ''}</span></div>
     <div class="campo"><strong>Cédula</strong> <span>${conductor.cedula || '—'}</span></div>
@@ -573,7 +605,6 @@ function renderPerfil(conductor, documentos) {
     </div>
   `;
 
-  // Fotos
   const fotosCont = document.getElementById("fotos-container");
   fotosCont.innerHTML = "";
 
@@ -597,7 +628,6 @@ function renderPerfil(conductor, documentos) {
     `;
   }
 
-  // Documentos
   const docSection = document.getElementById("documentos-section");
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
