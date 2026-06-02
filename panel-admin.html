@@ -1159,6 +1159,8 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -1554,6 +1556,7 @@
           </tbody>
         </table>
       </div>
+    </div>
 
     <!-- VIAJES SECTION -->
     <div id="viajesSection" class="section-content">
@@ -1595,8 +1598,6 @@
       <div class="viajes-list" id="viajesList">
         <div style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</div>
       </div>
-    </div>
-
     </div>
 
 <!-- Botones -->
@@ -2650,9 +2651,9 @@ function filterConductores(filter, btn) {
 async function toggleEstado(id) {
   const conductor = allConductores.find(c => c.id === id);
   if (!conductor) return;
-  
+
   const estadoActual = obtenerEstadoConductor(conductor);
-  let nuevoEstado;
+  let nuevoEstadoBool;
   let motivo = null;
 
   if (estadoActual === 'activo') {
@@ -2668,7 +2669,7 @@ async function toggleEstado(id) {
         return;
       }
       motivo = value.trim();
-      nuevoEstado = 'inactivo';
+      nuevoEstadoBool = false;
     } else {
       const motivoInput = prompt('Ingrese motivo de desactivación:');
       if (!motivoInput || motivoInput.trim() === '') {
@@ -2676,19 +2677,19 @@ async function toggleEstado(id) {
         return;
       }
       motivo = motivoInput.trim();
-      nuevoEstado = 'inactivo';
+      nuevoEstadoBool = false;
     }
   } else {
-    nuevoEstado = 'activo';
+    nuevoEstadoBool = true;
   }
-  
+
   try {
     const updateData = {
-      estado: nuevoEstado,
+      estado: nuevoEstadoBool,
       motivo_desactivacion: motivo,
       updated_at: new Date().toISOString()
     };
-    
+
     const { error } = await supabaseClient
       .from('conductores')
       .update(updateData)
@@ -2696,17 +2697,17 @@ async function toggleEstado(id) {
 
     if (error) throw error;
 
-    showToast(`Estado actualizado a ${nuevoEstado}`, 'ok');
-    
+    showToast(`Estado actualizado a ${nuevoEstadoBool ? 'activo' : 'inactivo'}`, 'success');
+
     if (conductorEditId === id) {
-      conductorEditActivo = nuevoEstado === 'activo';
+      conductorEditActivo = nuevoEstadoBool === true;
       const btnToggle = document.getElementById('btnToggleModal');
       if (btnToggle) {
-        btnToggle.textContent = nuevoEstado === 'activo' ? 'Deshabilitar' : 'Habilitar';
-        btnToggle.className = nuevoEstado === 'activo' ? 'btn-warning' : 'btn-success';
+        btnToggle.textContent = nuevoEstadoBool === true ? 'Deshabilitar' : 'Habilitar';
+        btnToggle.className = nuevoEstadoBool === true ? 'btn-warning' : 'btn-success';
       }
     }
-    
+
     cargarConductores();
 
   } catch (error) {
