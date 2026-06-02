@@ -104,6 +104,43 @@
     font-weight: 500;
   }
 
+  /* Cintillo de cobertura - Panamá Oeste */
+  .coverage-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    margin-bottom: 25px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(180, 83, 9, 0.1) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    animation: bannerPulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes bannerPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); }
+    50% { box-shadow: 0 0 20px 4px rgba(245, 158, 11, 0.1); }
+  }
+
+  .coverage-banner .banner-icon {
+    width: 24px;
+    height: 24px;
+    color: #fbbf24;
+    flex-shrink: 0;
+  }
+
+  .coverage-banner .banner-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fbbf24;
+    letter-spacing: 0.3px;
+  }
+
+  .coverage-banner .banner-text strong {
+    color: #f59e0b;
+  }
+
   .status-hero {
     display: flex;
     align-items: center;
@@ -350,8 +387,11 @@
     .campo { flex-direction: column; gap: 5px; }
     .campo strong { width: 100%; }
     .status-hero { flex-direction: column; text-align: center; }
+    .coverage-banner { padding: 12px 16px; }
+    .coverage-banner .banner-text { font-size: 13px; }
   }
 </style>
+<base target="_blank">
 </head>
 
 <body>
@@ -365,6 +405,15 @@
       Road To
     </div>
     <p>Perfil de verificación de conductor</p>
+  </div>
+
+  <!-- Cintillo de cobertura: Panamá Oeste -->
+  <div class="coverage-banner">
+    <svg class="banner-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+    </svg>
+    <span class="banner-text">Esta plataforma aplica únicamente para <strong>Panamá Oeste</strong></span>
   </div>
 
   <div id="statusHero"></div>
