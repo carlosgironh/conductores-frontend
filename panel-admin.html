@@ -1187,6 +1187,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -2139,8 +2140,8 @@ document.getElementById('editFormPasajero').addEventListener('submit', async (e)
 
 let allViajes = [];
 let currentFilterViajes = 'todos';
-const pasajeroCacheViajes = new Map();
-const conductorCacheViajes = new Map();
+let pasajerosMapViajes = new Map();
+let conductoresMapViajes = new Map();
 
 function formatDateViajes(dateString) {
   if (!dateString) return '-';
@@ -2151,81 +2152,73 @@ function formatDateViajes(dateString) {
   });
 }
 
-async function getPasajeroInfoViajes(pasajeroId) {
-  if (!pasajeroId) return { nombre: 'Desconocido', celular: '-', email: '-' };
-  if (pasajeroCacheViajes.has(pasajeroId)) return pasajeroCacheViajes.get(pasajeroId);
+async function precargarPasajerosYConductores(viajes) {
+  // Extraer IDs únicos no nulos
+  const pasajeroIds = [...new Set(viajes.map(v => v.pasajero_id).filter(id => id))];
+  const conductorIds = [...new Set(viajes.map(v => v.conductor_asignado_id).filter(id => id))];
 
-  try {
-    const { data, error } = await supabaseClient
-      .from('passengers')
-      .select('nombres, apellidos, celular, email')
-      .eq('id', pasajeroId)
-      .maybeSingle();
+  pasajerosMapViajes.clear();
+  conductoresMapViajes.clear();
 
-    if (error) {
-      console.error('[VIAJES] Supabase error pasajero:', error);
-      const fallback = { nombre: 'Usuario ' + pasajeroId.slice(0, 8), celular: '-', email: '-' };
-      pasajeroCacheViajes.set(pasajeroId, fallback);
-      return fallback;
+  // Cargar pasajeros en batch (1 sola consulta)
+  if (pasajeroIds.length > 0) {
+    try {
+      const { data: pasajeros, error } = await supabaseClient
+        .from('passengers')
+        .select('id, nombres, apellidos, celular, email')
+        .in('id', pasajeroIds);
+
+      if (error) {
+        console.error('[VIAJES] Error batch pasajeros:', error);
+      } else if (pasajeros) {
+        for (const p of pasajeros) {
+          pasajerosMapViajes.set(p.id, {
+            nombre: `${p.nombres || ''} ${p.apellidos || ''}`.trim() || 'Sin nombre',
+            celular: p.celular || '-',
+            email: p.email || '-'
+          });
+        }
+      }
+    } catch (e) {
+      console.error('[VIAJES] Exception batch pasajeros:', e);
     }
-
-    if (!data) {
-      const fallback = { nombre: 'Usuario no encontrado', celular: '-', email: '-' };
-      pasajeroCacheViajes.set(pasajeroId, fallback);
-      return fallback;
-    }
-
-    const info = {
-      nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
-      celular: data.celular || '-',
-      email: data.email || '-'
-    };
-    pasajeroCacheViajes.set(pasajeroId, info);
-    return info;
-
-  } catch (e) {
-    console.error('[VIAJES] Exception pasajero:', e);
-    const fallback = { nombre: 'Error cargando', celular: '-', email: '-' };
-    pasajeroCacheViajes.set(pasajeroId, fallback);
-    return fallback;
   }
+
+  // Cargar conductores en batch (1 sola consulta)
+  if (conductorIds.length > 0) {
+    try {
+      const { data: conductores, error } = await supabaseClient
+        .from('conductores')
+        .select('id, nombres, apellidos, celular, nombre, placa, marca, modelo')
+        .in('id', conductorIds);
+
+      if (error) {
+        console.error('[VIAJES] Error batch conductores:', error);
+      } else if (conductores) {
+        for (const c of conductores) {
+          conductoresMapViajes.set(c.id, {
+            nombre: c.nombre || `${c.nombres || ''} ${c.apellidos || ''}`.trim() || 'Sin nombre',
+            celular: c.celular || '-',
+            vehiculo: `${c.marca || ''} ${c.modelo || ''} ${c.placa || ''}`.trim() || '-'
+          });
+        }
+      }
+    } catch (e) {
+      console.error('[VIAJES] Exception batch conductores:', e);
+    }
+  }
+
+  console.log(`[VIAJES] Precarga: ${pasajerosMapViajes.size} pasajeros, ${conductoresMapViajes.size} conductores`);
 }
 
-async function getConductorInfoViajes(conductorId) {
+function getPasajeroInfoViajes(pasajeroId) {
+  if (!pasajeroId) return { nombre: 'Desconocido', celular: '-', email: '-' };
+  return pasajerosMapViajes.get(pasajeroId) || { nombre: 'Usuario no encontrado', celular: '-', email: '-' };
+}
+
+function getConductorInfoViajes(conductorId) {
   if (!conductorId) return null;
-  if (conductorCacheViajes.has(conductorId)) return conductorCacheViajes.get(conductorId);
-
-  try {
-    const { data, error } = await supabaseClient
-      .from('conductores')
-      .select('nombres, apellidos, celular, nombre, placa, marca, modelo')
-      .eq('id', conductorId)
-      .maybeSingle();
-
-    if (error) {
-      console.error('[VIAJES] Supabase error conductor:', error);
-      conductorCacheViajes.set(conductorId, null);
-      return null;
-    }
-
-    if (!data) {
-      conductorCacheViajes.set(conductorId, null);
-      return null;
-    }
-
-    const info = {
-      nombre: data.nombre || `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
-      celular: data.celular || '-',
-      vehiculo: `${data.marca || ''} ${data.modelo || ''} ${data.placa || ''}`.trim() || '-'
-    };
-    conductorCacheViajes.set(conductorId, info);
-    return info;
-
-  } catch (e) {
-    console.error('[VIAJES] Exception conductor:', e);
-    conductorCacheViajes.set(conductorId, null);
-    return null;
-  }
+  return conductoresMapViajes.get(conductorId) || null;
 }
 
 async function cargarViajes() {
@@ -2249,7 +2242,10 @@ async function cargarViajes() {
     console.log('[VIAJES] Datos recibidos:', viajes?.length || 0);
     allViajes = viajes || [];
     updateStatsViajes();
-    await renderViajesList();
+
+    // Precargar pasajeros y conductores en batch (2 consultas en lugar de N×2)
+    await precargarPasajerosYConductores(allViajes);
+    renderViajesList();
 
   } catch (error) {
     console.error('Error cargando viajes:', error);
@@ -2269,7 +2265,7 @@ function updateStatsViajes() {
   document.getElementById('completadoCountViajes').textContent = completados;
 }
 
-async function renderViajesList() {
+function renderViajesList() {
   const list = document.getElementById('viajesList');
   if (!list) {
     console.error('[VIAJES] No se encontró el contenedor');
@@ -2292,66 +2288,51 @@ async function renderViajesList() {
     return;
   }
 
-  list.innerHTML = '';
+  const html = filtered.map(v => {
+    const pasajero = getPasajeroInfoViajes(v.pasajero_id);
+    const conductor = getConductorInfoViajes(v.conductor_asignado_id);
 
-  for (const v of filtered) {
-    let pasajero = { nombre: 'Cargando...', celular: '-', email: '-' };
-    let conductor = null;
-
-    try {
-      pasajero = await getPasajeroInfoViajes(v.pasajero_id);
-    } catch (e) {
-      console.error('[VIAJES] Error pasajero:', e);
-      pasajero = { nombre: 'Error', celular: '-', email: '-' };
-    }
-
-    try {
-      conductor = await getConductorInfoViajes(v.conductor_asignado_id);
-    } catch (e) {
-      console.error('[VIAJES] Error conductor:', e);
-      conductor = null;
-    }
-
-    const item = document.createElement('div');
-    item.className = `viaje-item ${v.estado || 'pendiente'}`;
-    item.innerHTML = `
-      <div class="viaje-route">
-        <span class="origin">📍 ${v.origen || '-'}</span>
-        <span class="arrow">→</span>
-        <span class="destiny">🏁 ${v.destino || '-'}</span>
-      </div>
-      <div class="viaje-meta">
-        <span>📅 ${formatDateViajes(v.fecha_hora)}</span>
-        <span class="status-badge ${v.estado || 'pendiente'}">
-          ${(v.estado || 'pendiente').charAt(0).toUpperCase() + (v.estado || 'pendiente').slice(1)}
-        </span>
-      </div>
-      <div class="viaje-pasajero">
-        <strong>👤 Pasajero:</strong> ${pasajero.nombre}<br>
-        <span style="color:#64748b;">📞 ${pasajero.celular} · ✉️ ${pasajero.email}</span>
-      </div>
-      ${conductor ? `
-        <div class="viaje-conductor">
-          <strong>🚗 Conductor:</strong> ${conductor.nombre}<br>
-          <span style="color:#64748b;">📞 ${conductor.celular} · 🚙 ${conductor.vehiculo}</span>
+    return `
+      <div class="viaje-item ${v.estado || 'pendiente'}">
+        <div class="viaje-route">
+          <span class="origin">📍 ${v.origen || '-'}</span>
+          <span class="arrow">→</span>
+          <span class="destiny">🏁 ${v.destino || '-'}</span>
         </div>
-      ` : `<div class="viaje-sin-conductor">⏳ Sin conductor asignado</div>`}
-      <div class="viaje-actions">
-        <button class="action-btn view" onclick="viewViajeDetailAdmin('${v.id}')" title="Ver detalle completo">
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-          </svg>
-        </button>
-        <button class="action-btn delete" onclick="deleteViajeAdmin('${v.id}')" title="Eliminar viaje">
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-          </svg>
-        </button>
+        <div class="viaje-meta">
+          <span>📅 ${formatDateViajes(v.fecha_hora)}</span>
+          <span class="status-badge ${v.estado || 'pendiente'}">
+            ${(v.estado || 'pendiente').charAt(0).toUpperCase() + (v.estado || 'pendiente').slice(1)}
+          </span>
+        </div>
+        <div class="viaje-pasajero">
+          <strong>👤 Pasajero:</strong> ${pasajero.nombre}<br>
+          <span style="color:#64748b;">📞 ${pasajero.celular} · ✉️ ${pasajero.email}</span>
+        </div>
+        ${conductor ? `
+          <div class="viaje-conductor">
+            <strong>🚗 Conductor:</strong> ${conductor.nombre}<br>
+            <span style="color:#64748b;">📞 ${conductor.celular} · 🚙 ${conductor.vehiculo}</span>
+          </div>
+        ` : `<div class="viaje-sin-conductor">⏳ Sin conductor asignado</div>`}
+        <div class="viaje-actions">
+          <button class="action-btn view" onclick="viewViajeDetailAdmin('${v.id}')" title="Ver detalle completo">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+          <button class="action-btn delete" onclick="deleteViajeAdmin('${v.id}')" title="Eliminar viaje">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
       </div>
     `;
-    list.appendChild(item);
-  }
+  }).join('');
+
+  list.innerHTML = html;
 }
 
 function filterViajes(filter, btn) {
@@ -2359,9 +2340,7 @@ function filterViajes(filter, btn) {
   document.querySelectorAll('#viajesSection .filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderViajesList();
-}
-
-async function viewViajeDetailAdmin(viajeId) {
+}async function viewViajeDetailAdmin(viajeId) {
   const viaje = allViajes.find(v => v.id === viajeId);
   if (!viaje) return;
 
