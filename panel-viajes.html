@@ -556,7 +556,6 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
-        let conductorId = null;   // ← ID interno de la tabla conductores (para FK)
         let subscriptions = [];
         let cancelViajeId = null;
 
@@ -586,9 +585,9 @@
         }
 
         // ============================================
-        // BLOQUEO: Verificar conductor y obtener su ID interno
+        // BLOQUEO: Verificar que el usuario es conductor
         // ============================================
-        async function verificarEstadoConductor() {
+        async function verificarConductor() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'dashboard.html';
@@ -597,7 +596,7 @@
 
             console.log('[AUTH] auth.uid():', user.id);
 
-            // Intentar con status primero
+            // Verificar que existe en tabla conductores (por auth_user_id)
             let { data: conductor, error } = await supabaseClient
                 .from('conductores')
                 .select('id, auth_user_id, status, nombre_completo, vehiculo')
@@ -627,11 +626,6 @@
             }
 
             console.log('[CONDUCTOR] Encontrado:', conductor);
-            console.log('[CONDUCTOR] ID interno (para FK):', conductor.id);
-            console.log('[CONDUCTOR] auth_user_id:', conductor.auth_user_id);
-
-            // Guardar el ID interno del conductor (el que la FK espera)
-            conductorId = conductor.id;
 
             // Validar status si existe
             if (conductor.status && conductor.status !== 'active') {
@@ -743,7 +737,7 @@
         }
 
         // ============================================
-        // CARGAR MIS VIAJES — usa conductorId (ID interno de la tabla)
+        // CARGAR MIS VIAJES — usa auth.uid() (la FK apunta a auth.users.id)
         // ============================================
         async function cargarMisViajes() {
             const container = document.getElementById('lista-asignados');
@@ -751,7 +745,7 @@
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
-                    .eq('conductor_asignado_id', conductorId)  // ← ID interno, no auth.uid()
+                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid(), la FK apunta a auth.users.id
                     .in('estado', ['asignado', 'completado', 'cancelado'])
                     .order('fecha_hora', { ascending: true });
 
@@ -813,19 +807,19 @@
         }
 
         // ============================================
-        // ACEPTAR VIAJE — usa conductorId (ID interno de la tabla conductores)
+        // ACEPTAR VIAJE — usa auth.uid() (la FK apunta a auth.users.id)
         // ============================================
         async function aceptarViaje(viajeId, btnElement) {
             btnElement.disabled = true;
             btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
 
             try {
-                console.log('[ACEPTAR] Usando conductorId:', conductorId);
+                console.log('[ACEPTAR] Usando auth.uid():', currentUser.id);
                 const { data, error } = await supabaseClient
                     .from('viajes_reservados')
                     .update({
                         estado: 'asignado',
-                        conductor_asignado_id: conductorId,  // ← ID interno, no auth.uid()
+                        conductor_asignado_id: currentUser.id,  // ← auth.uid(), la FK apunta a auth.users.id
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', viajeId)
@@ -856,7 +850,7 @@
         }
 
         // ============================================
-        // COMPLETAR VIAJE — usa conductorId
+        // COMPLETAR VIAJE — usa auth.uid()
         // ============================================
         async function completarViaje(viajeId) {
             try {
@@ -864,13 +858,10 @@
                     .from('viajes_reservados')
                     .update({ estado: 'completado', updated_at: new Date().toISOString() })
                     .eq('id', viajeId)
-                    .eq('conductor_asignado_id', conductorId)  // ← ID interno
+                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid()
                     .select();
 
-                if (error) {
-                    console.error('[COMPLETAR] Error:', error);
-                    throw error;
-                }
+                if (error) { console.error('[COMPLETAR] Error:', error); throw error; }
                 console.log('[COMPLETAR] Éxito:', data);
                 showToast('Viaje marcado como completado ✅');
                 await cargarMisViajes();
@@ -881,7 +872,7 @@
         }
 
         // ============================================
-        // CANCELAR VIAJE — usa conductorId
+        // CANCELAR VIAJE — usa auth.uid()
         // ============================================
         function abrirCancelModal(viajeId) {
             cancelViajeId = viajeId;
@@ -918,7 +909,7 @@
                     .from('viajes_reservados')
                     .update(updateData)
                     .eq('id', cancelViajeId)
-                    .eq('conductor_asignado_id', conductorId)  // ← ID interno
+                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid()
                     .select();
 
                 if (error) { console.error('[CANCELAR] Error:', error); throw error; }
@@ -955,7 +946,7 @@
                 .channel('mis-viajes')
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
-                    filter: `conductor_asignado_id=eq.${conductorId}`  // ← ID interno
+                    filter: `conductor_asignado_id=eq.${currentUser.id}`  // ← auth.uid()
                 }, () => cargarMisViajes())
                 .subscribe();
 
@@ -972,11 +963,9 @@
             currentUser = session.user;
             console.log('[INIT] auth.uid():', currentUser.id);
 
-            // 1. Verificar conductor y obtener su ID interno
-            const activo = await verificarEstadoConductor();
-            if (!activo) return;
-
-            console.log('[INIT] conductorId listo:', conductorId);
+            // 1. Verificar que es conductor
+            const esConductor = await verificarConductor();
+            if (!esConductor) return;
 
             // 2. Cargar datos
             await cargarViajesDisponibles();
