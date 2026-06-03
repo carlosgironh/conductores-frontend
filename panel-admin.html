@@ -2678,7 +2678,13 @@ async function cambiarEstadoViajeAdmin(viajeId, nuevoEstado) {
 
   } catch (error) {
     console.error('Error cambiando estado:', error);
-    showToast('Error al cambiar estado: ' + error.message, 'error');
+    if (error.code === '23503' || error.message?.includes('violates foreign key') || error.message?.includes('is not present in table')) {
+      showToast('Error: El conductor asignado no tiene una cuenta válida. Asigna otro conductor.', 'error');
+    } else if (error.code === '42501' || error.message?.includes('row-level security')) {
+      showToast('Error: No tienes permisos. Verifica las políticas RLS.', 'error');
+    } else {
+      showToast('Error al cambiar estado: ' + (error.message || error), 'error');
+    }
   } finally {
     hideLoading();
   }
@@ -2937,6 +2943,7 @@ async function confirmarAsignacion() {
   showLoading('Asignando conductor...');
 
   try {
+    // Intentar asignar directamente
     const { error } = await supabaseClient
       .from('viajes_reservados')
       .update({
@@ -2946,7 +2953,15 @@ async function confirmarAsignacion() {
       })
       .eq('id', viajeIdParaAsignar);
 
-    if (error) throw error;
+    if (error) {
+      // Si falla por FK (conductor no existe en auth.users), intentar con RPC
+      if (error.code === '23503' || error.message?.includes('violates foreign key')) {
+        console.warn('FK error, intentando con RPC...');
+        await asignarConductorRPC(viajeIdParaAsignar, conductorSeleccionadoId);
+        return;
+      }
+      throw error;
+    }
 
     showToast('Conductor asignado correctamente', 'success');
     closeAsignarModal();
@@ -2955,9 +2970,40 @@ async function confirmarAsignacion() {
 
   } catch (error) {
     console.error('Error asignando conductor:', error);
-    showToast('Error al asignar conductor: ' + error.message, 'error');
+    if (error.code === '23503' || error.message?.includes('violates foreign key') || error.message?.includes('is not present in table')) {
+      showToast('Error: El conductor seleccionado no tiene una cuenta de usuario válida en el sistema de autenticación. Verifica que el conductor esté registrado correctamente.', 'error');
+    } else if (error.code === '42501' || error.message?.includes('row-level security')) {
+      showToast('Error: No tienes permisos para asignar conductores. Verifica las políticas RLS en Supabase.', 'error');
+    } else {
+      showToast('Error al asignar conductor: ' + (error.message || error), 'error');
+    }
   } finally {
     hideLoading();
+  }
+}
+
+// Fallback: intentar asignar mediante RPC (requiere función en Supabase)
+async function asignarConductorRPC(viajeId, conductorId) {
+  try {
+    const { data, error } = await supabaseClient.rpc('asignar_conductor_admin', {
+      p_viaje_id: viajeId,
+      p_conductor_id: conductorId
+    });
+
+    if (error) {
+      console.error('RPC error:', error);
+      showToast('Error: No se pudo asignar el conductor. El conductor no tiene una cuenta válida o falta la función RPC en Supabase.', 'error');
+      return;
+    }
+
+    showToast('Conductor asignado correctamente (vía RPC)', 'success');
+    closeAsignarModal();
+    closeEditModal();
+    await cargarViajes();
+
+  } catch (e) {
+    console.error('RPC exception:', e);
+    showToast('Error: Falta la función RPC "asignar_conductor_admin" en Supabase. Crea la función SQL para poder asignar conductores.', 'error');
   }
 }
 
