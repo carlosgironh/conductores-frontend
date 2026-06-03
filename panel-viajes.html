@@ -370,6 +370,45 @@
 
         .nav-perfil svg { width: 18px; height: 18px; }
 
+        /* Modal overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(30,41,59,0.98);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 35px 25px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
@@ -381,7 +420,7 @@
             .card { padding: 18px; }
         }
     </style>
-<base target="_blank">
+    <base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -408,7 +447,7 @@
         </div>
     </header>
 
-    <div class="container">
+    <div class="container" id="app-container">
         <h1 class="page-title">🚗 Panel de Viajes</h1>
         <p class="page-subtitle">Gestiona tus viajes disponibles y pasajeros asignados</p>
 
@@ -460,15 +499,38 @@
 
     <div id="toast" class="toast"></div>
 
+    <!-- Modal Cancelar/Revertir Viaje -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeCancelModal()">×</button>
+
+            <div style="margin-bottom:25px;">
+                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">⚠️ Cancelar Viaje</h3>
+                <p style="color:#94a3b8;font-size:14px;">Por favor, indica el motivo de la cancelación.</p>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:8px;">Motivo de cancelación *</label>
+                <textarea id="cancelMotivo" rows="3" style="width:100%;padding:14px 18px;border-radius:12px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Ej: Problema mecánico, emergencia personal, etc."></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="closeCancelModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Volver</button>
+                <button onclick="confirmarCancelarViaje('pendiente')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">🔄 Dejar en Pendiente</button>
+                <button onclick="confirmarCancelarViaje('cancelado')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">❌ Cancelar Definitivo</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-        const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let subscriptions = [];
+        let cancelViajeId = null;
 
         function formatDate(dateString) {
             const date = new Date(dateString);
@@ -495,7 +557,77 @@
             return badges[estado] || estado;
         }
 
-        // Función para obtener datos del pasajero por ID
+        // ============================================
+        // BLOQUEO: Verificar estado del conductor
+        // ============================================
+        async function verificarEstadoConductor() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'dashboard.html';
+                return false;
+            }
+
+            const { data: conductor, error } = await supabaseClient
+                .from('conductores')
+                .select('status, nombre_completo, vehiculo')
+                .eq('id', user.id)
+                .single();
+
+            if (error || !conductor) {
+                mostrarBloqueo('No estás registrado como conductor en el sistema.');
+                return false;
+            }
+
+            if (conductor.status !== 'active') {
+                let mensaje = '';
+                switch(conductor.status) {
+                    case 'inactive':
+                        mensaje = 'Tu cuenta está inactiva. Contacta al administrador para reactivarla.';
+                        break;
+                    case 'banned':
+                        mensaje = 'Tu cuenta ha sido suspendida. Contacta soporte.';
+                        break;
+                    case 'pending':
+                        mensaje = 'Tu cuenta está pendiente de aprobación. Espera la validación del administrador.';
+                        break;
+                    default:
+                        mensaje = 'No puedes acceder en este momento. Estado: ' + conductor.status;
+                }
+                mostrarBloqueo(mensaje);
+                return false;
+            }
+
+            return true;
+        }
+
+        function mostrarBloqueo(mensaje) {
+            document.getElementById('app-container').style.display = 'none';
+
+            const bloqueo = document.createElement('div');
+            bloqueo.id = 'bloqueo-overlay';
+            bloqueo.innerHTML = `
+                <div style="
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.9); display: flex;
+                    align-items: center; justify-content: center; z-index: 9999;
+                    flex-direction: column; padding: 20px; text-align: center;
+                ">
+                    <div style="font-size: 64px; margin-bottom: 20px;">🚫</div>
+                    <h2 style="color: white; margin-bottom: 15px;">Acceso Restringido</h2>
+                    <p style="color: #ccc; max-width: 400px; line-height: 1.5;">${mensaje}</p>
+                    <button onclick="logout()"
+                        style="margin-top: 30px; padding: 12px 24px; background: #e74c3c;
+                        color: white; border: none; border-radius: 8px; cursor: pointer; font-weight:700;">
+                        Cerrar Sesión
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(bloqueo);
+        }
+
+        // ============================================
+        // PASAJERO INFO
+        // ============================================
         async function getPasajeroInfo(pasajeroId) {
             if (!pasajeroId) return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
             try {
@@ -504,11 +636,11 @@
                     .select('nombres, apellidos, celular, email')
                     .eq('id', pasajeroId)
                     .maybeSingle();
-                
+
                 if (error || !data) {
                     return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
                 }
-                
+
                 return {
                     nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
                     telefono: data.celular || 'No disponible',
@@ -519,11 +651,13 @@
             }
         }
 
+        // ============================================
+        // CARGAR VIAJES DISPONIBLES
+        // ============================================
         async function cargarViajesDisponibles() {
             const container = document.getElementById('lista-disponibles');
 
             try {
-                // Consulta simple sin JOIN
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
@@ -544,7 +678,6 @@
                     return;
                 }
 
-                // Obtener info de pasajeros en paralelo
                 const viajesConPasajero = await Promise.all(
                     viajes.map(async (viaje) => {
                         const pasajero = await getPasajeroInfo(viaje.pasajero_id);
@@ -579,11 +712,13 @@
             }
         }
 
+        // ============================================
+        // CARGAR MIS VIAJES
+        // ============================================
         async function cargarMisViajes() {
             const container = document.getElementById('lista-asignados');
 
             try {
-                // Consulta simple sin JOIN
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
@@ -611,7 +746,6 @@
                     return;
                 }
 
-                // Obtener info de pasajeros en paralelo
                 const viajesConPasajero = await Promise.all(
                     viajes.map(async (viaje) => {
                         const pasajero = await getPasajeroInfo(viaje.pasajero_id);
@@ -654,39 +788,52 @@
             }
         }
 
+        // ============================================
+        // ACEPTAR VIAJE — Update directo atómico (sin Edge Function)
+        // ============================================
         async function aceptarViaje(viajeId, btnElement) {
             btnElement.disabled = true;
             btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
 
             try {
-                const response = await fetch(EDGE_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${(await supabaseClient.auth.getSession()).data.session?.access_token}`
-                    },
-                    body: JSON.stringify({
-                        action: 'aceptar_viaje',
-                        viaje_id: viajeId,
-                        conductor_id: currentUser.id
+                const { data, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update({
+                        estado: 'asignado',
+                        conductor_asignado_id: currentUser.id,
+                        updated_at: new Date().toISOString()
                     })
-                });
+                    .eq('id', viajeId)
+                    .eq('estado', 'pendiente')
+                    .select();
 
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error || 'Error al aceptar viaje');
+                if (error) {
+                    console.error('[ACEPTAR] Error Supabase:', error);
+                    throw error;
+                }
 
+                if (!data || data.length === 0) {
+                    throw new Error('Este viaje ya fue aceptado por otro conductor. 🏃‍♂️');
+                }
+
+                console.log('[ACEPTAR] Viaje asignado:', data);
                 showToast('¡Viaje aceptado exitosamente! 🎉');
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
 
             } catch (err) {
-                console.error('Error:', err);
-                showToast(err.message, 'error');
+                console.error('[ACEPTAR] Error:', err);
+                showToast(err.message || 'No se pudo asignar el viaje', 'error');
+                await cargarViajesDisponibles();
+            } finally {
                 btnElement.disabled = false;
                 btnElement.innerHTML = '✋ Aceptar Viaje';
             }
         }
 
+        // ============================================
+        // COMPLETAR VIAJE
+        // ============================================
         async function completarViaje(viajeId) {
             try {
                 const { data, error } = await supabaseClient
@@ -709,20 +856,18 @@
             }
         }
 
-        // Variables para el modal de cancelación
-        let cancelViajeId = null;
-
+        // ============================================
+        // CANCELAR VIAJE — Modal
+        // ============================================
         function abrirCancelModal(viajeId) {
             cancelViajeId = viajeId;
             document.getElementById('cancelMotivo').value = '';
-            const modal = document.getElementById('cancelModal');
-            modal.style.display = 'flex';
+            document.getElementById('cancelModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
 
         function closeCancelModal() {
-            const modal = document.getElementById('cancelModal');
-            modal.style.display = 'none';
+            document.getElementById('cancelModal').style.display = 'none';
             document.body.style.overflow = '';
             cancelViajeId = null;
         }
@@ -744,10 +889,10 @@
 
                 if (nuevoEstado === 'cancelado') {
                     updateData.motivo_cancelacion = motivo;
-                    updateData.conductor_asignado_id = null; // Liberar conductor
+                    updateData.conductor_asignado_id = null;
                 } else {
                     updateData.motivo_revertir = motivo;
-                    updateData.conductor_asignado_id = null; // Liberar conductor para reasignar
+                    updateData.conductor_asignado_id = null;
                 }
 
                 const { data, error } = await supabaseClient
@@ -772,13 +917,16 @@
 
                 closeCancelModal();
                 await cargarMisViajes();
-                await cargarViajesDisponibles(); // Recargar disponibles si volvió a pendiente
+                await cargarViajesDisponibles();
             } catch (err) {
                 console.error('[CANCELAR] Error:', err);
                 showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
         }
 
+        // ============================================
+        // LOGOUT & SUSCRIPCIONES
+        // ============================================
         async function logout() {
             await supabaseClient.auth.signOut();
             window.location.href = 'dashboard.html';
@@ -804,6 +952,9 @@
             subscriptions.push(sub1, sub2);
         }
 
+        // ============================================
+        // INIT
+        // ============================================
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -814,30 +965,21 @@
 
             currentUser = session.user;
 
-            // Verificar que sea conductor
-            const { data: conductor } = await supabaseClient
-                .from('conductores')
-                .select('id')
-                .eq('auth_user_id', currentUser.id)
-                .maybeSingle();
+            // 1. Validar estado del conductor ANTES de cargar nada
+            const activo = await verificarEstadoConductor();
+            if (!activo) return;
 
-            if (!conductor) {
-                showToast('Acceso restringido a conductores', 'error');
-                setTimeout(() => window.location.href = 'index.html', 2000);
-                return;
-            }
-
+            // 2. Cargar datos
             await cargarViajesDisponibles();
             await cargarMisViajes();
+
+            // 3. Suscripciones Realtime
             iniciarSuscripciones();
 
-            // Event listeners para modal de cancelación (dentro de init para asegurar DOM listo)
-            const cancelModal = document.getElementById('cancelModal');
-            if (cancelModal) {
-                cancelModal.addEventListener('click', (e) => {
-                    if (e.target === e.currentTarget) closeCancelModal();
-                });
-            }
+            // 4. Event listeners del modal (DOM ya listo)
+            document.getElementById('cancelModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeCancelModal();
+            });
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeCancelModal();
             });
@@ -849,29 +991,6 @@
 
         init();
     </script>
-
-    <!-- Modal Cancelar/Revertir Viaje -->
-    <div class="modal-overlay" id="cancelModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:2000;justify-content:center;align-items:center;padding:20px;">
-        <div class="modal-content" style="max-width:500px;width:100%;background:rgba(30,41,59,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:35px 25px;position:relative;">
-            <button class="modal-close" onclick="closeCancelModal()" style="position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;">×</button>
-
-            <div style="margin-bottom:25px;">
-                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">⚠️ Cancelar Viaje</h3>
-                <p style="color:#94a3b8;font-size:14px;">Por favor, indica el motivo de la cancelación.</p>
-            </div>
-
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:8px;">Motivo de cancelación *</label>
-                <textarea id="cancelMotivo" rows="3" style="width:100%;padding:14px 18px;border-radius:12px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Ej: Problema mecánico, emergencia personal, etc."></textarea>
-            </div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button onclick="closeCancelModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Volver</button>
-                <button onclick="confirmarCancelarViaje('pendiente')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">🔄 Dejar en Pendiente</button>
-                <button onclick="confirmarCancelarViaje('cancelado')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">❌ Cancelar Definitivo</button>
-            </div>
-        </div>
-    </div>
 
 </body>
 </html>
