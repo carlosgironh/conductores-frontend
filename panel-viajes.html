@@ -409,6 +409,35 @@
             font-size: 20px;
         }
 
+        /* Bloqueo overlay */
+        .bloqueo-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .bloqueo-icono { font-size: 64px; margin-bottom: 20px; }
+        .bloqueo-titulo { color: white; margin-bottom: 15px; font-size: 24px; font-weight: 700; }
+        .bloqueo-mensaje { color: #ccc; max-width: 400px; line-height: 1.5; margin-bottom: 30px; }
+        .bloqueo-btn {
+            padding: 12px 24px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
@@ -567,18 +596,54 @@
                 return false;
             }
 
-            const { data: conductor, error } = await supabaseClient
-                .from('conductores')
-                .select('status, nombre_completo, vehiculo')
-                .eq('id', user.id)
-                .single();
+            console.log('[AUTH] Usuario logueado:', user.id);
 
-            if (error || !conductor) {
-                mostrarBloqueo('No estás registrado como conductor en el sistema.');
+            // PASO 1: Verificar si es conductor usando auth_user_id (como el código original)
+            const { data: conductor, error: errConductor } = await supabaseClient
+                .from('conductores')
+                .select('id, auth_user_id, status, nombre_completo, vehiculo')
+                .eq('auth_user_id', user.id)
+                .maybeSingle();
+
+            if (errConductor) {
+                console.error('[CONDUCTOR] Error consultando conductores:', errConductor);
+                // Si el error es 400 por columna inexistente, intentar sin status
+                if (errConductor.code === '42703' || errConductor.message?.includes('status')) {
+                    console.log('[CONDUCTOR] Columna status no existe, intentando sin ella...');
+                    const { data: conductorSimple, error: errSimple } = await supabaseClient
+                        .from('conductores')
+                        .select('id, auth_user_id')
+                        .eq('auth_user_id', user.id)
+                        .maybeSingle();
+
+                    if (errSimple) {
+                        console.error('[CONDUCTOR] Error incluso sin status:', errSimple);
+                        showToast('Error verificando conductor: ' + errSimple.message, 'error');
+                        return false;
+                    }
+
+                    if (!conductorSimple) {
+                        mostrarBloqueo('No estás registrado como conductor en el sistema. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
+                        return false;
+                    }
+
+                    console.log('[CONDUCTOR] Conductor encontrado (sin status). Asumiendo activo.');
+                    return true;
+                }
+
+                showToast('Error verificando conductor: ' + errConductor.message, 'error');
                 return false;
             }
 
-            if (conductor.status !== 'active') {
+            if (!conductor) {
+                mostrarBloqueo('No estás registrado como conductor en el sistema. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
+                return false;
+            }
+
+            console.log('[CONDUCTOR] Encontrado:', conductor);
+
+            // PASO 2: Validar status (si existe la columna)
+            if (conductor.status && conductor.status !== 'active') {
                 let mensaje = '';
                 switch(conductor.status) {
                     case 'inactive':
@@ -604,23 +669,12 @@
             document.getElementById('app-container').style.display = 'none';
 
             const bloqueo = document.createElement('div');
-            bloqueo.id = 'bloqueo-overlay';
+            bloqueo.className = 'bloqueo-overlay';
             bloqueo.innerHTML = `
-                <div style="
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.9); display: flex;
-                    align-items: center; justify-content: center; z-index: 9999;
-                    flex-direction: column; padding: 20px; text-align: center;
-                ">
-                    <div style="font-size: 64px; margin-bottom: 20px;">🚫</div>
-                    <h2 style="color: white; margin-bottom: 15px;">Acceso Restringido</h2>
-                    <p style="color: #ccc; max-width: 400px; line-height: 1.5;">${mensaje}</p>
-                    <button onclick="logout()"
-                        style="margin-top: 30px; padding: 12px 24px; background: #e74c3c;
-                        color: white; border: none; border-radius: 8px; cursor: pointer; font-weight:700;">
-                        Cerrar Sesión
-                    </button>
-                </div>
+                <div class="bloqueo-icono">🚫</div>
+                <h2 class="bloqueo-titulo">Acceso Restringido</h2>
+                <p class="bloqueo-mensaje">${mensaje}</p>
+                <button class="bloqueo-btn" onclick="logout()">Cerrar Sesión</button>
             `;
             document.body.appendChild(bloqueo);
         }
@@ -789,7 +843,7 @@
         }
 
         // ============================================
-        // ACEPTAR VIAJE — Update directo atómico (sin Edge Function)
+        // ACEPTAR VIAJE — Update directo atómico
         // ============================================
         async function aceptarViaje(viajeId, btnElement) {
             btnElement.disabled = true;
@@ -964,6 +1018,7 @@
             }
 
             currentUser = session.user;
+            console.log('[INIT] Session user ID:', currentUser.id);
 
             // 1. Validar estado del conductor ANTES de cargar nada
             const activo = await verificarEstadoConductor();
