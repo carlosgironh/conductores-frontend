@@ -370,7 +370,6 @@
 
         .nav-perfil svg { width: 18px; height: 18px; }
 
-        /* Modal overlay */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -409,7 +408,6 @@
             font-size: 20px;
         }
 
-        /* Bloqueo overlay */
         .bloqueo-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -558,6 +556,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
+        let conductorId = null;   // ← ID interno de la tabla conductores (para FK)
         let subscriptions = [];
         let cancelViajeId = null;
 
@@ -587,7 +586,7 @@
         }
 
         // ============================================
-        // BLOQUEO: Verificar estado del conductor
+        // BLOQUEO: Verificar conductor y obtener su ID interno
         // ============================================
         async function verificarEstadoConductor() {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -596,67 +595,52 @@
                 return false;
             }
 
-            console.log('[AUTH] Usuario logueado:', user.id);
+            console.log('[AUTH] auth.uid():', user.id);
 
-            // PASO 1: Verificar si es conductor usando auth_user_id (como el código original)
-            const { data: conductor, error: errConductor } = await supabaseClient
+            // Intentar con status primero
+            let { data: conductor, error } = await supabaseClient
                 .from('conductores')
                 .select('id, auth_user_id, status, nombre_completo, vehiculo')
                 .eq('auth_user_id', user.id)
                 .maybeSingle();
 
-            if (errConductor) {
-                console.error('[CONDUCTOR] Error consultando conductores:', errConductor);
-                // Si el error es 400 por columna inexistente, intentar sin status
-                if (errConductor.code === '42703' || errConductor.message?.includes('status')) {
-                    console.log('[CONDUCTOR] Columna status no existe, intentando sin ella...');
-                    const { data: conductorSimple, error: errSimple } = await supabaseClient
-                        .from('conductores')
-                        .select('id, auth_user_id')
-                        .eq('auth_user_id', user.id)
-                        .maybeSingle();
+            if (error && error.code === '42703') {
+                console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
+                const result = await supabaseClient
+                    .from('conductores')
+                    .select('id, auth_user_id')
+                    .eq('auth_user_id', user.id)
+                    .maybeSingle();
+                conductor = result.data;
+                error = result.error;
+            }
 
-                    if (errSimple) {
-                        console.error('[CONDUCTOR] Error incluso sin status:', errSimple);
-                        showToast('Error verificando conductor: ' + errSimple.message, 'error');
-                        return false;
-                    }
-
-                    if (!conductorSimple) {
-                        mostrarBloqueo('No estás registrado como conductor en el sistema. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
-                        return false;
-                    }
-
-                    console.log('[CONDUCTOR] Conductor encontrado (sin status). Asumiendo activo.');
-                    return true;
-                }
-
-                showToast('Error verificando conductor: ' + errConductor.message, 'error');
+            if (error) {
+                console.error('[CONDUCTOR] Error:', error);
+                showToast('Error verificando conductor: ' + error.message, 'error');
                 return false;
             }
 
             if (!conductor) {
-                mostrarBloqueo('No estás registrado como conductor en el sistema. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
+                mostrarBloqueo('No estás registrado como conductor. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
                 return false;
             }
 
             console.log('[CONDUCTOR] Encontrado:', conductor);
+            console.log('[CONDUCTOR] ID interno (para FK):', conductor.id);
+            console.log('[CONDUCTOR] auth_user_id:', conductor.auth_user_id);
 
-            // PASO 2: Validar status (si existe la columna)
+            // Guardar el ID interno del conductor (el que la FK espera)
+            conductorId = conductor.id;
+
+            // Validar status si existe
             if (conductor.status && conductor.status !== 'active') {
                 let mensaje = '';
                 switch(conductor.status) {
-                    case 'inactive':
-                        mensaje = 'Tu cuenta está inactiva. Contacta al administrador para reactivarla.';
-                        break;
-                    case 'banned':
-                        mensaje = 'Tu cuenta ha sido suspendida. Contacta soporte.';
-                        break;
-                    case 'pending':
-                        mensaje = 'Tu cuenta está pendiente de aprobación. Espera la validación del administrador.';
-                        break;
-                    default:
-                        mensaje = 'No puedes acceder en este momento. Estado: ' + conductor.status;
+                    case 'inactive': mensaje = 'Tu cuenta está inactiva. Contacta al administrador.'; break;
+                    case 'banned': mensaje = 'Tu cuenta ha sido suspendida.'; break;
+                    case 'pending': mensaje = 'Tu cuenta está pendiente de aprobación.'; break;
+                    default: mensaje = 'No puedes acceder. Estado: ' + conductor.status;
                 }
                 mostrarBloqueo(mensaje);
                 return false;
@@ -667,7 +651,6 @@
 
         function mostrarBloqueo(mensaje) {
             document.getElementById('app-container').style.display = 'none';
-
             const bloqueo = document.createElement('div');
             bloqueo.className = 'bloqueo-overlay';
             bloqueo.innerHTML = `
@@ -690,11 +673,7 @@
                     .select('nombres, apellidos, celular, email')
                     .eq('id', pasajeroId)
                     .maybeSingle();
-
-                if (error || !data) {
-                    return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
-                }
-
+                if (error || !data) return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
                 return {
                     nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
                     telefono: data.celular || 'No disponible',
@@ -710,7 +689,6 @@
         // ============================================
         async function cargarViajesDisponibles() {
             const container = document.getElementById('lista-disponibles');
-
             try {
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
@@ -719,7 +697,6 @@
                     .order('fecha_hora', { ascending: true });
 
                 if (error) throw error;
-
                 document.getElementById('stat-disponibles').textContent = viajes?.length ?? 0;
 
                 if (!viajes || viajes.length === 0) {
@@ -759,24 +736,22 @@
                         </button>
                     </div>
                 `).join('');
-
             } catch (err) {
                 console.error('Error cargando viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error al cargar viajes: ${err.message}</p></div>`;
+                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
             }
         }
 
         // ============================================
-        // CARGAR MIS VIAJES
+        // CARGAR MIS VIAJES — usa conductorId (ID interno de la tabla)
         // ============================================
         async function cargarMisViajes() {
             const container = document.getElementById('lista-asignados');
-
             try {
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
-                    .eq('conductor_asignado_id', currentUser.id)
+                    .eq('conductor_asignado_id', conductorId)  // ← ID interno, no auth.uid()
                     .in('estado', ['asignado', 'completado', 'cancelado'])
                     .order('fecha_hora', { ascending: true });
 
@@ -825,36 +800,32 @@
                         </div>
                         ${viaje.estado === 'asignado' ? `
                             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;">
-                                    ✅ Completar
-                                </button>
-                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">
-                                    ❌ Cancelar
-                                </button>
+                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;">✅ Completar</button>
+                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
                             </div>
                         ` : viaje.estado === 'completado' ? '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>' : '<div style="text-align:center;color:#f87171;font-weight:600;font-size:14px;">❌ Viaje Cancelado</div>'}
                     </div>
                 `).join('');
-
             } catch (err) {
                 console.error('Error cargando mis viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error al cargar tus viajes: ${err.message}</p></div>`;
+                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
             }
         }
 
         // ============================================
-        // ACEPTAR VIAJE — Update directo atómico
+        // ACEPTAR VIAJE — usa conductorId (ID interno de la tabla conductores)
         // ============================================
         async function aceptarViaje(viajeId, btnElement) {
             btnElement.disabled = true;
             btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
 
             try {
+                console.log('[ACEPTAR] Usando conductorId:', conductorId);
                 const { data, error } = await supabaseClient
                     .from('viajes_reservados')
                     .update({
                         estado: 'asignado',
-                        conductor_asignado_id: currentUser.id,
+                        conductor_asignado_id: conductorId,  // ← ID interno, no auth.uid()
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', viajeId)
@@ -870,11 +841,10 @@
                     throw new Error('Este viaje ya fue aceptado por otro conductor. 🏃‍♂️');
                 }
 
-                console.log('[ACEPTAR] Viaje asignado:', data);
+                console.log('[ACEPTAR] Éxito:', data);
                 showToast('¡Viaje aceptado exitosamente! 🎉');
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
-
             } catch (err) {
                 console.error('[ACEPTAR] Error:', err);
                 showToast(err.message || 'No se pudo asignar el viaje', 'error');
@@ -886,7 +856,7 @@
         }
 
         // ============================================
-        // COMPLETAR VIAJE
+        // COMPLETAR VIAJE — usa conductorId
         // ============================================
         async function completarViaje(viajeId) {
             try {
@@ -894,14 +864,14 @@
                     .from('viajes_reservados')
                     .update({ estado: 'completado', updated_at: new Date().toISOString() })
                     .eq('id', viajeId)
-                    .eq('conductor_asignado_id', currentUser.id)
+                    .eq('conductor_asignado_id', conductorId)  // ← ID interno
                     .select();
 
                 if (error) {
-                    console.error('[COMPLETAR] Error Supabase:', error);
+                    console.error('[COMPLETAR] Error:', error);
                     throw error;
                 }
-                console.log('[COMPLETAR] Update exitoso:', data);
+                console.log('[COMPLETAR] Éxito:', data);
                 showToast('Viaje marcado como completado ✅');
                 await cargarMisViajes();
             } catch (err) {
@@ -911,7 +881,7 @@
         }
 
         // ============================================
-        // CANCELAR VIAJE — Modal
+        // CANCELAR VIAJE — usa conductorId
         // ============================================
         function abrirCancelModal(viajeId) {
             cancelViajeId = viajeId;
@@ -928,19 +898,14 @@
 
         async function confirmarCancelarViaje(nuevoEstado) {
             if (!cancelViajeId) return;
-
             const motivo = document.getElementById('cancelMotivo').value.trim();
-            if (!motivo) {
-                showToast('Debes ingresar un motivo', 'error');
-                return;
-            }
+            if (!motivo) { showToast('Debes ingresar un motivo', 'error'); return; }
 
             try {
                 const updateData = {
                     estado: nuevoEstado,
                     updated_at: new Date().toISOString()
                 };
-
                 if (nuevoEstado === 'cancelado') {
                     updateData.motivo_cancelacion = motivo;
                     updateData.conductor_asignado_id = null;
@@ -953,22 +918,13 @@
                     .from('viajes_reservados')
                     .update(updateData)
                     .eq('id', cancelViajeId)
-                    .eq('conductor_asignado_id', currentUser.id)
+                    .eq('conductor_asignado_id', conductorId)  // ← ID interno
                     .select();
 
-                if (error) {
-                    console.error('[CANCELAR] Error Supabase:', error);
-                    throw error;
-                }
+                if (error) { console.error('[CANCELAR] Error:', error); throw error; }
+                console.log('[CANCELAR] Éxito:', data);
 
-                console.log('[CANCELAR] Update exitoso:', data);
-
-                if (nuevoEstado === 'cancelado') {
-                    showToast('Viaje cancelado definitivamente ❌');
-                } else {
-                    showToast('Viaje devuelto a pendiente 🔄');
-                }
-
+                showToast(nuevoEstado === 'cancelado' ? 'Viaje cancelado definitivamente ❌' : 'Viaje devuelto a pendiente 🔄');
                 closeCancelModal();
                 await cargarMisViajes();
                 await cargarViajesDisponibles();
@@ -999,7 +955,7 @@
                 .channel('mis-viajes')
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
-                    filter: `conductor_asignado_id=eq.${currentUser.id}`
+                    filter: `conductor_asignado_id=eq.${conductorId}`  // ← ID interno
                 }, () => cargarMisViajes())
                 .subscribe();
 
@@ -1011,27 +967,25 @@
         // ============================================
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-
-            if (!session) {
-                window.location.href = 'dashboard.html';
-                return;
-            }
+            if (!session) { window.location.href = 'dashboard.html'; return; }
 
             currentUser = session.user;
-            console.log('[INIT] Session user ID:', currentUser.id);
+            console.log('[INIT] auth.uid():', currentUser.id);
 
-            // 1. Validar estado del conductor ANTES de cargar nada
+            // 1. Verificar conductor y obtener su ID interno
             const activo = await verificarEstadoConductor();
             if (!activo) return;
+
+            console.log('[INIT] conductorId listo:', conductorId);
 
             // 2. Cargar datos
             await cargarViajesDisponibles();
             await cargarMisViajes();
 
-            // 3. Suscripciones Realtime
+            // 3. Suscripciones
             iniciarSuscripciones();
 
-            // 4. Event listeners del modal (DOM ya listo)
+            // 4. Modal listeners
             document.getElementById('cancelModal').addEventListener('click', (e) => {
                 if (e.target === e.currentTarget) closeCancelModal();
             });
