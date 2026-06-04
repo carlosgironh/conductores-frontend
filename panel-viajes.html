@@ -601,7 +601,7 @@
             // Verificar que existe en tabla conductores (por auth_user_id)
             let { data: conductor, error } = await supabaseClient
                 .from('conductores')
-                .select('id, auth_user_id, status, nombre_completo, vehiculo')
+                .select('id, auth_user_id, status, nombres, apellidos, vehiculo')
                 .eq('auth_user_id', user.id)
                 .maybeSingle();
 
@@ -609,7 +609,7 @@
                 console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
                 const result = await supabaseClient
                     .from('conductores')
-                    .select('id, auth_user_id')
+                    .select('id, auth_user_id, nombres, apellidos')
                     .eq('auth_user_id', user.id)
                     .maybeSingle();
                 conductor = result.data;
@@ -628,7 +628,7 @@
             }
 
             console.log('[CONDUCTOR] Encontrado:', conductor);
-            conductorNombre = conductor.nombre_completo || 'Conductor';
+            conductorNombre = ((conductor.nombres || '') + ' ' + (conductor.apellidos || '')).trim() || 'Conductor';
 
             // Validar status si existe
             if (conductor.status && conductor.status !== 'active') {
