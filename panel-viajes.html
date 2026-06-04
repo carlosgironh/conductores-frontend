@@ -449,6 +449,7 @@
     </style>
     <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -556,6 +557,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
+        let conductorNombre = "Conductor";
         let subscriptions = [];
         let cancelViajeId = null;
 
@@ -626,6 +628,7 @@
             }
 
             console.log('[CONDUCTOR] Encontrado:', conductor);
+            conductorNombre = conductor.nombre_completo || 'Conductor';
 
             // Validar status si existe
             if (conductor.status && conductor.status !== 'active') {
@@ -660,21 +663,23 @@
         // PASAJERO INFO
         // ============================================
         async function getPasajeroInfo(pasajeroId) {
-            if (!pasajeroId) return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
+            if (!pasajeroId) return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
             try {
                 const { data, error } = await supabaseClient
                     .from('passengers')
                     .select('nombres, apellidos, celular, email')
                     .eq('id', pasajeroId)
                     .maybeSingle();
-                if (error || !data) return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
+                if (error || !data) return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
                 return {
                     nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+                    apellidos: data.apellidos || '',
                     telefono: data.celular || 'No disponible',
+                    celular_raw: data.celular || '',
                     email: data.email || 'No disponible'
                 };
             } catch (e) {
-                return { nombre: 'Sin nombre', telefono: 'No disponible', email: 'No disponible' };
+                return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
             }
         }
 
@@ -793,10 +798,13 @@
                             <strong>✉️ Email:</strong> ${viaje.pasajero.email}
                         </div>
                         ${viaje.estado === 'asignado' ? `
-                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;">✅ Completar</button>
-                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
+                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;min-width:120px;">✅ Completar</button>
+                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;min-width:120px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
                             </div>
+                            <button class="btn" onclick="contactarWhatsApp('${viaje.pasajero.celular_raw}', '${viaje.pasajero.apellidos}')" style="background:linear-gradient(135deg,#25D366 0%,#128C7E 100%);color:#fff;width:100%;">
+                                📱 Contactar Pasajero
+                            </button>
                         ` : viaje.estado === 'completado' ? '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>' : '<div style="text-align:center;color:#f87171;font-weight:600;font-size:14px;">❌ Viaje Cancelado</div>'}
                     </div>
                 `).join('');
@@ -923,6 +931,43 @@
                 console.error('[CANCELAR] Error:', err);
                 showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
+        }
+
+
+        // ============================================
+        // CONTACTAR PASAJERO POR WHATSAPP
+        // ============================================
+        function generarSaludo() {
+            const hora = new Date().getHours();
+            return (hora >= 6 && hora < 18) ? 'Buen día' : 'Buenas noches';
+        }
+
+        function formatearWhatsApp(numero) {
+            if (!numero) return null;
+            let limpio = numero.toString().replace(/[^0-9]/g, '');
+            if (limpio.startsWith('507')) {
+                return '+507' + limpio.substring(3);
+            }
+            if (limpio.startsWith('05') && limpio.length === 8) {
+                return '+507' + limpio.substring(1);
+            }
+            return '+507' + limpio;
+        }
+
+        function contactarWhatsApp(celular, apellidosPasajero) {
+            const numero = formatearWhatsApp(celular);
+            if (!numero) {
+                showToast('El pasajero no tiene número de teléfono registrado', 'error');
+                return;
+            }
+            const saludo = generarSaludo();
+            const apellido = (apellidosPasajero || 'Pasajero').toUpperCase();
+            const conductor = (conductorNombre || 'Conductor').toUpperCase();
+            const mensaje = encodeURIComponent(
+                `${saludo}, estimado Sr(a). ${apellido} me llamo ${conductor} soy su conductor asignado para su viaje reservado en la plataforma RoadTo, un gusto saludarle.`
+            );
+            const url = `https://wa.me/${numero.replace('+', '')}?text=${mensaje}`;
+            window.open(url, '_blank');
         }
 
         // ============================================
