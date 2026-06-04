@@ -306,6 +306,7 @@
   }
 </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -358,8 +359,10 @@
             <input id="direccion" type="text" placeholder="Av. Principal #123" required>
           </div>
           <div class="form-group">
-            <label>Celular</label>
-            <input id="celular" type="text" placeholder="0999999999" required>
+            <label>Celular (WhatsApp)</label>
+            <input id="celular" type="tel" inputmode="numeric" maxlength="8" placeholder="61234567" required
+              pattern="^6[0-9]{7}$" title="Debe ser un número de 8 dígitos que empiece con 6. Ejemplo: 61234567">
+            <small style="display:block;margin-top:4px;font-size:12px;color:#64748b;">Solo números, 8 dígitos, empieza con 6. No incluya +507.</small>
           </div>
           <div class="form-group">
             <label>Cédula</label>
@@ -497,6 +500,34 @@ window.acceptAgreement = async function() {
   modalTerminos.classList.remove('active');
   await processRegistration();
 };
+
+// Validación en tiempo real: celular solo números, máximo 8, empieza con 6
+document.getElementById('celular').addEventListener('input', function(e) {
+  // Remover todo lo que no sea número
+  let val = this.value.replace(/[^0-9]/g, '');
+  // Limitar a 8 dígitos
+  if (val.length > 8) val = val.substring(0, 8);
+  // Si empieza con algo que no sea 6, mostrar error visual
+  if (val.length > 0 && val[0] !== '6') {
+    this.style.borderColor = '#ef4444';
+    this.style.boxShadow = '0 0 0 4px rgba(239,68,68,0.15)';
+  } else {
+    this.style.borderColor = '';
+    this.style.boxShadow = '';
+  }
+  this.value = val;
+});
+
+document.getElementById('celular').addEventListener('blur', function() {
+  const val = this.value;
+  if (val.length > 0 && val.length !== 8) {
+    this.style.borderColor = '#ef4444';
+    this.style.boxShadow = '0 0 0 4px rgba(239,68,68,0.15)';
+  } else if (val.length === 8 && val[0] === '6') {
+    this.style.borderColor = 'var(--corp-green)';
+    this.style.boxShadow = '0 0 0 4px rgba(138,199,37,0.15)';
+  }
+});
 
 // Manejar visualización de archivos seleccionados
 document.querySelectorAll('input[type="file"]').forEach(input => {
@@ -706,6 +737,14 @@ form.addEventListener("submit", async (e) => {
   const password = document.getElementById('password').value;
   if (password.length < 6) {
     showMessage("La contraseña debe tener al menos 6 caracteres.", "error");
+    return;
+  }
+
+  // Validar celular
+  const celular = document.getElementById('celular').value.trim();
+  if (!/^6[0-9]{7}$/.test(celular)) {
+    showMessage("El celular debe tener exactamente 8 dígitos numéricos y empezar con 6. Ejemplo: 61234567", "error");
+    document.getElementById('celular').focus();
     return;
   }
 
