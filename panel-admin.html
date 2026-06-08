@@ -1309,6 +1309,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -1617,6 +1618,8 @@
       <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
       <button class="section-tab" onclick="switchSection('viajes', this)">🚕 Viajes</button>
     </div>
+      <button class="section-tab" onclick="switchSection('config', this)">⚙️ Configuración</button>
+
 
 
     </div>
@@ -1769,6 +1772,98 @@
       <!-- Lista Viajes -->
       <div class="viajes-list" id="viajesList">
         <div style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</div>
+      </div>
+    </div>
+
+
+    <!-- CONFIGURACIÓN SECTION -->
+    <div id="configSection" class="section-content">
+      <div class="header" style="margin-top: 20px;">
+        <h2 style="font-size: 24px;">Configuración del Sistema</h2>
+        <p class="subtitle">Control de funciones y permisos globales</p>
+      </div>
+
+      <div class="info-box">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p><strong>¿Cómo funciona?</strong> Los cambios aquí se aplican en tiempo real a todos los conductores. Cuando desactives "Actualizar Perfil", el botón desaparecerá del panel de cada conductor hasta que lo vuelvas a activar.</p>
+      </div>
+
+      <div class="config-card">
+        <div class="config-header">
+          <div class="config-header-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="config-header-title">Permisos de Conductores</div>
+            <div class="config-header-subtitle">Controla qué pueden hacer los conductores en sus perfiles</div>
+          </div>
+        </div>
+
+        <div class="config-toggle-row" id="rowActualizarPerfil">
+          <div class="config-toggle-info">
+            <div class="icon green" id="iconActualizarPerfil">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </div>
+            <div class="text">
+              <div class="title">Actualizar Perfil <span class="config-status-badge enabled" id="badgeActualizarPerfil">Activo</span></div>
+              <div class="desc" id="descActualizarPerfil">Los conductores pueden modificar sus datos y subir documentos</div>
+            </div>
+          </div>
+          <div class="config-switch active" id="switchActualizarPerfil" onclick="toggleConfig('actualizar_perfil')">
+            <div class="thumb"></div>
+          </div>
+        </div>
+
+        <div class="config-toggle-row" id="rowRegistroConductor">
+          <div class="config-toggle-info">
+            <div class="icon green" id="iconRegistroConductor">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+            </div>
+            <div class="text">
+              <div class="title">Registro de Nuevos Conductores <span class="config-status-badge enabled" id="badgeRegistroConductor">Activo</span></div>
+              <div class="desc" id="descRegistroConductor">Permitir que nuevos conductores se registren en la plataforma</div>
+            </div>
+          </div>
+          <div class="config-switch active" id="switchRegistroConductor" onclick="toggleConfig('registro_conductores')">
+            <div class="thumb"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="config-card">
+        <div class="config-header">
+          <div class="config-header-icon" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(79, 70, 229, 0.1) 100%); border-color: rgba(99, 102, 241, 0.3);">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #818cf8;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="config-header-title">Mensaje de Bloqueo</div>
+            <div class="config-header-subtitle">Texto que verán los conductores cuando una función esté desactivada</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Mensaje cuando "Actualizar Perfil" esté desactivado</label>
+          <input type="text" id="configMensajeBloqueo" value="La actualización de datos está temporalmente deshabilitada. Contacte al administrador." placeholder="Escribe el mensaje...">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn-primary" onclick="guardarMensajeBloqueo()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:6px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Guardar Mensaje
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1936,6 +2031,11 @@ function switchSection(section, btn) {
   if (section === 'viajes') {
     cargarViajes();
   }
+  // Si cambia a config, cargar configuración
+  if (section === 'config') {
+    cargarConfiguracion();
+  }
+}
 }
 
 function obtenerEstadoPasajero(p) {
@@ -3033,7 +3133,8 @@ async function verificarAdmin() {
     try { await cargarConductores(); } catch(e) { console.error('Error conductores:', e); }
     try { await cargarPasajeros(); } catch(e) { console.error('Error pasajeros:', e); }
     try { await cargarViajes(); } catch(e) { console.error('Error viajes:', e); }
-    hideLoading();
+    
+    try { await cargarConfiguracion(); } catch(e) { console.error('Error config:', e); }hideLoading();
     
     if (isCapacitor && SplashScreen) {
       SplashScreen.hide();
@@ -3855,6 +3956,174 @@ async function sendQRByEmail() {
     hideLoading();
     window.open(`mailto:${currentQRConductor.email}?subject=${subject}&body=${body}`, '_blank');
     showToast('Se abrió tu cliente de email', 'success');
+  }
+}
+
+
+// ==================== SECCIÓN CONFIGURACIÓN DEL SISTEMA ====================
+let configData = {};
+
+async function cargarConfiguracion() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('app_config')
+      .select('*');
+
+    if (error) {
+      console.error('Error cargando configuración:', error);
+      // Si la tabla no existe, mostrar mensaje
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        showToast('⚠️ Crea la tabla app_config en Supabase primero. Ver instrucciones.', 'error');
+      }
+      return;
+    }
+
+    configData = {};
+    (data || []).forEach(row => {
+      configData[row.clave] = row.valor;
+    });
+
+    renderizarConfigUI();
+  } catch (e) {
+    console.error('Error cargando config:', e);
+  }
+}
+
+function renderizarConfigUI() {
+  // Actualizar Perfil
+  const actualizarActivo = configData['actualizar_perfil'] !== 'false';
+  const switchActualizar = document.getElementById('switchActualizarPerfil');
+  const badgeActualizar = document.getElementById('badgeActualizarPerfil');
+  const descActualizar = document.getElementById('descActualizarPerfil');
+  const iconActualizar = document.getElementById('iconActualizarPerfil');
+  const rowActualizar = document.getElementById('rowActualizarPerfil');
+
+  if (switchActualizar) {
+    if (actualizarActivo) {
+      switchActualizar.classList.add('active');
+      switchActualizar.classList.remove('disabled');
+      badgeActualizar.textContent = 'Activo';
+      badgeActualizar.className = 'config-status-badge enabled';
+      descActualizar.textContent = 'Los conductores pueden modificar sus datos y subir documentos';
+      iconActualizar.className = 'icon green';
+      rowActualizar.classList.remove('disabled-row');
+    } else {
+      switchActualizar.classList.remove('active');
+      switchActualizar.classList.add('disabled');
+      badgeActualizar.textContent = 'Bloqueado';
+      badgeActualizar.className = 'config-status-badge disabled';
+      descActualizar.textContent = 'Los conductores NO pueden actualizar sus datos';
+      iconActualizar.className = 'icon red';
+      rowActualizar.classList.add('disabled-row');
+    }
+  }
+
+  // Registro de conductores
+  const registroActivo = configData['registro_conductores'] !== 'false';
+  const switchRegistro = document.getElementById('switchRegistroConductor');
+  const badgeRegistro = document.getElementById('badgeRegistroConductor');
+  const descRegistro = document.getElementById('descRegistroConductor');
+  const iconRegistro = document.getElementById('iconRegistroConductor');
+  const rowRegistro = document.getElementById('rowRegistroConductor');
+
+  if (switchRegistro) {
+    if (registroActivo) {
+      switchRegistro.classList.add('active');
+      switchRegistro.classList.remove('disabled');
+      badgeRegistro.textContent = 'Activo';
+      badgeRegistro.className = 'config-status-badge enabled';
+      descRegistro.textContent = 'Permitir que nuevos conductores se registren en la plataforma';
+      iconRegistro.className = 'icon green';
+      rowRegistro.classList.remove('disabled-row');
+    } else {
+      switchRegistro.classList.remove('active');
+      switchRegistro.classList.add('disabled');
+      badgeRegistro.textContent = 'Bloqueado';
+      badgeRegistro.className = 'config-status-badge disabled';
+      descRegistro.textContent = 'El registro de nuevos conductores está cerrado';
+      iconRegistro.className = 'icon red';
+      rowRegistro.classList.add('disabled-row');
+    }
+  }
+
+  // Mensaje de bloqueo
+  const mensajeInput = document.getElementById('configMensajeBloqueo');
+  if (mensajeInput && configData['mensaje_bloqueo_actualizar']) {
+    mensajeInput.value = configData['mensaje_bloqueo_actualizar'];
+  }
+}
+
+async function toggleConfig(clave) {
+  const valorActual = configData[clave];
+  const nuevoValor = valorActual === 'false' ? 'true' : 'false';
+
+  showLoading('Guardando configuración...');
+
+  try {
+    // Intentar upsert
+    const { error } = await supabaseClient
+      .from('app_config')
+      .upsert({ clave: clave, valor: nuevoValor, updated_at: new Date().toISOString() },
+              { onConflict: 'clave' });
+
+    if (error) {
+      // Si falla, intentar update primero
+      const { error: updateError } = await supabaseClient
+        .from('app_config')
+        .update({ valor: nuevoValor, updated_at: new Date().toISOString() })
+        .eq('clave', clave);
+
+      if (updateError) {
+        // Si no existe, insertar
+        const { error: insertError } = await supabaseClient
+          .from('app_config')
+          .insert([{ clave: clave, valor: nuevoValor }]);
+
+        if (insertError) throw insertError;
+      }
+    }
+
+    configData[clave] = nuevoValor;
+    renderizarConfigUI();
+
+    const estadoTexto = nuevoValor === 'true' ? 'ACTIVADO' : 'DESACTIVADO';
+    showToast(`\u2705 ${clave.replace(/_/g, ' ').toUpperCase()} ${estadoTexto}`, 'success');
+
+  } catch (error) {
+    console.error('Error guardando config:', error);
+    showToast('Error: ' + error.message, 'error');
+
+    // Si es error de tabla no existe, dar instrucciones
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      showToast('\u26a0\ufe0f Crea la tabla app_config en Supabase. Ver SQL en instrucciones.', 'error');
+    }
+  } finally {
+    hideLoading();
+  }
+}
+
+async function guardarMensajeBloqueo() {
+  const mensaje = document.getElementById('configMensajeBloqueo').value.trim();
+  if (!mensaje) {
+    showToast('Escribe un mensaje', 'error');
+    return;
+  }
+
+  showLoading('Guardando...');
+  try {
+    const { error } = await supabaseClient
+      .from('app_config')
+      .upsert({ clave: 'mensaje_bloqueo_actualizar', valor: mensaje, updated_at: new Date().toISOString() },
+              { onConflict: 'clave' });
+
+    if (error) throw error;
+
+    configData['mensaje_bloqueo_actualizar'] = mensaje;
+    showToast('\u2705 Mensaje guardado correctamente', 'success');
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  } finally {
+    hideLoading();
   }
 }
 

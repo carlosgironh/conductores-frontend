@@ -796,6 +796,7 @@
     }
   }
 </style>
+<base target="_blank">
 </head>
 
 <body>
@@ -1218,7 +1219,71 @@ async function subirDocumento(conductorId, tipo, file) {
   }
 }
 
+
+// ==================== BLOQUEO DE ACTUALIZACIÓN DESDE ADMIN ====================
+let appConfigUpdate = {};
+
+async function verificarBloqueoActualizacion() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('app_config')
+      .select('clave, valor')
+      .eq('clave', 'actualizar_perfil')
+      .single();
+
+    if (error) {
+      console.log('Config no disponible:', error.message);
+      return true; // Permisivo por defecto
+    }
+
+    const bloqueado = data && data.valor === 'false';
+
+    if (bloqueado) {
+      // Obtener mensaje personalizado
+      const { data: msgData } = await supabaseClient
+        .from('app_config')
+        .select('valor')
+        .eq('clave', 'mensaje_bloqueo_actualizar')
+        .single();
+
+      const mensaje = msgData?.valor || 'La actualización de datos está temporalmente deshabilitada por el administrador.';
+
+      // Mostrar bloqueo
+      document.body.innerHTML = `
+        <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:
+          radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at top left, #0a1208, #0a1208);
+          color: #eef8e4; font-family: 'Inter', sans-serif;">
+          <div style="max-width:400px; width:100%; text-align:center; padding:40px; background:rgba(30,41,59,0.6); border-radius:24px; border:1px solid rgba(255,255,255,0.1);">
+            <div style="width:70px; height:70px; margin:0 auto 20px; background:rgba(239,68,68,0.15); border-radius:20px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(239,68,68,0.3);">
+              <svg width="32" height="32" fill="none" stroke="#f87171" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <h2 style="font-size:24px; font-weight:800; margin-bottom:12px; color:#fff;">Actualización Bloqueada</h2>
+            <p style="color:#94a3b8; font-size:14px; line-height:1.6; margin-bottom:24px;">${mensaje}</p>
+            <button onclick="window.location.href='perfil.html'" style="padding:14px 28px; border:none; border-radius:14px; background:linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color:white; font-size:14px; font-weight:700; cursor:pointer;">
+              Volver a Mi Perfil
+            </button>
+          </div>
+        </div>
+      `;
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    console.error('Error verificando bloqueo:', e);
+    return true; // Permisivo por defecto
+  }
+}
+
 async function cargarDatos() {
+  // Verificar primero si la actualización está bloqueada
+  const permitido = await verificarBloqueoActualizacion();
+  if (!permitido) return; // Se redirigió/bloqueó, no continuar
+
   showLoading('Cargando datos...');
   
   try {

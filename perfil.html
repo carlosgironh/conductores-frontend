@@ -676,6 +676,7 @@
     opacity: 1;
   }
 </style>
+<base target="_blank">
 </head>
 
 <body>
@@ -706,12 +707,18 @@
     <div class="documentos-grid" id="documentos-grid"></div>
   </div>
 
-  <button class="btn-update" onclick="irAPanel()">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-    </svg>
-    Actualizar Datos
-  </button>
+  <div id="btnUpdateContainer">
+    <button class="btn-update" onclick="irAPanel()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+      Actualizar Datos
+    </button>
+  </div>
+  <div id="bloqueoMensaje" style="display:none; margin-top:25px; padding:16px 20px; border-radius:14px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); text-align:center;">
+    <div style="color:#f87171; font-size:14px; font-weight:600; margin-bottom:4px;">⚠️ Actualización Deshabilitada</div>
+    <div id="bloqueoTexto" style="color:#94a3b8; font-size:13px;">Contacte al administrador para más información.</div>
+  </div>
 
   <!-- ELIMINADO: QR container -->
 </div>
@@ -827,6 +834,55 @@ function renderStatusBanner(estado, motivoDeshabilitado = '') {
   card.insertAdjacentHTML('afterbegin', bannerHTML);
 }
 
+
+// ==================== VERIFICACIÓN DE CONFIGURACIÓN REMOTA ====================
+let appConfig = {};
+
+async function verificarConfigActualizar() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('app_config')
+      .select('clave, valor')
+      .in('clave', ['actualizar_perfil', 'mensaje_bloqueo_actualizar']);
+
+    if (error) {
+      console.log('Config no disponible (tabla puede no existir):', error.message);
+      // Si hay error, mostrar el botón por defecto (permissivo)
+      mostrarBotonActualizar(true);
+      return;
+    }
+
+    appConfig = {};
+    (data || []).forEach(row => { appConfig[row.clave] = row.valor; });
+
+    const actualizarActivo = appConfig['actualizar_perfil'] !== 'false';
+    mostrarBotonActualizar(actualizarActivo);
+
+  } catch (e) {
+    console.error('Error verificando config:', e);
+    mostrarBotonActualizar(true); // Por defecto, mostrar
+  }
+}
+
+function mostrarBotonActualizar(visible) {
+  const btnContainer = document.getElementById('btnUpdateContainer');
+  const bloqueoMsg = document.getElementById('bloqueoMensaje');
+  const bloqueoTexto = document.getElementById('bloqueoTexto');
+
+  if (visible) {
+    if (btnContainer) btnContainer.style.display = 'block';
+    if (bloqueoMsg) bloqueoMsg.style.display = 'none';
+  } else {
+    if (btnContainer) btnContainer.style.display = 'none';
+    if (bloqueoMsg) {
+      bloqueoMsg.style.display = 'block';
+      // Mostrar mensaje personalizado si existe
+      const mensaje = appConfig['mensaje_bloqueo_actualizar'] || 'La actualización de datos está temporalmente deshabilitada. Contacte al administrador.';
+      bloqueoTexto.textContent = mensaje;
+    }
+  }
+}
+
 async function cargarPerfil() {
   try {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
@@ -860,6 +916,7 @@ async function cargarPerfil() {
     documentosCache = documentos;
 
     renderPerfil(conductor, documentos, user);
+    await verificarConfigActualizar();
 
   } catch (error) {
     console.error('Error cargando perfil:', error);
