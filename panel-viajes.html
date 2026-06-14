@@ -670,6 +670,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -1034,146 +1035,254 @@
         }
 
         // ============================================
-        // YAPPY API - INTEGRACIÓN REST COMPLETA
+        // BOTÓN DE PAGO YAPPY V2 - INTEGRACIÓN OFICIAL
         // ============================================
+        // Documentación: Botón de Pago Yappy V2
+        // CDN: https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js
+        // API Base: https://apipagosbg.bgeneral.cloud
+        // 
+        // Flujo:
+        // 1. Cargar botón desde CDN
+        // 2. Clic en botón → llamar Edge Function (backend seguro)
+        // 3. Edge Function: valida comercio + crea orden
+        // 4. Frontend recibe params → btnYappy.eventPayment(params)
+        // 5. Yappy abre modal → usuario paga
+        // 6. eventSuccess → activar suscripción
 
-        let yappySessionToken = null;
-        let yappySessionExpiry = null;
+        let yappyButtonLoaded = false;
+        let yappyOrderId = null;
 
         /**
-         * Paso 1: Login en Yappy API para obtener token de sesión
-         * POST /v1/session/login
-         * Headers: api-key, secret-key, client-ip, channel
+         * Cargar el script del Botón de Pago Yappy desde CDN
          */
-        async function yappyLogin() {
-            // Si ya tenemos token válido, reutilizarlo
-            if (yappySessionToken && yappySessionExpiry && Date.now() < yappySessionExpiry) {
-                console.log('[YAPPY API] Reutilizando token existente');
-                return yappySessionToken;
-            }
+        function cargarYappyButton() {
+            if (yappyButtonLoaded) return;
 
-            console.log('[YAPPY API] Iniciando sesión...');
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js';
+            script.onload = () => {
+                console.log('[YAPPY V2] Botón cargado desde CDN');
+                yappyButtonLoaded = true;
+            };
+            script.onerror = () => {
+                console.error('[YAPPY V2] Error cargando botón desde CDN');
+                showToast('Error cargando botón de Yappy. Intenta recargar la página.', 'error');
+            };
+            document.head.appendChild(script);
+        }
 
-            const response = await fetch(`${YAPPY_CONFIG.apiBaseUrl}/v1/session/login`, {
+        /**
+         * Paso 1: Validar comercio via Edge Function (backend seguro)
+         * POST /payments/validate/merchant
+         */
+        async function yappyValidarComercio() {
+            console.log('[YAPPY V2] Validando comercio...');
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+
+            const response = await fetch(`${YAPPY_CONFIG.edgeFunctionUrl}/yappy-validate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'api-key': YAPPY_CONFIG.apiKey,
-                    'secret-key': YAPPY_CONFIG.secretKey,
-                    'client-ip': YAPPY_CONFIG.clientIp,
-                    'channel': YAPPY_CONFIG.channel
+                    'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
-                    body: {
-                        code: YAPPY_CONFIG.secretKey  // El code puede ser el secret-key o un código específico
-                    }
+                    merchantId: YAPPY_CONFIG.merchantId,
+                    secretKey: YAPPY_CONFIG.secretKey,
+                    urlDomain: YAPPY_CONFIG.domain
                 })
             });
 
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error validando comercio');
+            }
+
             const data = await response.json();
-            console.log('[YAPPY API] Login response:', data);
-
-            if (data.status && data.status.code !== 'YP-0000') {
-                throw new Error(`Yappy Login Error: ${data.status.description} (${data.status.code})`);
-            }
-
-            if (!data.body || !data.body.token) {
-                throw new Error('Yappy Login: No se recibió token');
-            }
-
-            yappySessionToken = data.body.token;
-            // Token válido por 24h (configurar según documentación)
-            yappySessionExpiry = Date.now() + (24 * 60 * 60 * 1000);
-
-            console.log('[YAPPY API] Token obtenido exitosamente');
-            return yappySessionToken;
+            console.log('[YAPPY V2] Token obtenido');
+            return data.body; // { epochTime, token }
         }
 
         /**
-         * Paso 2: Generar Link de Pago dinámico
-         * POST /v1/payment (endpoint según documentación de Yappy)
-         * Headers: Authorization Bearer {token}, api-key, secret-key
+         * Paso 2: Crear orden via Edge Function (backend seguro)
+         * POST /payments/payment-wc
          */
-        async function yappyGenerarPago(orderId) {
-            const token = await yappyLogin();
+        async function yappyCrearOrden(validateToken) {
+            console.log('[YAPPY V2] Creando orden...');
 
-            console.log('[YAPPY API] Generando link de pago...');
+            // orderId: máx 15 chars, alfanumérico
+            yappyOrderId = 'R' + Date.now().toString(36).toUpperCase().substring(0, 14);
+            const paymentDate = Math.floor(Date.now() / 1000); // Epoch time en segundos
 
-            const payload = {
-                body: {
-                    merchantId: YAPPY_CONFIG.merchantId,
-                    orderId: orderId,
-                    amount: YAPPY_CONFIG.monto.toFixed(2),
-                    currency: YAPPY_CONFIG.moneda,
-                    description: 'Activación 24h - RoadTo Conductor',
-                    successUrl: `${YAPPY_CONFIG.returnUrl}?orderId=${orderId}&status=success`,
-                    failUrl: `${YAPPY_CONFIG.returnUrl}?orderId=${orderId}&status=failed`,
-                    domain: 'https://nrdesingcorp.com',
-                    // Opcional: teléfono del conductor para notificación
-                    tel: currentConductor.celular || ''
-                }
-            };
+            const { data: { session } } = await supabaseClient.auth.getSession();
 
-            const response = await fetch(`${YAPPY_CONFIG.apiBaseUrl}/v1/payment`, {
+            // IPN URL: Endpoint en Edge Function para recibir notificaciones
+            const ipnUrl = `${YAPPY_CONFIG.edgeFunctionUrl}/yappy-ipn`;
+
+            const response = await fetch(`${YAPPY_CONFIG.edgeFunctionUrl}/yappy-payment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'api-key': YAPPY_CONFIG.apiKey,
-                    'secret-key': YAPPY_CONFIG.secretKey,
-                    'client-ip': YAPPY_CONFIG.clientIp,
-                    'channel': YAPPY_CONFIG.channel
+                    'Authorization': `Bearer ${session.access_token}`
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    merchantId: YAPPY_CONFIG.merchantId,
+                    secretKey: YAPPY_CONFIG.secretKey,
+                    token: validateToken,
+                    orderId: yappyOrderId,
+                    domain: YAPPY_CONFIG.domain,
+                    paymentDate: paymentDate,
+                    aliasYappy: currentConductor.celular || '', // Teléfono del conductor (opcional)
+                    ipnUrl: ipnUrl,
+                    discount: '0.00',
+                    taxes: '0.00',
+                    subtotal: YAPPY_CONFIG.monto.toFixed(2),
+                    total: YAPPY_CONFIG.monto.toFixed(2),
+                    conductorId: currentConductor.id
+                })
             });
 
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error creando orden');
+            }
+
             const data = await response.json();
-            console.log('[YAPPY API] Payment response:', data);
-
-            if (data.status && data.status.code !== 'YP-0000') {
-                throw new Error(`Yappy Payment Error: ${data.status.description} (${data.status.code})`);
-            }
-
-            if (!data.body || !data.body.url) {
-                throw new Error('Yappy Payment: No se recibió URL de pago');
-            }
-
-            return data.body.url;  // URL del link de pago dinámico
+            console.log('[YAPPY V2] Orden creada');
+            return data.body; // { transactionId, token, documentName }
         }
 
+        /**
+         * Mostrar modal con Botón de Pago Yappy
+         */
         async function activarCuentaYappy() {
             if (!currentConductor) { 
                 showToast('Error: No se encontró información del conductor', 'error'); 
                 return; 
             }
 
-            // ⚠️ VALIDAR QUE LAS CREDENCIALES ESTÁN CONFIGURADAS
-            if (YAPPY_CONFIG.apiKey === 'TU_API_KEY_AQUI' || YAPPY_CONFIG.secretKey === 'TU_SECRET_KEY_AQUI') {
-                showToast('⚠️ Configura tus credenciales de Yappy API en YAPPY_CONFIG', 'error');
-                console.error('[YAPPY API] Credenciales no configuradas. Reemplaza TU_API_KEY_AQUI y TU_SECRET_KEY_AQUI en el código.');
+            // Validar credenciales
+            if (YAPPY_CONFIG.secretKey === 'TU_SECRET_KEY_AQUI') {
+                showToast('⚠️ Configura tu Secret Key de Yappy en YAPPY_CONFIG', 'error');
+                console.error('[YAPPY V2] Secret Key no configurada.');
                 return;
             }
 
-            showToast('Conectando con Yappy API...', 'warning');
+            showToast('Preparando pago con Yappy...', 'warning');
 
             try {
-                const orderId = 'ROADTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                // Cargar botón Yappy si no está cargado
+                cargarYappyButton();
 
-                // Generar link de pago dinámico via API
-                const paymentUrl = await yappyGenerarPago(orderId);
+                // 1. Validar comercio (obtener token)
+                const validateData = await yappyValidarComercio();
 
-                console.log('[YAPPY API] URL de pago:', paymentUrl);
+                // 2. Crear orden
+                const paymentData = await yappyCrearOrden(validateData.token);
 
-                // Guardar orderId para verificar al volver
-                localStorage.setItem('yappy_pending_order', orderId);
+                // 3. Mostrar modal con botón Yappy
+                mostrarModalYappy(paymentData);
+
+                // 4. Guardar orderId para verificar
+                localStorage.setItem('yappy_pending_order', yappyOrderId);
                 localStorage.setItem('yappy_pending_time', Date.now().toString());
 
-                // Redirigir al link de pago de Yappy
-                window.location.href = paymentUrl;
-
             } catch (error) {
-                console.error('[YAPPY API] Error:', error);
-                showToast('Error iniciando pago: ' + error.message, 'error');
+                console.error('[YAPPY V2] Error:', error);
+                showToast('Error preparando pago: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Mostrar modal con el Botón de Pago Yappy embebido
+         */
+        function mostrarModalYappy(paymentData) {
+            // Crear modal si no existe
+            let modal = document.getElementById('yappyPaymentModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'yappyPaymentModal';
+                modal.className = 'modal-overlay';
+                modal.style.display = 'none';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 450px;">
+                        <button class="modal-close" onclick="cerrarModalYappy()">×</button>
+                        <div style="text-align:center; margin-bottom: 20px;">
+                            <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">💳 Pagar con Yappy</h3>
+                            <p style="color:#94a3b8;font-size:14px;">Activa tu cuenta por 24 horas</p>
+                            <div style="font-size:28px;font-weight:800;color:#4ade80;margin:10px 0;">$${YAPPY_CONFIG.monto.toFixed(2)} USD</div>
+                        </div>
+                        <div id="yappyButtonContainer" style="display:flex;justify-content:center;margin:20px 0;">
+                            <btn-yappy id="btnYappy" theme="blue" rounded="true"></btn-yappy>
+                        </div>
+                        <div id="yappyStatus" style="text-align:center;color:#94a3b8;font-size:13px;margin-top:10px;"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                // Cerrar al hacer clic fuera
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) cerrarModalYappy();
+                });
+            }
+
+            // Mostrar modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // Configurar botón Yappy
+            setTimeout(() => {
+                const btnYappy = document.getElementById('btnYappy');
+                if (btnYappy) {
+                    // Limpiar eventos anteriores
+                    btnYappy.replaceWith(btnYappy.cloneNode(true));
+                    const freshBtn = document.getElementById('btnYappy');
+
+                    // Configurar eventos del botón
+                    freshBtn.addEventListener('eventSuccess', (event) => {
+                        console.log('[YAPPY V2] Pago exitoso:', event.detail);
+                        document.getElementById('yappyStatus').innerHTML = '<span style="color:#4ade80;">✅ Pago completado. Activando cuenta...</span>';
+                        setTimeout(() => {
+                            cerrarModalYappy();
+                            activarSuscripcionTrasPago(yappyOrderId);
+                        }, 2000);
+                    });
+
+                    freshBtn.addEventListener('eventError', (event) => {
+                        console.error('[YAPPY V2] Pago fallido:', event.detail);
+                        document.getElementById('yappyStatus').innerHTML = '<span style="color:#f87171;">❌ El pago no se completó. Intenta nuevamente.</span>';
+                    });
+
+                    freshBtn.addEventListener('eventClick', async () => {
+                        console.log('[YAPPY V2] Botón clickeado');
+                        document.getElementById('yappyStatus').innerHTML = '<span style="color:#fbbf24;">⏳ Procesando...</span>';
+
+                        // Enviar datos al botón para procesar el pago
+                        const params = {
+                            transactionId: paymentData.transactionId,
+                            documentName: paymentData.documentName,
+                            token: paymentData.token
+                        };
+                        freshBtn.eventPayment(params);
+                    });
+
+                    // Verificar si Yappy está online
+                    freshBtn.addEventListener('isYappyOnline', (event) => {
+                        console.log('[YAPPY V2] Yappy online:', event.detail);
+                        if (!event.detail) {
+                            document.getElementById('yappyStatus').innerHTML = '<span style="color:#f87171;">⚠️ Yappy no está disponible en este momento.</span>';
+                        }
+                    });
+                }
+            }, 500);
+        }
+
+        function cerrarModalYappy() {
+            const modal = document.getElementById('yappyPaymentModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
             }
         }
 
