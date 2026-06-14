@@ -669,6 +669,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -861,7 +862,9 @@
             monto: 5.00,
             moneda: "USD",
             duracionHoras: 24,
-            apiUrl: 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook',
+            // YAPPY LINK - URL de pago dinámico proporcionada por Yappy Comercial
+            // Este link ya tiene el merchant ID configurado, no necesita hash HMAC
+            yappyLink: 'https://link.yappy.com.pa/dyn/%2BCXVpAcQY97N%2FZQBDk5Y5hSk16Vdr9BZvaim7nGhYrA%3D',
             returnUrl: 'https://nrdesingcorp.com/panel-viajes.html'
         };
 
@@ -1024,42 +1027,37 @@
         }
 
         // ============================================
-        // YAPPY - ACTIVAR CUENTA
+        // YAPPY LINK - ACTIVAR CUENTA (SIMPLE Y SEGURO)
         // ============================================
         async function activarCuentaYappy() {
-            if (!currentConductor) { showToast('Error: No se encontró información del conductor', 'error'); return; }
+            if (!currentConductor) { 
+                showToast('Error: No se encontró información del conductor', 'error'); 
+                return; 
+            }
 
-            showToast('Iniciando pago con Yappy...', 'warning');
+            showToast('Conectando con Yappy...', 'warning');
 
             try {
                 const orderId = 'ROADTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-                // Llamar a Edge Function para generar URL de pago
-                const response = await fetch('https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook/generate-payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        conductor_id: currentConductor.id,
-                        orderId: orderId,
-                        total: YAPPY_CONFIG.monto,
-                        subtotal: YAPPY_CONFIG.monto,
-                        taxes: 0,
-                        tel: currentConductor.celular || ''
-                    })
-                });
+                // YAPPY LINK - Usar link de pago dinámico directo
+                // Este link ya está configurado con tu merchant ID en Yappy Comercial
+                const url = new URL(YAPPY_CONFIG.yappyLink);
 
-                const data = await response.json();
+                // Agregar parámetros adicionales para tracking
+                // Nota: Yappy Link puede o no aceptar estos parámetros según configuración
+                // Los parámetros principales (monto, merchant) ya están en el link base
+                url.searchParams.set('reference', orderId);
+                url.searchParams.set('description', 'Activación 24h - RoadTo Conductor');
 
-                if (!data.success || !data.redirectUrl) {
-                    throw new Error(data.error || 'Error generando URL de pago');
-                }
+                console.log('[YAPPY LINK] URL generada:', url.toString());
 
                 // Guardar orderId para verificar al volver
-                localStorage.setItem('yappy_pending_order', data.orderId);
+                localStorage.setItem('yappy_pending_order', orderId);
                 localStorage.setItem('yappy_pending_time', Date.now().toString());
 
                 // Redirigir a Yappy
-                window.location.href = data.redirectUrl;
+                window.location.href = url.toString();
 
             } catch (error) {
                 console.error('[YAPPY] Error:', error);
@@ -1176,20 +1174,109 @@
                 container.appendChild(bloqueo);
             } else { bloqueo.style.display = 'block'; }
         }
+        // ============================================
+        // VERIFICAR PAGO PENDIENTE (al volver de Yappy)
+        // ============================================
         async function verificarPagoPendiente() {
-            const pendingTx = localStorage.getItem('yappy_pending_tx');
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            const status = urlParams.get('status'); // Yappy puede devolver status=success o status=failed
+
+            // Si no hay orderId en URL, revisar localStorage
+            const pendingOrder = localStorage.getItem('yappy_pending_order');
             const pendingTime = localStorage.getItem('yappy_pending_time');
-            if (!pendingTx || !pendingTime) return;
-            const ahora = Date.now();
-            const tiempoPendiente = ahora - parseInt(pendingTime);
-            if (tiempoPendiente > 30 * 60 * 1000) {
-                localStorage.removeItem('yappy_pending_tx');
+
+            if (!orderId && !pendingOrder) return;
+
+            // Si volvió de Yappy con éxito (o hay un orderId que coincide con el pendiente)
+            if (status === 'success' || (orderId && orderId === pendingOrder)) {
+                showToast('¡Pago confirmado! Activando cuenta...', 'success');
+
+                // Limpiar localStorage
+                localStorage.removeItem('yappy_pending_order');
                 localStorage.removeItem('yappy_pending_time');
+
+                // Activar suscripción en Supabase
+                await activarSuscripcionTrasPago(orderId || pendingOrder);
+
+                // Limpiar URL (quitar parámetros de Yappy)
+                window.history.replaceState({}, document.title, window.location.pathname);
                 return;
             }
-            showToast('Verificando estado de pago...', 'warning');
-            localStorage.removeItem('yappy_pending_tx');
-            localStorage.removeItem('yappy_pending_time');
+
+            // Si falló o canceló
+            if (status === 'failed' || status === 'cancelled') {
+                showToast('El pago no se completó. Intenta nuevamente.', 'error');
+                localStorage.removeItem('yappy_pending_order');
+                localStorage.removeItem('yappy_pending_time');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            // Si hay orden pendiente pero no hay status (usuario cerró la ventana o volvió manualmente)
+            if (pendingOrder && pendingTime) {
+                const tiempoPendiente = Date.now() - parseInt(pendingTime);
+                if (tiempoPendiente > 30 * 60 * 1000) { // 30 minutos de gracia
+                    localStorage.removeItem('yappy_pending_order');
+                    localStorage.removeItem('yappy_pending_time');
+                } else {
+                    // Aún dentro del tiempo de gracia, mostrar mensaje
+                    showToast('Si completaste el pago en Yappy, tu cuenta se activará en breve...', 'warning');
+                }
+            }
+        }
+
+        // ============================================
+        // ACTIVAR SUSCRIPCIÓN TRAS PAGO EXITOSO
+        // ============================================
+        async function activarSuscripcionTrasPago(orderId) {
+            if (!currentConductor) return;
+
+            try {
+                const ahora = new Date();
+                const vencimiento = new Date(ahora.getTime() + YAPPY_CONFIG.duracionHoras * 60 * 60 * 1000);
+
+                // Actualizar conductor
+                const { error: updateError } = await supabaseClient
+                    .from('conductores')
+                    .update({
+                        suscripcion_activa: true,
+                        payment_status: 'paid',
+                        fecha_ultimo_pago: ahora.toISOString(),
+                        fecha_vencimiento: vencimiento.toISOString(),
+                        plan: 'basico_24h',
+                        updated_at: ahora.toISOString()
+                    })
+                    .eq('id', currentConductor.id);
+
+                if (updateError) throw updateError;
+
+                // Registrar pago en tabla pagos
+                const { error: pagoError } = await supabaseClient
+                    .from('pagos')
+                    .insert([{
+                        conductor_id: currentConductor.id,
+                        monto: YAPPY_CONFIG.monto,
+                        moneda: YAPPY_CONFIG.moneda,
+                        plan: 'basico_24h',
+                        estado: 'completado',
+                        metodo: 'yappy_link',
+                        referencia: orderId,
+                        fecha_pago: ahora.toISOString(),
+                        fecha_vencimiento: vencimiento.toISOString()
+                    }]);
+
+                if (pagoError) console.error('[PAGO] Error registrando pago:', pagoError);
+
+                showToast('✅ Cuenta activada por 24 horas!', 'success');
+
+                // Recargar datos del conductor
+                await recargarConductor();
+
+            } catch (error) {
+                console.error('[ACTIVAR] Error:', error);
+                showToast('Error activando cuenta: ' + error.message, 'error');
+            }
         }
 
 
