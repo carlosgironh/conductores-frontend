@@ -668,6 +668,7 @@
     <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -798,7 +799,7 @@
             <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:20px;">
                 <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
                     <span style="color:#94a3b8;font-size:13px;">Monto:</span>
-                    <span style="color:#fff;font-weight:700;">$10.00 USD</span>
+                    <span style="color:#fff;font-weight:700;">$5.00 USD</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
                     <span style="color:#94a3b8;font-size:13px;">Plan:</span>
@@ -857,12 +858,12 @@
         // Configuración de Yappy
         const YAPPY_CONFIG = {
             empresa: "ROADTO",
-            monto: 10.00,
+            monto: 5.00,
             moneda: "USD",
             duracionHoras: 24,
             urlPago: "https://yappy.com.pa/pagar",
-            callbackUrl: window.location.origin + "/api/yappy/callback",
-            returnUrl: window.location.href
+            callbackUrl: 'https://nrdesingcorp.com/api/yappy/callback',
+            returnUrl: 'https://nrdesingcorp.com/panel-viajes.html'
         };
 
         function formatDate(dateString) {
@@ -1147,12 +1148,12 @@
                         <h3 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Viajes Bloqueados</h3>
                         <p style="color:#94a3b8;font-size:14px;max-width:400px;margin:0 auto 20px;line-height:1.5;">
                             Tu cuenta requiere activación para recibir solicitudes de viajes. 
-                            Activa tu cuenta con Yappy por solo <strong style="color:#fbbf24;">$10.00 USD</strong> y obtén <strong style="color:#4ade80;">24 horas</strong> de servicio.
+                            Activa tu cuenta con Yappy por solo <strong style="color:#fbbf24;">$5.00 USD</strong> y obtén <strong style="color:#4ade80;">24 horas</strong> de servicio.
                         </p>
                         <button class="btn btn-purple" onclick="activarCuentaYappy()" style="max-width:300px;margin:0 auto;">
                             <span class="yappy-logo">
                                 <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                                Activar con Yappy - $10.00
+                                Activar con Yappy - $5.00
                             </span>
                         </button>
                     </div>
