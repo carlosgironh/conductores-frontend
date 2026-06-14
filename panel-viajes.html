@@ -861,8 +861,7 @@
             monto: 5.00,
             moneda: "USD",
             duracionHoras: 24,
-            urlPago: "https://yappy.com.pa/pagar",
-            callbackUrl: 'https://nrdesingcorp.com/api/yappy/callback',
+            apiUrl: 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook',
             returnUrl: 'https://nrdesingcorp.com/panel-viajes.html'
         };
 
@@ -1029,27 +1028,43 @@
         // ============================================
         async function activarCuentaYappy() {
             if (!currentConductor) { showToast('Error: No se encontró información del conductor', 'error'); return; }
-            const transactionId = 'ROADTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+            showToast('Iniciando pago con Yappy...', 'warning');
+
             try {
-                const { error: txError } = await supabaseClient
-                    .from('pagos')
-                    .insert([{
+                const orderId = 'ROADTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+                // Llamar a Edge Function para generar URL de pago
+                const response = await fetch('https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook/generate-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
                         conductor_id: currentConductor.id,
-                        monto: YAPPY_CONFIG.monto,
-                        moneda: YAPPY_CONFIG.moneda,
-                        plan: 'basico_24h',
-                        estado: 'pendiente',
-                        metodo: 'yappy',
-                        referencia: transactionId,
-                        fecha_pago: new Date().toISOString()
-                    }]);
-                if (txError) console.error('[YAPPY] Error guardando transacción:', txError);
-            } catch (e) { console.error('[YAPPY] Exception:', e); }
-            const yappyUrl = `${YAPPY_CONFIG.urlPago}?empresa=${encodeURIComponent(YAPPY_CONFIG.empresa)}&monto=${YAPPY_CONFIG.monto.toFixed(2)}&moneda=${YAPPY_CONFIG.moneda}&referencia=${encodeURIComponent(transactionId)}&callback=${encodeURIComponent(YAPPY_CONFIG.callbackUrl)}&return=${encodeURIComponent(YAPPY_CONFIG.returnUrl)}`;
-            localStorage.setItem('yappy_pending_tx', transactionId);
-            localStorage.setItem('yappy_pending_time', Date.now().toString());
-            showToast('Redirigiendo a Yappy...', 'warning');
-            window.location.href = yappyUrl;
+                        orderId: orderId,
+                        total: YAPPY_CONFIG.monto,
+                        subtotal: YAPPY_CONFIG.monto,
+                        taxes: 0,
+                        tel: currentConductor.celular || ''
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success || !data.redirectUrl) {
+                    throw new Error(data.error || 'Error generando URL de pago');
+                }
+
+                // Guardar orderId para verificar al volver
+                localStorage.setItem('yappy_pending_order', data.orderId);
+                localStorage.setItem('yappy_pending_time', Date.now().toString());
+
+                // Redirigir a Yappy
+                window.location.href = data.redirectUrl;
+
+            } catch (error) {
+                console.error('[YAPPY] Error:', error);
+                showToast('Error iniciando pago: ' + error.message, 'error');
+            }
         }
 
         // ============================================
