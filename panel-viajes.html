@@ -669,6 +669,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -855,13 +856,20 @@
         let countdownInterval = null;
         let isDevMode = false; // Cambiar a true para mostrar botón de simular pago
 
-        // Configuración de Yappy
+        // Configuración de Yappy API
         const YAPPY_CONFIG = {
             empresa: "ROADTO",
             monto: 5.00,
             moneda: "USD",
             duracionHoras: 24,
-            apiUrl: 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook',
+            merchantId: 'MXNBX-84293445',
+            // ⚠️ REEMPLAZAR CON TUS CREDENCIALES REALES DE YAPPY COMERCIAL API
+            // Obténlas en: Yappy Comercial > Integraciones > Generar Credenciales
+            apiKey: 'TU_API_KEY_AQUI',        // Header: api-key
+            secretKey: 'TU_SECRET_KEY_AQUI',  // Header: secret-key
+            clientIp: 'nrdesingcorp.com',       // Header: client-ip (tu dominio o IP pública)
+            channel: 'WEB',                    // Header: channel
+            apiBaseUrl: 'https://api.yappy.com.pa',  // URL base de la API de Yappy
             returnUrl: 'https://nrdesingcorp.com/panel-viajes.html'
         };
 
@@ -1024,45 +1032,145 @@
         }
 
         // ============================================
-        // YAPPY - ACTIVAR CUENTA
+        // YAPPY API - INTEGRACIÓN REST COMPLETA
         // ============================================
-        async function activarCuentaYappy() {
-            if (!currentConductor) { showToast('Error: No se encontró información del conductor', 'error'); return; }
 
-            showToast('Iniciando pago con Yappy...', 'warning');
+        let yappySessionToken = null;
+        let yappySessionExpiry = null;
+
+        /**
+         * Paso 1: Login en Yappy API para obtener token de sesión
+         * POST /v1/session/login
+         * Headers: api-key, secret-key, client-ip, channel
+         */
+        async function yappyLogin() {
+            // Si ya tenemos token válido, reutilizarlo
+            if (yappySessionToken && yappySessionExpiry && Date.now() < yappySessionExpiry) {
+                console.log('[YAPPY API] Reutilizando token existente');
+                return yappySessionToken;
+            }
+
+            console.log('[YAPPY API] Iniciando sesión...');
+
+            const response = await fetch(`${YAPPY_CONFIG.apiBaseUrl}/v1/session/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-key': YAPPY_CONFIG.apiKey,
+                    'secret-key': YAPPY_CONFIG.secretKey,
+                    'client-ip': YAPPY_CONFIG.clientIp,
+                    'channel': YAPPY_CONFIG.channel
+                },
+                body: JSON.stringify({
+                    body: {
+                        code: YAPPY_CONFIG.secretKey  // El code puede ser el secret-key o un código específico
+                    }
+                })
+            });
+
+            const data = await response.json();
+            console.log('[YAPPY API] Login response:', data);
+
+            if (data.status && data.status.code !== 'YP-0000') {
+                throw new Error(`Yappy Login Error: ${data.status.description} (${data.status.code})`);
+            }
+
+            if (!data.body || !data.body.token) {
+                throw new Error('Yappy Login: No se recibió token');
+            }
+
+            yappySessionToken = data.body.token;
+            // Token válido por 24h (configurar según documentación)
+            yappySessionExpiry = Date.now() + (24 * 60 * 60 * 1000);
+
+            console.log('[YAPPY API] Token obtenido exitosamente');
+            return yappySessionToken;
+        }
+
+        /**
+         * Paso 2: Generar Link de Pago dinámico
+         * POST /v1/payment (endpoint según documentación de Yappy)
+         * Headers: Authorization Bearer {token}, api-key, secret-key
+         */
+        async function yappyGenerarPago(orderId) {
+            const token = await yappyLogin();
+
+            console.log('[YAPPY API] Generando link de pago...');
+
+            const payload = {
+                body: {
+                    merchantId: YAPPY_CONFIG.merchantId,
+                    orderId: orderId,
+                    amount: YAPPY_CONFIG.monto.toFixed(2),
+                    currency: YAPPY_CONFIG.moneda,
+                    description: 'Activación 24h - RoadTo Conductor',
+                    successUrl: `${YAPPY_CONFIG.returnUrl}?orderId=${orderId}&status=success`,
+                    failUrl: `${YAPPY_CONFIG.returnUrl}?orderId=${orderId}&status=failed`,
+                    domain: 'https://nrdesingcorp.com',
+                    // Opcional: teléfono del conductor para notificación
+                    tel: currentConductor.celular || ''
+                }
+            };
+
+            const response = await fetch(`${YAPPY_CONFIG.apiBaseUrl}/v1/payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'api-key': YAPPY_CONFIG.apiKey,
+                    'secret-key': YAPPY_CONFIG.secretKey,
+                    'client-ip': YAPPY_CONFIG.clientIp,
+                    'channel': YAPPY_CONFIG.channel
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            console.log('[YAPPY API] Payment response:', data);
+
+            if (data.status && data.status.code !== 'YP-0000') {
+                throw new Error(`Yappy Payment Error: ${data.status.description} (${data.status.code})`);
+            }
+
+            if (!data.body || !data.body.url) {
+                throw new Error('Yappy Payment: No se recibió URL de pago');
+            }
+
+            return data.body.url;  // URL del link de pago dinámico
+        }
+
+        async function activarCuentaYappy() {
+            if (!currentConductor) { 
+                showToast('Error: No se encontró información del conductor', 'error'); 
+                return; 
+            }
+
+            // ⚠️ VALIDAR QUE LAS CREDENCIALES ESTÁN CONFIGURADAS
+            if (YAPPY_CONFIG.apiKey === 'TU_API_KEY_AQUI' || YAPPY_CONFIG.secretKey === 'TU_SECRET_KEY_AQUI') {
+                showToast('⚠️ Configura tus credenciales de Yappy API en YAPPY_CONFIG', 'error');
+                console.error('[YAPPY API] Credenciales no configuradas. Reemplaza TU_API_KEY_AQUI y TU_SECRET_KEY_AQUI en el código.');
+                return;
+            }
+
+            showToast('Conectando con Yappy API...', 'warning');
 
             try {
                 const orderId = 'ROADTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-                // Llamar a Edge Function para generar URL de pago
-                const response = await fetch('https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook/generate-payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        conductor_id: currentConductor.id,
-                        orderId: orderId,
-                        total: YAPPY_CONFIG.monto,
-                        subtotal: YAPPY_CONFIG.monto,
-                        taxes: 0,
-                        tel: currentConductor.celular || ''
-                    })
-                });
+                // Generar link de pago dinámico via API
+                const paymentUrl = await yappyGenerarPago(orderId);
 
-                const data = await response.json();
-
-                if (!data.success || !data.redirectUrl) {
-                    throw new Error(data.error || 'Error generando URL de pago');
-                }
+                console.log('[YAPPY API] URL de pago:', paymentUrl);
 
                 // Guardar orderId para verificar al volver
-                localStorage.setItem('yappy_pending_order', data.orderId);
+                localStorage.setItem('yappy_pending_order', orderId);
                 localStorage.setItem('yappy_pending_time', Date.now().toString());
 
-                // Redirigir a Yappy
-                window.location.href = data.redirectUrl;
+                // Redirigir al link de pago de Yappy
+                window.location.href = paymentUrl;
 
             } catch (error) {
-                console.error('[YAPPY] Error:', error);
+                console.error('[YAPPY API] Error:', error);
                 showToast('Error iniciando pago: ' + error.message, 'error');
             }
         }
@@ -1176,20 +1284,109 @@
                 container.appendChild(bloqueo);
             } else { bloqueo.style.display = 'block'; }
         }
+        // ============================================
+        // VERIFICAR PAGO PENDIENTE (al volver de Yappy)
+        // ============================================
         async function verificarPagoPendiente() {
-            const pendingTx = localStorage.getItem('yappy_pending_tx');
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            const status = urlParams.get('status'); // Yappy puede devolver status=success o status=failed
+
+            // Si no hay orderId en URL, revisar localStorage
+            const pendingOrder = localStorage.getItem('yappy_pending_order');
             const pendingTime = localStorage.getItem('yappy_pending_time');
-            if (!pendingTx || !pendingTime) return;
-            const ahora = Date.now();
-            const tiempoPendiente = ahora - parseInt(pendingTime);
-            if (tiempoPendiente > 30 * 60 * 1000) {
-                localStorage.removeItem('yappy_pending_tx');
+
+            if (!orderId && !pendingOrder) return;
+
+            // Si volvió de Yappy con éxito (o hay un orderId que coincide con el pendiente)
+            if (status === 'success' || (orderId && orderId === pendingOrder)) {
+                showToast('¡Pago confirmado! Activando cuenta...', 'success');
+
+                // Limpiar localStorage
+                localStorage.removeItem('yappy_pending_order');
                 localStorage.removeItem('yappy_pending_time');
+
+                // Activar suscripción en Supabase
+                await activarSuscripcionTrasPago(orderId || pendingOrder);
+
+                // Limpiar URL (quitar parámetros de Yappy)
+                window.history.replaceState({}, document.title, window.location.pathname);
                 return;
             }
-            showToast('Verificando estado de pago...', 'warning');
-            localStorage.removeItem('yappy_pending_tx');
-            localStorage.removeItem('yappy_pending_time');
+
+            // Si falló o canceló
+            if (status === 'failed' || status === 'cancelled') {
+                showToast('El pago no se completó. Intenta nuevamente.', 'error');
+                localStorage.removeItem('yappy_pending_order');
+                localStorage.removeItem('yappy_pending_time');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            // Si hay orden pendiente pero no hay status (usuario cerró la ventana o volvió manualmente)
+            if (pendingOrder && pendingTime) {
+                const tiempoPendiente = Date.now() - parseInt(pendingTime);
+                if (tiempoPendiente > 30 * 60 * 1000) { // 30 minutos de gracia
+                    localStorage.removeItem('yappy_pending_order');
+                    localStorage.removeItem('yappy_pending_time');
+                } else {
+                    // Aún dentro del tiempo de gracia, mostrar mensaje
+                    showToast('Si completaste el pago en Yappy, tu cuenta se activará en breve...', 'warning');
+                }
+            }
+        }
+
+        // ============================================
+        // ACTIVAR SUSCRIPCIÓN TRAS PAGO EXITOSO
+        // ============================================
+        async function activarSuscripcionTrasPago(orderId) {
+            if (!currentConductor) return;
+
+            try {
+                const ahora = new Date();
+                const vencimiento = new Date(ahora.getTime() + YAPPY_CONFIG.duracionHoras * 60 * 60 * 1000);
+
+                // Actualizar conductor
+                const { error: updateError } = await supabaseClient
+                    .from('conductores')
+                    .update({
+                        suscripcion_activa: true,
+                        payment_status: 'paid',
+                        fecha_ultimo_pago: ahora.toISOString(),
+                        fecha_vencimiento: vencimiento.toISOString(),
+                        plan: 'basico_24h',
+                        updated_at: ahora.toISOString()
+                    })
+                    .eq('id', currentConductor.id);
+
+                if (updateError) throw updateError;
+
+                // Registrar pago en tabla pagos
+                const { error: pagoError } = await supabaseClient
+                    .from('pagos')
+                    .insert([{
+                        conductor_id: currentConductor.id,
+                        monto: YAPPY_CONFIG.monto,
+                        moneda: YAPPY_CONFIG.moneda,
+                        plan: 'basico_24h',
+                        estado: 'completado',
+                        metodo: 'yappy_directo',
+                        referencia: orderId,
+                        fecha_pago: ahora.toISOString(),
+                        fecha_vencimiento: vencimiento.toISOString()
+                    }]);
+
+                if (pagoError) console.error('[PAGO] Error registrando pago:', pagoError);
+
+                showToast('✅ Cuenta activada por 24 horas!', 'success');
+
+                // Recargar datos del conductor
+                await recargarConductor();
+
+            } catch (error) {
+                console.error('[ACTIVAR] Error:', error);
+                showToast('Error activando cuenta: ' + error.message, 'error');
+            }
         }
 
 
