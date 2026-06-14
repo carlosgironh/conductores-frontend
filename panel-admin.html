@@ -1034,6 +1034,123 @@
     font-weight: 500;
   }
 
+
+  /* ===== INDICADORES DE PAGO ===== */
+  .payment-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .payment-indicator.paid {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+  .payment-indicator.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  .payment-indicator.expired {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .payment-indicator.nodata {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .countdown-small {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .countdown-small.active { color: #4ade80; }
+  .countdown-small.warning { color: #fbbf24; }
+  .countdown-small.expired { color: #f87171; }
+
+  /* Stats de pagos */
+  .stat-card.paid .stat-value { color: #4ade80; }
+  .stat-card.expired .stat-value { color: #f87171; }
+  .stat-card.nopayment .stat-value { color: #94a3b8; }
+
+  /* Modal de detalle de pago */
+  .payment-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .payment-detail-item {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .payment-detail-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .payment-detail-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .payment-detail-value.success { color: #4ade80; }
+  .payment-detail-value.danger { color: #f87171; }
+  .payment-detail-value.warning { color: #fbbf24; }
+
+  .payment-history-admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .payment-history-admin-date {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .payment-history-admin-amount {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4ade80;
+  }
+  .payment-history-admin-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .payment-history-admin-status.success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+  }
+  .payment-history-admin-status.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+  }
+  .payment-history-admin-status.expired {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+
   /* Responsive */
   
   /* ==================== SECCIÓN VIAJES ==================== */
@@ -1634,13 +1751,13 @@
         <div class="stat-value" id="activeCount">0</div>
         <div class="stat-label">Activos</div>
       </div>
-      <div class="stat-card pending">
-        <div class="stat-value" id="pendingCount">0</div>
-        <div class="stat-label">Pendientes</div>
+      <div class="stat-card paid">
+        <div class="stat-value" id="paidCount">0</div>
+        <div class="stat-label">Con Pago</div>
       </div>
-      <div class="stat-card inactive">
-        <div class="stat-value" id="inactiveCount">0</div>
-        <div class="stat-label">Inactivos</div>
+      <div class="stat-card expired">
+        <div class="stat-value" id="expiredCount">0</div>
+        <div class="stat-label">Pago Vencido</div>
       </div>
     </div>
 
@@ -1650,6 +1767,8 @@
       <button class="filter-btn" onclick="filterConductores('activo', this)">Activos</button>
       <button class="filter-btn" onclick="filterConductores('pendiente', this)">Pendientes</button>
       <button class="filter-btn" onclick="filterConductores('inactivo', this)">Inactivos</button>
+      <button class="filter-btn" onclick="filterConductores('con_pago', this)">💳 Con Pago</button>
+      <button class="filter-btn" onclick="filterConductores('sin_pago', this)">❌ Sin Pago</button>
     </div>
 
     <!-- Tabla -->
@@ -1661,6 +1780,7 @@
             <th>Conductor</th>
             <th>Correo</th>
             <th>Vehículo</th>
+            <th>Pago</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -1863,6 +1983,16 @@ let conductorEditId = null;
 let conductorEditActivo = null;
 let conductorEditAviso = false;
 const emailCache = new Map();
+
+// Variables para pagos
+let paymentDetailConductorId = null;
+
+// Configuración de pagos
+const PAYMENT_CONFIG = {
+    duracionHoras: 24,
+    monto: 10.00,
+    moneda: 'USD'
+};
 
 // Variables para QR
 let currentQRConductor = null;
@@ -3101,12 +3231,209 @@ function obtenerEstadoConductor(c) {
   return 'pendiente';
 }
 
+// ============================================
+// FUNCIONES DE PAGO
+// ============================================
+
+function verificarSuscripcionActiva(conductor) {
+    if (!conductor || !conductor.fecha_vencimiento) return false;
+    const ahora = new Date();
+    const vencimiento = new Date(conductor.fecha_vencimiento);
+    return vencimiento > ahora;
+}
+
+function obtenerTiempoRestante(conductor) {
+    if (!conductor || !conductor.fecha_vencimiento) return 0;
+    const ahora = new Date();
+    const vencimiento = new Date(conductor.fecha_vencimiento);
+    return Math.max(0, vencimiento - ahora);
+}
+
+function formatDuration(ms) {
+    if (ms <= 0) return "Expirado";
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function obtenerEstadoPago(conductor) {
+    if (!conductor) return 'nodata';
+    if (!conductor.fecha_vencimiento) return 'nopayment';
+    if (verificarSuscripcionActiva(conductor)) return 'paid';
+    return 'expired';
+}
+
+function renderPaymentIndicator(conductor) {
+    const estado = obtenerEstadoPago(conductor);
+    const tiempoRestante = obtenerTiempoRestante(conductor);
+
+    switch (estado) {
+        case 'paid':
+            return `<span class="payment-indicator paid">✅ Pago al día</span><br><span class="countdown-small ${tiempoRestante < 3600000 ? 'warning' : 'active'}">${formatDuration(tiempoRestante)}</span>`;
+        case 'expired':
+            return `<span class="payment-indicator expired">❌ Vencido</span><br><span class="countdown-small expired">${conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleDateString('es-ES') : ''}</span>`;
+        case 'nopayment':
+            return `<span class="payment-indicator pending">⏳ Sin pago</span>`;
+        default:
+            return `<span class="payment-indicator nodata">—</span>`;
+    }
+}
+
+async function cargarHistorialPagosAdmin(conductorId) {
+    try {
+        const { data: pagos, error } = await supabaseClient
+            .from('pagos')
+            .select('*')
+            .eq('conductor_id', conductorId)
+            .order('fecha_pago', { ascending: false })
+            .limit(10);
+
+        if (error) throw error;
+        return pagos || [];
+    } catch (e) {
+        console.error('[ADMIN PAGOS] Error:', e);
+        return [];
+    }
+}
+
+async function openPaymentDetailModal(conductorId) {
+    paymentDetailConductorId = conductorId;
+    const conductor = allConductores.find(c => c.id === conductorId);
+    if (!conductor) return;
+
+    const modal = document.getElementById('paymentDetailModal');
+    const content = document.getElementById('paymentDetailContent');
+
+    content.innerHTML = '<div style="text-align: center; padding: 30px;"><div class="spinner"></div><p style="color: #94a3b8; margin-top: 10px;">Cargando historial...</p></div>';
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    const pagos = await cargarHistorialPagosAdmin(conductorId);
+    const estado = obtenerEstadoPago(conductor);
+    const tiempoRestante = obtenerTiempoRestante(conductor);
+
+    let estadoHtml = '';
+    if (estado === 'paid') {
+        estadoHtml = `<div class="payment-detail-item" style="border: 1px solid rgba(34, 197, 94, 0.3);"><div class="payment-detail-label">Estado</div><div class="payment-detail-value success">✅ Activo - ${formatDuration(tiempoRestante)} restantes</div></div>`;
+    } else if (estado === 'expired') {
+        estadoHtml = `<div class="payment-detail-item" style="border: 1px solid rgba(239, 68, 68, 0.3);"><div class="payment-detail-label">Estado</div><div class="payment-detail-value danger">❌ Vencido - ${conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleString('es-ES') : 'N/A'}</div></div>`;
+    } else {
+        estadoHtml = `<div class="payment-detail-item" style="border: 1px solid rgba(245, 158, 11, 0.3);"><div class="payment-detail-label">Estado</div><div class="payment-detail-value warning">⏳ Sin pagos registrados</div></div>`;
+    }
+
+    let historialHtml = '';
+    if (pagos.length > 0) {
+        historialHtml = `
+            <div style="margin-top: 20px;">
+                <h4 style="color: #e2e8f0; font-size: 14px; font-weight: 700; margin-bottom: 12px;">📜 Historial de Pagos</h4>
+                ${pagos.map(p => `
+                    <div class="payment-history-admin-item">
+                        <div>
+                            <div class="payment-history-admin-date">${p.fecha_pago ? new Date(p.fecha_pago).toLocaleString('es-ES') : 'N/A'}</div>
+                            <div style="font-size: 11px; color: #64748b;">${p.metodo || 'Yappy'} · ${p.referencia || 'N/A'}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="payment-history-admin-amount">$${p.monto?.toFixed(2) || '0.00'} ${p.moneda || 'USD'}</div>
+                            <span class="payment-history-admin-status ${p.estado === 'completado' ? 'success' : (p.estado === 'pendiente' ? 'pending' : 'expired')}">${p.estado === 'completado' ? '✓ Completado' : (p.estado === 'pendiente' ? '⏳ Pendiente' : '❌ ' + p.estado)}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        historialHtml = `<div style="text-align: center; padding: 20px; color: #64748b; font-size: 13px;">No hay pagos registrados</div>`;
+    }
+
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">💳</div>
+            <h3 style="font-size: 18px; font-weight: 700; color: #fff;">${conductor.nombres || ''} ${conductor.apellidos || ''}</h3>
+            <p style="color: #94a3b8; font-size: 13px;">${conductor.email || 'Sin email'}</p>
+        </div>
+        <div class="payment-detail-grid">
+            <div class="payment-detail-item">
+                <div class="payment-detail-label">Plan Actual</div>
+                <div class="payment-detail-value">${conductor.plan || 'Básico'}</div>
+            </div>
+            <div class="payment-detail-item">
+                <div class="payment-detail-label">Monto</div>
+                <div class="payment-detail-value">$${PAYMENT_CONFIG.monto.toFixed(2)} ${PAYMENT_CONFIG.moneda}</div>
+            </div>
+            ${estadoHtml}
+            <div class="payment-detail-item">
+                <div class="payment-detail-label">Último Pago</div>
+                <div class="payment-detail-value">${conductor.fecha_ultimo_pago ? new Date(conductor.fecha_ultimo_pago).toLocaleDateString('es-ES') : 'Nunca'}</div>
+            </div>
+        </div>
+        ${historialHtml}
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+            <button class="btn-secondary" onclick="closePaymentDetailModal()" style="padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0;">Cerrar</button>
+            ${estado !== 'paid' ? `<button class="btn-success" onclick="activarPagoManual('${conductorId}')" style="padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none;">✅ Activar Manualmente</button>` : ''}
+        </div>
+    `;
+}
+
+function closePaymentDetailModal() {
+    const modal = document.getElementById('paymentDetailModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    paymentDetailConductorId = null;
+}
+
+async function activarPagoManual(conductorId) {
+    if (!confirm('¿Activar suscripción manualmente por 24 horas?')) return;
+
+    try {
+        const ahora = new Date();
+        const vencimiento = new Date(ahora.getTime() + PAYMENT_CONFIG.duracionHoras * 60 * 60 * 1000);
+
+        const { error } = await supabaseClient
+            .from('conductores')
+            .update({
+                suscripcion_activa: true,
+                payment_status: 'paid',
+                fecha_ultimo_pago: ahora.toISOString(),
+                fecha_vencimiento: vencimiento.toISOString(),
+                plan: 'basico_24h',
+                pago_al_dia: true,
+                updated_at: ahora.toISOString()
+            })
+            .eq('id', conductorId);
+
+        if (error) throw error;
+
+        // Registrar pago manual
+        await supabaseClient
+            .from('pagos')
+            .insert([{
+                conductor_id: conductorId,
+                monto: PAYMENT_CONFIG.monto,
+                moneda: PAYMENT_CONFIG.moneda,
+                plan: 'basico_24h',
+                estado: 'completado',
+                metodo: 'manual_admin',
+                referencia: 'MANUAL-' + Date.now(),
+                fecha_pago: ahora.toISOString(),
+                fecha_vencimiento: vencimiento.toISOString()
+            }]);
+
+        showToast('✅ Suscripción activada manualmente por 24 horas', 'success');
+        closePaymentDetailModal();
+        await cargarConductores();
+    } catch (error) {
+        console.error('[ADMIN] Error activando pago manual:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
 // Cargar conductores
 async function cargarConductores() {
   try {
     const { data: conductores, error } = await supabaseClient
       .from('conductores')
-      .select('*')
+      .select('*, pagos(*)')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -3124,13 +3451,16 @@ async function cargarConductores() {
 function updateStats() {
   const total = allConductores.length;
   const active = allConductores.filter(c => obtenerEstadoConductor(c) === 'activo').length;
-  const pending = allConductores.filter(c => obtenerEstadoConductor(c) === 'pendiente').length;
-  const inactive = allConductores.filter(c => obtenerEstadoConductor(c) === 'inactivo').length;
+  const paid = allConductores.filter(c => verificarSuscripcionActiva(c)).length;
+  const expired = allConductores.filter(c => {
+      const estado = obtenerEstadoPago(c);
+      return estado === 'expired' || estado === 'nopayment';
+  }).length;
 
   document.getElementById('totalCount').textContent = total;
   document.getElementById('activeCount').textContent = active;
-  document.getElementById('pendingCount').textContent = pending;
-  document.getElementById('inactiveCount').textContent = inactive;
+  document.getElementById('paidCount').textContent = paid;
+  document.getElementById('expiredCount').textContent = expired;
 }
 
 async function renderTable() {
@@ -3183,6 +3513,9 @@ async function renderTable() {
       <td style="font-family: monospace; letter-spacing:1px; color: #60a5fa;">
         ${c.marca || ''} ${c.modelo || ''} - ${c.placa || ''}
       </td>
+      <td style="text-align: center;">
+        ${renderPaymentIndicator(c)}
+      </td>
       <td>
         <div class="actions">
           <button class="action-btn view" onclick="viewConductor('${c.id}')" title="Ver Perfil">
@@ -3207,6 +3540,11 @@ async function renderTable() {
                 ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
                 : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
               }
+            </svg>
+          </button>
+          <button class="action-btn qr" onclick="openPaymentDetailModal('${c.id}')" title="Ver Estado de Pago">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </button>
           <button class="action-btn delete" onclick="deleteConductor('${c.id}')" title="Eliminar">
@@ -3911,6 +4249,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeEditModal();
       closeEditModalPasajero();
       closeQrModal();
+      closePaymentDetailModal();
     }
   });
   
@@ -3937,6 +4276,24 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, false);
 </script>
+
+
+  <!-- Modal Detalle de Pago del Conductor -->
+  <div class="modal-overlay centered" id="paymentDetailModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="modal-close" onclick="closePaymentDetailModal()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div class="modal-header" style="justify-content: center; padding-right: 0;">
+        <h3 class="modal-title">💳 Estado de Pago</h3>
+      </div>
+      <div id="paymentDetailContent">
+        <div style="text-align: center; padding: 30px; color: #64748b;">Cargando...</div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
