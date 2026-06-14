@@ -1,0 +1,62 @@
+name: Mi Equipo Dev Local
+version: 1.0.0
+schema: v1
+
+models:
+  - name: 🎨 Frontend Dev
+    provider: ollama
+    model: qwen2.5-coder:3b
+    systemMessage: Eres un desarrollador Frontend experto en HTML, CSS y JavaScript. Responde en español.
+    contextLength: 4096
+    completionOptions:
+      temperature: 0.2
+      maxTokens: 2048
+
+  - name: ⚙️ Backend Dev
+    provider: ollama
+    model: deepseek-coder:6.7b-instruct
+    systemMessage: Eres un desarrollador Backend experto en Node.js, Express y APIs REST. Responde en español.
+    contextLength: 4096
+    completionOptions:
+      temperature: 0.2
+      maxTokens: 2048
+
+  - name: 🗄️ DBA SQL
+    provider: ollama
+    model: qwen2.5-coder:7b
+    systemMessage: Eres un DBA experto en SQL. Responde en español.
+    contextLength: 8192
+    completionOptions:
+      temperature: 0.1
+      maxTokens: 3072
+
+  - name: 🚀 Full Stack Lead
+    provider: ollama
+    model: deepseek-coder-v2:latest
+    systemMessage: Eres Tech Lead Full Stack. Responde en español.
+    contextLength: 8192
+    completionOptions:
+      temperature: 0.2
+      maxTokens: 4096
+
+  - name: 🧠 Consultor Senior
+    provider: ollama
+    model: gemma4:latest
+    systemMessage: Eres consultor senior de desarrollo. Responde en español.
+    contextLength: 8192
+    completionOptions:
+      temperature: 0.3
+      maxTokens: 4096
+
+tabAutocompleteModel:
+  name: ⚡ Autocomplete
+  provider: ollama
+  model: qwen2.5-coder:1.5b
+  contextLength: 2048
+  completionOptions:
+    temperature: 0.05
+    maxTokens: 200
+
+embeddingsProvider:
+  provider: ollama
+  model: nomic-embed-text
