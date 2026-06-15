@@ -357,7 +357,7 @@
     function updateStatusBadge(status) {
       const badge = document.getElementById('status-badge');
       badge.className = 'status-badge';
-      if (status === 'activa') {
+      if (status === 'active' || status === 'activa') {
         badge.classList.add('activa');
         badge.textContent = 'Activa';
       } else if (status === 'pendiente') {
@@ -461,7 +461,7 @@
         logDebug('Buscando datos del conductor en tabla "conductores"...');
         const { data: conductor, error: condError } = await supabaseClient
           .from('conductores')
-          .select('nombres, apellidos, status, vehiculo, modelo, marca, celular, auth_user_id')
+          .select('id,nombres,apellidos,status,marca,modelo,placa,color,celular,direccion,auth_user_id,payment_status,fecha_vencimiento,suscripcion_activa,fecha_ultimo_pago,proximo_pago,pago_al_dia')
           .eq('auth_user_id', authUser.id)
           .maybeSingle();
 
@@ -480,7 +480,19 @@
         conductorData = conductor;
         const nombreCompleto = `${conductor.nombres || ''} ${conductor.apellidos || ''}`.trim();
         const inicial = (conductor.nombres?.[0] || '?').toUpperCase();
-        const vehiculo = `${conductor.marca || ''} ${conductor.modelo || ''} ${conductor.vehiculo || ''}`.trim() || 'Sin vehículo registrado';
+
+        // Info del vehículo (columnas reales: marca, modelo, placa, color)
+        const vehiculoInfo = [];
+        if (conductor.marca) vehiculoInfo.push(conductor.marca);
+        if (conductor.modelo) vehiculoInfo.push(conductor.modelo);
+        if (conductor.placa) vehiculoInfo.push(`Placa: ${conductor.placa}`);
+        if (conductor.color) vehiculoInfo.push(conductor.color);
+        const vehiculo = vehiculoInfo.join(' • ') || 'Sin vehículo registrado';
+
+        // ─── Lógica de suscripción 24h (oculta en código) ───
+        // Al pagar: status='active', suscripcion_activa=true, pago_al_dia=true
+        // fecha_ultimo_pago=NOW(), proximo_pago=NOW()+24h, fecha_vencimiento=NOW()+24h
+        // El conductor no ve la duración en UI, pero el sistema la controla
 
         document.getElementById('conductor-name').textContent = nombreCompleto || 'Conductor';
         document.getElementById('conductor-initial').textContent = inicial;
@@ -659,11 +671,13 @@
         const { error } = await supabaseClient
           .from('conductores')
           .update({
-            status: 'activa',
-            fecha_activacion: ahora.toISOString(),
-            fecha_expiracion: expiracion.toISOString(),
-            yappy_order_id: paymentDetail?.orderId || null,
-            yappy_transaction_id: paymentDetail?.transactionId || null,
+            status: 'active',
+            suscripcion_activa: true,
+            pago_al_dia: true,
+            fecha_ultimo_pago: ahora.toISOString(),
+            proximo_pago: expiracion.toISOString(),
+            fecha_vencimiento: expiracion.toISOString(),
+            payment_status: 'paid',
           })
           .eq('auth_user_id', authUser.id);
 
