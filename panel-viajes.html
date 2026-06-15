@@ -1092,7 +1092,7 @@
 
             console.log('[YAPPY V2] Edge URL:', edgeUrl);
 
-            const response = await fetch(`${edgeUrl}/yappy-validate`, {
+            const response = await fetch(`${edgeUrl}?action=validate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1142,9 +1142,9 @@
             const edgeUrl = YAPPY_CONFIG.edgeFunctionUrl || 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
 
             // IPN URL: Endpoint en Edge Function para recibir notificaciones
-            const ipnUrl = `${YAPPY_CONFIG.domain}/yappy-ipn`;
+            const ipnUrl = `${YAPPY_CONFIG.edgeFunctionUrl}?action=ipn`;
 
-            const response = await fetch(`${edgeUrl}/yappy-payment`, {
+            const response = await fetch(`${edgeUrl}?action=payment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2032,7 +2032,7 @@
         });
 
         init();
-    </script>  
+    </script>
 
 </body>
 </html>
