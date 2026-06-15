@@ -516,22 +516,12 @@
         const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-        const EDGE_FUNCTION_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
-        const YAPPY_DOMAIN = 'https://nrdesingcorp.com';
-
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let conductorData = null;
         let yappyToken = null;
-        let yappyEpochTime = null;  // ← NUEVO: guardar epochTime del paso 1
-
-        // Headers para Edge Function (requiere apikey para auth anónima)
-        const EDGE_HEADERS = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'apikey': SUPABASE_ANON_KEY
-        };
+        let yappyEpochTime = null;
 
         function log(msg, type = 'info') {
             const timestamp = new Date().toLocaleTimeString('es-PA', {hour12:false});
@@ -664,13 +654,13 @@
                 const v1 = await yappyValidarComercio();
                 if (!v1.success) throw new Error(v1.error);
                 yappyToken = v1.token;
-                yappyEpochTime = v1.epochTime;  // ← NUEVO: guardar epochTime
+                yappyEpochTime = v1.epochTime;
                 log(`✓ Token obtenido, epochTime: ${yappyEpochTime}`, 'success');
                 updateStep(1, 'done');
                 updateStep(2, 'active');
 
                 log('Paso 2/3: Creando orden...');
-                const v2 = await yappyCrearOrden(yappyToken, yappyEpochTime);  // ← CORREGIDO: pasar epochTime
+                const v2 = await yappyCrearOrden(yappyToken, yappyEpochTime);
                 if (!v2.success) throw new Error(v2.error);
                 log(`✓ Orden: ${v2.transactionId}`, 'success');
                 updateStep(2, 'done');
@@ -688,55 +678,57 @@
             }
         }
 
+        // ============================================
+        // CORREGIDO: Usar supabase.functions.invoke()
+        // en vez de fetch directo para evitar que
+        // Supabase intercepte headers
+        // ============================================
         async function yappyValidarComercio() {
-            log('POST ?action=validate');
+            log('invoke yappy-webhook (validate)');
 
-            const body = { urlDomain: YAPPY_DOMAIN };
+            const body = { action: 'validate', urlDomain: 'https://nrdesingcorp.com' };
             log(`Body: ${JSON.stringify(body)}`);
 
-            const response = await fetch(`${EDGE_FUNCTION_URL}?action=validate`, {
-                method: 'POST',
-                headers: EDGE_HEADERS,
-                body: JSON.stringify(body)
-            });
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('yappy-webhook', {
+                    body: body
+                });
 
-            log(`Status: ${response.status}`);
-            const text = await response.text();
-            log(`Raw: ${text.substring(0,300)}`);
+                if (error) {
+                    log(`Edge Function error: ${error.message}`, 'error');
+                    return { success: false, error: error.message };
+                }
 
-            let data;
-            try { data = JSON.parse(text); }
-            catch { return { success: false, error: `No JSON: ${text.substring(0,100)}` }; }
+                log(`Response: ${JSON.stringify(data).substring(0,300)}`);
 
-            if (!response.ok) {
-                const err = data.status?.description || data.error || data.message || `HTTP ${response.status}`;
-                return { success: false, error: err };
+                const token = data.body?.token || data.token;
+                const epochTime = data.body?.epochTime || data.epochTime;
+                if (!token) return { success: false, error: 'No token recibido' };
+
+                return { success: true, token, epochTime, raw: data };
+            } catch (err) {
+                log(`Exception: ${err.message}`, 'error');
+                return { success: false, error: err.message };
             }
-
-            const token = data.body?.token || data.token;
-            const epochTime = data.body?.epochTime || data.epochTime;
-            if (!token) return { success: false, error: 'No token recibido' };
-
-            return { success: true, token, epochTime, raw: data };
         }
 
         async function yappyCrearOrden(token, epochTime) {
-            log('POST ?action=payment');
+            log('invoke yappy-webhook (payment)');
 
-            // CORREGIDO: orderId máximo 15 caracteres alfanuméricos
             const orderId = `R${Date.now().toString(36).toUpperCase()}`;
             log(`orderId: ${orderId} (len=${orderId.length})`);
 
-            // CORREGIDO: paymentDate debe ser el epochTime del paso 1, NO Date.now()/1000
             const paymentDate = epochTime ? String(epochTime) : Math.floor(Date.now() / 1000).toString();
-            log(`paymentDate: ${paymentDate} (from epochTime)`);
+            log(`paymentDate: ${paymentDate}`);
 
             const body = {
+                action: 'payment',
+                yappyToken: token,   // ← token de Yappy en el body, NO en headers
                 orderId: orderId,
-                domain: YAPPY_DOMAIN,
-                paymentDate: paymentDate,  // ← CORREGIDO: usa epochTime del paso 1
+                domain: 'https://nrdesingcorp.com',
+                paymentDate: paymentDate,
                 aliasYappy: '',
-                ipnUrl: `${YAPPY_DOMAIN}/yappy-ipn`,
+                ipnUrl: 'https://nrdesingcorp.com/yappy-ipn',
                 discount: '0.00',
                 taxes: '0.00',
                 subtotal: '5.00',
@@ -746,48 +738,40 @@
             };
             log(`Body: ${JSON.stringify(body)}`);
 
-            const response = await fetch(`${EDGE_FUNCTION_URL}?action=payment`, {
-                method: 'POST',
-                headers: {
-                    ...EDGE_HEADERS,
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(body)
-            });
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('yappy-webhook', {
+                    body: body
+                });
 
-            log(`Status: ${response.status}`);
-            const text = await response.text();
-            log(`Raw: ${text.substring(0,300)}`);
+                if (error) {
+                    log(`Edge Function error: ${error.message}`, 'error');
+                    return { success: false, error: error.message };
+                }
 
-            let data;
-            try { data = JSON.parse(text); }
-            catch { return { success: false, error: `No JSON: ${text.substring(0,100)}` }; }
+                log(`Response: ${JSON.stringify(data).substring(0,300)}`);
 
-            if (!response.ok) {
-                const err = data.status?.description || data.error || data.message || `HTTP ${response.status}`;
-                return { success: false, error: err };
+                const txId = data.body?.transactionId || data.transactionId;
+                const docName = data.body?.documentName || data.documentName;
+                const respToken = data.body?.token || data.token;
+
+                if (!txId || !docName) {
+                    return { success: false, error: 'Faltan datos en respuesta' };
+                }
+
+                return { success: true, transactionId: txId, documentName: docName, token: respToken, raw: data };
+            } catch (err) {
+                log(`Exception: ${err.message}`, 'error');
+                return { success: false, error: err.message };
             }
-
-            const txId = data.body?.transactionId || data.transactionId;
-            const docName = data.body?.documentName || data.documentName;
-            const respToken = data.body?.token || data.token;
-
-            if (!txId || !docName) {
-                return { success: false, error: 'Faltan datos en respuesta' };
-            }
-
-            return { success: true, transactionId: txId, documentName: docName, token: respToken, raw: data };
         }
 
         function renderizarBotonYappy(orderData) {
             const container = document.getElementById('yappy-container');
 
-            // CORREGIDO: Cargar botón Yappy como ES Module
             container.innerHTML = `
                 <div id="yappy-btn-wrapper" style="width:100%;"></div>
             `;
 
-            // Cargar el script como módulo ES
             import('https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js')
                 .then(() => {
                     log('Yappy Web Component cargado (ES Module)');
