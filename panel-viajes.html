@@ -671,6 +671,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -873,7 +874,10 @@
             clientIp: 'nrdesingcorp.com',       // Header: client-ip (tu dominio o IP pública)
             channel: 'WEB',                    // Header: channel
             apiBaseUrl: 'https://api.yappy.com.pa',  // URL base de la API de Yappy
-            returnUrl: 'https://nrdesingcorp.com/panel-viajes.html'
+            returnUrl: 'https://nrdesingcorp.com/panel-viajes.html',
+            // URLs para la integración V2 via Edge Function
+            domain: 'https://nrdesingcorp.com',
+            edgeFunctionUrl: 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook'
         };
 
         function formatDate(dateString) {
@@ -1037,23 +1041,25 @@
         // ============================================
         // BOTÓN DE PAGO YAPPY V2 - INTEGRACIÓN OFICIAL
         // ============================================
-        // Documentación: Botón de Pago Yappy V2
+        // Documentación oficial: https://www.yappy.com.pa/comercial/desarrolladores/
         // CDN: https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js
         // API Base: https://apipagosbg.bgeneral.cloud
-        // 
-        // Flujo:
-        // 1. Cargar botón desde CDN
-        // 2. Clic en botón → llamar Edge Function (backend seguro)
-        // 3. Edge Function: valida comercio + crea orden
-        // 4. Frontend recibe params → btnYappy.eventPayment(params)
-        // 5. Yappy abre modal → usuario paga
-        // 6. eventSuccess → activar suscripción
+        //
+        // Flujo oficial V2:
+        // 1. Cargar botón Yappy desde CDN
+        // 2. Clic en botón → eventClick dispara callback
+        // 3. Callback llama a Edge Function /yappy-validate (obtiene token)
+        // 4. Callback llama a Edge Function /yappy-payment (crea orden)
+        // 5. btnYappy.eventPayment({transactionId, token, documentName})
+        // 6. Yappy abre modal nativo → usuario paga
+        // 7. eventSuccess → activar suscripción
+        // 8. IPN (GET /yappy-ipn) confirma el pago en backend
 
         let yappyButtonLoaded = false;
         let yappyOrderId = null;
 
         /**
-         * Cargar el script del Botón de Pago Yappy desde CDN
+         * Cargar el script del Botón de Pago Yappy desde CDN oficial
          */
         function cargarYappyButton() {
             if (yappyButtonLoaded) return;
@@ -1073,16 +1079,17 @@
         }
 
         /**
-         * Paso 1: Validar comercio via Edge Function (backend seguro)
+         * Paso 1: Validar comercio via Edge Function
          * POST /payments/validate/merchant
+         * Body: { merchantId, urlDomain }
+         * Response: { body: { epochTime, token } }
          */
         async function yappyValidarComercio() {
-            console.log('[YAPPY V2] Validando comercio...');
+            console.log('[YAPPY V2] Step 1: Validando comercio...');
 
             const { data: { session } } = await supabaseClient.auth.getSession();
-
-            // URL completa de la Edge Function
             const edgeUrl = YAPPY_CONFIG.edgeFunctionUrl || 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
+
             console.log('[YAPPY V2] Edge URL:', edgeUrl);
 
             const response = await fetch(`${edgeUrl}/yappy-validate`, {
@@ -1093,35 +1100,49 @@
                 },
                 body: JSON.stringify({
                     urlDomain: YAPPY_CONFIG.domain
-                    // merchantId y secretKey vienen de las variables de entorno de la Edge Function
                 })
             });
 
+            console.log('[YAPPY V2] Validate response status:', response.status);
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Error validando comercio');
+                let errorMsg = 'Error validando comercio';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorData.message || errorMsg;
+                } catch(e) {}
+                throw new Error(errorMsg + ' (HTTP ' + response.status + ')');
             }
 
             const data = await response.json();
-            console.log('[YAPPY V2] Token obtenido');
+            console.log('[YAPPY V2] Validate response:', data);
+
+            if (!data.body || !data.body.token) {
+                throw new Error('La respuesta no contiene token válido');
+            }
+
             return data.body; // { epochTime, token }
         }
 
         /**
-         * Paso 2: Crear orden via Edge Function (backend seguro)
+         * Paso 2: Crear orden via Edge Function
          * POST /payments/payment-wc
+         * Headers: Authorization: Bearer {token}
+         * Body: { merchantId, orderId, domain, paymentDate, aliasYappy, ipnUrl, discount, taxes, subtotal, total }
+         * Response: { body: { transactionId, token, documentName } }
          */
         async function yappyCrearOrden(validateToken) {
-            console.log('[YAPPY V2] Creando orden...');
+            console.log('[YAPPY V2] Step 2: Creando orden...');
 
             // orderId: máx 15 chars, alfanumérico
             yappyOrderId = 'R' + Date.now().toString(36).toUpperCase().substring(0, 14);
             const paymentDate = Math.floor(Date.now() / 1000); // Epoch time en segundos
 
             const { data: { session } } = await supabaseClient.auth.getSession();
+            const edgeUrl = YAPPY_CONFIG.edgeFunctionUrl || 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
 
             // IPN URL: Endpoint en Edge Function para recibir notificaciones
-            const ipnUrl = `${YAPPY_CONFIG.edgeFunctionUrl}/yappy-ipn`;
+            const ipnUrl = `${YAPPY_CONFIG.domain}/yappy-ipn`;
 
             const response = await fetch(`${edgeUrl}/yappy-payment`, {
                 method: 'POST',
@@ -1134,24 +1155,33 @@
                     orderId: yappyOrderId,
                     domain: YAPPY_CONFIG.domain,
                     paymentDate: paymentDate,
-                    aliasYappy: currentConductor.celular || '', // Teléfono del conductor (opcional)
+                    aliasYappy: currentConductor.celular || '', // Teléfono del conductor (opcional, para pruebas)
                     ipnUrl: ipnUrl,
                     discount: '0.00',
                     taxes: '0.00',
                     subtotal: YAPPY_CONFIG.monto.toFixed(2),
-                    total: YAPPY_CONFIG.monto.toFixed(2),
-                    conductorId: currentConductor.id
-                    // merchantId y secretKey vienen de las variables de entorno de la Edge Function
+                    total: YAPPY_CONFIG.monto.toFixed(2)
                 })
             });
 
+            console.log('[YAPPY V2] Payment response status:', response.status);
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Error creando orden');
+                let errorMsg = 'Error creando orden';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorData.message || errorMsg;
+                } catch(e) {}
+                throw new Error(errorMsg + ' (HTTP ' + response.status + ')');
             }
 
             const data = await response.json();
-            console.log('[YAPPY V2] Orden creada');
+            console.log('[YAPPY V2] Payment response:', data);
+
+            if (!data.body || !data.body.transactionId || !data.body.token || !data.body.documentName) {
+                throw new Error('La respuesta no contiene datos de pago válidos');
+            }
+
             return data.body; // { transactionId, token, documentName }
         }
 
@@ -1167,7 +1197,7 @@
             // Validar configuración
             if (!YAPPY_CONFIG.domain || !YAPPY_CONFIG.edgeFunctionUrl) {
                 showToast('⚠️ Configuración de Yappy incompleta', 'error');
-                console.error('[YAPPY V2] Configuración incompleta.');
+                console.error('[YAPPY V2] Configuración incompleta. domain:', YAPPY_CONFIG.domain, 'edgeFunctionUrl:', YAPPY_CONFIG.edgeFunctionUrl);
                 return;
             }
 
@@ -1179,9 +1209,11 @@
 
                 // 1. Validar comercio (obtener token)
                 const validateData = await yappyValidarComercio();
+                console.log('[YAPPY V2] Token obtenido:', validateData.token ? 'SÍ' : 'NO');
 
                 // 2. Crear orden
                 const paymentData = await yappyCrearOrden(validateData.token);
+                console.log('[YAPPY V2] Orden creada. transactionId:', paymentData.transactionId);
 
                 // 3. Mostrar modal con botón Yappy
                 mostrarModalYappy(paymentData);
@@ -1266,6 +1298,7 @@
                             documentName: paymentData.documentName,
                             token: paymentData.token
                         };
+                        console.log('[YAPPY V2] Enviando params a eventPayment:', params);
                         freshBtn.eventPayment(params);
                     });
 
