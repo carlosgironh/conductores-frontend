@@ -711,12 +711,12 @@
             </div>
             <div class="account-info">
                 <div class="account-info-item">
-                    <div class="account-info-label">Plan</div>
+                    <div class="account-info-label">Duración</div>
                     <div id="accountPlanValue" class="account-info-value">-</div>
                 </div>
                 <div class="account-info-item">
-                    <div class="account-info-label">Estado Pago</div>
-                    <div id="accountPaymentValue" class="account-info-value danger">Pendiente</div>
+                    <div class="account-info-label">Estado</div>
+                    <div id="accountPaymentValue" class="account-info-value danger">Pago requerido</div>
                 </div>
             </div>
             <div id="paymentCountdown" class="payment-countdown" style="display:none;">
@@ -863,7 +863,7 @@
             monto: 5.00,
             moneda: "USD",
             duracionHoras: 24,
-            merchantId: '9aaf1605-ec6d-4ace-a610-86897b898cc2',
+            merchantId: 'MXNBX-84293445',
             // ⚠️ REEMPLAZAR CON TUS CREDENCIALES REALES DE YAPPY COMERCIAL API
             // Obténlas en: Yappy Comercial > Integraciones > Generar Credenciales
             apiKey: 'OIGSD-13147374',        // Header: api-key
@@ -955,7 +955,7 @@
                 card.className = 'account-status-card active';
                 badge.className = 'account-status-badge active';
                 badge.textContent = '✅ Activo';
-                planValue.textContent = currentConductor.plan || 'Básico';
+                planValue.textContent = '24h';
                 paymentValue.textContent = 'Pagado';
                 paymentValue.className = 'account-info-value success';
                 countdown.style.display = 'block';
@@ -970,7 +970,7 @@
                 card.className = 'account-status-card inactive';
                 badge.className = 'account-status-badge inactive';
                 badge.textContent = '❌ Inactivo';
-                planValue.textContent = currentConductor.plan || 'Sin plan';
+                planValue.textContent = '-';
                 paymentValue.textContent = 'Pago requerido';
                 paymentValue.className = 'account-info-value danger';
                 countdown.style.display = 'none';
@@ -1081,16 +1081,19 @@
 
             const { data: { session } } = await supabaseClient.auth.getSession();
 
-            const response = await fetch(`${YAPPY_CONFIG.edgeFunctionUrl}/yappy-validate`, {
+            // URL completa de la Edge Function
+            const edgeUrl = YAPPY_CONFIG.edgeFunctionUrl || 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
+            console.log('[YAPPY V2] Edge URL:', edgeUrl);
+
+            const response = await fetch(`${edgeUrl}/yappy-validate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
-                    merchantId: YAPPY_CONFIG.merchantId,
-                    secretKey: YAPPY_CONFIG.secretKey,
                     urlDomain: YAPPY_CONFIG.domain
+                    // merchantId y secretKey vienen de las variables de entorno de la Edge Function
                 })
             });
 
@@ -1120,15 +1123,13 @@
             // IPN URL: Endpoint en Edge Function para recibir notificaciones
             const ipnUrl = `${YAPPY_CONFIG.edgeFunctionUrl}/yappy-ipn`;
 
-            const response = await fetch(`${YAPPY_CONFIG.edgeFunctionUrl}/yappy-payment`, {
+            const response = await fetch(`${edgeUrl}/yappy-payment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
-                    merchantId: YAPPY_CONFIG.merchantId,
-                    secretKey: YAPPY_CONFIG.secretKey,
                     token: validateToken,
                     orderId: yappyOrderId,
                     domain: YAPPY_CONFIG.domain,
@@ -1140,6 +1141,7 @@
                     subtotal: YAPPY_CONFIG.monto.toFixed(2),
                     total: YAPPY_CONFIG.monto.toFixed(2),
                     conductorId: currentConductor.id
+                    // merchantId y secretKey vienen de las variables de entorno de la Edge Function
                 })
             });
 
@@ -1162,10 +1164,10 @@
                 return; 
             }
 
-            // Validar credenciales
-            if (YAPPY_CONFIG.secretKey === 'TU_SECRET_KEY_AQUI') {
-                showToast('⚠️ Configura tu Secret Key de Yappy en YAPPY_CONFIG', 'error');
-                console.error('[YAPPY V2] Secret Key no configurada.');
+            // Validar configuración
+            if (!YAPPY_CONFIG.domain || !YAPPY_CONFIG.edgeFunctionUrl) {
+                showToast('⚠️ Configuración de Yappy incompleta', 'error');
+                console.error('[YAPPY V2] Configuración incompleta.');
                 return;
             }
 
