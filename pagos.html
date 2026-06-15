@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#0a1208">
     <title>Pagos - Activar Suscripción | Road To</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- CDN del Botón Yappy V2 -->
     <script src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -150,7 +149,6 @@
             margin-bottom: 20px;
         }
 
-        /* Plan Card */
         .plan-card {
             background: linear-gradient(135deg, rgba(0,163,224,0.15) 0%, rgba(0,119,179,0.1) 100%);
             border: 2px solid var(--yappy-blue);
@@ -205,30 +203,6 @@
             color: var(--text-muted);
         }
 
-        .plan-features {
-            list-style: none;
-            text-align: left;
-            margin: 20px 0;
-            padding: 0;
-        }
-
-        .plan-features li {
-            padding: 8px 0;
-            color: var(--text-muted);
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .plan-features li::before {
-            content: '✓';
-            color: var(--success);
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        /* Yappy Button Container */
         .yappy-container {
             margin-top: 20px;
             min-height: 60px;
@@ -237,7 +211,6 @@
             justify-content: center;
         }
 
-        /* Custom button while loading */
         .btn-yappy-custom {
             width: 100%;
             padding: 16px;
@@ -292,7 +265,6 @@
 
         .secure-badge svg { width: 16px; height: 16px; }
 
-        /* Alerts */
         .alert {
             padding: 14px 18px;
             border-radius: 12px;
@@ -307,7 +279,6 @@
         .alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
         .alert-info { background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.3); color: #60a5fa; }
 
-        /* Debug Panel */
         .debug-toggle {
             background: none;
             border: 1px solid rgba(255,255,255,0.1);
@@ -341,7 +312,6 @@
         .log-info { color: #60a5fa; }
         .log-warn { color: #fbbf24; }
 
-        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -366,7 +336,6 @@
 
         .loading-overlay p { color: var(--text-muted); font-size: 14px; }
 
-        /* Info Grid */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -398,7 +367,6 @@
         .info-value.success { color: #4ade80; }
         .info-value.danger { color: #f87171; }
 
-        /* Steps indicator */
         .steps {
             display: flex;
             justify-content: center;
@@ -452,7 +420,6 @@
             .plan-price { font-size: 2.2rem; }
         }
     </style>
-<base target="_blank">
 </head>
 <body>
 
@@ -475,7 +442,6 @@
         <h1 class="page-title">💳 Métodos de Pago</h1>
         <p class="page-subtitle">Activa tu suscripción de forma segura con Yappy</p>
 
-        <!-- Alertas -->
         <div id="alert-container"></div>
 
         <!-- Info del conductor -->
@@ -498,15 +464,8 @@
             <div class="plan-card">
                 <div class="plan-badge">Plan Básico</div>
                 <div class="plan-price">$5.00 <span>/ 24 horas</span></div>
-                <ul class="plan-features">
-                    <li>Acceso ilimitado a viajes por 24 horas</li>
-                    <li>Notificaciones en tiempo real</li>
-                    <li>Soporte prioritario</li>
-                    <li>Renovación automática disponible</li>
-                </ul>
             </div>
 
-            <!-- Steps -->
             <div class="steps">
                 <div class="step active" id="step1">1</div>
                 <div class="step-line" id="line1"></div>
@@ -518,7 +477,6 @@
             <div class="card-title">🔒 Pago Seguro con Yappy</div>
             <div class="card-desc">Paga de forma rápida y segura usando Yappy de Banco General. El pago se procesa directamente en la app de Yappy.</div>
 
-            <!-- Botón Yappy -->
             <div class="yappy-container" id="yappy-container">
                 <button class="btn-yappy-custom" id="btn-iniciar" onclick="iniciarFlujoYappy()">
                     <div class="spinner"></div>
@@ -549,16 +507,12 @@
 
     </div>
 
-    <!-- Loading overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="big-spinner"></div>
         <p>Procesando pago...</p>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
         const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
@@ -571,12 +525,10 @@
         let conductorData = null;
         let yappyToken = null;
 
-        // ============================================
-        // DEBUG LOGGING
-        // ============================================
         function log(msg, type = 'info') {
             const timestamp = new Date().toLocaleTimeString('es-PA', {hour12:false});
             const logsContainer = document.getElementById('debug-logs');
+            if (!logsContainer) return;
             const entry = document.createElement('div');
             entry.className = `log-entry log-${type}`;
             entry.textContent = `[${timestamp}] ${msg}`;
@@ -598,6 +550,7 @@
         function updateStep(stepNum, status) {
             const step = document.getElementById(`step${stepNum}`);
             const line = document.getElementById(`line${stepNum}`);
+            if (!step) return;
             if (status === 'done') {
                 step.className = 'step done';
                 step.innerHTML = '✓';
@@ -607,9 +560,6 @@
             }
         }
 
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
             log('Página de pagos cargada');
             await verificarAuth();
@@ -625,23 +575,51 @@
                     return;
                 }
                 currentUser = session.user;
-                log(`Usuario: ${currentUser.id.substring(0,8)}...`);
+                log(`Usuario autenticado: ${currentUser.id.substring(0,8)}...`);
                 await cargarConductor();
             } catch (err) {
                 log(`Auth error: ${err.message}`, 'error');
             }
         }
 
+        // ============================================
+        // CARGAR CONDUCTOR - CORREGIDO
+        // ============================================
         async function cargarConductor() {
             try {
+                log('Cargando datos del conductor...');
+
+                // Primera consulta con todas las columnas
                 let { data, error } = await supabaseClient
                     .from('conductores')
-                    .select('id,auth_user_id,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
+                    .select('id,auth_user_id,status,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
                     .eq('auth_user_id', currentUser.id)
                     .maybeSingle();
 
+                // Si falla por columna status (42703), reintentar sin ella
+                if (error && error.code === '42703') {
+                    log('Columna status no existe, reintentando sin ella...', 'warn');
+                    const result = await supabaseClient
+                        .from('conductores')
+                        .select('id,auth_user_id,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
+                        .eq('auth_user_id', currentUser.id)
+                        .maybeSingle();
+                    data = result.data;
+                    error = result.error;
+                }
+
                 if (error) {
                     log(`Error DB: ${error.message}`, 'error');
+                    document.getElementById('conductor-nombre').textContent = 'Error';
+                    document.getElementById('estado-badge').innerHTML = '<span style="color:#f87171;">Error</span>';
+                    return;
+                }
+
+                if (!data) {
+                    log('No se encontró conductor', 'error');
+                    document.getElementById('conductor-nombre').textContent = 'No encontrado';
+                    document.getElementById('estado-badge').innerHTML = '<span style="color:#f87171;">No registrado</span>';
+                    mostrarAlerta('danger', 'No estás registrado como conductor.');
                     return;
                 }
 
@@ -661,18 +639,15 @@
                 }
                 log(`Conductor: ${nombre}, Suscripción: ${activa ? 'activa' : 'inactiva'}`);
             } catch (err) {
-                log(`Error: ${err.message}`, 'error');
+                log(`Error catch: ${err.message}`, 'error');
+                document.getElementById('conductor-nombre').textContent = 'Error';
+                document.getElementById('estado-badge').innerHTML = '<span style="color:#f87171;">Error</span>';
             }
         }
 
         // ============================================
-        // FLUJO YAPPY V2 - DOCUMENTACIÓN OFICIAL
+        // FLUJO YAPPY V2
         // ============================================
-        // Paso 1: Validar comercio → POST ?action=validate
-        // Paso 2: Crear orden → POST ?action=payment (con Bearer token)
-        // Paso 3: Renderizar btn-yappy con transactionId, token, documentName
-        // ============================================
-
         async function iniciarFlujoYappy() {
             const btn = document.getElementById('btn-iniciar');
             btn.classList.add('loading');
@@ -711,12 +686,6 @@
             }
         }
 
-        // ============================================
-        // PASO 1: VALIDAR COMERCIO
-        // POST /payments/validate/merchant
-        // Body: { merchantId, urlDomain }
-        // Response: { status: {...}, body: {epochTime, token} }
-        // ============================================
         async function yappyValidarComercio() {
             log('POST ?action=validate');
 
@@ -751,13 +720,6 @@
             return { success: true, token, raw: data };
         }
 
-        // ============================================
-        // PASO 2: CREAR ORDEN
-        // POST /payments/payment-wc
-        // Headers: Authorization: Bearer {token}
-        // Body: { merchantId, orderId, domain, paymentDate, aliasYappy, ipnUrl, discount, taxes, subtotal, total }
-        // Response: { status: {...}, body: {transactionId, token, documentName} }
-        // ============================================
         async function yappyCrearOrden(token) {
             log('POST ?action=payment');
 
@@ -813,10 +775,6 @@
             return { success: true, transactionId: txId, documentName: docName, token: respToken, raw: data };
         }
 
-        // ============================================
-        // PASO 3: RENDERIZAR BOTÓN YAPPY
-        // Según documentación: eventPayment({transactionId, token, documentName})
-        // ============================================
         function renderizarBotonYappy(orderData) {
             const container = document.getElementById('yappy-container');
 
@@ -834,12 +792,10 @@
 
             const btnYappy = document.getElementById('yappy-button');
 
-            // eventClick: Usuario hace clic en el botón
             btnYappy.addEventListener('eventClick', async (e) => {
                 log('eventClick: usuario clickeó botón');
                 document.getElementById('loading-overlay').classList.add('show');
 
-                // Pasar parámetros al botón para que abra el modal de Yappy
                 const paymentParams = {
                     transactionId: orderData.transactionId,
                     token: orderData.token,
@@ -849,14 +805,12 @@
                 btnYappy.eventPayment(paymentParams);
             });
 
-            // eventSuccess: Pago exitoso
             btnYappy.addEventListener('eventSuccess', async (e) => {
                 log('eventSuccess: ¡Pago completado!', 'success');
                 document.getElementById('loading-overlay').classList.remove('show');
                 await activarSuscripcion(orderData.transactionId);
             });
 
-            // eventError: Pago fallido
             btnYappy.addEventListener('eventError', (e) => {
                 log(`eventError: ${JSON.stringify(e.detail)}`, 'error');
                 document.getElementById('loading-overlay').classList.remove('show');
@@ -864,7 +818,6 @@
                 restaurarBoton();
             });
 
-            // isYappyOnline: Verificar disponibilidad
             btnYappy.addEventListener('isYappyOnline', (e) => {
                 const online = e.detail;
                 log(`isYappyOnline: ${online}`);
@@ -890,13 +843,12 @@
             updateStep(1, 'active');
             updateStep(2, '');
             updateStep(3, '');
-            document.getElementById('line1').className = 'step-line';
-            document.getElementById('line2').className = 'step-line';
+            const l1 = document.getElementById('line1');
+            const l2 = document.getElementById('line2');
+            if (l1) l1.className = 'step-line';
+            if (l2) l2.className = 'step-line';
         }
 
-        // ============================================
-        // ACTIVAR SUSCRIPCIÓN TRAS PAGO
-        // ============================================
         async function activarSuscripcion(transactionId) {
             log('Activando suscripción en Supabase...');
             try {
@@ -921,7 +873,6 @@
                     return;
                 }
 
-                // Registrar en tabla pagos
                 await supabaseClient.from('pagos').insert([{
                     conductor_id: conductorData.id,
                     monto: 5.00,
