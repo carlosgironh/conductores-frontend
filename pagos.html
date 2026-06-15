@@ -377,13 +377,49 @@
     // ============================================================
     // AUTH & DATOS DEL CONDUCTOR
     // ============================================================
+    async function restaurarSesionDesdeStorage() {
+      try {
+        const raw = localStorage.getItem('supabase_session');
+        if (!raw) return false;
+        const stored = JSON.parse(raw);
+        if (!stored.access_token) return false;
+
+        logDebug('Intentando restaurar sesión desde localStorage...');
+        const { data, error } = await supabaseClient.auth.setSession({
+          access_token: stored.access_token,
+          refresh_token: stored.refresh_token,
+        });
+
+        if (error || !data.session) {
+          localStorage.removeItem('supabase_session');
+          return false;
+        }
+
+        logDebug('✓ Sesión restaurada desde localStorage');
+        return true;
+      } catch (e) {
+        localStorage.removeItem('supabase_session');
+        return false;
+      }
+    }
+
     async function cargarDatosConductor() {
       logDebug('Iniciando carga de página...');
 
       try {
         // ─── PASO 1: Obtener sesión ───
         logDebug('Verificando sesión de Supabase...');
-        const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+        let { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+
+        // Si no hay sesión en cookies, intentar restaurar desde localStorage
+        if (!sessionData?.session) {
+          const restored = await restaurarSesionDesdeStorage();
+          if (restored) {
+            const refreshed = await supabaseClient.auth.getSession();
+            sessionData = refreshed.data;
+            sessionError = refreshed.error;
+          }
+        }
 
         if (sessionError) {
           logDebug(`Error de sesión: ${sessionError.message}`, 'error');
@@ -394,7 +430,6 @@
         if (!sessionData?.session) {
           logDebug('No hay sesión activa. Usuario no logueado.', 'warn');
           showAlert('No has iniciado sesión. Redirigiendo al login...', 'warn');
-          // Redirección suave después de 3 segundos para que lea el mensaje
           setTimeout(() => {
             window.location.href = 'login.html';
           }, 3000);
@@ -410,6 +445,7 @@
         if (userError || !userData?.user) {
           logDebug(`Error obteniendo usuario: ${userError?.message || 'Sin usuario'}`, 'error');
           showAlert('Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn');
+          localStorage.removeItem('supabase_session');
           setTimeout(() => {
             window.location.href = 'login.html';
           }, 3000);
@@ -674,6 +710,27 @@
         setBtnLoading(false);
       }
     }
+
+    // ============================================================
+    // LISTENER DE CAMBIOS DE AUTH
+    // ============================================================
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      logDebug(`Auth event: ${event}`);
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('supabase_session');
+        showAlert('Sesión cerrada. Redirigiendo al login...', 'warn');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+      }
+      if (event === 'SIGNED_IN' && session) {
+        localStorage.setItem('supabase_session', JSON.stringify({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_at: session.expires_at,
+        }));
+      }
+    });
 
     // ============================================================
     // INICIALIZACIÓN SEGURA
