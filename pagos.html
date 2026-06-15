@@ -420,6 +420,7 @@
             .plan-price { font-size: 2.2rem; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -592,7 +593,7 @@
                 // Primera consulta con todas las columnas
                 let { data, error } = await supabaseClient
                     .from('conductores')
-                    .select('id,auth_user_id,status,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
+                    .select('id,auth_user_id,nombres,apellidos,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
                     .eq('auth_user_id', currentUser.id)
                     .maybeSingle();
 
@@ -601,7 +602,7 @@
                     log('Columna status no existe, reintentando sin ella...', 'warn');
                     const result = await supabaseClient
                         .from('conductores')
-                        .select('id,auth_user_id,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
+                        .select('id,auth_user_id,nombres,apellidos,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
                         .eq('auth_user_id', currentUser.id)
                         .maybeSingle();
                     data = result.data;
