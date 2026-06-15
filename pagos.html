@@ -297,7 +297,7 @@
   <script>
     // ─── Supabase ───
     const SUPABASE_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0MTEyNjUsImV4cCI6MjA1MTk4NzI2NX0.0t3L5I3n9k2v3v4v5v6v7v8v9v0v1v2v3v4v5v6v7v8v9v0v1v2v3v4v5';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ─── API de Render (reemplaza Edge Function de Supabase) ───
@@ -431,7 +431,7 @@
           logDebug('No hay sesión activa. Usuario no logueado.', 'warn');
           showAlert('No has iniciado sesión. Redirigiendo al login...', 'warn');
           setTimeout(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'dashboard.html';
           }, 3000);
           return;
         }
@@ -447,7 +447,7 @@
           showAlert('Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn');
           localStorage.removeItem('supabase_session');
           setTimeout(() => {
-            window.location.href = 'login.html';
+            window.location.href = 'dashboard.html';
           }, 3000);
           return;
         }
@@ -720,7 +720,7 @@
         localStorage.removeItem('supabase_session');
         showAlert('Sesión cerrada. Redirigiendo al login...', 'warn');
         setTimeout(() => {
-          window.location.href = 'login.html';
+          window.location.href = 'dashboard.html';
         }, 2000);
       }
       if (event === 'SIGNED_IN' && session) {
