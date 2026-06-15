@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#0a1208">
     <title>Pagos - Activar Suscripción | Road To</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -525,6 +524,7 @@
         let currentUser = null;
         let conductorData = null;
         let yappyToken = null;
+        let yappyEpochTime = null;  // ← NUEVO: guardar epochTime del paso 1
 
         // Headers para Edge Function (requiere apikey para auth anónima)
         const EDGE_HEADERS = {
@@ -664,12 +664,13 @@
                 const v1 = await yappyValidarComercio();
                 if (!v1.success) throw new Error(v1.error);
                 yappyToken = v1.token;
-                log('✓ Token obtenido', 'success');
+                yappyEpochTime = v1.epochTime;  // ← NUEVO: guardar epochTime
+                log(`✓ Token obtenido, epochTime: ${yappyEpochTime}`, 'success');
                 updateStep(1, 'done');
                 updateStep(2, 'active');
 
                 log('Paso 2/3: Creando orden...');
-                const v2 = await yappyCrearOrden(yappyToken);
+                const v2 = await yappyCrearOrden(yappyToken, yappyEpochTime);  // ← CORREGIDO: pasar epochTime
                 if (!v2.success) throw new Error(v2.error);
                 log(`✓ Orden: ${v2.transactionId}`, 'success');
                 updateStep(2, 'done');
@@ -713,21 +714,27 @@
             }
 
             const token = data.body?.token || data.token;
+            const epochTime = data.body?.epochTime || data.epochTime;
             if (!token) return { success: false, error: 'No token recibido' };
 
-            return { success: true, token, raw: data };
+            return { success: true, token, epochTime, raw: data };
         }
 
-        async function yappyCrearOrden(token) {
+        async function yappyCrearOrden(token, epochTime) {
             log('POST ?action=payment');
 
-            const orderId = `RT${Date.now()}`.substring(0, 15);
-            const paymentDate = Math.floor(Date.now() / 1000).toString();
+            // CORREGIDO: orderId máximo 15 caracteres alfanuméricos
+            const orderId = `R${Date.now().toString(36).toUpperCase()}`;
+            log(`orderId: ${orderId} (len=${orderId.length})`);
+
+            // CORREGIDO: paymentDate debe ser el epochTime del paso 1, NO Date.now()/1000
+            const paymentDate = epochTime ? String(epochTime) : Math.floor(Date.now() / 1000).toString();
+            log(`paymentDate: ${paymentDate} (from epochTime)`);
 
             const body = {
                 orderId: orderId,
                 domain: YAPPY_DOMAIN,
-                paymentDate: paymentDate,
+                paymentDate: paymentDate,  // ← CORREGIDO: usa epochTime del paso 1
                 aliasYappy: '',
                 ipnUrl: `${YAPPY_DOMAIN}/yappy-ipn`,
                 discount: '0.00',
@@ -775,53 +782,69 @@
         function renderizarBotonYappy(orderData) {
             const container = document.getElementById('yappy-container');
 
+            // CORREGIDO: Cargar botón Yappy como ES Module
             container.innerHTML = `
-                <btn-yappy
-                    id="yappy-button"
-                    data-amount="5.00"
-                    data-description="Activación 24h - RoadTo"
-                    data-reference="${orderData.transactionId}"
-                    theme="dark"
-                    rounded="true"
-                    style="width:100%;"
-                ></btn-yappy>
+                <div id="yappy-btn-wrapper" style="width:100%;"></div>
             `;
 
-            const btnYappy = document.getElementById('yappy-button');
+            // Cargar el script como módulo ES
+            import('https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js')
+                .then(() => {
+                    log('Yappy Web Component cargado (ES Module)');
+                    const wrapper = document.getElementById('yappy-btn-wrapper');
+                    wrapper.innerHTML = `
+                        <btn-yappy
+                            id="yappy-button"
+                            data-amount="5.00"
+                            data-description="Activación 24h - RoadTo"
+                            data-reference="${orderData.transactionId}"
+                            theme="dark"
+                            rounded="true"
+                            style="width:100%;"
+                        ></btn-yappy>
+                    `;
 
-            btnYappy.addEventListener('eventClick', async (e) => {
-                log('eventClick: usuario clickeó botón');
-                document.getElementById('loading-overlay').classList.add('show');
+                    const btnYappy = document.getElementById('yappy-button');
 
-                const paymentParams = {
-                    transactionId: orderData.transactionId,
-                    token: orderData.token,
-                    documentName: orderData.documentName
-                };
-                log(`eventPayment: ${JSON.stringify(paymentParams)}`);
-                btnYappy.eventPayment(paymentParams);
-            });
+                    btnYappy.addEventListener('eventClick', async (e) => {
+                        log('eventClick: usuario clickeó botón');
+                        document.getElementById('loading-overlay').classList.add('show');
 
-            btnYappy.addEventListener('eventSuccess', async (e) => {
-                log('eventSuccess: ¡Pago completado!', 'success');
-                document.getElementById('loading-overlay').classList.remove('show');
-                await activarSuscripcion(orderData.transactionId);
-            });
+                        const paymentParams = {
+                            transactionId: orderData.transactionId,
+                            token: orderData.token,
+                            documentName: orderData.documentName
+                        };
+                        log(`eventPayment: ${JSON.stringify(paymentParams)}`);
+                        btnYappy.eventPayment(paymentParams);
+                    });
 
-            btnYappy.addEventListener('eventError', (e) => {
-                log(`eventError: ${JSON.stringify(e.detail)}`, 'error');
-                document.getElementById('loading-overlay').classList.remove('show');
-                mostrarAlerta('danger', 'El pago no se completó. Intenta de nuevo.');
-                restaurarBoton();
-            });
+                    btnYappy.addEventListener('eventSuccess', async (e) => {
+                        log('eventSuccess: ¡Pago completado!', 'success');
+                        document.getElementById('loading-overlay').classList.remove('show');
+                        await activarSuscripcion(orderData.transactionId);
+                    });
 
-            btnYappy.addEventListener('isYappyOnline', (e) => {
-                const online = e.detail;
-                log(`isYappyOnline: ${online}`);
-                if (!online) {
-                    mostrarAlerta('warning', 'Yappy no está disponible en este momento.');
-                }
-            });
+                    btnYappy.addEventListener('eventError', (e) => {
+                        log(`eventError: ${JSON.stringify(e.detail)}`, 'error');
+                        document.getElementById('loading-overlay').classList.remove('show');
+                        mostrarAlerta('danger', 'El pago no se completó. Intenta de nuevo.');
+                        restaurarBoton();
+                    });
+
+                    btnYappy.addEventListener('isYappyOnline', (e) => {
+                        const online = e.detail;
+                        log(`isYappyOnline: ${online}`);
+                        if (!online) {
+                            mostrarAlerta('warning', 'Yappy no está disponible en este momento.');
+                        }
+                    });
+                })
+                .catch(err => {
+                    log(`Error cargando Yappy component: ${err.message}`, 'error');
+                    mostrarAlerta('danger', 'Error cargando botón Yappy. Intenta de nuevo.');
+                    restaurarBoton();
+                });
         }
 
         function restaurarBoton() {
