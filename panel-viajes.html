@@ -121,6 +121,127 @@
             margin-bottom: 24px;
         }
 
+        /* ===== TARJETA ESTADO DE PAGO ===== */
+        .payment-status-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-status-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+
+        .payment-status-card.active::before {
+            background: linear-gradient(90deg, var(--success), #34d399);
+        }
+
+        .payment-status-card.inactive::before {
+            background: linear-gradient(90deg, var(--danger), #f87171);
+        }
+
+        .payment-status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .payment-status-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-status-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-status-badge.active {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .payment-status-badge.inactive {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .payment-status-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .payment-status-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .payment-status-text strong {
+            color: var(--text-light);
+        }
+
+        .btn-activate {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            min-height: 48px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-activate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .yappy-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .yappy-logo svg {
+            width: 22px;
+            height: 22px;
+        }
+
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -437,223 +558,19 @@
             font-size: 14px;
         }
 
-
-        /* ===== TARJETA DE ESTADO DE CUENTA / PAGOS ===== */
-        .account-status-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .bloqueo-pago-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(15,23,42,0.5);
             border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
+            border: 1px solid rgba(239,68,68,0.2);
+            margin-top: 20px;
         }
 
-        .account-status-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-        }
+        .bloqueo-pago-box .icono { font-size: 48px; margin-bottom: 16px; }
+        .bloqueo-pago-box h3 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .bloqueo-pago-box p { color: #94a3b8; font-size: 14px; max-width: 400px; margin: 0 auto 20px; line-height: 1.5; }
 
-        .account-status-card.active::before {
-            background: linear-gradient(90deg, var(--success), #34d399);
-        }
-
-        .account-status-card.inactive::before {
-            background: linear-gradient(90deg, var(--danger), #f87171);
-        }
-
-        .account-status-card.warning::before {
-            background: linear-gradient(90deg, var(--warning), #fbbf24);
-        }
-
-        .account-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .account-title {
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .account-status-badge {
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .account-status-badge.active {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .account-status-badge.inactive {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .account-status-badge.warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .account-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .account-info-item {
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .account-info-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .account-info-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-light);
-        }
-
-        .account-info-value.success { color: #4ade80; }
-        .account-info-value.danger { color: #f87171; }
-        .account-info-value.warning { color: #fbbf24; }
-
-        .payment-countdown {
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 16px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .payment-countdown-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .payment-countdown-value {
-            font-size: 24px;
-            font-weight: 800;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
-        }
-
-        .payment-countdown-value.active { color: #4ade80; }
-        .payment-countdown-value.warning { color: #fbbf24; }
-        .payment-countdown-value.danger { color: #f87171; }
-
-        .payment-progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .payment-progress-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 1s ease;
-        }
-
-        .payment-progress-fill.active { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .payment-progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .payment-progress-fill.danger { background: linear-gradient(90deg, #ef4444, #f87171); }
-
-        .btn-purple {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
-        }
-
-        .btn-purple:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
-        }
-
-        .yappy-logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 800;
-            font-size: 16px;
-            color: #00a3e0;
-        }
-
-        .yappy-logo svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .payment-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .payment-history-date {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .payment-history-amount {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--corp-green-light);
-        }
-
-        .payment-history-status {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .payment-history-status.success {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-        }
-
-        .payment-history-status.pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-        }
-
-        .toast-warning { border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
@@ -663,12 +580,11 @@
             .stat-item { padding: 12px 8px; }
             .stat-value { font-size: 22px; }
             .card { padding: 18px; }
+            .payment-status-info { flex-direction: column; align-items: stretch; }
+            .payment-status-text { text-align: center; }
         }
     </style>
     <base target="_blank">
-<base target="_blank">
-<base target="_blank">
-<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -699,48 +615,27 @@
         <h1 class="page-title">🚗 Panel de Viajes</h1>
         <p class="page-subtitle">Gestiona tus viajes disponibles y pasajeros asignados</p>
 
-
-        <!-- ===== TARJETA DE ESTADO DE CUENTA / SUSCRIPCIÓN ===== -->
-        <div id="accountStatusCard" class="account-status-card inactive" style="display:none;">
-            <div class="account-header">
-                <div class="account-title">
+        <!-- ===== TARJETA ESTADO DE PAGO ===== -->
+        <div id="paymentStatusCard" class="payment-status-card inactive" style="display:none;">
+            <div class="payment-status-header">
+                <div class="payment-status-title">
                     <span>💳</span> Estado de Cuenta
                 </div>
-                <span id="accountStatusBadge" class="account-status-badge inactive">Inactivo</span>
+                <span id="paymentStatusBadge" class="payment-status-badge inactive">Inactivo</span>
             </div>
-            <div class="account-info">
-                <div class="account-info-item">
-                    <div class="account-info-label">Plan</div>
-                    <div id="accountPlanValue" class="account-info-value">-</div>
+            <div class="payment-status-info">
+                <div class="payment-status-text" id="paymentStatusText">
+                    Tu cuenta requiere activación para recibir solicitudes de viajes.
                 </div>
-                <div class="account-info-item">
-                    <div class="account-info-label">Estado Pago</div>
-                    <div id="accountPaymentValue" class="account-info-value danger">Pendiente</div>
-                </div>
-            </div>
-            <div id="paymentCountdown" class="payment-countdown" style="display:none;">
-                <div class="payment-countdown-label">⏰ Tiempo restante de activación</div>
-                <div id="countdownValue" class="payment-countdown-value active">00:00:00</div>
-                <div class="payment-progress-bar">
-                    <div id="countdownProgress" class="payment-progress-fill active" style="width: 100%;"></div>
-                </div>
-            </div>
-            <div id="paymentHistory" style="display:none; margin-bottom: 16px;">
-                <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">📜 Historial de Pagos</div>
-                <div id="paymentHistoryList"></div>
-            </div>
-            <div id="paymentActions">
-                <a href="pagos.html" class="btn btn-purple" style="margin-bottom: 8px; text-align: center;">
+                <a href="pagos.html" class="btn-activate" id="btnActivar">
                     <span class="yappy-logo">
-                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                        Activar con Yappy - $5.00
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Activar con Yappy
                     </span>
                 </a>
-                <button id="btnSimularPago" class="btn btn-success" onclick="simularPago()" style="display:none;">
-                    🧪 Simular Pago (Testing)
-                </button>
             </div>
         </div>
+
         <div class="stats-bar">
             <div class="stat-item">
                 <div class="stat-value" id="stat-disponibles">0</div>
@@ -760,7 +655,7 @@
             </div>
         </div>
 
-        <div class="grid">
+        <div class="grid" id="viajesGrid">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
@@ -788,36 +683,6 @@
     </div>
 
     <div id="toast" class="toast"></div>
-
-    <!-- Modal Simular Pago (Testing) -->
-    <div class="modal-overlay" id="simularPagoModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeSimularPagoModal()">×</button>
-            <div style="margin-bottom:25px; text-align:center;">
-                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">🧪 Simular Pago</h3>
-                <p style="color:#94a3b8;font-size:14px;">Modo desarrollo: Simula un pago exitoso de Yappy</p>
-            </div>
-            <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:20px;">
-                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                    <span style="color:#94a3b8;font-size:13px;">Monto:</span>
-                    <span style="color:#fff;font-weight:700;">$5.00 USD</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                    <span style="color:#94a3b8;font-size:13px;">Plan:</span>
-                    <span style="color:#fff;font-weight:700;">Activación 24h</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;">
-                    <span style="color:#94a3b8;font-size:13px;">Duración:</span>
-                    <span style="color:#4ade80;font-weight:700;">24 horas</span>
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;">
-                <button onclick="closeSimularPagoModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Cancelar</button>
-                <button onclick="confirmarSimularPago()" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">✅ Confirmar Pago</button>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Modal Cancelar/Revertir Viaje -->
     <div class="modal-overlay" id="cancelModal">
@@ -853,18 +718,6 @@
         let subscriptions = [];
         let cancelViajeId = null;
         let currentConductor = null;
-        let countdownInterval = null;
-        let isDevMode = false; // Cambiar a true para mostrar botón de simular pago
-
-        // Configuración de Yappy
-        const YAPPY_CONFIG = {
-            empresa: "ROADTO",
-            monto: 5.00,
-            moneda: "USD",
-            duracionHoras: 24,
-            apiUrl: 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook',
-            returnUrl: 'https://nrdesingcorp.com/panel-viajes.html'
-        };
 
         function formatDate(dateString) {
             const date = new Date(dateString);
@@ -881,283 +734,6 @@
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        function formatDuration(ms) {
-            if (ms <= 0) return "00:00:00";
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        // ============================================
-        // VERIFICAR ESTADO DE SUSCRIPCIÓN (24 HORAS)
-        // ============================================
-        function verificarSuscripcionActiva(conductor) {
-            if (!conductor) return false;
-            if (!conductor.fecha_vencimiento) return false;
-            const ahora = new Date();
-            const vencimiento = new Date(conductor.fecha_vencimiento);
-            return vencimiento > ahora;
-        }
-
-        function obtenerTiempoRestante(conductor) {
-            if (!conductor || !conductor.fecha_vencimiento) return 0;
-            const ahora = new Date();
-            const vencimiento = new Date(conductor.fecha_vencimiento);
-            return Math.max(0, vencimiento - ahora);
-        }
-
-        function obtenerPorcentajeRestante(conductor) {
-            if (!conductor || !conductor.fecha_vencimiento || !conductor.fecha_ultimo_pago) return 0;
-            const ahora = new Date();
-            const vencimiento = new Date(conductor.fecha_vencimiento);
-            const inicio = new Date(conductor.fecha_ultimo_pago);
-            const total = vencimiento - inicio;
-            const restante = vencimiento - ahora;
-            return Math.max(0, Math.min(100, (restante / total) * 100));
-        }
-
-        // ============================================
-        // RENDERIZAR TARJETA DE ESTADO DE CUENTA
-        // ============================================
-        function renderAccountStatusCard() {
-            const card = document.getElementById('accountStatusCard');
-            const badge = document.getElementById('accountStatusBadge');
-            const planValue = document.getElementById('accountPlanValue');
-            const paymentValue = document.getElementById('accountPaymentValue');
-            const countdown = document.getElementById('paymentCountdown');
-            const countdownValue = document.getElementById('countdownValue');
-            const countdownProgress = document.getElementById('countdownProgress');
-            const paymentHistory = document.getElementById('paymentHistory');
-            const btnActivar = document.getElementById('btnActivar');
-            const btnSimular = document.getElementById('btnSimularPago');
-
-            if (!currentConductor) return;
-
-            const suscripcionActiva = verificarSuscripcionActiva(currentConductor);
-            const tiempoRestante = obtenerTiempoRestante(currentConductor);
-            const porcentaje = obtenerPorcentajeRestante(currentConductor);
-
-            card.style.display = 'block';
-
-            if (suscripcionActiva) {
-                card.className = 'account-status-card active';
-                badge.className = 'account-status-badge active';
-                badge.textContent = '✅ Activo';
-                planValue.textContent = currentConductor.plan || 'Básico';
-                paymentValue.textContent = 'Pagado';
-                paymentValue.className = 'account-info-value success';
-                countdown.style.display = 'block';
-                countdownValue.textContent = formatDuration(tiempoRestante);
-                countdownValue.className = tiempoRestante < 3600000 ? 'payment-countdown-value warning' : 'payment-countdown-value active';
-                countdownProgress.style.width = porcentaje + '%';
-                countdownProgress.className = porcentaje < 10 ? 'payment-progress-fill danger' : (porcentaje < 25 ? 'payment-progress-fill warning' : 'payment-progress-fill active');
-                btnActivar.style.display = 'none';
-                btnSimular.style.display = 'none';
-                iniciarCountdown();
-            } else {
-                card.className = 'account-status-card inactive';
-                badge.className = 'account-status-badge inactive';
-                badge.textContent = '❌ Inactivo';
-                planValue.textContent = currentConductor.plan || 'Sin plan';
-                paymentValue.textContent = 'Pago requerido';
-                paymentValue.className = 'account-info-value danger';
-                countdown.style.display = 'none';
-                btnActivar.style.display = 'block';
-                btnSimular.style.display = isDevMode ? 'block' : 'none';
-                if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-            }
-            cargarHistorialPagos();
-        }
-
-        function iniciarCountdown() {
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                if (!currentConductor || !verificarSuscripcionActiva(currentConductor)) {
-                    clearInterval(countdownInterval); countdownInterval = null;
-                    renderAccountStatusCard();
-                    location.reload();
-                    return;
-                }
-                const tiempoRestante = obtenerTiempoRestante(currentConductor);
-                const porcentaje = obtenerPorcentajeRestante(currentConductor);
-                const cv = document.getElementById('countdownValue');
-                const cp = document.getElementById('countdownProgress');
-                if (cv) {
-                    cv.textContent = formatDuration(tiempoRestante);
-                    cv.className = tiempoRestante < 3600000 ? 'payment-countdown-value warning' : 'payment-countdown-value active';
-                }
-                if (cp) {
-                    cp.style.width = porcentaje + '%';
-                    cp.className = porcentaje < 10 ? 'payment-progress-fill danger' : (porcentaje < 25 ? 'payment-progress-fill warning' : 'payment-progress-fill active');
-                }
-            }, 1000);
-        }
-
-        async function cargarHistorialPagos() {
-            if (!currentConductor) return;
-            try {
-                const { data: pagos, error } = await supabaseClient
-                    .from('pagos')
-                    .select('*')
-                    .eq('conductor_id', currentConductor.id)
-                    .order('fecha_pago', { ascending: false })
-                    .limit(5);
-                if (error) throw error;
-                const list = document.getElementById('paymentHistoryList');
-                const container = document.getElementById('paymentHistory');
-                if (!pagos || pagos.length === 0) { container.style.display = 'none'; return; }
-                container.style.display = 'block';
-                list.innerHTML = pagos.map(p => `
-                    <div class="payment-history-item">
-                        <div>
-                            <div class="payment-history-date">${formatDate(p.fecha_pago)}</div>
-                            <div style="font-size:11px;color:var(--text-muted);">${p.metodo || 'Yappy'} · ${p.referencia || 'N/A'}</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div class="payment-history-amount">$${p.monto?.toFixed(2) || '0.00'}</div>
-                            <span class="payment-history-status ${p.estado === 'completado' ? 'success' : 'pending'}">${p.estado === 'completado' ? '✓ Completado' : '⏳ Pendiente'}</span>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { console.error('[PAGOS] Error cargando historial:', e); }
-        }
-
-        // ============================================
-        // YAPPY - ACTIVAR CUENTA
-        // ============================================
-        async function activarCuentaYappy() {
-            // Redirige a la página de pagos dedicada
-            window.location.href = 'pagos.html';
-        }
-
-        // ============================================
-        // SIMULAR PAGO (MODO DESARROLLO)
-        // ============================================
-        function simularPago() {
-            const modal = document.getElementById('simularPagoModal');
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-        function closeSimularPagoModal() {
-            const modal = document.getElementById('simularPagoModal');
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-        async function confirmarSimularPago() {
-            if (!currentConductor) return;
-            showToast('Procesando pago simulado...', 'warning');
-            closeSimularPagoModal();
-            try {
-                const ahora = new Date();
-                const vencimiento = new Date(ahora.getTime() + YAPPY_CONFIG.duracionHoras * 60 * 60 * 1000);
-                const { error: updateError } = await supabaseClient
-                    .from('conductores')
-                    .update({
-                        suscripcion_activa: true,
-                        payment_status: 'paid',
-                        fecha_ultimo_pago: ahora.toISOString(),
-                        fecha_vencimiento: vencimiento.toISOString(),
-                        plan: 'basico_24h',
-                        updated_at: ahora.toISOString()
-                    })
-                    .eq('id', currentConductor.id);
-                if (updateError) throw updateError;
-                const { error: pagoError } = await supabaseClient
-                    .from('pagos')
-                    .insert([{
-                        conductor_id: currentConductor.id,
-                        monto: YAPPY_CONFIG.monto,
-                        moneda: YAPPY_CONFIG.moneda,
-                        plan: 'basico_24h',
-                        estado: 'completado',
-                        metodo: 'yappy_simulado',
-                        referencia: 'SIM-' + Date.now(),
-                        fecha_pago: ahora.toISOString(),
-                        fecha_vencimiento: vencimiento.toISOString()
-                    }]);
-                if (pagoError) console.error('[PAGO] Error registrando pago:', pagoError);
-                showToast('✅ Pago simulado exitoso. Cuenta activada por 24 horas!', 'success');
-                await recargarConductor();
-            } catch (error) {
-                console.error('[SIMULAR] Error:', error);
-                showToast('Error al simular pago: ' + error.message, 'error');
-            }
-        }
-        async function recargarConductor() {
-            if (!currentUser) return;
-            const { data: conductor, error } = await supabaseClient
-                .from('conductores')
-                .select('*')
-                .eq('auth_user_id', currentUser.id)
-                .maybeSingle();
-            if (error) { console.error('[RELOAD] Error:', error); return; }
-            if (conductor) {
-                currentConductor = conductor;
-                renderAccountStatusCard();
-                if (verificarSuscripcionActiva(conductor)) {
-                    document.getElementById('app-container').style.display = 'block';
-                    const bloqueo = document.getElementById('bloqueo-pago');
-                    if (bloqueo) bloqueo.style.display = 'none';
-                    const grid = document.querySelector('.grid');
-                    const statsBar = document.querySelector('.stats-bar');
-                    if (grid) grid.style.display = 'grid';
-                    if (statsBar) statsBar.style.display = 'grid';
-                    await cargarViajesDisponibles();
-                    await cargarMisViajes();
-                    iniciarSuscripciones();
-                } else {
-                    mostrarBloqueoPago();
-                }
-            }
-        }
-        function mostrarBloqueoPago() {
-            const grid = document.querySelector('.grid');
-            const statsBar = document.querySelector('.stats-bar');
-            if (grid) grid.style.display = 'none';
-            if (statsBar) statsBar.style.display = 'none';
-            const container = document.getElementById('app-container');
-            let bloqueo = document.getElementById('bloqueo-pago');
-            if (!bloqueo) {
-                bloqueo = document.createElement('div');
-                bloqueo.id = 'bloqueo-pago';
-                bloqueo.innerHTML = `
-                    <div style="text-align:center;padding:40px 20px;background:rgba(15,23,42,0.5);border-radius:20px;border:1px solid rgba(239,68,68,0.2);margin-top:20px;">
-                        <div style="font-size:48px;margin-bottom:16px;">🔒</div>
-                        <h3 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Viajes Bloqueados</h3>
-                        <p style="color:#94a3b8;font-size:14px;max-width:400px;margin:0 auto 20px;line-height:1.5;">
-                            Tu cuenta requiere activación para recibir solicitudes de viajes. 
-                            Activa tu cuenta con Yappy por solo <strong style="color:#fbbf24;">$5.00 USD</strong> y obtén <strong style="color:#4ade80;">24 horas</strong> de servicio.
-                        </p>
-                        <a href="pagos.html" class="btn btn-purple" style="max-width:300px;margin:0 auto;display:inline-flex;">
-                            <span class="yappy-logo">
-                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                                Activar con Yappy - $5.00
-                            </span>
-                        </a>
-                    </div>
-                `;
-                container.appendChild(bloqueo);
-            } else { bloqueo.style.display = 'block'; }
-        }
-        async function verificarPagoPendiente() {
-            const pendingTx = localStorage.getItem('yappy_pending_tx');
-            const pendingTime = localStorage.getItem('yappy_pending_time');
-            if (!pendingTx || !pendingTime) return;
-            const ahora = Date.now();
-            const tiempoPendiente = ahora - parseInt(pendingTime);
-            if (tiempoPendiente > 30 * 60 * 1000) {
-                localStorage.removeItem('yappy_pending_tx');
-                localStorage.removeItem('yappy_pending_time');
-                return;
-            }
-            showToast('Verificando estado de pago...', 'warning');
-            localStorage.removeItem('yappy_pending_tx');
-            localStorage.removeItem('yappy_pending_time');
-        }
-
-
         function getEstadoBadge(estado) {
             const badges = {
                 'pendiente': '<span class="badge badge-pendiente">Pendiente</span>',
@@ -1166,6 +742,51 @@
                 'cancelado': '<span class="badge badge-cancelado">Cancelado</span>'
             };
             return badges[estado] || estado;
+        }
+
+        // ============================================
+        // VERIFICAR ESTADO DE PAGO
+        // ============================================
+        function verificarPagoActivo(conductor) {
+            if (!conductor) return false;
+            // Si tiene fecha_vencimiento, verificar que no haya vencido
+            if (conductor.fecha_vencimiento) {
+                const ahora = new Date();
+                const vencimiento = new Date(conductor.fecha_vencimiento);
+                return vencimiento > ahora;
+            }
+            // Fallback: usar campo suscripcion_activa o pago_al_dia
+            return conductor.suscripcion_activa === true || conductor.pago_al_dia === true;
+        }
+
+        // ============================================
+        // RENDERIZAR TARJETA ESTADO DE PAGO
+        // ============================================
+        function renderPaymentStatusCard() {
+            const card = document.getElementById('paymentStatusCard');
+            const badge = document.getElementById('paymentStatusBadge');
+            const text = document.getElementById('paymentStatusText');
+            const btn = document.getElementById('btnActivar');
+
+            if (!currentConductor) return;
+
+            const pagoActivo = verificarPagoActivo(currentConductor);
+
+            card.style.display = 'block';
+
+            if (pagoActivo) {
+                card.className = 'payment-status-card active';
+                badge.className = 'payment-status-badge active';
+                badge.textContent = '✅ Activo';
+                text.innerHTML = 'Tu cuenta está <strong>activa</strong>. Puedes recibir y gestionar solicitudes de viajes.';
+                btn.style.display = 'none';
+            } else {
+                card.className = 'payment-status-card inactive';
+                badge.className = 'payment-status-badge inactive';
+                badge.textContent = '❌ Inactivo';
+                text.innerHTML = 'Tu cuenta requiere <strong>activación</strong> para recibir solicitudes de viajes. Activa tu cuenta con Yappy.';
+                btn.style.display = 'inline-flex';
+            }
         }
 
         // ============================================
@@ -1181,10 +802,10 @@
             console.log('[AUTH] auth.uid():', user.id);
             currentUser = user;
 
-            // Verificar que existe en tabla conductores (por auth_user_id) - incluir campos de suscripción
+            // Verificar que existe en tabla conductores (por auth_user_id)
             let { data: conductor, error } = await supabaseClient
                 .from('conductores')
-                .select('id, auth_user_id, status, nombres, apellidos, vehiculo, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, plan, pago_al_dia')
+                .select('id, auth_user_id, status, nombres, apellidos, vehiculo, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
                 .eq('auth_user_id', user.id)
                 .maybeSingle();
 
@@ -1192,7 +813,7 @@
                 console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
                 const result = await supabaseClient
                     .from('conductores')
-                    .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, plan, pago_al_dia')
+                    .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
                     .eq('auth_user_id', user.id)
                     .maybeSingle();
                 conductor = result.data;
@@ -1227,16 +848,16 @@
                 return false;
             }
 
-            // Verificar suscripción activa (24 horas)
-            const suscripcionActiva = verificarSuscripcionActiva(conductor);
-
             // Renderizar tarjeta de estado SIEMPRE
-            renderAccountStatusCard();
+            renderPaymentStatusCard();
 
-            if (!suscripcionActiva) {
+            // Verificar si el pago está activo
+            const pagoActivo = verificarPagoActivo(conductor);
+
+            if (!pagoActivo) {
                 // Bloquear acceso a viajes pero mantener panel visible
                 mostrarBloqueoPago();
-                showToast('Tu suscripción ha vencido. Activa tu cuenta para continuar.', 'warning');
+                showToast('Tu cuenta requiere activación. Dirígete a pagos.html para activarla.', 'warning');
                 return true; // Retornamos true para que init() continúe, pero bloqueamos viajes
             }
 
@@ -1254,6 +875,36 @@
                 <button class="bloqueo-btn" onclick="logout()">Cerrar Sesión</button>
             `;
             document.body.appendChild(bloqueo);
+        }
+
+        function mostrarBloqueoPago() {
+            const grid = document.getElementById('viajesGrid');
+            const statsBar = document.querySelector('.stats-bar');
+            if (grid) grid.style.display = 'none';
+            if (statsBar) statsBar.style.display = 'none';
+
+            const container = document.getElementById('app-container');
+            let bloqueo = document.getElementById('bloqueo-pago');
+            if (!bloqueo) {
+                bloqueo = document.createElement('div');
+                bloqueo.id = 'bloqueo-pago';
+                bloqueo.innerHTML = `
+                    <div class="bloqueo-pago-box">
+                        <div class="icono">🔒</div>
+                        <h3>Viajes Bloqueados</h3>
+                        <p>Tu cuenta requiere activación para recibir solicitudes de viajes. Activa tu cuenta con Yappy.</p>
+                        <a href="pagos.html" class="btn-activate" style="max-width:300px;margin:0 auto;display:inline-flex;">
+                            <span class="yappy-logo">
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                Activar con Yappy
+                            </span>
+                        </a>
+                    </div>
+                `;
+                container.appendChild(bloqueo);
+            } else {
+                bloqueo.style.display = 'block';
+            }
         }
 
         // ============================================
@@ -1339,7 +990,7 @@
         }
 
         // ============================================
-        // CARGAR MIS VIAJES — usa auth.uid() (la FK apunta a auth.users.id)
+        // CARGAR MIS VIAJES — usa auth.uid()
         // ============================================
         async function cargarMisViajes() {
             const container = document.getElementById('lista-asignados');
@@ -1347,7 +998,7 @@
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
-                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid(), la FK apunta a auth.users.id
+                    .eq('conductor_asignado_id', currentUser.id)
                     .in('estado', ['asignado', 'completado', 'cancelado'])
                     .order('fecha_hora', { ascending: true });
 
@@ -1412,11 +1063,10 @@
         }
 
         // ============================================
-        // ACEPTAR VIAJE — usa auth.uid() (la FK apunta a auth.users.id)
+        // ACEPTAR VIAJE
         // ============================================
         async function aceptarViaje(viajeId, btnElement) {
-            // Verificar suscripción activa
-            if (!verificarSuscripcionActiva(currentConductor)) {
+            if (!verificarPagoActivo(currentConductor)) {
                 showToast('Tu cuenta está inactiva. Activa tu suscripción para aceptar viajes.', 'error');
                 return;
             }
@@ -1430,7 +1080,7 @@
                     .from('viajes_reservados')
                     .update({
                         estado: 'asignado',
-                        conductor_asignado_id: currentUser.id,  // ← auth.uid(), la FK apunta a auth.users.id
+                        conductor_asignado_id: currentUser.id,
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', viajeId)
@@ -1461,10 +1111,10 @@
         }
 
         // ============================================
-        // COMPLETAR VIAJE — usa auth.uid()
+        // COMPLETAR VIAJE
         // ============================================
         async function completarViaje(viajeId) {
-            if (!verificarSuscripcionActiva(currentConductor)) {
+            if (!verificarPagoActivo(currentConductor)) {
                 showToast('Tu cuenta está inactiva. No puedes completar viajes.', 'error');
                 return;
             }
@@ -1473,7 +1123,7 @@
                     .from('viajes_reservados')
                     .update({ estado: 'completado', updated_at: new Date().toISOString() })
                     .eq('id', viajeId)
-                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid()
+                    .eq('conductor_asignado_id', currentUser.id)
                     .select();
 
                 if (error) { console.error('[COMPLETAR] Error:', error); throw error; }
@@ -1487,7 +1137,7 @@
         }
 
         // ============================================
-        // CANCELAR VIAJE — usa auth.uid()
+        // CANCELAR VIAJE
         // ============================================
         function abrirCancelModal(viajeId) {
             cancelViajeId = viajeId;
@@ -1524,7 +1174,7 @@
                     .from('viajes_reservados')
                     .update(updateData)
                     .eq('id', cancelViajeId)
-                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid()
+                    .eq('conductor_asignado_id', currentUser.id)
                     .select();
 
                 if (error) { console.error('[CANCELAR] Error:', error); throw error; }
@@ -1539,7 +1189,6 @@
                 showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
         }
-
 
         // ============================================
         // CONTACTAR PASAJERO POR WHATSAPP
@@ -1586,8 +1235,8 @@
         }
 
         function iniciarSuscripciones() {
-            // Solo suscribirse si tiene suscripción activa
-            if (!verificarSuscripcionActiva(currentConductor)) return;
+            // Solo suscribirse si tiene pago activo
+            if (!verificarPagoActivo(currentConductor)) return;
 
             const sub1 = supabaseClient
                 .channel('viajes-pendientes')
@@ -1601,7 +1250,7 @@
                 .channel('mis-viajes')
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
-                    filter: `conductor_asignado_id=eq.${currentUser.id}`  // ← auth.uid()
+                    filter: `conductor_asignado_id=eq.${currentUser.id}`
                 }, () => cargarMisViajes())
                 .subscribe();
 
@@ -1618,15 +1267,12 @@
             currentUser = session.user;
             console.log('[INIT] auth.uid():', currentUser.id);
 
-            // Verificar pago pendiente (si volvió de Yappy)
-            await verificarPagoPendiente();
-
             // 1. Verificar que es conductor
             const esConductor = await verificarConductor();
             if (!esConductor) return;
 
-            // 2. Si tiene suscripción activa, cargar datos
-            if (verificarSuscripcionActiva(currentConductor)) {
+            // 2. Si tiene pago activo, cargar datos
+            if (verificarPagoActivo(currentConductor)) {
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
                 // 3. Suscripciones
@@ -1638,19 +1284,12 @@
                 if (e.target === e.currentTarget) closeCancelModal();
             });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeCancelModal();
-                    closeSimularPagoModal();
-                }
-            });
-            document.getElementById('simularPagoModal').addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) closeSimularPagoModal();
+                if (e.key === 'Escape') closeCancelModal();
             });
         }
 
         window.addEventListener('beforeunload', () => {
             subscriptions.forEach(sub => sub.unsubscribe());
-            if (countdownInterval) clearInterval(countdownInterval);
         });
 
         init();
