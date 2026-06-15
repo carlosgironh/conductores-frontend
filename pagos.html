@@ -518,55 +518,14 @@
     // YAPPY API v2 — Usando Render (NO Supabase Edge Functions)
     // ============================================================
 
-    // ─── PASO 1: Validar comercio ───
-    async function yappyValidarComercio() {
-      logDebug('=== INICIANDO FLUJO YAPPY V2 ===', 'info');
-      logDebug('Paso 1/3: Validando comercio...');
-      logDebug(`POST ${RENDER_API_URL} | action=validate`);
-
-      const response = await fetch(RENDER_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'validate',
-          urlDomain: YAPPY_DOMAIN,
-        }),
-      });
-
-      const data = await response.json();
-      logDebug(`HTTP ${response.status} | Respuesta: ${JSON.stringify(data).slice(0, 200)}...`);
-
-      if (!response.ok) {
-        throw new Error(data.error || data.message || `Error HTTP ${response.status}`);
-      }
-
-      if (data.status?.code !== '0000') {
-        throw new Error(data.status?.description || 'Yappy rechazó la validación del comercio');
-      }
-
-      const token = data.body?.token;
-      const epochTime = data.epochTime;
-
-      if (!token) {
-        throw new Error('No se recibió token de Yappy en la respuesta');
-      }
-
-      logDebug(`✓ Token obtenido | epochTime: ${epochTime}`, 'success');
-      return { token, epochTime };
-    }
-
-    // ─── PASO 2: Crear orden ───
-    async function yappyCrearOrden(token, epochTime) {
-      logDebug('Paso 2/3: Creando orden de pago...');
+    // ─── FLUJO COMPLETO YAPPY (single-step) ───
+    async function yappyCrearOrdenCompleta() {
+      logDebug('=== INICIANDO FLUJO YAPPY (single-step) ===', 'info');
+      logDebug('Creando orden de pago...');
+      logDebug(`POST ${RENDER_API_URL} | action=create-order`);
 
       const orderId = `R${Date.now().toString(36).toUpperCase()}`;
-      const paymentDate = String(epochTime);
-
       logDebug(`orderId: ${orderId} (len=${orderId.length})`);
-      logDebug(`paymentDate: ${paymentDate}`);
 
       const response = await fetch(RENDER_API_URL, {
         method: 'POST',
@@ -575,11 +534,10 @@
           'Accept': 'application/json',
         },
         body: JSON.stringify({
-          action: 'payment',
-          yappyToken: token,
+          action: 'create-order',
+          urlDomain: YAPPY_DOMAIN,
           orderId: orderId,
           domain: YAPPY_DOMAIN,
-          paymentDate: paymentDate,
           aliasYappy: '',
           ipnUrl: `${YAPPY_DOMAIN}/yappy-ipn`,
           discount: '0.00',
@@ -590,14 +548,11 @@
       });
 
       const data = await response.json();
-      logDebug(`HTTP ${response.status} | Respuesta: ${JSON.stringify(data).slice(0, 300)}...`);
+      logDebug(`Status: ${response.status}`);
+      logDebug(`Raw: ${JSON.stringify(data).slice(0, 300)}...`);
 
-      if (!response.ok) {
-        throw new Error(data.error || data.message || `Error HTTP ${response.status}`);
-      }
-
-      if (data.status?.code !== '0000') {
-        throw new Error(data.status?.description || 'Yappy rechazó la creación de la orden');
+      if (!response.ok || data.status?.code !== '0000') {
+        throw new Error(data.status?.description || data.error || 'Error creando orden');
       }
 
       logDebug('✓ Orden creada exitosamente', 'success');
@@ -645,7 +600,6 @@
 
       } catch (err) {
         logDebug(`Error cargando Web Component Yappy: ${err.message}`, 'error');
-        // Fallback: dejar el botón original pero con mensaje
         container.innerHTML = `
           <button class="btn-yappy-fallback" onclick="window.open('https://yappy.com.pa','_blank')">
             ⚠️ Abrir Yappy manualmente
@@ -687,7 +641,7 @@
           return;
         }
 
-        updateStatusBadge('activa');
+        updateStatusBadge('active');
         logDebug(`✓ Suscripción activada hasta ${expiracion.toLocaleString('es-PA')}`, 'success');
         showAlert('¡Suscripción activada! Tienes 24 horas de servicio.', 'success');
 
@@ -696,7 +650,7 @@
       }
     }
 
-    // ─── Flujo completo Yappy ───
+    // ─── Flujo completo ───
     async function iniciarFlujoYappy() {
       if (!authReady || !conductorData) {
         showAlert('Datos del conductor no cargados. Espera un momento o recarga la página.');
@@ -707,15 +661,10 @@
       hideAlert();
 
       try {
-        // Paso 1
-        const { token, epochTime } = await yappyValidarComercio();
-        yappyToken = token;
-        yappyEpochTime = epochTime;
+        // Single-step: crear orden completa
+        const orden = await yappyCrearOrdenCompleta();
 
-        // Paso 2
-        const orden = await yappyCrearOrden(token, epochTime);
-
-        // Paso 3
+        // Renderizar botón Yappy
         await renderizarBotonYappy(orden);
 
       } catch (err) {
@@ -723,9 +672,7 @@
         showAlert(err.message || 'Error en el proceso de pago. Intenta de nuevo.');
         setBtnLoading(false);
       }
-    }
-
-    // ============================================================
+    }// ============================================================
     // LISTENER DE CAMBIOS DE AUTH
     // ============================================================
     supabaseClient.auth.onAuthStateChange((event, session) => {
