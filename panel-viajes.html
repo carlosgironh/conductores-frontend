@@ -1,2047 +1,456 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0a1208">
-    <title>Panel de Viajes - Conductor | Road To</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        :root {
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
-            --corp-green: #8ac725;
-            --corp-green-dark: #448414;
-            --corp-green-lime: #9ad93a;
-            --corp-green-light: #b8e85c;
-            --corp-gray: #7d7d7d;
-            --corp-gray-dark: #4a4a4a;
-            --corp-gray-light: #9e9e9e;
-            --corp-gray-soft: #cbd5e1;
-            --corp-blue: #2563eb;
-            --corp-blue-dark: #1e40af;
-            --corp-blue-light: #3b82f6;
-            --corp-orange: #f97316;
-            --corp-orange-light: #fb923c;
-            --primary: var(--corp-green);
-            --primary-dark: var(--corp-green-dark);
-            --accent: var(--corp-green-lime);
-            --bg-dark: #0a1208;
-            --text-light: #eef8e4;
-            --text-muted: #8a9e7d;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            min-height: 100vh;
-            background: radial-gradient(ellipse at 10% 20%, rgba(138,199,37,0.15) 0%, transparent 50%),
-                        radial-gradient(ellipse at 90% 80%, rgba(154,217,58,0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
-            color: var(--text-light);
-            padding-top: calc(70px + var(--safe-top));
-            padding-bottom: calc(20px + var(--safe-bottom));
-        }
-
-        .app-header {
-            position: fixed;
-            top: calc(10px + var(--safe-top));
-            left: calc(10px + env(safe-area-inset-left));
-            right: calc(10px + env(safe-area-inset-right));
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            padding: 10px;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .brand-small {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            font-size: 14px;
-            color: var(--corp-orange);
-            text-decoration: none;
-        }
-
-        .brand-small svg { width: 24px; height: 24px; color: var(--corp-orange-light); }
-
-        .nav-buttons { display: flex; gap: 8px; }
-
-        .nav-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .nav-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
-        .nav-btn:active { transform: scale(0.95); }
-        .nav-btn svg { width: 20px; height: 20px; }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .page-subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-item {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 16px 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-item:hover {
-            border-color: rgba(138, 199, 37, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--corp-green-light);
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        @media (min-width: 1024px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-        }
-
-        .card {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-pendiente { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
-        .badge-asignado { background: rgba(37,99,235,0.15); color: var(--corp-blue-light); border: 1px solid rgba(37,99,235,0.25); }
-        .badge-completado { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
-        .badge-cancelado { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
-
-        .viaje-item {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .viaje-item:hover {
-            border-color: rgba(138, 199, 37, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .viaje-item.asignado {
-            border-left: 3px solid var(--corp-green);
-        }
-
-        .viaje-route {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .viaje-route .origin { color: var(--warning); }
-        .viaje-route .arrow { color: var(--text-muted); }
-        .viaje-route .destiny { color: var(--success); }
-
-        .viaje-meta {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .pasajero-info {
-            background: rgba(138, 199, 37, 0.08);
-            border: 1px solid rgba(138, 199, 37, 0.15);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 14px;
-            font-size: 13px;
-        }
-
-        .pasajero-info strong { color: var(--corp-green-light); }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            font-family: inherit;
-            min-height: 44px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--corp-green) 0%, var(--corp-green-dark) 100%);
-            color: #0a1208;
-            box-shadow: 0 4px 15px rgba(68, 132, 20, 0.35);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(68, 132, 20, 0.5);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
-        }
-
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn:active { transform: scale(0.97); }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
-        .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
-        .empty-state p { font-size: 13px; }
-
-        .loading { display: flex; justify-content: center; padding: 30px; }
-
-        .spinner {
-            width: 28px; height: 28px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--corp-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .toast {
-            position: fixed;
-            bottom: max(20px, var(--safe-bottom));
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(10, 18, 8, 0.95);
-            color: var(--text-light);
-            padding: 14px 28px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 1000;
-            opacity: 0;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            white-space: nowrap;
-        }
-
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-success { border-color: rgba(16, 185, 129, 0.3); color: #4ade80; }
-        .toast-error { border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
-
-        .nav-perfil {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            background: rgba(138, 199, 37, 0.1);
-            border: 1px solid rgba(138, 199, 37, 0.2);
-            border-radius: 12px;
-            color: var(--corp-green-light);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .nav-perfil:hover {
-            background: rgba(138, 199, 37, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .nav-perfil svg { width: 18px; height: 18px; }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            max-width: 500px;
-            width: 100%;
-            background: rgba(30,41,59,0.98);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 35px 25px;
-            position: relative;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px; right: 20px;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: rgba(239,68,68,0.15);
-            border: 1px solid rgba(239,68,68,0.3);
-            color: #f87171;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        .bloqueo-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            flex-direction: column;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .bloqueo-icono { font-size: 64px; margin-bottom: 20px; }
-        .bloqueo-titulo { color: white; margin-bottom: 15px; font-size: 24px; font-weight: 700; }
-        .bloqueo-mensaje { color: #ccc; max-width: 400px; line-height: 1.5; margin-bottom: 30px; }
-        .bloqueo-btn {
-            padding: 12px 24px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-
-        /* ===== TARJETA DE ESTADO DE CUENTA / PAGOS ===== */
-        .account-status-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .account-status-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-        }
-
-        .account-status-card.active::before {
-            background: linear-gradient(90deg, var(--success), #34d399);
-        }
-
-        .account-status-card.inactive::before {
-            background: linear-gradient(90deg, var(--danger), #f87171);
-        }
-
-        .account-status-card.warning::before {
-            background: linear-gradient(90deg, var(--warning), #fbbf24);
-        }
-
-        .account-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .account-title {
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .account-status-badge {
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .account-status-badge.active {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .account-status-badge.inactive {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .account-status-badge.warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .account-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .account-info-item {
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .account-info-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .account-info-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-light);
-        }
-
-        .account-info-value.success { color: #4ade80; }
-        .account-info-value.danger { color: #f87171; }
-        .account-info-value.warning { color: #fbbf24; }
-
-        .payment-countdown {
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 16px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .payment-countdown-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .payment-countdown-value {
-            font-size: 24px;
-            font-weight: 800;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
-        }
-
-        .payment-countdown-value.active { color: #4ade80; }
-        .payment-countdown-value.warning { color: #fbbf24; }
-        .payment-countdown-value.danger { color: #f87171; }
-
-        .payment-progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .payment-progress-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 1s ease;
-        }
-
-        .payment-progress-fill.active { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .payment-progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .payment-progress-fill.danger { background: linear-gradient(90deg, #ef4444, #f87171); }
-
-        .btn-purple {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
-        }
-
-        .btn-purple:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
-        }
-
-        .yappy-logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 800;
-            font-size: 16px;
-            color: #00a3e0;
-        }
-
-        .yappy-logo svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .payment-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .payment-history-date {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .payment-history-amount {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--corp-green-light);
-        }
-
-        .payment-history-status {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .payment-history-status.success {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-        }
-
-        .payment-history-status.pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-        }
-
-        .toast-warning { border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
-
-        @media (max-width: 640px) {
-            .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .stat-item { padding: 12px 8px; }
-            .stat-value { font-size: 22px; }
-            .card { padding: 18px; }
-        }
-    </style>
-    <base target="_blank">
-<base target="_blank">
-<base target="_blank">
-<base target="_blank">
-<base target="_blank">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Viajes - Conductor</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --primary-dark: #1557b0;
+    --success: #34a853;
+    --warning: #fbbc04;
+    --danger: #ea4335;
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .header {
+    background: var(--card);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 { font-size: 1.25rem; color: var(--text); }
+  .header .user-info { display: flex; align-items: center; gap: 12px; }
+  .header .user-info span { color: var(--text-muted); font-size: 0.875rem; }
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-warning { background: var(--warning); color: #1a1a1a; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+  .card h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--text); }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .status-active { background: rgba(52,168,83,0.15); color: #34a853; }
+  .status-inactive { background: rgba(234,67,53,0.15); color: #ea4335; }
+  .status-pending { background: rgba(251,188,4,0.15); color: #fbbc04; }
+  .subscription-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .subscription-info h3 { font-size: 1rem; margin-bottom: 4px; }
+  .subscription-info p { color: var(--text-muted); font-size: 0.875rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .stat-box { text-align: center; padding: 20px; }
+  .stat-box .number { font-size: 2rem; font-weight: 700; color: var(--primary); }
+  .stat-box .label { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+  .viajes-list { margin-top: 16px; }
+  .viaje-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .viaje-item .info h4 { font-size: 0.95rem; margin-bottom: 4px; }
+  .viaje-item .info p { color: var(--text-muted); font-size: 0.8rem; }
+  .viaje-item .price { font-size: 1.1rem; font-weight: 700; color: var(--success); }
+  .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
+  .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.5; }
+  .loading { text-align: center; padding: 48px; color: var(--text-muted); }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.875rem;
+  }
+  .alert-warning { background: rgba(251,188,4,0.1); border: 1px solid rgba(251,188,4,0.3); color: #fbbc04; }
+  .alert-danger { background: rgba(234,67,53,0.1); border: 1px solid rgba(234,67,53,0.3); color: #ea4335; }
+  .alert-success { background: rgba(52,168,83,0.1); border: 1px solid rgba(52,168,83,0.3); color: #34a853; }
+  .btn-pago {
+    background: linear-gradient(135deg, #1a73e8, #1557b0);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .btn-pago:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(26,115,232,0.3);
+  }
+  .btn-pago svg { width: 24px; height: 24px; }
+  .conductor-info { display: flex; align-items: center; gap: 16px; }
+  .conductor-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; font-weight: 700;
+  }
+  @media (max-width: 768px) {
+    .header { flex-direction: column; gap: 12px; text-align: center; }
+    .subscription-box { flex-direction: column; text-align: center; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
 <base target="_blank">
 </head>
 <body>
 
-    <header class="app-header">
-        <a href="index.html" class="brand-small">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
-            </svg>
-            Road To
-        </a>
-        <div class="nav-buttons">
-            <a class="nav-perfil" href="perfil.html">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                Mi Perfil
-            </a>
-            <button class="nav-btn" onclick="logout()" title="Cerrar sesión">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-            </button>
-        </div>
-    </header>
+<div class="header">
+  <h1>🚕 Panel de Viajes</h1>
+  <div class="user-info">
+    <span id="conductor-nombre">Cargando...</span>
+    <button class="btn btn-danger" onclick="cerrarSesion()">Cerrar Sesión</button>
+  </div>
+</div>
 
-    <div class="container" id="app-container">
-        <h1 class="page-title">🚗 Panel de Viajes</h1>
-        <p class="page-subtitle">Gestiona tus viajes disponibles y pasajeros asignados</p>
+<div class="container">
 
+  <!-- Alerta de suscripción -->
+  <div id="alerta-suscripcion" style="display:none;"></div>
 
-        <!-- ===== TARJETA DE ESTADO DE CUENTA / SUSCRIPCIÓN ===== -->
-        <div id="accountStatusCard" class="account-status-card inactive" style="display:none;">
-            <div class="account-header">
-                <div class="account-title">
-                    <span>💳</span> Estado de Cuenta
-                </div>
-                <span id="accountStatusBadge" class="account-status-badge inactive">Inactivo</span>
-            </div>
-            <div class="account-info">
-                <div class="account-info-item">
-                    <div class="account-info-label">Duración</div>
-                    <div id="accountPlanValue" class="account-info-value">-</div>
-                </div>
-                <div class="account-info-item">
-                    <div class="account-info-label">Estado</div>
-                    <div id="accountPaymentValue" class="account-info-value danger">Pago requerido</div>
-                </div>
-            </div>
-            <div id="paymentCountdown" class="payment-countdown" style="display:none;">
-                <div class="payment-countdown-label">⏰ Tiempo restante de activación</div>
-                <div id="countdownValue" class="payment-countdown-value active">00:00:00</div>
-                <div class="payment-progress-bar">
-                    <div id="countdownProgress" class="payment-progress-fill active" style="width: 100%;"></div>
-                </div>
-            </div>
-            <div id="paymentHistory" style="display:none; margin-bottom: 16px;">
-                <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">📜 Historial de Pagos</div>
-                <div id="paymentHistoryList"></div>
-            </div>
-            <div id="paymentActions">
-                <button id="btnActivar" class="btn btn-purple" onclick="activarCuentaYappy()" style="margin-bottom: 8px;">
-                    <span class="yappy-logo">
-                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                        Activar con Yappy
-                    </span>
-                </button>
-                <button id="btnSimularPago" class="btn btn-success" onclick="simularPago()" style="display:none;">
-                    🧪 Simular Pago (Testing)
-                </button>
-            </div>
-        </div>
-        <div class="stats-bar">
-            <div class="stat-item">
-                <div class="stat-value" id="stat-disponibles">0</div>
-                <div class="stat-label">Disponibles</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="stat-asignados">0</div>
-                <div class="stat-label">Mis Viajes</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="stat-completados">0</div>
-                <div class="stat-label">Completados</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="stat-cancelados">0</div>
-                <div class="stat-label">Cancelados</div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        📍 Viajes Disponibles
-                        <span class="badge badge-pendiente">En vivo</span>
-                    </div>
-                </div>
-                <div id="lista-disponibles">
-                    <div class="loading"><div class="spinner"></div></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        👥 Mis Pasajeros Asignados
-                        <span class="badge badge-asignado">Activos</span>
-                    </div>
-                </div>
-                <div id="lista-asignados">
-                    <div class="loading"><div class="spinner"></div></div>
-                </div>
-            </div>
-        </div>
+  <!-- Info del conductor -->
+  <div class="card">
+    <div class="conductor-info">
+      <div class="conductor-avatar" id="avatar-inicial">?</div>
+      <div>
+        <h3 id="nombre-completo">Cargando...</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem;" id="vehiculo-info">Cargando...</p>
+      </div>
     </div>
+  </div>
 
-    <div id="toast" class="toast"></div>
-
-    <!-- Modal Simular Pago (Testing) -->
-    <div class="modal-overlay" id="simularPagoModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeSimularPagoModal()">×</button>
-            <div style="margin-bottom:25px; text-align:center;">
-                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">🧪 Simular Pago</h3>
-                <p style="color:#94a3b8;font-size:14px;">Modo desarrollo: Simula un pago exitoso de Yappy</p>
-            </div>
-            <div style="background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;margin-bottom:20px;">
-                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                    <span style="color:#94a3b8;font-size:13px;">Monto:</span>
-                    <span style="color:#fff;font-weight:700;">$5.00 USD</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-                    <span style="color:#94a3b8;font-size:13px;">Plan:</span>
-                    <span style="color:#fff;font-weight:700;">Activación 24h</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;">
-                    <span style="color:#94a3b8;font-size:13px;">Duración:</span>
-                    <span style="color:#4ade80;font-weight:700;">24 horas</span>
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;">
-                <button onclick="closeSimularPagoModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Cancelar</button>
-                <button onclick="confirmarSimularPago()" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">✅ Confirmar Pago</button>
-            </div>
-        </div>
+  <!-- Estado de suscripción -->
+  <div class="card">
+    <div class="subscription-box">
+      <div class="subscription-info">
+        <h3>Estado de Suscripción</h3>
+        <p id="estado-suscripcion-texto">Verificando...</p>
+      </div>
+      <div id="estado-badge-container">
+        <span class="status-badge status-pending">⏳ Verificando</span>
+      </div>
     </div>
-
-
-    <!-- Modal Cancelar/Revertir Viaje -->
-    <div class="modal-overlay" id="cancelModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeCancelModal()">×</button>
-
-            <div style="margin-bottom:25px;">
-                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">⚠️ Cancelar Viaje</h3>
-                <p style="color:#94a3b8;font-size:14px;">Por favor, indica el motivo de la cancelación.</p>
-            </div>
-
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:8px;">Motivo de cancelación *</label>
-                <textarea id="cancelMotivo" rows="3" style="width:100%;padding:14px 18px;border-radius:12px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Ej: Problema mecánico, emergencia personal, etc."></textarea>
-            </div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button onclick="closeCancelModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Volver</button>
-                <button onclick="confirmarCancelarViaje('pendiente')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">🔄 Dejar en Pendiente</button>
-                <button onclick="confirmarCancelarViaje('cancelado')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">❌ Cancelar Definitivo</button>
-            </div>
-        </div>
+    <div id="accion-suscripcion" style="margin-top:20px;text-align:center;">
+      <!-- El botón de pago aparece aquí si no está activa -->
     </div>
-
-    <script>
-        const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let currentUser = null;
-        let conductorNombre = "Conductor";
-        let subscriptions = [];
-        let cancelViajeId = null;
-        let currentConductor = null;
-        let countdownInterval = null;
-        let isDevMode = false; // Cambiar a true para mostrar botón de simular pago
-
-        // Configuración de Yappy API
-        const YAPPY_CONFIG = {
-            empresa: "ROADTO",
-            monto: 5.00,
-            moneda: "USD",
-            duracionHoras: 24,
-            merchantId: 'MXNBX-84293445',
-            // ⚠️ REEMPLAZAR CON TUS CREDENCIALES REALES DE YAPPY COMERCIAL API
-            // Obténlas en: Yappy Comercial > Integraciones > Generar Credenciales
-            apiKey: 'OIGSD-13147374',        // Header: api-key
-            secretKey: 'WVBfRTFBMTZFMUItN0FCMy0zOUJBLTk2QzYtMzk0MURFM0U2MTdF',  // Header: secret-key
-            commerceId: '9aaf1605-ec6d-4ace-a610-86897b898cc2',  // ID de comercio
-            commerceSecret: 'WVBfRjlDQ0RBODYtNTQyNC0zMzY5LTgzM0MtQjk1NTcyQ0FEQjMxLjlhYWYxNjA1LWVjNmQtNGFjZS1hNjEwLTg2ODk3Yjg5OGNjMg==',  // Secret de comercio
-            clientIp: 'nrdesingcorp.com',       // Header: client-ip (tu dominio o IP pública)
-            channel: 'WEB',                    // Header: channel
-            apiBaseUrl: 'https://api.yappy.com.pa',  // URL base de la API de Yappy
-            returnUrl: 'https://nrdesingcorp.com/panel-viajes.html',
-            // URLs para la integración V2 via Edge Function
-            domain: 'https://nrdesingcorp.com',
-            edgeFunctionUrl: 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook'
-        };
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('es-ES', {
-                day: '2-digit', month: 'short', year: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast toast-${type} show`;
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-
-        function formatDuration(ms) {
-            if (ms <= 0) return "00:00:00";
-            const totalSeconds = Math.floor(ms / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        // ============================================
-        // VERIFICAR ESTADO DE SUSCRIPCIÓN (24 HORAS)
-        // ============================================
-        function verificarSuscripcionActiva(conductor) {
-            if (!conductor) return false;
-            if (!conductor.fecha_vencimiento) return false;
-            const ahora = new Date();
-            const vencimiento = new Date(conductor.fecha_vencimiento);
-            return vencimiento > ahora;
-        }
-
-        function obtenerTiempoRestante(conductor) {
-            if (!conductor || !conductor.fecha_vencimiento) return 0;
-            const ahora = new Date();
-            const vencimiento = new Date(conductor.fecha_vencimiento);
-            return Math.max(0, vencimiento - ahora);
-        }
-
-        function obtenerPorcentajeRestante(conductor) {
-            if (!conductor || !conductor.fecha_vencimiento || !conductor.fecha_ultimo_pago) return 0;
-            const ahora = new Date();
-            const vencimiento = new Date(conductor.fecha_vencimiento);
-            const inicio = new Date(conductor.fecha_ultimo_pago);
-            const total = vencimiento - inicio;
-            const restante = vencimiento - ahora;
-            return Math.max(0, Math.min(100, (restante / total) * 100));
-        }
-
-        // ============================================
-        // RENDERIZAR TARJETA DE ESTADO DE CUENTA
-        // ============================================
-        function renderAccountStatusCard() {
-            const card = document.getElementById('accountStatusCard');
-            const badge = document.getElementById('accountStatusBadge');
-            const planValue = document.getElementById('accountPlanValue');
-            const paymentValue = document.getElementById('accountPaymentValue');
-            const countdown = document.getElementById('paymentCountdown');
-            const countdownValue = document.getElementById('countdownValue');
-            const countdownProgress = document.getElementById('countdownProgress');
-            const paymentHistory = document.getElementById('paymentHistory');
-            const btnActivar = document.getElementById('btnActivar');
-            const btnSimular = document.getElementById('btnSimularPago');
-
-            if (!currentConductor) return;
-
-            const suscripcionActiva = verificarSuscripcionActiva(currentConductor);
-            const tiempoRestante = obtenerTiempoRestante(currentConductor);
-            const porcentaje = obtenerPorcentajeRestante(currentConductor);
-
-            card.style.display = 'block';
-
-            if (suscripcionActiva) {
-                card.className = 'account-status-card active';
-                badge.className = 'account-status-badge active';
-                badge.textContent = '✅ Activo';
-                planValue.textContent = '24h';
-                paymentValue.textContent = 'Pagado';
-                paymentValue.className = 'account-info-value success';
-                countdown.style.display = 'block';
-                countdownValue.textContent = formatDuration(tiempoRestante);
-                countdownValue.className = tiempoRestante < 3600000 ? 'payment-countdown-value warning' : 'payment-countdown-value active';
-                countdownProgress.style.width = porcentaje + '%';
-                countdownProgress.className = porcentaje < 10 ? 'payment-progress-fill danger' : (porcentaje < 25 ? 'payment-progress-fill warning' : 'payment-progress-fill active');
-                btnActivar.style.display = 'none';
-                btnSimular.style.display = 'none';
-                iniciarCountdown();
-            } else {
-                card.className = 'account-status-card inactive';
-                badge.className = 'account-status-badge inactive';
-                badge.textContent = '❌ Inactivo';
-                planValue.textContent = '-';
-                paymentValue.textContent = 'Pago requerido';
-                paymentValue.className = 'account-info-value danger';
-                countdown.style.display = 'none';
-                btnActivar.style.display = 'block';
-                btnSimular.style.display = isDevMode ? 'block' : 'none';
-                if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-            }
-            cargarHistorialPagos();
-        }
-
-        function iniciarCountdown() {
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                if (!currentConductor || !verificarSuscripcionActiva(currentConductor)) {
-                    clearInterval(countdownInterval); countdownInterval = null;
-                    renderAccountStatusCard();
-                    location.reload();
-                    return;
-                }
-                const tiempoRestante = obtenerTiempoRestante(currentConductor);
-                const porcentaje = obtenerPorcentajeRestante(currentConductor);
-                const cv = document.getElementById('countdownValue');
-                const cp = document.getElementById('countdownProgress');
-                if (cv) {
-                    cv.textContent = formatDuration(tiempoRestante);
-                    cv.className = tiempoRestante < 3600000 ? 'payment-countdown-value warning' : 'payment-countdown-value active';
-                }
-                if (cp) {
-                    cp.style.width = porcentaje + '%';
-                    cp.className = porcentaje < 10 ? 'payment-progress-fill danger' : (porcentaje < 25 ? 'payment-progress-fill warning' : 'payment-progress-fill active');
-                }
-            }, 1000);
-        }
-
-        async function cargarHistorialPagos() {
-            if (!currentConductor) return;
-            try {
-                const { data: pagos, error } = await supabaseClient
-                    .from('pagos')
-                    .select('*')
-                    .eq('conductor_id', currentConductor.id)
-                    .order('fecha_pago', { ascending: false })
-                    .limit(5);
-                if (error) throw error;
-                const list = document.getElementById('paymentHistoryList');
-                const container = document.getElementById('paymentHistory');
-                if (!pagos || pagos.length === 0) { container.style.display = 'none'; return; }
-                container.style.display = 'block';
-                list.innerHTML = pagos.map(p => `
-                    <div class="payment-history-item">
-                        <div>
-                            <div class="payment-history-date">${formatDate(p.fecha_pago)}</div>
-                            <div style="font-size:11px;color:var(--text-muted);">${p.metodo || 'Yappy'} · ${p.referencia || 'N/A'}</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div class="payment-history-amount">$${p.monto?.toFixed(2) || '0.00'}</div>
-                            <span class="payment-history-status ${p.estado === 'completado' ? 'success' : 'pending'}">${p.estado === 'completado' ? '✓ Completado' : '⏳ Pendiente'}</span>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { console.error('[PAGOS] Error cargando historial:', e); }
-        }
-
-        // ============================================
-        // BOTÓN DE PAGO YAPPY V2 - INTEGRACIÓN OFICIAL
-        // ============================================
-        // Documentación oficial: https://www.yappy.com.pa/comercial/desarrolladores/
-        // CDN: https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js
-        // API Base: https://apipagosbg.bgeneral.cloud
-        //
-        // Flujo oficial V2:
-        // 1. Cargar botón Yappy desde CDN
-        // 2. Clic en botón → eventClick dispara callback
-        // 3. Callback llama a Edge Function /yappy-validate (obtiene token)
-        // 4. Callback llama a Edge Function /yappy-payment (crea orden)
-        // 5. btnYappy.eventPayment({transactionId, token, documentName})
-        // 6. Yappy abre modal nativo → usuario paga
-        // 7. eventSuccess → activar suscripción
-        // 8. IPN (GET /yappy-ipn) confirma el pago en backend
-
-        let yappyButtonLoaded = false;
-        let yappyOrderId = null;
-
-        /**
-         * Cargar el script del Botón de Pago Yappy desde CDN oficial
-         */
-        function cargarYappyButton() {
-            if (yappyButtonLoaded) return;
-
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = 'https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js';
-            script.onload = () => {
-                console.log('[YAPPY V2] Botón cargado desde CDN');
-                yappyButtonLoaded = true;
-            };
-            script.onerror = () => {
-                console.error('[YAPPY V2] Error cargando botón desde CDN');
-                showToast('Error cargando botón de Yappy. Intenta recargar la página.', 'error');
-            };
-            document.head.appendChild(script);
-        }
-
-        /**
-         * Paso 1: Validar comercio via Edge Function
-         * POST /payments/validate/merchant
-         * Body: { merchantId, urlDomain }
-         * Response: { body: { epochTime, token } }
-         */
-        async function yappyValidarComercio() {
-            console.log('[YAPPY V2] Step 1: Validando comercio...');
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            const edgeUrl = YAPPY_CONFIG.edgeFunctionUrl || 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
-
-            console.log('[YAPPY V2] Edge URL:', edgeUrl);
-
-            const response = await fetch(`${edgeUrl}?action=validate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
-                    urlDomain: YAPPY_CONFIG.domain
-                })
-            });
-
-            console.log('[YAPPY V2] Validate response status:', response.status);
-
-            if (!response.ok) {
-                let errorMsg = 'Error validando comercio';
-                let errorBody = '';
-                try {
-                    errorBody = await response.text();
-                    console.error('[YAPPY V2] Error body:', errorBody);
-                    const errorData = JSON.parse(errorBody);
-                    errorMsg = errorData.error || errorData.message || errorData.rawResponse || errorMsg;
-                } catch(e) {
-                    errorMsg = errorBody || errorMsg;
-                }
-                throw new Error(errorMsg + ' (HTTP ' + response.status + ')');
-            }
-
-            const data = await response.json();
-            console.log('[YAPPY V2] Validate response:', data);
-
-            if (!data.body || !data.body.token) {
-                throw new Error('La respuesta no contiene token válido');
-            }
-
-            return data.body; // { epochTime, token }
-        }
-
-        /**
-         * Paso 2: Crear orden via Edge Function
-         * POST /payments/payment-wc
-         * Headers: Authorization: Bearer {token}
-         * Body: { merchantId, orderId, domain, paymentDate, aliasYappy, ipnUrl, discount, taxes, subtotal, total }
-         * Response: { body: { transactionId, token, documentName } }
-         */
-        async function yappyCrearOrden(validateToken) {
-            console.log('[YAPPY V2] Step 2: Creando orden...');
-
-            // orderId: máx 15 chars, alfanumérico
-            yappyOrderId = 'R' + Date.now().toString(36).toUpperCase().substring(0, 14);
-            const paymentDate = Math.floor(Date.now() / 1000); // Epoch time en segundos
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            const edgeUrl = YAPPY_CONFIG.edgeFunctionUrl || 'https://ugchmuhjzzyofoogprlr.supabase.co/functions/v1/yappy-webhook';
-
-            // IPN URL: Endpoint en Edge Function para recibir notificaciones
-            const ipnUrl = `${YAPPY_CONFIG.edgeFunctionUrl}?action=ipn`;
-
-            const response = await fetch(`${edgeUrl}?action=payment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
-                    token: validateToken,
-                    orderId: yappyOrderId,
-                    domain: YAPPY_CONFIG.domain,
-                    paymentDate: paymentDate,
-                    aliasYappy: currentConductor.celular || '', // Teléfono del conductor (opcional, para pruebas)
-                    ipnUrl: ipnUrl,
-                    discount: '0.00',
-                    taxes: '0.00',
-                    subtotal: YAPPY_CONFIG.monto.toFixed(2),
-                    total: YAPPY_CONFIG.monto.toFixed(2)
-                })
-            });
-
-            console.log('[YAPPY V2] Payment response status:', response.status);
-
-            if (!response.ok) {
-                let errorMsg = 'Error creando orden';
-                let errorBody = '';
-                try {
-                    errorBody = await response.text();
-                    console.error('[YAPPY V2] Error body:', errorBody);
-                    const errorData = JSON.parse(errorBody);
-                    errorMsg = errorData.error || errorData.message || errorData.rawResponse || errorMsg;
-                } catch(e) {
-                    errorMsg = errorBody || errorMsg;
-                }
-                throw new Error(errorMsg + ' (HTTP ' + response.status + ')');
-            }
-
-            const data = await response.json();
-            console.log('[YAPPY V2] Payment response:', data);
-
-            if (!data.body || !data.body.transactionId || !data.body.token || !data.body.documentName) {
-                throw new Error('La respuesta no contiene datos de pago válidos');
-            }
-
-            return data.body; // { transactionId, token, documentName }
-        }
-
-        /**
-         * Mostrar modal con Botón de Pago Yappy
-         */
-        async function activarCuentaYappy() {
-            if (!currentConductor) { 
-                showToast('Error: No se encontró información del conductor', 'error'); 
-                return; 
-            }
-
-            // Validar configuración
-            if (!YAPPY_CONFIG.domain || !YAPPY_CONFIG.edgeFunctionUrl) {
-                showToast('⚠️ Configuración de Yappy incompleta', 'error');
-                console.error('[YAPPY V2] Configuración incompleta. domain:', YAPPY_CONFIG.domain, 'edgeFunctionUrl:', YAPPY_CONFIG.edgeFunctionUrl);
-                return;
-            }
-
-            showToast('Preparando pago con Yappy...', 'warning');
-
-            try {
-                // Cargar botón Yappy si no está cargado
-                cargarYappyButton();
-
-                // 1. Validar comercio (obtener token)
-                const validateData = await yappyValidarComercio();
-                console.log('[YAPPY V2] Token obtenido:', validateData.token ? 'SÍ' : 'NO');
-
-                // 2. Crear orden
-                const paymentData = await yappyCrearOrden(validateData.token);
-                console.log('[YAPPY V2] Orden creada. transactionId:', paymentData.transactionId);
-
-                // 3. Mostrar modal con botón Yappy
-                mostrarModalYappy(paymentData);
-
-                // 4. Guardar orderId para verificar
-                localStorage.setItem('yappy_pending_order', yappyOrderId);
-                localStorage.setItem('yappy_pending_time', Date.now().toString());
-
-            } catch (error) {
-                console.error('[YAPPY V2] Error:', error);
-                showToast('Error preparando pago: ' + error.message, 'error');
-            }
-        }
-
-        /**
-         * Mostrar modal con el Botón de Pago Yappy embebido
-         */
-        function mostrarModalYappy(paymentData) {
-            // Crear modal si no existe
-            let modal = document.getElementById('yappyPaymentModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'yappyPaymentModal';
-                modal.className = 'modal-overlay';
-                modal.style.display = 'none';
-                modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 450px;">
-                        <button class="modal-close" onclick="cerrarModalYappy()">×</button>
-                        <div style="text-align:center; margin-bottom: 20px;">
-                            <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">💳 Pagar con Yappy</h3>
-                            <p style="color:#94a3b8;font-size:14px;">Activa tu cuenta por 24 horas</p>
-                            <div style="font-size:28px;font-weight:800;color:#4ade80;margin:10px 0;">$${YAPPY_CONFIG.monto.toFixed(2)} USD</div>
-                        </div>
-                        <div id="yappyButtonContainer" style="display:flex;justify-content:center;margin:20px 0;">
-                            <btn-yappy id="btnYappy" theme="blue" rounded="true"></btn-yappy>
-                        </div>
-                        <div id="yappyStatus" style="text-align:center;color:#94a3b8;font-size:13px;margin-top:10px;"></div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-
-                // Cerrar al hacer clic fuera
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) cerrarModalYappy();
-                });
-            }
-
-            // Mostrar modal
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-
-            // Configurar botón Yappy
-            setTimeout(() => {
-                const btnYappy = document.getElementById('btnYappy');
-                if (btnYappy) {
-                    // Limpiar eventos anteriores
-                    btnYappy.replaceWith(btnYappy.cloneNode(true));
-                    const freshBtn = document.getElementById('btnYappy');
-
-                    // Configurar eventos del botón
-                    freshBtn.addEventListener('eventSuccess', (event) => {
-                        console.log('[YAPPY V2] Pago exitoso:', event.detail);
-                        document.getElementById('yappyStatus').innerHTML = '<span style="color:#4ade80;">✅ Pago completado. Activando cuenta...</span>';
-                        setTimeout(() => {
-                            cerrarModalYappy();
-                            activarSuscripcionTrasPago(yappyOrderId);
-                        }, 2000);
-                    });
-
-                    freshBtn.addEventListener('eventError', (event) => {
-                        console.error('[YAPPY V2] Pago fallido:', event.detail);
-                        document.getElementById('yappyStatus').innerHTML = '<span style="color:#f87171;">❌ El pago no se completó. Intenta nuevamente.</span>';
-                    });
-
-                    freshBtn.addEventListener('eventClick', async () => {
-                        console.log('[YAPPY V2] Botón clickeado');
-                        document.getElementById('yappyStatus').innerHTML = '<span style="color:#fbbf24;">⏳ Procesando...</span>';
-
-                        // Enviar datos al botón para procesar el pago
-                        const params = {
-                            transactionId: paymentData.transactionId,
-                            documentName: paymentData.documentName,
-                            token: paymentData.token
-                        };
-                        console.log('[YAPPY V2] Enviando params a eventPayment:', params);
-                        freshBtn.eventPayment(params);
-                    });
-
-                    // Verificar si Yappy está online
-                    freshBtn.addEventListener('isYappyOnline', (event) => {
-                        console.log('[YAPPY V2] Yappy online:', event.detail);
-                        if (!event.detail) {
-                            document.getElementById('yappyStatus').innerHTML = '<span style="color:#f87171;">⚠️ Yappy no está disponible en este momento.</span>';
-                        }
-                    });
-                }
-            }, 500);
-        }
-
-        function cerrarModalYappy() {
-            const modal = document.getElementById('yappyPaymentModal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = '';
-            }
-        }
-
-        // ============================================
-        // SIMULAR PAGO (MODO DESARROLLO)
-        // ============================================
-        function simularPago() {
-            const modal = document.getElementById('simularPagoModal');
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-        function closeSimularPagoModal() {
-            const modal = document.getElementById('simularPagoModal');
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-        async function confirmarSimularPago() {
-            if (!currentConductor) return;
-            showToast('Procesando pago simulado...', 'warning');
-            closeSimularPagoModal();
-            try {
-                const ahora = new Date();
-                const vencimiento = new Date(ahora.getTime() + YAPPY_CONFIG.duracionHoras * 60 * 60 * 1000);
-                const { error: updateError } = await supabaseClient
-                    .from('conductores')
-                    .update({
-                        suscripcion_activa: true,
-                        payment_status: 'paid',
-                        fecha_ultimo_pago: ahora.toISOString(),
-                        fecha_vencimiento: vencimiento.toISOString(),
-                        plan: 'basico_24h',
-                        updated_at: ahora.toISOString()
-                    })
-                    .eq('id', currentConductor.id);
-                if (updateError) throw updateError;
-                const { error: pagoError } = await supabaseClient
-                    .from('pagos')
-                    .insert([{
-                        conductor_id: currentConductor.id,
-                        monto: YAPPY_CONFIG.monto,
-                        moneda: YAPPY_CONFIG.moneda,
-                        plan: 'basico_24h',
-                        estado: 'completado',
-                        metodo: 'yappy_simulado',
-                        referencia: 'SIM-' + Date.now(),
-                        fecha_pago: ahora.toISOString(),
-                        fecha_vencimiento: vencimiento.toISOString()
-                    }]);
-                if (pagoError) console.error('[PAGO] Error registrando pago:', pagoError);
-                showToast('✅ Pago simulado exitoso. Cuenta activada por 24 horas!', 'success');
-                await recargarConductor();
-            } catch (error) {
-                console.error('[SIMULAR] Error:', error);
-                showToast('Error al simular pago: ' + error.message, 'error');
-            }
-        }
-        async function recargarConductor() {
-            if (!currentUser) return;
-            const { data: conductor, error } = await supabaseClient
-                .from('conductores')
-                .select('*')
-                .eq('auth_user_id', currentUser.id)
-                .maybeSingle();
-            if (error) { console.error('[RELOAD] Error:', error); return; }
-            if (conductor) {
-                currentConductor = conductor;
-                renderAccountStatusCard();
-                if (verificarSuscripcionActiva(conductor)) {
-                    document.getElementById('app-container').style.display = 'block';
-                    const bloqueo = document.getElementById('bloqueo-pago');
-                    if (bloqueo) bloqueo.style.display = 'none';
-                    const grid = document.querySelector('.grid');
-                    const statsBar = document.querySelector('.stats-bar');
-                    if (grid) grid.style.display = 'grid';
-                    if (statsBar) statsBar.style.display = 'grid';
-                    await cargarViajesDisponibles();
-                    await cargarMisViajes();
-                    iniciarSuscripciones();
-                } else {
-                    mostrarBloqueoPago();
-                }
-            }
-        }
-        function mostrarBloqueoPago() {
-            const grid = document.querySelector('.grid');
-            const statsBar = document.querySelector('.stats-bar');
-            if (grid) grid.style.display = 'none';
-            if (statsBar) statsBar.style.display = 'none';
-            const container = document.getElementById('app-container');
-            let bloqueo = document.getElementById('bloqueo-pago');
-            if (!bloqueo) {
-                bloqueo = document.createElement('div');
-                bloqueo.id = 'bloqueo-pago';
-                bloqueo.innerHTML = `
-                    <div style="text-align:center;padding:40px 20px;background:rgba(15,23,42,0.5);border-radius:20px;border:1px solid rgba(239,68,68,0.2);margin-top:20px;">
-                        <div style="font-size:48px;margin-bottom:16px;">🔒</div>
-                        <h3 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Viajes Bloqueados</h3>
-                        <p style="color:#94a3b8;font-size:14px;max-width:400px;margin:0 auto 20px;line-height:1.5;">
-                            Tu cuenta requiere activación para recibir solicitudes de viajes. 
-                            Activa tu cuenta con Yappy por solo <strong style="color:#fbbf24;">$5.00 USD</strong> y obtén <strong style="color:#4ade80;">24 horas</strong> de servicio.
-                        </p>
-                        <button class="btn btn-purple" onclick="activarCuentaYappy()" style="max-width:300px;margin:0 auto;">
-                            <span class="yappy-logo">
-                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                                Activar con Yappy - $5.00
-                            </span>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(bloqueo);
-            } else { bloqueo.style.display = 'block'; }
-        }
-        // ============================================
-        // VERIFICAR PAGO PENDIENTE (al volver de Yappy)
-        // ============================================
-        async function verificarPagoPendiente() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('orderId');
-            const status = urlParams.get('status'); // Yappy puede devolver status=success o status=failed
-
-            // Si no hay orderId en URL, revisar localStorage
-            const pendingOrder = localStorage.getItem('yappy_pending_order');
-            const pendingTime = localStorage.getItem('yappy_pending_time');
-
-            if (!orderId && !pendingOrder) return;
-
-            // Si volvió de Yappy con éxito (o hay un orderId que coincide con el pendiente)
-            if (status === 'success' || (orderId && orderId === pendingOrder)) {
-                showToast('¡Pago confirmado! Activando cuenta...', 'success');
-
-                // Limpiar localStorage
-                localStorage.removeItem('yappy_pending_order');
-                localStorage.removeItem('yappy_pending_time');
-
-                // Activar suscripción en Supabase
-                await activarSuscripcionTrasPago(orderId || pendingOrder);
-
-                // Limpiar URL (quitar parámetros de Yappy)
-                window.history.replaceState({}, document.title, window.location.pathname);
-                return;
-            }
-
-            // Si falló o canceló
-            if (status === 'failed' || status === 'cancelled') {
-                showToast('El pago no se completó. Intenta nuevamente.', 'error');
-                localStorage.removeItem('yappy_pending_order');
-                localStorage.removeItem('yappy_pending_time');
-                window.history.replaceState({}, document.title, window.location.pathname);
-                return;
-            }
-
-            // Si hay orden pendiente pero no hay status (usuario cerró la ventana o volvió manualmente)
-            if (pendingOrder && pendingTime) {
-                const tiempoPendiente = Date.now() - parseInt(pendingTime);
-                if (tiempoPendiente > 30 * 60 * 1000) { // 30 minutos de gracia
-                    localStorage.removeItem('yappy_pending_order');
-                    localStorage.removeItem('yappy_pending_time');
-                } else {
-                    // Aún dentro del tiempo de gracia, mostrar mensaje
-                    showToast('Si completaste el pago en Yappy, tu cuenta se activará en breve...', 'warning');
-                }
-            }
-        }
-
-        // ============================================
-        // ACTIVAR SUSCRIPCIÓN TRAS PAGO EXITOSO
-        // ============================================
-        async function activarSuscripcionTrasPago(orderId) {
-            if (!currentConductor) return;
-
-            try {
-                const ahora = new Date();
-                const vencimiento = new Date(ahora.getTime() + YAPPY_CONFIG.duracionHoras * 60 * 60 * 1000);
-
-                // Actualizar conductor
-                const { error: updateError } = await supabaseClient
-                    .from('conductores')
-                    .update({
-                        suscripcion_activa: true,
-                        payment_status: 'paid',
-                        fecha_ultimo_pago: ahora.toISOString(),
-                        fecha_vencimiento: vencimiento.toISOString(),
-                        plan: 'basico_24h',
-                        updated_at: ahora.toISOString()
-                    })
-                    .eq('id', currentConductor.id);
-
-                if (updateError) throw updateError;
-
-                // Registrar pago en tabla pagos
-                const { error: pagoError } = await supabaseClient
-                    .from('pagos')
-                    .insert([{
-                        conductor_id: currentConductor.id,
-                        monto: YAPPY_CONFIG.monto,
-                        moneda: YAPPY_CONFIG.moneda,
-                        plan: 'basico_24h',
-                        estado: 'completado',
-                        metodo: 'yappy_directo',
-                        referencia: orderId,
-                        fecha_pago: ahora.toISOString(),
-                        fecha_vencimiento: vencimiento.toISOString()
-                    }]);
-
-                if (pagoError) console.error('[PAGO] Error registrando pago:', pagoError);
-
-                showToast('✅ Cuenta activada por 24 horas!', 'success');
-
-                // Recargar datos del conductor
-                await recargarConductor();
-
-            } catch (error) {
-                console.error('[ACTIVAR] Error:', error);
-                showToast('Error activando cuenta: ' + error.message, 'error');
-            }
-        }
-
-
-        function getEstadoBadge(estado) {
-            const badges = {
-                'pendiente': '<span class="badge badge-pendiente">Pendiente</span>',
-                'asignado': '<span class="badge badge-asignado">Asignado</span>',
-                'completado': '<span class="badge badge-completado">Completado</span>',
-                'cancelado': '<span class="badge badge-cancelado">Cancelado</span>'
-            };
-            return badges[estado] || estado;
-        }
-
-        // ============================================
-        // BLOQUEO: Verificar que el usuario es conductor
-        // ============================================
-        async function verificarConductor() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) {
-                window.location.href = 'dashboard.html';
-                return false;
-            }
-
-            console.log('[AUTH] auth.uid():', user.id);
-            currentUser = user;
-
-            // Verificar que existe en tabla conductores (por auth_user_id) - incluir campos de suscripción
-            let { data: conductor, error } = await supabaseClient
-                .from('conductores')
-                .select('id, auth_user_id, status, nombres, apellidos, vehiculo, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, plan, pago_al_dia')
-                .eq('auth_user_id', user.id)
-                .maybeSingle();
-
-            if (error && error.code === '42703') {
-                console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
-                const result = await supabaseClient
-                    .from('conductores')
-                    .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, plan, pago_al_dia')
-                    .eq('auth_user_id', user.id)
-                    .maybeSingle();
-                conductor = result.data;
-                error = result.error;
-            }
-
-            if (error) {
-                console.error('[CONDUCTOR] Error:', error);
-                showToast('Error verificando conductor: ' + error.message, 'error');
-                return false;
-            }
-
-            if (!conductor) {
-                mostrarBloqueo('No estás registrado como conductor. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
-                return false;
-            }
-
-            console.log('[CONDUCTOR] Encontrado:', conductor);
-            currentConductor = conductor;
-            conductorNombre = ((conductor.nombres || '') + ' ' + (conductor.apellidos || '')).trim() || 'Conductor';
-
-            // Validar status si existe
-            if (conductor.status && conductor.status !== 'active') {
-                let mensaje = '';
-                switch(conductor.status) {
-                    case 'inactive': mensaje = 'Tu cuenta está inactiva. Contacta al administrador.'; break;
-                    case 'banned': mensaje = 'Tu cuenta ha sido suspendida.'; break;
-                    case 'pending': mensaje = 'Tu cuenta está pendiente de aprobación.'; break;
-                    default: mensaje = 'No puedes acceder. Estado: ' + conductor.status;
-                }
-                mostrarBloqueo(mensaje);
-                return false;
-            }
-
-            // Verificar suscripción activa (24 horas)
-            const suscripcionActiva = verificarSuscripcionActiva(conductor);
-
-            // Renderizar tarjeta de estado SIEMPRE
-            renderAccountStatusCard();
-
-            if (!suscripcionActiva) {
-                // Bloquear acceso a viajes pero mantener panel visible
-                mostrarBloqueoPago();
-                showToast('Tu suscripción ha vencido. Activa tu cuenta para continuar.', 'warning');
-                return true; // Retornamos true para que init() continúe, pero bloqueamos viajes
-            }
-
-            return true;
-        }
-
-        function mostrarBloqueo(mensaje) {
-            document.getElementById('app-container').style.display = 'none';
-            const bloqueo = document.createElement('div');
-            bloqueo.className = 'bloqueo-overlay';
-            bloqueo.innerHTML = `
-                <div class="bloqueo-icono">🚫</div>
-                <h2 class="bloqueo-titulo">Acceso Restringido</h2>
-                <p class="bloqueo-mensaje">${mensaje}</p>
-                <button class="bloqueo-btn" onclick="logout()">Cerrar Sesión</button>
-            `;
-            document.body.appendChild(bloqueo);
-        }
-
-        // ============================================
-        // PASAJERO INFO
-        // ============================================
-        async function getPasajeroInfo(pasajeroId) {
-            if (!pasajeroId) return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
-            try {
-                const { data, error } = await supabaseClient
-                    .from('passengers')
-                    .select('nombres, apellidos, celular, email')
-                    .eq('id', pasajeroId)
-                    .maybeSingle();
-                if (error || !data) return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
-                return {
-                    nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
-                    apellidos: data.apellidos || '',
-                    telefono: data.celular || 'No disponible',
-                    celular_raw: data.celular || '',
-                    email: data.email || 'No disponible'
-                };
-            } catch (e) {
-                return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
-            }
-        }
-
-        // ============================================
-        // CARGAR VIAJES DISPONIBLES
-        // ============================================
-        async function cargarViajesDisponibles() {
-            const container = document.getElementById('lista-disponibles');
-            try {
-                const { data: viajes, error } = await supabaseClient
-                    .from('viajes_reservados')
-                    .select('*')
-                    .eq('estado', 'pendiente')
-                    .order('fecha_hora', { ascending: true });
-
-                if (error) throw error;
-                document.getElementById('stat-disponibles').textContent = viajes?.length ?? 0;
-
-                if (!viajes || viajes.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🛣️</div>
-                            <h3>No hay viajes disponibles</h3>
-                            <p>Los nuevos viajes aparecerán aquí automáticamente</p>
-                        </div>`;
-                    return;
-                }
-
-                const viajesConPasajero = await Promise.all(
-                    viajes.map(async (viaje) => {
-                        const pasajero = await getPasajeroInfo(viaje.pasajero_id);
-                        return { ...viaje, pasajero };
-                    })
-                );
-
-                container.innerHTML = viajesConPasajero.map(viaje => `
-                    <div class="viaje-item" data-id="${viaje.id}">
-                        <div class="viaje-route">
-                            <span class="origin">📍 ${viaje.origen}</span>
-                            <span class="arrow">→</span>
-                            <span class="destiny">🏁 ${viaje.destino}</span>
-                        </div>
-                        <div class="viaje-meta">
-                            <span>📅 ${formatDate(viaje.fecha_hora)}</span>
-                            <span>${getEstadoBadge(viaje.estado)}</span>
-                        </div>
-                        <div class="pasajero-info">
-                            <strong>Pasajero:</strong> ${viaje.pasajero.nombre}<br>
-                            <strong>Teléfono:</strong> ${viaje.pasajero.telefono}
-                        </div>
-                        <button class="btn btn-primary" onclick="aceptarViaje('${viaje.id}', this)">
-                            ✋ Aceptar Viaje
-                        </button>
-                    </div>
-                `).join('');
-            } catch (err) {
-                console.error('Error cargando viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
-            }
-        }
-
-        // ============================================
-        // CARGAR MIS VIAJES — usa auth.uid() (la FK apunta a auth.users.id)
-        // ============================================
-        async function cargarMisViajes() {
-            const container = document.getElementById('lista-asignados');
-            try {
-                const { data: viajes, error } = await supabaseClient
-                    .from('viajes_reservados')
-                    .select('*')
-                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid(), la FK apunta a auth.users.id
-                    .in('estado', ['asignado', 'completado', 'cancelado'])
-                    .order('fecha_hora', { ascending: true });
-
-                if (error) throw error;
-
-                const asignados = viajes?.filter(v => v.estado === 'asignado') ?? [];
-                const completados = viajes?.filter(v => v.estado === 'completado') ?? [];
-                const cancelados = viajes?.filter(v => v.estado === 'cancelado') ?? [];
-
-                document.getElementById('stat-asignados').textContent = asignados.length;
-                document.getElementById('stat-completados').textContent = completados.length;
-                document.getElementById('stat-cancelados').textContent = cancelados.length;
-
-                if (!viajes || viajes.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">👤</div>
-                            <h3>No tienes viajes asignados</h3>
-                            <p>Acepta un viaje desde el panel izquierdo</p>
-                        </div>`;
-                    return;
-                }
-
-                const viajesConPasajero = await Promise.all(
-                    viajes.map(async (viaje) => {
-                        const pasajero = await getPasajeroInfo(viaje.pasajero_id);
-                        return { ...viaje, pasajero };
-                    })
-                );
-
-                container.innerHTML = viajesConPasajero.map(viaje => `
-                    <div class="viaje-item asignado" data-id="${viaje.id}">
-                        <div class="viaje-route">
-                            <span class="origin">📍 ${viaje.origen}</span>
-                            <span class="arrow">→</span>
-                            <span class="destiny">🏁 ${viaje.destino}</span>
-                        </div>
-                        <div class="viaje-meta">
-                            <span>📅 ${formatDate(viaje.fecha_hora)}</span>
-                            <span>${getEstadoBadge(viaje.estado)}</span>
-                        </div>
-                        <div class="pasajero-info">
-                            <strong>👤 Pasajero:</strong> ${viaje.pasajero.nombre}<br>
-                            <strong>📞 Teléfono:</strong> ${viaje.pasajero.telefono}<br>
-                            <strong>✉️ Email:</strong> ${viaje.pasajero.email}
-                        </div>
-                        ${viaje.estado === 'asignado' ? `
-                            <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
-                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;min-width:120px;">✅ Completar</button>
-                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;min-width:120px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
-                            </div>
-                            <button class="btn" onclick="contactarWhatsApp('${viaje.pasajero.celular_raw}', '${viaje.pasajero.apellidos}')" style="background:linear-gradient(135deg,#25D366 0%,#128C7E 100%);color:#fff;width:100%;">
-                                📱 Contactar Pasajero
-                            </button>
-                        ` : viaje.estado === 'completado' ? '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>' : '<div style="text-align:center;color:#f87171;font-weight:600;font-size:14px;">❌ Viaje Cancelado</div>'}
-                    </div>
-                `).join('');
-            } catch (err) {
-                console.error('Error cargando mis viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
-            }
-        }
-
-        // ============================================
-        // ACEPTAR VIAJE — usa auth.uid() (la FK apunta a auth.users.id)
-        // ============================================
-        async function aceptarViaje(viajeId, btnElement) {
-            // Verificar suscripción activa
-            if (!verificarSuscripcionActiva(currentConductor)) {
-                showToast('Tu cuenta está inactiva. Activa tu suscripción para aceptar viajes.', 'error');
-                return;
-            }
-
-            btnElement.disabled = true;
-            btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
-
-            try {
-                console.log('[ACEPTAR] Usando auth.uid():', currentUser.id);
-                const { data, error } = await supabaseClient
-                    .from('viajes_reservados')
-                    .update({
-                        estado: 'asignado',
-                        conductor_asignado_id: currentUser.id,  // ← auth.uid(), la FK apunta a auth.users.id
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', viajeId)
-                    .eq('estado', 'pendiente')
-                    .select();
-
-                if (error) {
-                    console.error('[ACEPTAR] Error Supabase:', error);
-                    throw error;
-                }
-
-                if (!data || data.length === 0) {
-                    throw new Error('Este viaje ya fue aceptado por otro conductor. 🏃‍♂️');
-                }
-
-                console.log('[ACEPTAR] Éxito:', data);
-                showToast('¡Viaje aceptado exitosamente! 🎉');
-                await cargarViajesDisponibles();
-                await cargarMisViajes();
-            } catch (err) {
-                console.error('[ACEPTAR] Error:', err);
-                showToast(err.message || 'No se pudo asignar el viaje', 'error');
-                await cargarViajesDisponibles();
-            } finally {
-                btnElement.disabled = false;
-                btnElement.innerHTML = '✋ Aceptar Viaje';
-            }
-        }
-
-        // ============================================
-        // COMPLETAR VIAJE — usa auth.uid()
-        // ============================================
-        async function completarViaje(viajeId) {
-            if (!verificarSuscripcionActiva(currentConductor)) {
-                showToast('Tu cuenta está inactiva. No puedes completar viajes.', 'error');
-                return;
-            }
-            try {
-                const { data, error } = await supabaseClient
-                    .from('viajes_reservados')
-                    .update({ estado: 'completado', updated_at: new Date().toISOString() })
-                    .eq('id', viajeId)
-                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid()
-                    .select();
-
-                if (error) { console.error('[COMPLETAR] Error:', error); throw error; }
-                console.log('[COMPLETAR] Éxito:', data);
-                showToast('Viaje marcado como completado ✅');
-                await cargarMisViajes();
-            } catch (err) {
-                console.error('[COMPLETAR] Error:', err);
-                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
-            }
-        }
-
-        // ============================================
-        // CANCELAR VIAJE — usa auth.uid()
-        // ============================================
-        function abrirCancelModal(viajeId) {
-            cancelViajeId = viajeId;
-            document.getElementById('cancelMotivo').value = '';
-            document.getElementById('cancelModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeCancelModal() {
-            document.getElementById('cancelModal').style.display = 'none';
-            document.body.style.overflow = '';
-            cancelViajeId = null;
-        }
-
-        async function confirmarCancelarViaje(nuevoEstado) {
-            if (!cancelViajeId) return;
-            const motivo = document.getElementById('cancelMotivo').value.trim();
-            if (!motivo) { showToast('Debes ingresar un motivo', 'error'); return; }
-
-            try {
-                const updateData = {
-                    estado: nuevoEstado,
-                    updated_at: new Date().toISOString()
-                };
-                if (nuevoEstado === 'cancelado') {
-                    updateData.motivo_cancelacion = motivo;
-                    updateData.conductor_asignado_id = null;
-                } else {
-                    updateData.motivo_revertir = motivo;
-                    updateData.conductor_asignado_id = null;
-                }
-
-                const { data, error } = await supabaseClient
-                    .from('viajes_reservados')
-                    .update(updateData)
-                    .eq('id', cancelViajeId)
-                    .eq('conductor_asignado_id', currentUser.id)  // ← auth.uid()
-                    .select();
-
-                if (error) { console.error('[CANCELAR] Error:', error); throw error; }
-                console.log('[CANCELAR] Éxito:', data);
-
-                showToast(nuevoEstado === 'cancelado' ? 'Viaje cancelado definitivamente ❌' : 'Viaje devuelto a pendiente 🔄');
-                closeCancelModal();
-                await cargarMisViajes();
-                await cargarViajesDisponibles();
-            } catch (err) {
-                console.error('[CANCELAR] Error:', err);
-                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
-            }
-        }
-
-
-        // ============================================
-        // CONTACTAR PASAJERO POR WHATSAPP
-        // ============================================
-        function generarSaludo() {
-            const hora = new Date().getHours();
-            return (hora >= 6 && hora < 18) ? 'Buen día' : 'Buenas noches';
-        }
-
-        function formatearWhatsApp(numero) {
-            if (!numero) return null;
-            let limpio = numero.toString().replace(/[^0-9]/g, '');
-            if (limpio.startsWith('507')) {
-                return '+507' + limpio.substring(3);
-            }
-            if (limpio.startsWith('05') && limpio.length === 8) {
-                return '+507' + limpio.substring(1);
-            }
-            return '+507' + limpio;
-        }
-
-        function contactarWhatsApp(celular, apellidosPasajero) {
-            const numero = formatearWhatsApp(celular);
-            if (!numero) {
-                showToast('El pasajero no tiene número de teléfono registrado', 'error');
-                return;
-            }
-            const saludo = generarSaludo();
-            const apellido = (apellidosPasajero || 'Pasajero').toUpperCase();
-            const conductor = (conductorNombre || 'Conductor').toUpperCase();
-            const mensaje = encodeURIComponent(
-                `${saludo}, estimado Sr(a). ${apellido} me llamo ${conductor} soy su conductor asignado para su viaje reservado en la plataforma RoadTo, un gusto saludarle.`
-            );
-            const url = `https://wa.me/${numero.replace('+', '')}?text=${mensaje}`;
-            window.open(url, '_blank');
-        }
-
-        // ============================================
-        // LOGOUT & SUSCRIPCIONES
-        // ============================================
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'dashboard.html';
-        }
-
-        function iniciarSuscripciones() {
-            // Solo suscribirse si tiene suscripción activa
-            if (!verificarSuscripcionActiva(currentConductor)) return;
-
-            const sub1 = supabaseClient
-                .channel('viajes-pendientes')
-                .on('postgres_changes', {
-                    event: '*', schema: 'public', table: 'viajes_reservados',
-                    filter: 'estado=eq.pendiente'
-                }, () => cargarViajesDisponibles())
-                .subscribe();
-
-            const sub2 = supabaseClient
-                .channel('mis-viajes')
-                .on('postgres_changes', {
-                    event: '*', schema: 'public', table: 'viajes_reservados',
-                    filter: `conductor_asignado_id=eq.${currentUser.id}`  // ← auth.uid()
-                }, () => cargarMisViajes())
-                .subscribe();
-
-            subscriptions.push(sub1, sub2);
-        }
-
-        // ============================================
-        // INIT
-        // ============================================
-        async function init() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'dashboard.html'; return; }
-
-            currentUser = session.user;
-            console.log('[INIT] auth.uid():', currentUser.id);
-
-            // Verificar pago pendiente (si volvió de Yappy)
-            await verificarPagoPendiente();
-
-            // 1. Verificar que es conductor
-            const esConductor = await verificarConductor();
-            if (!esConductor) return;
-
-            // 2. Si tiene suscripción activa, cargar datos
-            if (verificarSuscripcionActiva(currentConductor)) {
-                await cargarViajesDisponibles();
-                await cargarMisViajes();
-                // 3. Suscripciones
-                iniciarSuscripciones();
-            }
-
-            // 4. Modal listeners
-            document.getElementById('cancelModal').addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) closeCancelModal();
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeCancelModal();
-                    closeSimularPagoModal();
-                }
-            });
-            document.getElementById('simularPagoModal').addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) closeSimularPagoModal();
-            });
-        }
-
-        window.addEventListener('beforeunload', () => {
-            subscriptions.forEach(sub => sub.unsubscribe());
-            if (countdownInterval) clearInterval(countdownInterval);
-        });
-
-        init();
-    </script>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="grid-2">
+    <div class="card stat-box">
+      <div class="number" id="total-viajes">0</div>
+      <div class="label">Viajes Completados</div>
+    </div>
+    <div class="card stat-box">
+      <div class="number" id="total-ganado">$0.00</div>
+      <div class="label">Total Ganado</div>
+    </div>
+  </div>
+
+  <!-- Viajes disponibles -->
+  <div class="card">
+    <h2>📋 Viajes Disponibles</h2>
+    <div id="viajes-container">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando viajes...</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================
+// CONFIGURACIÓN
+// ============================================
+const SUPABASE_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MDA1MjUsImV4cCI6MjA1NjM3NjUyNX0.0k1Zf8Y2V1eC1zLk9pQrStUvWxYzAbCdEfGhIjKlMnO';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let conductorData = null;
+let currentUser = null;
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('[INIT] Cargando panel de viajes...');
+  await verificarAuth();
+});
+
+async function verificarAuth() {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+      console.log('[AUTH] No hay sesión, redirigiendo a login...');
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = session.user;
+    console.log('[AUTH] auth.uid():', currentUser.id);
+    await cargarConductor();
+    await cargarViajes();
+  } catch (err) {
+    console.error('[AUTH] Error:', err);
+    mostrarAlerta('danger', 'Error de autenticación. Por favor inicia sesión nuevamente.');
+  }
+}
+
+// ============================================
+// CARGAR DATOS DEL CONDUCTOR
+// ============================================
+async function cargarConductor() {
+  try {
+    // Primero intentamos con todas las columnas
+    let { data, error } = await supabase
+      .from('conductores')
+      .select('id,auth_user_id,status,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
+      .eq('auth_user_id', currentUser.id)
+      .single();
+
+    // Si falla por columna status, reintentamos sin ella
+    if (error && error.message && error.message.includes('status')) {
+      console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
+      const result = await supabase
+        .from('conductores')
+        .select('id,auth_user_id,nombres,apellidos,vehiculo,modelo,marca,suscripcion_activa,payment_status,fecha_ultimo_pago,fecha_vencimiento,plan,pago_al_dia')
+        .eq('auth_user_id', currentUser.id)
+        .single();
+      data = result.data;
+      error = result.error;
+    }
+
+    if (error) {
+      console.error('[CONDUCTOR] Error:', error);
+      mostrarAlerta('danger', 'Error al cargar datos del conductor.');
+      return;
+    }
+
+    conductorData = data;
+    console.log('[CONDUCTOR] Encontrado:', data);
+    renderizarConductor(data);
+    renderizarEstadoSuscripcion(data);
+  } catch (err) {
+    console.error('[CONDUCTOR] Error catch:', err);
+    mostrarAlerta('danger', 'Error al cargar conductor.');
+  }
+}
+
+function renderizarConductor(data) {
+  const nombreCompleto = `${data.nombres || ''} ${data.apellidos || ''}`.trim();
+  document.getElementById('conductor-nombre').textContent = nombreCompleto;
+  document.getElementById('nombre-completo').textContent = nombreCompleto;
+  document.getElementById('avatar-inicial').textContent = (data.nombres || '?')[0].toUpperCase();
+
+  const vehiculoInfo = [];
+  if (data.marca) vehiculoInfo.push(data.marca);
+  if (data.modelo) vehiculoInfo.push(data.modelo);
+  if (data.vehiculo) vehiculoInfo.push(data.vehiculo);
+  document.getElementById('vehiculo-info').textContent = vehiculoInfo.length > 0
+    ? vehiculoInfo.join(' · ')
+    : 'Vehículo no registrado';
+}
+
+// ============================================
+// ESTADO DE SUSCRIPCIÓN
+// ============================================
+function renderizarEstadoSuscripcion(data) {
+  const estaActiva = data.suscripcion_activa === true;
+  const pagoAlDia = data.pago_al_dia === true;
+  const vencimiento = data.fecha_vencimiento ? new Date(data.fecha_vencimiento) : null;
+  const ahora = new Date();
+  const vencio = vencimiento && vencimiento < ahora;
+
+  const badgeContainer = document.getElementById('estado-badge-container');
+  const textoContainer = document.getElementById('estado-suscripcion-texto');
+  const accionContainer = document.getElementById('accion-suscripcion');
+  const alertaContainer = document.getElementById('alerta-suscripcion');
+
+  if (estaActiva && pagoAlDia && !vencio) {
+    badgeContainer.innerHTML = '<span class="status-badge status-active">✅ Suscripción Activa</span>';
+    textoContainer.textContent = vencimiento
+      ? `Tu suscripción está activa hasta el ${vencimiento.toLocaleDateString('es-PA')}`
+      : 'Tu suscripción está activa';
+    accionContainer.innerHTML = '';
+    alertaContainer.style.display = 'none';
+  } else {
+    badgeContainer.innerHTML = '<span class="status-badge status-inactive">❌ Suscripción Inactiva</span>';
+    textoContainer.textContent = 'Tu suscripción ha vencido o no está activa. Actívala para recibir viajes.';
+
+    // Botón que lleva a la página de pagos
+    accionContainer.innerHTML = `
+      <a href="pagos.html" class="btn-pago">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+          <line x1="1" y1="10" x2="23" y2="10"/>
+        </svg>
+        💳 Activar Suscripción - $5.00 / 24h
+      </a>
+      <p style="color:var(--text-muted);font-size:0.8rem;margin-top:12px;">
+        Serás redirigido a la página de pagos segura
+      </p>
+    `;
+
+    alertaContainer.style.display = 'block';
+    alertaContainer.innerHTML = `
+      <div class="alert alert-warning">
+        ⚠️ Tu suscripción está inactiva. No puedes recibir viajes hasta activarla.
+      </div>
+    `;
+  }
+}
+
+// ============================================
+// CARGAR VIAJES
+// ============================================
+async function cargarViajes() {
+  try {
+    const { data: viajes, error } = await supabase
+      .from('viajes_reservados')
+      .select('*')
+      .eq('estado', 'pendiente')
+      .order('fecha_solicitud', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error('[VIAJES] Error:', error);
+      document.getElementById('viajes-container').innerHTML = `
+        <div class="empty-state">
+          <p>Error al cargar viajes. Intenta de nuevo.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Actualizar estadísticas
+    const { data: historial } = await supabase
+      .from('viajes_reservados')
+      .select('precio')
+      .eq('conductor_asignado_id', currentUser.id)
+      .eq('estado', 'completado');
+
+    const totalViajes = historial ? historial.length : 0;
+    const totalGanado = historial ? historial.reduce((sum, v) => sum + (v.precio || 0), 0) : 0;
+
+    document.getElementById('total-viajes').textContent = totalViajes;
+    document.getElementById('total-ganado').textContent = `$${totalGanado.toFixed(2)}`;
+
+    renderizarViajes(viajes || []);
+  } catch (err) {
+    console.error('[VIAJES] Error:', err);
+    document.getElementById('viajes-container').innerHTML = `
+      <div class="empty-state">
+        <p>Error al cargar viajes.</p>
+      </div>
+    `;
+  }
+}
+
+function renderizarViajes(viajes) {
+  const container = document.getElementById('viajes-container');
+
+  if (!viajes || viajes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+        </svg>
+        <p>No hay viajes disponibles en este momento.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = viajes.map(v => `
+    <div class="viaje-item">
+      <div class="info">
+        <h4>📍 ${v.origen || 'Origen no especificado'} → ${v.destino || 'Destino no especificado'}</h4>
+        <p>🕐 ${v.fecha_solicitud ? new Date(v.fecha_solicitud).toLocaleString('es-PA') : 'Fecha no disponible'}</p>
+      </div>
+      <div class="price">$${(v.precio || 0).toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================
+// UTILIDADES
+// ============================================
+function mostrarAlerta(tipo, mensaje) {
+  const container = document.getElementById('alerta-suscripcion');
+  container.style.display = 'block';
+  container.innerHTML = `<div class="alert alert-${tipo}">${mensaje}</div>`;
+}
+
+async function cerrarSesion() {
+  await supabase.auth.signOut();
+  window.location.href = 'login.html';
+}
+</script>
 
 </body>
 </html>
