@@ -1107,10 +1107,15 @@
 
             if (!response.ok) {
                 let errorMsg = 'Error validando comercio';
+                let errorBody = '';
                 try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorData.message || errorMsg;
-                } catch(e) {}
+                    errorBody = await response.text();
+                    console.error('[YAPPY V2] Error body:', errorBody);
+                    const errorData = JSON.parse(errorBody);
+                    errorMsg = errorData.error || errorData.message || errorData.rawResponse || errorMsg;
+                } catch(e) {
+                    errorMsg = errorBody || errorMsg;
+                }
                 throw new Error(errorMsg + ' (HTTP ' + response.status + ')');
             }
 
@@ -1168,10 +1173,15 @@
 
             if (!response.ok) {
                 let errorMsg = 'Error creando orden';
+                let errorBody = '';
                 try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorData.message || errorMsg;
-                } catch(e) {}
+                    errorBody = await response.text();
+                    console.error('[YAPPY V2] Error body:', errorBody);
+                    const errorData = JSON.parse(errorBody);
+                    errorMsg = errorData.error || errorData.message || errorData.rawResponse || errorMsg;
+                } catch(e) {
+                    errorMsg = errorBody || errorMsg;
+                }
                 throw new Error(errorMsg + ' (HTTP ' + response.status + ')');
             }
 
