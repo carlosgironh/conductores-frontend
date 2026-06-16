@@ -473,7 +473,7 @@
     }
 
     // ============================================================
-    // PAGO CON YAPPY - Flujo completo
+    // PAGO CON YAPPY - Flujo completo v3
     // ============================================================
     async function iniciarPago() {
       if (!authReady || !conductorData) {
@@ -485,7 +485,7 @@
       hideAlert();
 
       try {
-        logDebug('=== INICIANDO PAGO CON YAPPY ===');
+        logDebug('=== INICIANDO PAGO CON YAPPY v3 ===');
         logDebug('Llamando a API en Render...');
         logDebug(`POST ${RENDER_API_URL} | action=create-order`);
 
@@ -497,7 +497,6 @@
           },
           body: JSON.stringify({
             action: 'create-order',
-            urlDomain: YAPPY_DOMAIN,
             total: '5.00',
           }),
         });
@@ -517,6 +516,10 @@
         } else if (data.success && data.data?.body?.token) {
           logDebug('✓ Orden creada. Token recibido.', 'success');
           showAlert('Orden creada. Procesando pago...', 'info');
+        } else if (data.success && data.data?.body?.redirectUrl) {
+          logDebug('✓ Orden creada. URL de redirección recibida.', 'success');
+          window.open(data.data.body.redirectUrl, '_blank');
+          showAlert('Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info');
         } else {
           throw new Error('Respuesta inesperada de Yappy');
         }
