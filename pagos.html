@@ -3,456 +3,607 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pago con Yappy - Road To</title>
+  <title>Pagos - Panel de Conductor</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #ca8a04;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #475569;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       padding: 20px;
     }
-    .container {
-      width: 100%;
-      max-width: 420px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 32px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-    }
+    .container { max-width: 520px; margin: 0 auto; }
     .header {
       text-align: center;
-      margin-bottom: 28px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
     }
-    .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-    .header p { font-size: 14px; color: rgba(255,255,255,0.6); }
-    .card {
-      background: rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-    .card-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 12px;
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-label { font-size: 13px; color: rgba(255,255,255,0.5); }
-    .info-value { font-size: 13px; font-weight: 600; }
-    .status-active {
-      background: rgba(34,197,94,0.2);
-      color: #22c55e;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-    }
-    .price-box {
-      text-align: center;
-      padding: 24px;
-      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2));
-      border-radius: 16px;
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); margin-top: 4px; }
+
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
       margin-bottom: 20px;
-      border: 1px solid rgba(99,102,241,0.2);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
     }
-    .price-label { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
-    .price-amount { font-size: 36px; font-weight: 700; }
-    .price-currency { font-size: 18px; font-weight: 500; opacity: 0.8; }
-    .btn-yappy {
-      width: 100%;
-      padding: 16px;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
+    .alert.show { display: flex; }
+    .alert-error { background: rgba(220,38,38,0.12); color: #fca5a5; border: 1px solid rgba(220,38,38,0.25); }
+    .alert-warn  { background: rgba(202,138,4,0.12); color: #fde047; border: 1px solid rgba(202,138,4,0.25); }
+    .alert-info  { background: rgba(37,99,235,0.12); color: #93c5fd; border: 1px solid rgba(37,99,235,0.25); }
+    .alert-success { background: rgba(22,163,74,0.12); color: #86efac; border: 1px solid rgba(22,163,74,0.25); }
+
+    .status-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+    .status-header {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .status-label { color: var(--text-muted); font-size: 0.875rem; }
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-badge.activa { background: rgba(22,163,74,0.2); color: #4ade80; }
+    .status-badge.inactiva { background: rgba(220,38,38,0.2); color: #f87171; }
+    .status-badge.pendiente { background: rgba(202,138,4,0.2); color: #facc15; }
+
+    .conductor-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0 0;
+      border-top: 1px solid var(--border);
+    }
+    .conductor-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .conductor-details h3 { font-size: 1.05rem; font-weight: 600; }
+    .conductor-details p { color: var(--text-muted); font-size: 0.875rem; margin-top: 2px; }
+
+    .plan-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .plan-price {
+      font-size: 3.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .plan-price span { font-size: 1.1rem; font-weight: 500; -webkit-text-fill-color: #94a3b8; }
+    .plan-period { color: var(--text-muted); margin-top: 10px; font-size: 0.9375rem; }
+    .plan-features {
+      list-style: none;
+      margin: 22px 0 0;
+      text-align: left;
+    }
+    .plan-features li {
+      padding: 9px 0;
+      display: flex;
+      align-items: center;
       gap: 10px;
-      transition: all 0.3s ease;
-      margin-bottom: 12px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(71,85,105,0.3);
     }
-    .btn-yappy-primary {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: #fff;
-      box-shadow: 0 8px 25px rgba(99,102,241,0.3);
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features li::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 700;
+      flex-shrink: 0;
     }
-    .btn-yappy-primary:hover {
+
+    .yappy-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .yappy-section h3 { margin-bottom: 16px; font-size: 1.125rem; }
+    .btn-yappy {
+      background: linear-gradient(135deg, #00a3e0, #0077b6);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-yappy:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(99,102,241,0.4);
+      box-shadow: 0 8px 24px rgba(0,163,224,0.3);
     }
-    .btn-yappy-primary:disabled {
+    .btn-yappy:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
+      box-shadow: none;
     }
-    .btn-yappy-secondary {
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-    .btn-yappy-secondary:hover {
-      background: rgba(255,255,255,0.12);
-    }
-    .loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
-    }
-    .loading.active { display: block; }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: #6366f1;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .error-box {
-      display: none;
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.3);
+
+    .debug-panel {
+      background: #020617;
       border-radius: 12px;
       padding: 16px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .error-box.active { display: block; }
-    .error-box h3 { font-size: 14px; margin-bottom: 8px; color: #fca5a5; }
-    .error-box p { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.5; }
-    .success-box {
-      display: none;
-      background: rgba(34,197,94,0.15);
-      border: 1px solid rgba(34,197,94,0.3);
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-    }
-    .success-box.active { display: block; }
-    .success-icon { font-size: 48px; margin-bottom: 12px; }
-    .debug-log {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      width: 380px;
-      max-height: 300px;
+      margin-top: 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.75rem;
+      max-height: 320px;
       overflow-y: auto;
-      background: rgba(0,0,0,0.85);
-      border-radius: 12px;
-      padding: 12px;
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      color: #4ade80;
-      z-index: 1000;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid #1e293b;
     }
-    .debug-log .error { color: #f87171; }
-    .debug-log .info { color: #60a5fa; }
-    .debug-log .warn { color: #fbbf24; }
-    .yappy-logo {
-      width: 28px;
-      height: 28px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 14px;
+    .debug-panel h4 {
+      color: #64748b;
+      margin-bottom: 10px;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      position: sticky;
+      top: 0;
+      background: #020617;
+      padding-bottom: 6px;
     }
-    .hidden { display: none !important; }
+    .debug-line {
+      padding: 2px 0;
+      color: #94a3b8;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    .debug-line.error { color: #f87171; }
+    .debug-line.success { color: #4ade80; }
+    .debug-line.warn { color: #facc15; }
+    .debug-line.info { color: #93c5fd; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     @media (max-width: 480px) {
-      .container { padding: 24px; }
-      .debug-log { width: calc(100% - 20px); left: 10px; right: 10px; }
+      body { padding: 12px; }
+      .plan-price { font-size: 2.6rem; }
     }
   </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Pago de Suscripción</h1>
-      <p>Activa tu cuenta de conductor</p>
+      <h1>💳 Pagos</h1>
+      <p>Gestiona tu suscripción de conductor</p>
     </div>
 
-    <!-- Datos del conductor -->
-    <div class="card" id="conductor-card">
-      <div class="card-title">Datos del Conductor</div>
-      <div id="conductor-info">
-        <div class="info-row">
-          <span class="info-label">Nombre</span>
-          <span class="info-value" id="info-nombre">Cargando...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Email</span>
-          <span class="info-value" id="info-email">Cargando...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Estado</span>
-          <span class="info-value"><span class="status-active" id="info-status">Cargando...</span></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Vehículo</span>
-          <span class="info-value" id="info-vehiculo">Cargando...</span>
+    <div id="alert-box" class="alert"></div>
+
+    <div class="status-card" id="status-card" style="display:none;">
+      <div class="status-header">
+        <span class="status-label">Estado de suscripción</span>
+        <span id="status-badge" class="status-badge inactiva">—</span>
+      </div>
+      <div class="conductor-info">
+        <div class="conductor-avatar" id="conductor-initial">?</div>
+        <div class="conductor-details">
+          <h3 id="conductor-name">Cargando...</h3>
+          <p id="conductor-vehiculo">—</p>
         </div>
       </div>
     </div>
 
-    <!-- Precio -->
-    <div class="price-box">
-      <div class="price-label">Mensualidad</div>
-      <div class="price-amount">$5.00 <span class="price-currency">USD</span></div>
+    <div class="plan-card" id="plan-card" style="display:none;">
+      <div class="plan-price">$5.00 <span>/ 24h</span></div>
+      <p class="plan-period">Activación por 24 horas de servicio</p>
+      <ul class="plan-features">
+        <li>Acceso al panel de viajes</li>
+        <li>Notificaciones en tiempo real</li>
+        <li>Soporte prioritario</li>
+        <li>Historial de viajes</li>
+      </ul>
     </div>
 
-    <!-- Loading -->
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <p>Procesando pago con Yappy...</p>
+    <div class="yappy-section" id="yappy-section" style="display:none;">
+      <h3>Pagar con Yappy</h3>
+      <button id="btn-pagar" class="btn-yappy">
+        <span id="btn-text">Pagar $5.00 con Yappy</span>
+      </button>
     </div>
 
-    <!-- Error -->
-    <div class="error-box" id="error-box">
-      <h3 id="error-title">Error en el pago</h3>
-      <p id="error-message">Intente de nuevo más tarde.</p>
+    <div class="debug-panel">
+      <h4>🐛 Debug Log</h4>
+      <div id="debug-log"></div>
     </div>
-
-    <!-- Success -->
-    <div class="success-box" id="success-box">
-      <div class="success-icon">✅</div>
-      <h3>¡Pago exitoso!</h3>
-      <p>Tu suscripción ha sido activada.</p>
-    </div>
-
-    <!-- Botones -->
-    <button class="btn-yappy btn-yappy-primary" id="btn-pagar" onclick="iniciarPago()">
-      <div class="yappy-logo">Y</div>
-      Pagar $5.00 con Yappy
-    </button>
-
-    <button class="btn-yappy btn-yappy-secondary hidden" id="btn-reintentar" onclick="iniciarPago()">
-      Reintentar pago
-    </button>
-
-    <button class="btn-yappy btn-yappy-secondary" onclick="window.location.href='dashboard.html'">
-      Volver al Dashboard
-    </button>
   </div>
-
-  <!-- Debug Log -->
-  <div class="debug-log" id="debug-log"></div>
 
   <script>
     // ============================================================
-    // CONFIGURACIÓN
+    // CONFIGURACIÓN - SOLO UNA VEZ
     // ============================================================
-    const SUPABASE_URL = 'https://ugchmuhjzzyofooogprlr.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4';
-    const API_URL = 'https://conductores-api.onrender.com/api/yappy';
+    const SUPABASE_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
+    const YAPPY_DOMAIN = 'https://nrdesingcorp.com';
 
     let conductorData = null;
-    let currentUser = null;
+    let authUser = null;
+    let authReady = false;
 
     // ============================================================
-    // DEBUG LOG
+    // DEBUG
     // ============================================================
-    function log(msg, type = 'info') {
-      const debugLog = document.getElementById('debug-log');
-      const time = new Date().toLocaleTimeString();
-      const colorClass = type === 'error' ? 'error' : type === 'warn' ? 'warn' : 'info';
-      debugLog.innerHTML += `<div class="${colorClass}">[${time}] ${msg}</div>`;
-      debugLog.scrollTop = debugLog.scrollHeight;
+    function logDebug(msg, type = 'info') {
+      const log = document.getElementById('debug-log');
+      const time = new Date().toLocaleTimeString('es-PA', { hour12: false });
+      const line = document.createElement('div');
+      line.className = `debug-line ${type}`;
+      line.textContent = `[${time}] ${msg}`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
       console.log(`[YAPPY] ${msg}`);
     }
 
     // ============================================================
-    // INICIALIZACIÓN
+    // ALERTAS
     // ============================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-      log('DOM cargado. Iniciando autenticación...');
-      await cargarDatosConductor();
-    });
+    function showAlert(msg, type = 'error') {
+      const box = document.getElementById('alert-box');
+      box.className = `alert alert-${type} show`;
+      box.textContent = msg;
+    }
+    function hideAlert() {
+      document.getElementById('alert-box').classList.remove('show');
+    }
+
+    function setBtnLoading(loading) {
+      const btn = document.getElementById('btn-pagar');
+      const text = document.getElementById('btn-text');
+      if (loading) {
+        btn.disabled = true;
+        text.innerHTML = '<span class="spinner"></span> Procesando...';
+      } else {
+        btn.disabled = false;
+        text.textContent = 'Pagar $5.00 con Yappy';
+      }
+    }
+
+    function updateStatusBadge(status) {
+      const badge = document.getElementById('status-badge');
+      badge.className = 'status-badge';
+      if (status === 'active' || status === 'activa') {
+        badge.classList.add('activa');
+        badge.textContent = 'Activa';
+      } else if (status === 'pendiente') {
+        badge.classList.add('pendiente');
+        badge.textContent = 'Pendiente';
+      } else {
+        badge.classList.add('inactiva');
+        badge.textContent = 'Inactiva';
+      }
+    }
+
+    function showSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    }
+
+    // ============================================================
+    // RESTAURAR SESIÓN
+    // ============================================================
+    async function restaurarSesionDesdeStorage() {
+      try {
+        const raw = localStorage.getItem('supabase_session');
+        if (!raw) return false;
+        const stored = JSON.parse(raw);
+        if (!stored.access_token) return false;
+
+        logDebug('Intentando restaurar sesión desde localStorage...');
+        const { data, error } = await supabaseClient.auth.setSession({
+          access_token: stored.access_token,
+          refresh_token: stored.refresh_token,
+        });
+
+        if (error || !data.session) {
+          localStorage.removeItem('supabase_session');
+          return false;
+        }
+
+        logDebug('✓ Sesión restaurada desde localStorage', 'success');
+        return true;
+      } catch (e) {
+        localStorage.removeItem('supabase_session');
+        return false;
+      }
+    }
 
     // ============================================================
     // CARGAR DATOS DEL CONDUCTOR
     // ============================================================
     async function cargarDatosConductor() {
+      logDebug('Iniciando carga de página...');
+
       try {
-        log('Verificando sesión de Supabase...');
+        logDebug('Verificando sesión de Supabase...');
+        let { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
 
-        // Intentar obtener sesión
-        let { data: { session } } = await supabase.auth.getSession();
-
-        if (!session) {
-          log('No hay sesión en cookies. Intentando localStorage...', 'warn');
-          const stored = localStorage.getItem('supabase.auth.token');
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              const accessToken = parsed?.currentSession?.access_token;
-              if (accessToken) {
-                const { data: { user } } = await supabase.auth.getUser(accessToken);
-                if (user) {
-                  log('Sesión restaurada desde localStorage');
-                  currentUser = user;
-                }
-              }
-            } catch (e) {
-              log('Error restaurando sesión: ' + e.message, 'error');
-            }
+        if (!sessionData?.session) {
+          const restored = await restaurarSesionDesdeStorage();
+          if (restored) {
+            const refreshed = await supabaseClient.auth.getSession();
+            sessionData = refreshed.data;
+            sessionError = refreshed.error;
           }
-        } else {
-          currentUser = session.user;
-          log('Sesión encontrada. Token: ' + session.access_token.substring(0, 20) + '...');
         }
 
-        if (!currentUser) {
-          log('No hay usuario autenticado. Redirigiendo...', 'error');
-          mostrarError('Sesión no encontrada', 'Por favor inicia sesión en el dashboard primero.');
-          setTimeout(() => window.location.href = 'dashboard.html', 3000);
+        if (sessionError) {
+          logDebug(`Error de sesión: ${sessionError.message}`, 'error');
+          showAlert('Error al verificar sesión. Intenta recargar la página.');
           return;
         }
 
-        log('Usuario autenticado: ' + currentUser.id);
-        log('Email: ' + currentUser.email);
+        if (!sessionData?.session) {
+          logDebug('No hay sesión activa. Usuario no logueado.', 'warn');
+          showAlert('No has iniciado sesión. Redirigiendo al login...', 'warn');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
+          return;
+        }
 
-        // Cargar datos del conductor
-        log('Buscando datos del conductor en tabla "conductores"...');
-        const { data: conductor, error } = await supabase
+        const accessToken = sessionData.session.access_token;
+        logDebug(`Sesión encontrada. Token: ${accessToken.slice(0, 16)}...`);
+
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser(accessToken);
+
+        if (userError || !userData?.user) {
+          logDebug(`Error obteniendo usuario: ${userError?.message || 'Sin usuario'}`, 'error');
+          showAlert('Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn');
+          localStorage.removeItem('supabase_session');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
+          return;
+        }
+
+        authUser = userData.user;
+        authReady = true;
+        logDebug(`Usuario autenticado: ${authUser.id}`);
+        logDebug(`Email: ${authUser.email || 'N/A'}`);
+
+        logDebug('Buscando datos del conductor en tabla "conductores"...');
+        const { data: conductor, error: condError } = await supabaseClient
           .from('conductores')
-          .select('nombres, apellidos, status, modelo, marca, placa, color, celular, auth_user_id')
-          .eq('auth_user_id', currentUser.id)
-          .single();
+          .select('id,nombres,apellidos,status,marca,modelo,placa,color,celular,direccion,auth_user_id,payment_status,fecha_vencimiento,suscripcion_activa,fecha_ultimo_pago,proximo_pago,pago_al_dia')
+          .eq('auth_user_id', authUser.id)
+          .maybeSingle();
 
-        if (error || !conductor) {
-          log('Error cargando conductor: ' + (error?.message || 'No encontrado'), 'error');
-          mostrarError('Error', 'No se encontraron datos del conductor.');
+        if (condError) {
+          logDebug(`Error DB conductores: ${condError.message}`, 'error');
+          showAlert('Error al cargar datos del conductor desde el servidor.');
+          return;
+        }
+
+        if (!conductor) {
+          logDebug('No se encontró registro en tabla conductores para este usuario.', 'warn');
+          showAlert('Tu cuenta no tiene perfil de conductor registrado. Contacta al administrador.', 'warn');
           return;
         }
 
         conductorData = conductor;
-        log('Conductor: ' + conductor.nombres + ' ' + conductor.apellidos + ' | Status: ' + conductor.status);
+        const nombreCompleto = `${conductor.nombres || ''} ${conductor.apellidos || ''}`.trim();
+        const inicial = (conductor.nombres?.[0] || '?').toUpperCase();
 
-        // Mostrar en UI
-        document.getElementById('info-nombre').textContent = conductor.nombres + ' ' + conductor.apellidos;
-        document.getElementById('info-email').textContent = currentUser.email;
-        document.getElementById('info-status').textContent = conductor.status === 'active' ? 'Activo' : conductor.status;
-        document.getElementById('info-vehiculo').textContent =
-          (conductor.marca || '') + ' ' + (conductor.modelo || '') + ' • ' + (conductor.placa || '') + ' • ' + (conductor.color || '');
+        const vehiculoInfo = [];
+        if (conductor.marca) vehiculoInfo.push(conductor.marca);
+        if (conductor.modelo) vehiculoInfo.push(conductor.modelo);
+        if (conductor.placa) vehiculoInfo.push(`Placa: ${conductor.placa}`);
+        if (conductor.color) vehiculoInfo.push(conductor.color);
+        const vehiculo = vehiculoInfo.join(' • ') || 'Sin vehículo registrado';
+
+        document.getElementById('conductor-name').textContent = nombreCompleto || 'Conductor';
+        document.getElementById('conductor-initial').textContent = inicial;
+        document.getElementById('conductor-vehiculo').textContent = vehiculo;
+        updateStatusBadge(conductor.status);
+
+        logDebug(`Conductor: ${nombreCompleto} | Status: ${conductor.status || 'inactiva'} | Vehículo: ${vehiculo}`);
+
+        showSection('status-card');
+        showSection('plan-card');
+        showSection('yappy-section');
+        hideAlert();
 
       } catch (err) {
-        log('Error general: ' + err.message, 'error');
-        mostrarError('Error', err.message);
+        logDebug(`Error inesperado: ${err.message}`, 'error');
+        console.error(err);
+        showAlert('Error inesperado. Revisa la consola (F12) para más detalles.');
       }
     }
 
     // ============================================================
-    // INICIAR PAGO CON YAPPY
+    // PAGO CON YAPPY - Flujo completo
     // ============================================================
     async function iniciarPago() {
-      const btn = document.getElementById('btn-pagar');
-      const loading = document.getElementById('loading');
-      const errorBox = document.getElementById('error-box');
+      if (!authReady || !conductorData) {
+        showAlert('Datos del conductor no cargados. Espera un momento o recarga la página.');
+        return;
+      }
 
-      btn.disabled = true;
-      loading.classList.add('active');
-      errorBox.classList.remove('active');
+      setBtnLoading(true);
+      hideAlert();
 
       try {
-        log('=== INICIANDO PAGO CON YAPPY ===');
-        log('Llamando a API en Render...');
+        logDebug('=== INICIANDO PAGO CON YAPPY ===');
+        logDebug('Llamando a API en Render...');
+        logDebug(`POST ${RENDER_API_URL} | action=create-order`);
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(RENDER_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
           body: JSON.stringify({
             action: 'create-order',
+            urlDomain: YAPPY_DOMAIN,
             total: '5.00',
-            subtotal: '5.00'
-          })
+          }),
         });
 
         const data = await response.json();
-        log('Status: ' + response.status);
-        log('Response: ' + JSON.stringify(data).substring(0, 200) + '...');
+        logDebug(`Status: ${response.status}`);
+        logDebug(`Response: ${JSON.stringify(data).substring(0, 300)}...`);
 
         if (!response.ok) {
-          throw new Error(data.error || 'Error ' + response.status);
+          throw new Error(data.error || data.details?.description || 'Error creando orden');
         }
 
         if (data.success && data.data?.body?.documentName) {
-          // Éxito - redirigir a URL de Yappy
-          log('✓ Orden creada. Redirigiendo a Yappy...');
-          const redirectUrl = data.data.body.documentName;
-          window.open(redirectUrl, '_blank');
-          mostrarExito();
+          logDebug('✓ Orden creada. Redirigiendo a Yappy...', 'success');
+          window.open(data.data.body.documentName, '_blank');
+          showAlert('Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info');
         } else if (data.success && data.data?.body?.token) {
-          // También puede venir como token
-          log('✓ Orden creada. Token recibido.');
-          mostrarExito();
+          logDebug('✓ Orden creada. Token recibido.', 'success');
+          showAlert('Orden creada. Procesando pago...', 'info');
         } else {
           throw new Error('Respuesta inesperada de Yappy');
         }
 
       } catch (err) {
-        log('ERROR: ' + err.message, 'error');
-        mostrarError('Error creando orden', err.message);
-        btn.disabled = false;
-        document.getElementById('btn-reintentar').classList.remove('hidden');
+        logDebug(`ERROR: ${err.message}`, 'error');
+        showAlert('Error: ' + err.message);
       } finally {
-        loading.classList.remove('active');
+        setBtnLoading(false);
       }
     }
 
     // ============================================================
-    // MOSTRAR ERROR
+    // ACTIVAR SUSCRIPCIÓN
     // ============================================================
-    function mostrarError(title, message) {
-      document.getElementById('error-title').textContent = title;
-      document.getElementById('error-message').textContent = message;
-      document.getElementById('error-box').classList.add('active');
-      document.getElementById('btn-pagar').disabled = false;
+    async function activarSuscripcion() {
+      if (!authUser || !conductorData) {
+        logDebug('No hay authUser o conductorData', 'error');
+        return;
+      }
+
+      try {
+        logDebug('Activando suscripción...');
+        const ahora = new Date();
+        const expiracion = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
+
+        const { error } = await supabaseClient
+          .from('conductores')
+          .update({
+            status: 'active',
+            suscripcion_activa: true,
+            pago_al_dia: true,
+            fecha_ultimo_pago: ahora.toISOString(),
+            proximo_pago: expiracion.toISOString(),
+            fecha_vencimiento: expiracion.toISOString(),
+            payment_status: 'paid',
+          })
+          .eq('auth_user_id', authUser.id);
+
+        if (error) {
+          logDebug(`Error DB: ${error.message}`, 'error');
+          showAlert('Pago recibido, pero hubo un error activando tu cuenta. Contacta soporte.');
+          return;
+        }
+
+        updateStatusBadge('active');
+        logDebug(`✓ Suscripción activada hasta ${expiracion.toLocaleString('es-PA')}`, 'success');
+        showAlert('¡Suscripción activada! Tienes 24 horas de servicio.', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 3000);
+
+      } catch (err) {
+        logDebug(`Error: ${err.message}`, 'error');
+      }
     }
 
     // ============================================================
-    // MOSTRAR ÉXITO
+    // AUTH LISTENERS
     // ============================================================
-    function mostrarExito() {
-      document.getElementById('success-box').classList.add('active');
-      document.getElementById('btn-pagar').classList.add('hidden');
-      document.getElementById('btn-reintentar').classList.add('hidden');
-    }
-
-    // ============================================================
-    // EVENTOS DE AUTENTICACIÓN
-    // ============================================================
-    supabase.auth.onAuthStateChange((event, session) => {
-      log('Auth event: ' + event);
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      logDebug(`Auth event: ${event}`);
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('supabase_session');
+        showAlert('Sesión cerrada. Redirigiendo al login...', 'warn');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+      }
       if (event === 'SIGNED_IN' && session) {
-        currentUser = session.user;
-        cargarDatosConductor();
+        localStorage.setItem('supabase_session', JSON.stringify({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_at: session.expires_at,
+        }));
       }
+    });
+
+    // ============================================================
+    // INICIALIZACIÓN
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      logDebug('DOM cargado. Iniciando autenticación...');
+
+      // Asignar evento al botón (NO onclick en HTML)
+      document.getElementById('btn-pagar').addEventListener('click', iniciarPago);
+
+      cargarDatosConductor();
     });
   </script>
 </body>
