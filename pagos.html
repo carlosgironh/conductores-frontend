@@ -473,7 +473,7 @@
     }
 
     // ============================================================
-    // PAGO CON YAPPY - Flujo completo v3
+    // PAGO CON YAPPY - Flujo completo v2.1 (corregido)
     // ============================================================
     async function iniciarPago() {
       if (!authReady || !conductorData) {
@@ -485,7 +485,10 @@
       hideAlert();
 
       try {
-        logDebug('=== INICIANDO PAGO CON YAPPY v3 ===');
+        logDebug('=== INICIANDO PAGO CON YAPPY v2.1 ===');
+        logDebug('Correcciones aplicadas:');
+        logDebug('1. Authorization: token SIN "Bearer " prefix');
+        logDebug('2. Body incluye aliasYappy (teléfono destinatario)');
         logDebug('Llamando a API en Render...');
         logDebug(`POST ${RENDER_API_URL} | action=create-order`);
 
