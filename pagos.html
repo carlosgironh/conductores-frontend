@@ -181,7 +181,6 @@
       display: none;
     }
     .yappy-qr.show { display: block; }
-    .yappy-qr img { max-width: 200px; }
     .yappy-qr p { color: #333; margin-top: 10px; font-size: 14px; }
 
     .debug-panel {
@@ -275,11 +274,9 @@
         <span id="btn-text">Pagar $5.00 con Yappy</span>
       </button>
 
-      <!-- QR o link de pago -->
       <div id="yappy-qr" class="yappy-qr">
-        <p><strong>Escanea con Yappy:</strong></p>
+        <p><strong>Código de pago:</strong></p>
         <div id="qr-content"></div>
-        <p style="margin-top: 8px; font-size: 12px;">O usa el botón de arriba para abrir Yappy</p>
       </div>
     </div>
 
@@ -299,6 +296,8 @@
 
     const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
     const YAPPY_DOMAIN = 'https://nrdesingcorp.com';
+    // NÚMERO DE TELÉFONO YAPPY (sin prefijo, sin guiones)
+    const YAPPY_PHONE = '69977978';
 
     let conductorData = null;
     let authUser = null;
@@ -491,7 +490,7 @@
     }
 
     // ============================================================
-    // PAGO CON YAPPY - Flujo completo v2.2 (FUNCIONANDO!)
+    // PAGO CON YAPPY - v2.4 (Fix aliasYappy)
     // ============================================================
     async function iniciarPago() {
       if (!authReady || !conductorData) {
@@ -503,8 +502,8 @@
       hideAlert();
 
       try {
-        logDebug('=== INICIANDO PAGO CON YAPPY v2.2 ===');
-        logDebug('✅ API FUNCIONANDO - Código 0000 confirmado');
+        logDebug('=== INICIANDO PAGO CON YAPPY v2.4 ===');
+        logDebug('Enviando aliasYappy desde frontend: ' + YAPPY_PHONE);
         logDebug('Llamando a API en Render...');
         logDebug(`POST ${RENDER_API_URL} | action=create-order`);
 
@@ -517,6 +516,7 @@
           body: JSON.stringify({
             action: 'create-order',
             total: '5.00',
+            aliasYappy: YAPPY_PHONE  // ← Enviar número de teléfono desde frontend
           }),
         });
 
@@ -525,7 +525,10 @@
         logDebug(`Response: ${JSON.stringify(data).substring(0, 300)}...`);
 
         if (!response.ok) {
-          throw new Error(data.error || data.details?.description || 'Error creando orden');
+          if (data.details?.status?.code === 'YAPPY-004') {
+            throw new Error('YAPPY-004: Verifica que el número de teléfono esté registrado en Yappy.');
+          }
+          throw new Error(data.error || data.message || 'Error creando orden');
         }
 
         if (data.success) {
@@ -535,25 +538,21 @@
 
           logDebug('✓ Orden creada exitosamente!', 'success');
           logDebug(`Transaction ID: ${transactionId}`, 'success');
-          logDebug(`Document Name: ${documentName ? documentName.substring(0, 50) + '...' : 'N/A'}`, 'success');
 
-          // Si tenemos documentName (URL o QR), mostrarlo
           if (documentName) {
-            // Si es una URL, abrir en nueva pestaña
             if (documentName.startsWith('http')) {
-              logDebug('Abriendo URL de pago en nueva pestaña...');
+              logDebug('Abriendo URL de pago...');
               window.open(documentName, '_blank');
               showAlert('Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info');
             } else {
-              // Si es un string que representa un QR o código
               logDebug('Mostrando código de pago...');
-              document.getElementById('qr-content').innerHTML = `<p style="font-size: 18px; font-weight: bold; color: #333;">${documentName}</p>`;
+              document.getElementById('qr-content').innerHTML = 
+                `<p style="font-size: 18px; font-weight: bold; color: #333;">${documentName}</p>`;
               document.getElementById('yappy-qr').classList.add('show');
               showAlert('Usa el código mostrado para completar el pago en Yappy.', 'info');
             }
           } else if (paymentToken) {
-            // Si solo tenemos token, guardarlo para verificación posterior
-            logDebug('Token de pago recibido. Guardando para verificación...');
+            logDebug('Token de pago recibido.');
             localStorage.setItem('yappy_pending_payment', JSON.stringify({
               transactionId: transactionId,
               token: paymentToken,
@@ -562,7 +561,6 @@
             }));
             showAlert('Orden creada. Abre Yappy y busca la orden pendiente.', 'info');
           }
-
         } else {
           throw new Error('Respuesta inesperada de Yappy');
         }
@@ -646,7 +644,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       logDebug('DOM cargado. Iniciando autenticación...');
 
-      // Asignar evento al botón (NO onclick en HTML)
       document.getElementById('btn-pagar').addEventListener('click', iniciarPago);
 
       cargarDatosConductor();
