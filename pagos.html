@@ -149,7 +149,40 @@
     }
     .yappy-section h3 { margin-bottom: 16px; font-size: 1.125rem; }
 
-    /* Contenedor del botón Yappy */
+    .input-group {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .input-group input::placeholder {
+      color: #64748b;
+    }
+    .input-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
     .yappy-btn-container {
       min-height: 60px;
       display: flex;
@@ -294,6 +327,21 @@
 
     <div class="yappy-section" id="yappy-section" style="display:none;">
       <h3>Pagar con Yappy</h3>
+
+      <!-- Input para número de Yappy -->
+      <div class="input-group">
+        <label for="yappy-phone">📱 Número de celular para recibir la notificación de Yappy</label>
+        <input
+          type="tel"
+          id="yappy-phone"
+          placeholder="Ej: 60701234"
+          maxlength="8"
+          inputmode="numeric"
+          autocomplete="off"
+        >
+        <p class="input-hint">Ingresa tu número de celular registrado en Yappy. Se sugiere el número de tu perfil pero puedes cambiarlo.</p>
+      </div>
+
       <div id="yappy-status" class="yappy-status loading">Verificando Yappy...</div>
 
       <div class="yappy-btn-container">
@@ -312,7 +360,7 @@
       </div>
 
       <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">
-        Al hacer clic, Yappy te pedirá tu número de celular para enviarte la notificación de pago.
+        Al hacer clic, Yappy enviará una notificación push a tu celular para autorizar el pago.
       </p>
     </div>
 
@@ -518,12 +566,20 @@
 
         logDebug(`Conductor: ${nombreCompleto} | Status: ${conductor.status || 'inactiva'} | Vehículo: ${vehiculo}`);
 
+        // Pre-llenar número de celular si existe
+        if (conductor.celular) {
+          const cleanPhone = String(conductor.celular).replace(/\D/g, '').replace(/^507/, '');
+          if (cleanPhone.length >= 7) {
+            document.getElementById('yappy-phone').value = cleanPhone;
+            logDebug(`Número pre-llenado desde perfil: ${cleanPhone}`, 'info');
+          }
+        }
+
         showSection('status-card');
         showSection('plan-card');
         showSection('yappy-section');
         hideAlert();
 
-        // Inicializar componente Yappy después de cargar datos
         initYappyComponent();
 
       } catch (err) {
@@ -540,7 +596,6 @@
       logDebug('Inicializando componente Yappy...');
 
       const btnYappy = document.getElementById('btn-yappy');
-      const btnFallback = document.getElementById('btn-fallback');
 
       if (!btnYappy) {
         logDebug('Componente btn-yappy no encontrado en DOM', 'error');
@@ -548,20 +603,17 @@
         return;
       }
 
-      // Verificar si el componente se cargó correctamente
       let checkCount = 0;
-      const maxChecks = 20; // 10 segundos
+      const maxChecks = 20;
 
       const checkInterval = setInterval(() => {
         checkCount++;
 
-        // Intentar detectar si el componente está listo
         if (btnYappy.shadowRoot || btnYappy.isConnected) {
           clearInterval(checkInterval);
           yappyComponentReady = true;
           logDebug('Componente Yappy detectado en DOM', 'success');
 
-          // Escuchar eventos del componente
           setupYappyEvents(btnYappy);
           updateYappyStatus('online', '✓ Yappy disponible');
           return;
@@ -576,34 +628,26 @@
     }
 
     function setupYappyEvents(btnYappy) {
-      // eventClick - cuando el usuario hace clic en el botón
       btnYappy.addEventListener('eventClick', async () => {
         logDebug('=== CLICK EN BOTÓN YAPPY ===');
         await handleYappyPayment();
       });
 
-      // eventSuccess - pago exitoso
       btnYappy.addEventListener('eventSuccess', (event) => {
         logDebug('✓ Transacción exitosa: ' + JSON.stringify(event.detail), 'success');
         showAlert('¡Pago completado exitosamente!', 'success');
         activarSuscripcion();
       });
 
-      // eventError - error en pago
       btnYappy.addEventListener('eventError', (event) => {
         logDebug('✗ Error en transacción: ' + JSON.stringify(event.detail), 'error');
         showAlert('Error en el pago: ' + (event.detail?.message || 'Error desconocido'));
       });
 
-      // isYappyOnline - estado del canal Yappy
       btnYappy.addEventListener('isYappyOnline', (event) => {
         const online = event.detail === true;
         logDebug(`Yappy online event: ${online}`, online ? 'success' : 'warn');
-        if (online) {
-          updateYappyStatus('online', '✓ Yappy disponible');
-        } else {
-          updateYappyStatus('offline', '✗ Yappy no disponible');
-        }
+        updateYappyStatus(online ? 'online' : 'offline', online ? '✓ Yappy disponible' : '✗ Yappy no disponible');
       });
     }
 
@@ -620,7 +664,33 @@
     }
 
     // ============================================================
-    // MANEJAR PAGO YAPPY (Backend → Frontend → Componente Yappy)
+    // OBTENER NÚMERO YAPPY DEL INPUT (con validación)
+    // ============================================================
+    function getYappyPhone() {
+      const input = document.getElementById('yappy-phone');
+      const phone = input.value.trim().replace(/\D/g, '');
+
+      if (!phone || phone.length < 7) {
+        showAlert('Por favor ingresa un número de celular válido (mínimo 7 dígitos)');
+        input.focus();
+        return null;
+      }
+
+      return phone;
+    }
+
+    // Solo permitir números en el input
+    document.addEventListener('DOMContentLoaded', () => {
+      const phoneInput = document.getElementById('yappy-phone');
+      if (phoneInput) {
+        phoneInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '');
+        });
+      }
+    });
+
+    // ============================================================
+    // MANEJAR PAGO YAPPY
     // ============================================================
     async function handleYappyPayment() {
       if (!authReady || !conductorData) {
@@ -628,7 +698,12 @@
         return;
       }
 
-      // Loading
+      // Obtener número del input (validado)
+      const yappyPhone = getYappyPhone();
+      if (!yappyPhone) return;
+
+      logDebug(`Número Yappy ingresado: ${yappyPhone}`);
+
       if (yappyComponentReady) {
         const btnYappy = document.getElementById('btn-yappy');
         if (btnYappy) btnYappy.isButtonLoading = true;
@@ -637,7 +712,8 @@
       }
 
       try {
-        logDebug('=== INICIANDO PAGO CON YAPPY v3.0 ===');
+        logDebug('=== INICIANDO PAGO CON YAPPY v3.3 ===');
+        logDebug(`Enviando aliasYappy (celular conductor): ${yappyPhone}`);
         logDebug('Llamando a API en Render...');
         logDebug(`POST ${RENDER_API_URL} | action=create-order`);
 
@@ -650,8 +726,8 @@
           body: JSON.stringify({
             action: 'create-order',
             total: '5.00',
-            subtotal: '5.00'
-            // aliasYappy va en el backend (RoadTo = 69977978)
+            subtotal: '5.00',
+            aliasYappy: yappyPhone  // ← Número ingresado manualmente por el conductor
           }),
         });
 
@@ -674,7 +750,6 @@
           logDebug(`TransactionId: ${transactionId}`, 'success');
           logDebug(`DocumentName: ${documentName ? documentName.substring(0, 50) + '...' : 'NO RECIBIDO'}`);
 
-          // Preparar params para componente Yappy
           const params = {
             transactionId: transactionId,
             documentName: documentName,
@@ -684,19 +759,17 @@
           logDebug(`Params: ${JSON.stringify(params).substring(0, 200)}...`);
 
           if (yappyComponentReady) {
-            // Usar componente oficial
             logDebug('Enviando params al componente Yappy...');
             const btnYappy = document.getElementById('btn-yappy');
             btnYappy.eventPayment(params);
           } else {
-            // Fallback: redirección manual
             logDebug('Usando redirección manual (fallback)...');
             if (documentName) {
               if (documentName.startsWith('http')) {
                 window.open(documentName, '_blank');
                 showAlert('Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info');
               } else {
-                document.getElementById('qr-content').innerHTML = 
+                document.getElementById('qr-content').innerHTML =
                   `<p style="font-size: 18px; font-weight: bold; color: #333;">${documentName}</p>`;
                 document.getElementById('yappy-qr').classList.add('show');
                 showAlert('Usa el código mostrado para completar el pago en Yappy.', 'info');
