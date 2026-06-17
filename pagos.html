@@ -1,461 +1,801 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagos - RoadTo</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- CDN del Botón de Pago Yappy -->
-    <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 { color: #333; text-align: center; margin-bottom: 10px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
-        .info-box {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .info-box h3 { color: #667eea; margin-bottom: 10px; }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .info-row:last-child { border-bottom: none; }
-        .label { color: #666; font-weight: 500; }
-        .value { color: #333; font-weight: 600; }
-        .payment-section {
-            text-align: center;
-            padding: 20px 0;
-        }
-        .payment-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .amount {
-            font-size: 32px;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-        .yappy-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            min-height: 60px;
-        }
-        .btn-yappy-fallback {
-            width: 100%;
-            max-width: 300px;
-            padding: 16px;
-            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-yappy-fallback.show { display: flex; }
-        .btn-yappy-fallback:disabled { opacity: 0.6; cursor: not-allowed; }
-        .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        .loading .spinner { display: block; }
-        .loading .btn-text { display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .alert.show { display: block; }
-        .alert-error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-        .alert-success { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
-        .alert-info { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
-        .debug-log {
-            background: #1e1e1e;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            padding: 15px;
-            border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-        .debug-log .timestamp { color: #888; }
-        .debug-log .error { color: #ff4444; }
-        .debug-log .success { color: #00ff88; }
-        .debug-log .info { color: #66ccff; }
-        .status-yappy {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        .status-online { background: #d1fae5; color: #059669; }
-        .status-offline { background: #fee2e2; color: #dc2626; }
-        .status-loading { background: #fef3c7; color: #d97706; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagos - Panel de Conductor</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- CDN del Botón de Pago Yappy -->
+  <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #ca8a04;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #475569;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 520px; margin: 0 auto; }
+    .header {
+      text-align: center;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .header h1 { font-size: 1.5rem; font-weight: 700; }
+    .header p { color: var(--text-muted); margin-top: 4px; }
+
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .alert.show { display: flex; }
+    .alert-error { background: rgba(220,38,38,0.12); color: #fca5a5; border: 1px solid rgba(220,38,38,0.25); }
+    .alert-warn  { background: rgba(202,138,4,0.12); color: #fde047; border: 1px solid rgba(202,138,4,0.25); }
+    .alert-info  { background: rgba(37,99,235,0.12); color: #93c5fd; border: 1px solid rgba(37,99,235,0.25); }
+    .alert-success { background: rgba(22,163,74,0.12); color: #86efac; border: 1px solid rgba(22,163,74,0.25); }
+
+    .status-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .status-label { color: var(--text-muted); font-size: 0.875rem; }
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-badge.activa { background: rgba(22,163,74,0.2); color: #4ade80; }
+    .status-badge.inactiva { background: rgba(220,38,38,0.2); color: #f87171; }
+    .status-badge.pendiente { background: rgba(202,138,4,0.2); color: #facc15; }
+
+    .conductor-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0 0;
+      border-top: 1px solid var(--border);
+    }
+    .conductor-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .conductor-details h3 { font-size: 1.05rem; font-weight: 600; }
+    .conductor-details p { color: var(--text-muted); font-size: 0.875rem; margin-top: 2px; }
+
+    .plan-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .plan-price {
+      font-size: 3.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .plan-price span { font-size: 1.1rem; font-weight: 500; -webkit-text-fill-color: #94a3b8; }
+    .plan-period { color: var(--text-muted); margin-top: 10px; font-size: 0.9375rem; }
+    .plan-features {
+      list-style: none;
+      margin: 22px 0 0;
+      text-align: left;
+    }
+    .plan-features li {
+      padding: 9px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(71,85,105,0.3);
+    }
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features li::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .yappy-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .yappy-section h3 { margin-bottom: 16px; font-size: 1.125rem; }
+
+    /* Contenedor del botón Yappy */
+    .yappy-btn-container {
+      min-height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 16px 0;
+    }
+
+    .btn-yappy-fallback {
+      background: linear-gradient(135deg, #00a3e0, #0077b6);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-yappy-fallback.show { display: inline-flex; }
+    .btn-yappy-fallback:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,163,224,0.3);
+    }
+    .btn-yappy-fallback:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .yappy-status {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .yappy-status.online { background: rgba(22,163,74,0.2); color: #4ade80; }
+    .yappy-status.offline { background: rgba(220,38,38,0.2); color: #f87171; }
+    .yappy-status.loading { background: rgba(202,138,4,0.2); color: #facc15; }
+
+    .yappy-qr {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin: 16px 0;
+      display: none;
+    }
+    .yappy-qr.show { display: block; }
+    .yappy-qr p { color: #333; margin-top: 10px; font-size: 14px; }
+
+    .debug-panel {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.75rem;
+      max-height: 320px;
+      overflow-y: auto;
+      border: 1px solid #1e293b;
+    }
+    .debug-panel h4 {
+      color: #64748b;
+      margin-bottom: 10px;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      position: sticky;
+      top: 0;
+      background: #020617;
+      padding-bottom: 6px;
+    }
+    .debug-line {
+      padding: 2px 0;
+      color: #94a3b8;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    .debug-line.error { color: #f87171; }
+    .debug-line.success { color: #4ade80; }
+    .debug-line.warn { color: #facc15; }
+    .debug-line.info { color: #93c5fd; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .plan-price { font-size: 2.6rem; }
+    }
+  </style>
 <base target="_blank">
 </head>
 <body>
-    <div class="container">
-        <h1>💳 Pago con Yappy</h1>
-        <p class="subtitle">Completa tu pago de forma segura</p>
-
-        <div id="alertBox" class="alert"></div>
-
-        <div class="info-box" id="conductorInfo">
-            <h3>👤 Información del Conductor</h3>
-            <div class="info-row">
-                <span class="label">Nombre:</span>
-                <span class="value" id="nombreConductor">Cargando...</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Email:</span>
-                <span class="value" id="emailConductor">Cargando...</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Vehículo:</span>
-                <span class="value" id="vehiculoConductor">Cargando...</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Estado:</span>
-                <span class="value" id="statusConductor">Cargando...</span>
-            </div>
-        </div>
-
-        <div class="payment-section">
-            <h3>💰 Detalle del Pago</h3>
-            <div class="amount">$5.00 USD</div>
-            <p style="color: #666; margin-bottom: 10px;">Suscripción Mensual RoadTo</p>
-
-            <div id="yappyStatus" class="status-yappy status-loading">Verificando Yappy...</div>
-
-            <div class="yappy-container">
-                <!-- Botón oficial de Yappy -->
-                <btn-yappy id="btnYappy" theme="blue" rounded="true"></btn-yappy>
-
-                <!-- Fallback si Yappy no carga -->
-                <button class="btn-yappy-fallback" id="btnFallback">
-                    <div class="spinner"></div>
-                    <span class="btn-text">Pagar $5.00 con Yappy</span>
-                </button>
-            </div>
-
-            <p style="color: #888; font-size: 13px; margin-top: 10px;">
-                Al hacer clic, Yappy te pedirá tu número de celular para enviarte la notificación de pago.
-            </p>
-        </div>
-
-        <div class="debug-log" id="debugLog"></div>
+  <div class="container">
+    <div class="header">
+      <h1>💳 Pagos</h1>
+      <p>Gestiona tu suscripción de conductor</p>
     </div>
 
-    <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
-        const SUPABASE_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4';
-        const API_URL = 'https://conductores-api.onrender.com/api/yappy';
-        const YAPPY_AMOUNT = '5.00';
+    <div id="alert-box" class="alert"></div>
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const debugLog = document.getElementById('debugLog');
-        const alertBox = document.getElementById('alertBox');
-        const btnYappy = document.getElementById('btnYappy');
-        const btnFallback = document.getElementById('btnFallback');
-        const yappyStatus = document.getElementById('yappyStatus');
+    <div class="status-card" id="status-card" style="display:none;">
+      <div class="status-header">
+        <span class="status-label">Estado de suscripción</span>
+        <span id="status-badge" class="status-badge inactiva">—</span>
+      </div>
+      <div class="conductor-info">
+        <div class="conductor-avatar" id="conductor-initial">?</div>
+        <div class="conductor-details">
+          <h3 id="conductor-name">Cargando...</h3>
+          <p id="conductor-vehiculo">—</p>
+        </div>
+      </div>
+    </div>
 
-        let currentUser = null;
-        let conductorData = null;
-        let yappyOnline = false;
-        let yappyComponentReady = false;
+    <div class="plan-card" id="plan-card" style="display:none;">
+      <div class="plan-price">$5.00 <span>/ 24h</span></div>
+      <p class="plan-period">Activación por 24 horas de servicio</p>
+      <ul class="plan-features">
+        <li>Acceso al panel de viajes</li>
+        <li>Notificaciones en tiempo real</li>
+        <li>Soporte prioritario</li>
+        <li>Historial de viajes</li>
+      </ul>
+    </div>
 
-        function log(msg, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const colorClass = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
-            debugLog.innerHTML += `<div><span class="timestamp">[${timestamp}]</span> <span class="${colorClass}">${msg}</span></div>`;
-            debugLog.scrollTop = debugLog.scrollHeight;
-            console.log(`[YAPPY] ${msg}`);
-        }
+    <div class="yappy-section" id="yappy-section" style="display:none;">
+      <h3>Pagar con Yappy</h3>
+      <div id="yappy-status" class="yappy-status loading">Verificando Yappy...</div>
 
-        function showAlert(msg, type = 'error') {
-            alertBox.className = `alert alert-${type} show`;
-            alertBox.textContent = msg;
-            setTimeout(() => alertBox.classList.remove('show'), 5000);
-        }
+      <div class="yappy-btn-container">
+        <!-- Botón oficial de Yappy -->
+        <btn-yappy id="btn-yappy" theme="blue" rounded="true"></btn-yappy>
 
-        // ============================================
-        // AUTENTICACIÓN
-        // ============================================
-        async function initAuth() {
-            log('DOM cargado. Iniciando autenticación...');
+        <!-- Fallback si Yappy no carga -->
+        <button id="btn-fallback" class="btn-yappy-fallback">
+          <span id="fallback-text">Pagar $5.00 con Yappy</span>
+        </button>
+      </div>
 
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            if (error) {
-                log('Error al obtener sesión: ' + error.message, 'error');
-                showAlert('Error de autenticación');
-                return;
-            }
+      <div id="yappy-qr" class="yappy-qr">
+        <p><strong>Código de pago:</strong></p>
+        <div id="qr-content"></div>
+      </div>
 
-            if (!session) {
-                log('No hay sesión. Redirigiendo a login...', 'error');
-                window.location.href = 'dashboard.html';
-                return;
-            }
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">
+        Al hacer clic, Yappy te pedirá tu número de celular para enviarte la notificación de pago.
+      </p>
+    </div>
 
-            currentUser = session.user;
-            log(`Usuario autenticado: ${currentUser.id}`);
-            log(`Email: ${currentUser.email}`);
-            await loadConductorData();
-            initYappyComponent();
-        }
+    <div class="debug-panel">
+      <h4>🐛 Debug Log</h4>
+      <div id="debug-log"></div>
+    </div>
+  </div>
 
-        // ============================================
-        // CARGAR DATOS DEL CONDUCTOR
-        // ============================================
-        async function loadConductorData() {
-            log('Buscando datos del conductor en tabla "conductores"...');
+  <script>
+    // ============================================================
+    // CONFIGURACIÓN
+    // ============================================================
+    const SUPABASE_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            const { data, error } = await supabaseClient
-                .from('conductores')
-                .select('nombres, apellidos, status, vehiculo, modelo, marca, celular, auth_user_id')
-                .eq('auth_user_id', currentUser.id)
-                .single();
+    const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
+    const YAPPY_DOMAIN = 'https://nrdesingcorp.com';
 
-            if (error) {
-                log('Error al cargar conductor: ' + error.message, 'error');
-                showAlert('Error al cargar datos del conductor');
-                return;
-            }
+    let conductorData = null;
+    let authUser = null;
+    let authReady = false;
+    let yappyComponentReady = false;
 
-            conductorData = data;
-            const nombreCompleto = `${data.nombres || ''} ${data.apellidos || ''}`.trim();
-            const vehiculoInfo = `${data.vehiculo || 'N/A'} • ${data.modelo || ''} • Placa: ${data.marca || 'N/A'}`;
+    // ============================================================
+    // DEBUG
+    // ============================================================
+    function logDebug(msg, type = 'info') {
+      const log = document.getElementById('debug-log');
+      const time = new Date().toLocaleTimeString('es-PA', { hour12: false });
+      const line = document.createElement('div');
+      line.className = `debug-line ${type}`;
+      line.textContent = `[${time}] ${msg}`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+      console.log(`[YAPPY] ${msg}`);
+    }
 
-            document.getElementById('nombreConductor').textContent = nombreCompleto || 'N/A';
-            document.getElementById('emailConductor').textContent = currentUser.email;
-            document.getElementById('vehiculoConductor').textContent = vehiculoInfo;
-            document.getElementById('statusConductor').textContent = (data.status || 'N/A').toUpperCase();
+    // ============================================================
+    // ALERTAS
+    // ============================================================
+    function showAlert(msg, type = 'error') {
+      const box = document.getElementById('alert-box');
+      box.className = `alert alert-${type} show`;
+      box.textContent = msg;
+    }
+    function hideAlert() {
+      document.getElementById('alert-box').classList.remove('show');
+    }
 
-            log(`Conductor: ${nombreCompleto} | Status: ${data.status} | Vehículo: ${vehiculoInfo}`);
-        }
+    function setBtnLoading(loading) {
+      const btn = document.getElementById('btn-fallback');
+      const text = document.getElementById('fallback-text');
+      if (loading) {
+        btn.disabled = true;
+        text.innerHTML = '<span class="spinner"></span> Procesando...';
+      } else {
+        btn.disabled = false;
+        text.textContent = 'Pagar $5.00 con Yappy';
+      }
+    }
 
-        // ============================================
-        // INICIALIZAR COMPONENTE YAPPY
-        // ============================================
-        function initYappyComponent() {
-            log('Inicializando componente Yappy...');
+    function updateStatusBadge(status) {
+      const badge = document.getElementById('status-badge');
+      badge.className = 'status-badge';
+      if (status === 'active' || status === 'activa') {
+        badge.classList.add('activa');
+        badge.textContent = 'Activa';
+      } else if (status === 'pendiente') {
+        badge.classList.add('pendiente');
+        badge.textContent = 'Pendiente';
+      } else {
+        badge.classList.add('inactiva');
+        badge.textContent = 'Inactiva';
+      }
+    }
 
-            // Esperar a que el componente Yappy se cargue
-            const checkYappy = setInterval(() => {
-                if (btnYappy && btnYappy.isYappyOnline) {
-                    clearInterval(checkYappy);
-                    yappyComponentReady = true;
+    function showSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    }
 
-                    // Escuchar evento isYappyOnline
-                    btnYappy.addEventListener('isYappyOnline', (event) => {
-                        yappyOnline = event.detail === true;
-                        log(`Yappy online: ${yappyOnline}`, yappyOnline ? 'success' : 'error');
+    function updateYappyStatus(status, text) {
+      const el = document.getElementById('yappy-status');
+      el.className = `yappy-status ${status}`;
+      el.textContent = text;
+    }
 
-                        if (yappyOnline) {
-                            yappyStatus.className = 'status-yappy status-online';
-                            yappyStatus.textContent = '✓ Yappy disponible';
-                        } else {
-                            yappyStatus.className = 'status-yappy status-offline';
-                            yappyStatus.textContent = '✗ Yappy no disponible';
-                            showFallbackButton();
-                        }
-                    });
+    // ============================================================
+    // RESTAURAR SESIÓN
+    // ============================================================
+    async function restaurarSesionDesdeStorage() {
+      try {
+        const raw = localStorage.getItem('supabase_session');
+        if (!raw) return false;
+        const stored = JSON.parse(raw);
+        if (!stored.access_token) return false;
 
-                    // Escuchar evento eventClick
-                    btnYappy.addEventListener('eventClick', async () => {
-                        log('=== CLICK EN BOTÓN YAPPY ===');
-                        await handleYappyClick();
-                    });
-
-                    // Escuchar evento eventSuccess
-                    btnYappy.addEventListener('eventSuccess', (event) => {
-                        log('✓ Pago exitoso: ' + JSON.stringify(event.detail), 'success');
-                        showAlert('¡Pago completado exitosamente!', 'success');
-                        // Aquí activar suscripción en Supabase
-                    });
-
-                    // Escuchar evento eventError
-                    btnYappy.addEventListener('eventError', (event) => {
-                        log('✗ Error en pago: ' + JSON.stringify(event.detail), 'error');
-                        showAlert('Error en el pago: ' + (event.detail?.message || 'Error desconocido'));
-                    });
-
-                    log('Componente Yappy inicializado correctamente', 'success');
-                }
-            }, 1000);
-
-            // Timeout después de 10 segundos
-            setTimeout(() => {
-                if (!yappyComponentReady) {
-                    clearInterval(checkYappy);
-                    log('Componente Yappy no cargó. Usando fallback.', 'error');
-                    yappyStatus.className = 'status-yappy status-offline';
-                    yappyStatus.textContent = '✗ Yappy no disponible - Usando método alternativo';
-                    showFallbackButton();
-                }
-            }, 10000);
-        }
-
-        function showFallbackButton() {
-            btnYappy.style.display = 'none';
-            btnFallback.classList.add('show');
-            btnFallback.addEventListener('click', handleYappyClick);
-        }
-
-        // ============================================
-        // MANEJAR CLICK EN BOTÓN YAPPY
-        // ============================================
-        async function handleYappyClick() {
-            log('=== INICIANDO PAGO CON YAPPY v3.0 ===');
-            log('Obteniendo token de autenticación desde backend...');
-
-            // 1. Validar sesión
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                log('ERROR: Sesión expirada', 'error');
-                showAlert('Sesión expirada. Por favor inicia sesión nuevamente.');
-                return;
-            }
-
-            // 2. Mostrar loading
-            if (yappyComponentReady) {
-                btnYappy.isButtonLoading = true;
-            } else {
-                btnFallback.disabled = true;
-                btnFallback.classList.add('loading');
-            }
-
-            try {
-                // 3. Llamar al backend para crear la orden
-                log(`POST ${API_URL} | action=create-order`);
-
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`
-                    },
-                    body: JSON.stringify({
-                        action: 'create-order',
-                        total: YAPPY_AMOUNT,
-                        subtotal: YAPPY_AMOUNT,
-                        taxes: '0.00',
-                        discount: '0.00'
-                        // aliasYappy NO se envía desde frontend - el backend usa el de RoadTo
-                    })
-                });
-
-                log(`Status: ${response.status}`);
-                const result = await response.json();
-                log(`Response: ${JSON.stringify(result).substring(0, 500)}...`);
-
-                if (!response.ok) {
-                    throw new Error(result.error || `Error ${response.status}`);
-                }
-
-                if (result.success && result.data?.status?.code === '0000') {
-                    log('✓ Orden creada exitosamente', 'success');
-                    log(`OrderId: ${result.orderId}`, 'success');
-                    log(`TransactionId: ${result.transactionId}`, 'success');
-
-                    // 4. Preparar parámetros para el componente Yappy
-                    const params = {
-                        transactionId: result.transactionId,
-                        documentName: result.documentName,
-                        token: result.paymentToken || result.data?.body?.token
-                    };
-
-                    log(`Params para Yappy: ${JSON.stringify(params).substring(0, 200)}...`);
-
-                    // 5. Enviar al componente Yappy
-                    if (yappyComponentReady && btnYappy.eventPayment) {
-                        log('Enviando params al componente Yappy...');
-                        btnYappy.eventPayment(params);
-                    } else {
-                        // Fallback: redirigir manualmente
-                        log('Usando redirección manual (fallback)...');
-                        if (result.documentName) {
-                            if (result.documentName.startsWith('http')) {
-                                window.open(result.documentName, '_blank');
-                            } else {
-                                const yappyUrl = `https://apipagosbg.bgeneral.cloud/payments/payment-wc?documentName=${encodeURIComponent(result.documentName)}&token=${encodeURIComponent(params.token || '')}&transactionId=${encodeURIComponent(params.transactionId || '')}`;
-                                window.open(yappyUrl, '_blank');
-                            }
-                        } else if (params.token) {
-                            const yappyUrl = `https://apipagosbg.bgeneral.cloud/payments/payment-wc?token=${encodeURIComponent(params.token)}`;
-                            window.open(yappyUrl, '_blank');
-                        }
-                    }
-                } else {
-                    throw new Error(result.data?.status?.description || 'Error desconocido al crear orden');
-                }
-
-            } catch (error) {
-                log(`ERROR: ${error.message}`, 'error');
-                showAlert('Error al procesar el pago: ' + error.message);
-            } finally {
-                if (yappyComponentReady) {
-                    btnYappy.isButtonLoading = false;
-                } else {
-                    btnFallback.disabled = false;
-                    btnFallback.classList.remove('loading');
-                }
-            }
-        }
-
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        // Auth state changes
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            log(`Auth event: ${event}`);
-            if (event === 'SIGNED_OUT') {
-                window.location.href = 'dashboard.html';
-            }
+        logDebug('Intentando restaurar sesión desde localStorage...');
+        const { data, error } = await supabaseClient.auth.setSession({
+          access_token: stored.access_token,
+          refresh_token: stored.refresh_token,
         });
 
-        // Iniciar
-        document.addEventListener('DOMContentLoaded', initAuth);
-    </script>
+        if (error || !data.session) {
+          localStorage.removeItem('supabase_session');
+          return false;
+        }
+
+        logDebug('✓ Sesión restaurada desde localStorage', 'success');
+        return true;
+      } catch (e) {
+        localStorage.removeItem('supabase_session');
+        return false;
+      }
+    }
+
+    // ============================================================
+    // CARGAR DATOS DEL CONDUCTOR
+    // ============================================================
+    async function cargarDatosConductor() {
+      logDebug('Iniciando carga de página...');
+
+      try {
+        logDebug('Verificando sesión de Supabase...');
+        let { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+
+        if (!sessionData?.session) {
+          const restored = await restaurarSesionDesdeStorage();
+          if (restored) {
+            const refreshed = await supabaseClient.auth.getSession();
+            sessionData = refreshed.data;
+            sessionError = refreshed.error;
+          }
+        }
+
+        if (sessionError) {
+          logDebug(`Error de sesión: ${sessionError.message}`, 'error');
+          showAlert('Error al verificar sesión. Intenta recargar la página.');
+          return;
+        }
+
+        if (!sessionData?.session) {
+          logDebug('No hay sesión activa. Usuario no logueado.', 'warn');
+          showAlert('No has iniciado sesión. Redirigiendo al login...', 'warn');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
+          return;
+        }
+
+        const accessToken = sessionData.session.access_token;
+        logDebug(`Sesión encontrada. Token: ${accessToken.slice(0, 16)}...`);
+
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser(accessToken);
+
+        if (userError || !userData?.user) {
+          logDebug(`Error obteniendo usuario: ${userError?.message || 'Sin usuario'}`, 'error');
+          showAlert('Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn');
+          localStorage.removeItem('supabase_session');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
+          return;
+        }
+
+        authUser = userData.user;
+        authReady = true;
+        logDebug(`Usuario autenticado: ${authUser.id}`);
+        logDebug(`Email: ${authUser.email || 'N/A'}`);
+
+        logDebug('Buscando datos del conductor en tabla "conductores"...');
+        const { data: conductor, error: condError } = await supabaseClient
+          .from('conductores')
+          .select('id,nombres,apellidos,status,marca,modelo,placa,color,celular,direccion,auth_user_id,payment_status,fecha_vencimiento,suscripcion_activa,fecha_ultimo_pago,proximo_pago,pago_al_dia')
+          .eq('auth_user_id', authUser.id)
+          .maybeSingle();
+
+        if (condError) {
+          logDebug(`Error DB conductores: ${condError.message}`, 'error');
+          showAlert('Error al cargar datos del conductor desde el servidor.');
+          return;
+        }
+
+        if (!conductor) {
+          logDebug('No se encontró registro en tabla conductores para este usuario.', 'warn');
+          showAlert('Tu cuenta no tiene perfil de conductor registrado. Contacta al administrador.', 'warn');
+          return;
+        }
+
+        conductorData = conductor;
+        const nombreCompleto = `${conductor.nombres || ''} ${conductor.apellidos || ''}`.trim();
+        const inicial = (conductor.nombres?.[0] || '?').toUpperCase();
+
+        const vehiculoInfo = [];
+        if (conductor.marca) vehiculoInfo.push(conductor.marca);
+        if (conductor.modelo) vehiculoInfo.push(conductor.modelo);
+        if (conductor.placa) vehiculoInfo.push(`Placa: ${conductor.placa}`);
+        if (conductor.color) vehiculoInfo.push(conductor.color);
+        const vehiculo = vehiculoInfo.join(' • ') || 'Sin vehículo registrado';
+
+        document.getElementById('conductor-name').textContent = nombreCompleto || 'Conductor';
+        document.getElementById('conductor-initial').textContent = inicial;
+        document.getElementById('conductor-vehiculo').textContent = vehiculo;
+        updateStatusBadge(conductor.status);
+
+        logDebug(`Conductor: ${nombreCompleto} | Status: ${conductor.status || 'inactiva'} | Vehículo: ${vehiculo}`);
+
+        showSection('status-card');
+        showSection('plan-card');
+        showSection('yappy-section');
+        hideAlert();
+
+        // Inicializar componente Yappy después de cargar datos
+        initYappyComponent();
+
+      } catch (err) {
+        logDebug(`Error inesperado: ${err.message}`, 'error');
+        console.error(err);
+        showAlert('Error inesperado. Revisa la consola (F12) para más detalles.');
+      }
+    }
+
+    // ============================================================
+    // INICIALIZAR COMPONENTE YAPPY
+    // ============================================================
+    function initYappyComponent() {
+      logDebug('Inicializando componente Yappy...');
+
+      const btnYappy = document.getElementById('btn-yappy');
+      const btnFallback = document.getElementById('btn-fallback');
+
+      if (!btnYappy) {
+        logDebug('Componente btn-yappy no encontrado en DOM', 'error');
+        showFallback();
+        return;
+      }
+
+      // Verificar si el componente se cargó correctamente
+      let checkCount = 0;
+      const maxChecks = 20; // 10 segundos
+
+      const checkInterval = setInterval(() => {
+        checkCount++;
+
+        // Intentar detectar si el componente está listo
+        if (btnYappy.shadowRoot || btnYappy.isConnected) {
+          clearInterval(checkInterval);
+          yappyComponentReady = true;
+          logDebug('Componente Yappy detectado en DOM', 'success');
+
+          // Escuchar eventos del componente
+          setupYappyEvents(btnYappy);
+          updateYappyStatus('online', '✓ Yappy disponible');
+          return;
+        }
+
+        if (checkCount >= maxChecks) {
+          clearInterval(checkInterval);
+          logDebug('Componente Yappy no cargó después de 10s. Usando fallback.', 'warn');
+          showFallback();
+        }
+      }, 500);
+    }
+
+    function setupYappyEvents(btnYappy) {
+      // eventClick - cuando el usuario hace clic en el botón
+      btnYappy.addEventListener('eventClick', async () => {
+        logDebug('=== CLICK EN BOTÓN YAPPY ===');
+        await handleYappyPayment();
+      });
+
+      // eventSuccess - pago exitoso
+      btnYappy.addEventListener('eventSuccess', (event) => {
+        logDebug('✓ Transacción exitosa: ' + JSON.stringify(event.detail), 'success');
+        showAlert('¡Pago completado exitosamente!', 'success');
+        activarSuscripcion();
+      });
+
+      // eventError - error en pago
+      btnYappy.addEventListener('eventError', (event) => {
+        logDebug('✗ Error en transacción: ' + JSON.stringify(event.detail), 'error');
+        showAlert('Error en el pago: ' + (event.detail?.message || 'Error desconocido'));
+      });
+
+      // isYappyOnline - estado del canal Yappy
+      btnYappy.addEventListener('isYappyOnline', (event) => {
+        const online = event.detail === true;
+        logDebug(`Yappy online event: ${online}`, online ? 'success' : 'warn');
+        if (online) {
+          updateYappyStatus('online', '✓ Yappy disponible');
+        } else {
+          updateYappyStatus('offline', '✗ Yappy no disponible');
+        }
+      });
+    }
+
+    function showFallback() {
+      const btnYappy = document.getElementById('btn-yappy');
+      const btnFallback = document.getElementById('btn-fallback');
+
+      if (btnYappy) btnYappy.style.display = 'none';
+      if (btnFallback) {
+        btnFallback.classList.add('show');
+        btnFallback.addEventListener('click', handleYappyPayment);
+      }
+      updateYappyStatus('offline', '✗ Yappy no disponible - Método alternativo');
+    }
+
+    // ============================================================
+    // MANEJAR PAGO YAPPY (Backend → Frontend → Componente Yappy)
+    // ============================================================
+    async function handleYappyPayment() {
+      if (!authReady || !conductorData) {
+        showAlert('Datos del conductor no cargados. Espera un momento o recarga la página.');
+        return;
+      }
+
+      // Loading
+      if (yappyComponentReady) {
+        const btnYappy = document.getElementById('btn-yappy');
+        if (btnYappy) btnYappy.isButtonLoading = true;
+      } else {
+        setBtnLoading(true);
+      }
+
+      try {
+        logDebug('=== INICIANDO PAGO CON YAPPY v3.0 ===');
+        logDebug('Llamando a API en Render...');
+        logDebug(`POST ${RENDER_API_URL} | action=create-order`);
+
+        const response = await fetch(RENDER_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'create-order',
+            total: '5.00',
+            subtotal: '5.00'
+            // aliasYappy va en el backend (RoadTo = 69977978)
+          }),
+        });
+
+        const data = await response.json();
+        logDebug(`Status: ${response.status}`);
+        logDebug(`Response: ${JSON.stringify(data).substring(0, 300)}...`);
+
+        if (!response.ok) {
+          throw new Error(data.error || data.message || `Error ${response.status}`);
+        }
+
+        if (data.success && data.data?.status?.code === '0000') {
+          logDebug('✓ Orden creada exitosamente!', 'success');
+
+          const body = data.data?.body || {};
+          const transactionId = body.transactionId || data.transactionId;
+          const paymentToken = body.token || data.paymentToken;
+          const documentName = body.documentName || data.documentName;
+
+          logDebug(`TransactionId: ${transactionId}`, 'success');
+          logDebug(`DocumentName: ${documentName ? documentName.substring(0, 50) + '...' : 'NO RECIBIDO'}`);
+
+          // Preparar params para componente Yappy
+          const params = {
+            transactionId: transactionId,
+            documentName: documentName,
+            token: paymentToken
+          };
+
+          logDebug(`Params: ${JSON.stringify(params).substring(0, 200)}...`);
+
+          if (yappyComponentReady) {
+            // Usar componente oficial
+            logDebug('Enviando params al componente Yappy...');
+            const btnYappy = document.getElementById('btn-yappy');
+            btnYappy.eventPayment(params);
+          } else {
+            // Fallback: redirección manual
+            logDebug('Usando redirección manual (fallback)...');
+            if (documentName) {
+              if (documentName.startsWith('http')) {
+                window.open(documentName, '_blank');
+                showAlert('Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info');
+              } else {
+                document.getElementById('qr-content').innerHTML = 
+                  `<p style="font-size: 18px; font-weight: bold; color: #333;">${documentName}</p>`;
+                document.getElementById('yappy-qr').classList.add('show');
+                showAlert('Usa el código mostrado para completar el pago en Yappy.', 'info');
+              }
+            } else if (paymentToken) {
+              const yappyUrl = `https://apipagosbg.bgeneral.cloud/payments/payment-wc?token=${encodeURIComponent(paymentToken)}`;
+              window.open(yappyUrl, '_blank');
+              showAlert('Se abrió Yappy en una nueva pestaña.', 'info');
+            }
+          }
+        } else {
+          throw new Error(data.data?.status?.description || 'Error desconocido al crear orden');
+        }
+
+      } catch (err) {
+        logDebug(`ERROR: ${err.message}`, 'error');
+        showAlert('Error: ' + err.message);
+      } finally {
+        if (yappyComponentReady) {
+          const btnYappy = document.getElementById('btn-yappy');
+          if (btnYappy) btnYappy.isButtonLoading = false;
+        } else {
+          setBtnLoading(false);
+        }
+      }
+    }
+
+    // ============================================================
+    // ACTIVAR SUSCRIPCIÓN
+    // ============================================================
+    async function activarSuscripcion() {
+      if (!authUser || !conductorData) {
+        logDebug('No hay authUser o conductorData', 'error');
+        return;
+      }
+
+      try {
+        logDebug('Activando suscripción...');
+        const ahora = new Date();
+        const expiracion = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
+
+        const { error } = await supabaseClient
+          .from('conductores')
+          .update({
+            status: 'active',
+            suscripcion_activa: true,
+            pago_al_dia: true,
+            fecha_ultimo_pago: ahora.toISOString(),
+            proximo_pago: expiracion.toISOString(),
+            fecha_vencimiento: expiracion.toISOString(),
+            payment_status: 'paid',
+          })
+          .eq('auth_user_id', authUser.id);
+
+        if (error) {
+          logDebug(`Error DB: ${error.message}`, 'error');
+          showAlert('Pago recibido, pero hubo un error activando tu cuenta. Contacta soporte.');
+          return;
+        }
+
+        updateStatusBadge('active');
+        logDebug(`✓ Suscripción activada hasta ${expiracion.toLocaleString('es-PA')}`, 'success');
+        showAlert('¡Suscripción activada! Tienes 24 horas de servicio.', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 3000);
+
+      } catch (err) {
+        logDebug(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    // ============================================================
+    // AUTH LISTENERS
+    // ============================================================
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      logDebug(`Auth event: ${event}`);
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('supabase_session');
+        showAlert('Sesión cerrada. Redirigiendo al login...', 'warn');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+      }
+      if (event === 'SIGNED_IN' && session) {
+        localStorage.setItem('supabase_session', JSON.stringify({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_at: session.expires_at,
+        }));
+      }
+    });
+
+    // ============================================================
+    // INICIALIZACIÓN
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      logDebug('DOM cargado. Iniciando autenticación...');
+      cargarDatosConductor();
+    });
+  </script>
 </body>
 </html>
