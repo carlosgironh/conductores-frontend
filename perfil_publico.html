@@ -104,10 +104,6 @@
     font-weight: 500;
   }
 
-  /* ============================================
-     CINTILLO DE COBERTURA — PANAMÁ OESTE
-     Más grande, más visible, no opacado
-     ============================================ */
   .coverage-banner {
     display: flex;
     align-items: center;
@@ -227,6 +223,58 @@
     line-height: 1.4;
   }
 
+  /* ===== ESTADO DE PAGO ===== */
+  .payment-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: slideDown 0.6s ease-out backwards;
+  }
+
+  .payment-status-banner.paid {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(21, 128, 61, 0.05) 100%);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+  }
+
+  .payment-status-banner.pending {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(180, 83, 9, 0.1) 100%);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+  }
+
+  .payment-status-banner.overdue {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.1) 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  .payment-status-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  .payment-status-info h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .payment-status-info p {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
   h2 {
     text-align: center;
     font-weight: 800;
@@ -251,6 +299,13 @@
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     background: rgba(15, 23, 42, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .foto-wrapper:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
   }
 
   .foto {
@@ -323,6 +378,7 @@
     border: 1px solid rgba(139, 92, 246, 0.3);
   }
 
+  /* ===== VISTA PREVIA DE DOCUMENTOS ===== */
   .documentos-section {
     margin: 25px 0;
     padding: 25px;
@@ -351,7 +407,98 @@
     border-radius: 2px;
   }
 
-  .documentos-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .documentos-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px; 
+  }
+
+  .doc-preview {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .doc-preview:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .doc-preview-img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    display: block;
+  }
+
+  .doc-preview-pdf {
+    width: 100%;
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(185, 28, 28, 0.05) 100%);
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .doc-preview-pdf svg {
+    width: 40px;
+    height: 40px;
+    color: #f87171;
+  }
+
+  .doc-preview-pdf span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #f87171;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .doc-preview-label {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    padding: 10px 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .doc-preview-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .doc-preview:hover .doc-preview-overlay {
+    opacity: 1;
+  }
+
+  .doc-preview-overlay span {
+    background: rgba(99, 102, 241, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
 
   .btn-doc {
     background: rgba(255, 255, 255, 0.05);
@@ -413,6 +560,64 @@
     font-size: 12px;
   }
 
+  /* ===== MODAL VISTA PREVIA ===== */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(10, 15, 25, 0.95);
+    backdrop-filter: blur(20px);
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.3s ease;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal img, .modal iframe {
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 16px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: scaleIn 0.3s ease;
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+  }
+
   @media (max-width: 640px) {
     .card { padding: 30px 20px; border-radius: 24px; }
     h2 { font-size: 24px; }
@@ -424,8 +629,11 @@
     .coverage-banner .banner-icon { width: 26px; height: 26px; }
     .coverage-banner .banner-text { font-size: 14px; }
     .coverage-banner .banner-text .highlight { font-size: 15px; }
+    .documentos-grid { grid-template-columns: repeat(2, 1fr); }
+    .payment-status-banner { flex-direction: column; text-align: center; }
   }
 </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 
@@ -442,7 +650,6 @@
     <p>Perfil de verificación de conductor</p>
   </div>
 
-  <!-- Cintillo de cobertura: Panamá Oeste — AHORA MÁS GRANDE Y VISIBLE -->
   <div class="coverage-banner">
     <svg class="banner-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -454,6 +661,7 @@
   </div>
 
   <div id="statusHero"></div>
+  <div id="paymentStatus"></div>
 
   <div id="contenido">
     <div class="loading">
@@ -473,6 +681,13 @@
     © Road To — Perfil público de verificación.<br>
     Si tienes dudas sobre este conductor, contacta soporte.
   </div>
+</div>
+
+<!-- Modal para vista previa -->
+<div id="modalPreview" class="modal" onclick="cerrarModal()">
+  <div class="modal-close">&times;</div>
+  <img id="modalImg" src="" alt="Vista previa" style="display:none;">
+  <iframe id="modalPdf" src="" style="display:none; width:90%; height:85%; border:none; border-radius:16px;"></iframe>
 </div>
 
 <script>
@@ -514,7 +729,15 @@ async function cargarPerfil() {
       .select("*")
       .eq("conductor_id", conductor.id);
 
-    renderPerfil(conductor, documentos);
+    // Cargar estado de pago desde tabla pagos
+    const { data: pagos } = await supabaseClient
+      .from("pagos")
+      .select("*")
+      .eq("conductor_id", conductor.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    renderPerfil(conductor, documentos, pagos);
 
   } catch (error) {
     console.error('Error:', error);
@@ -545,15 +768,85 @@ function mostrarError(titulo, mensaje) {
   document.getElementById("fotos-container").style.display = 'none';
   document.getElementById("documentos-section").style.display = 'none';
   document.getElementById("statusHero").style.display = 'none';
+  document.getElementById("paymentStatus").style.display = 'none';
 }
 
-function renderPerfil(conductor, documentos) {
+function renderPerfil(conductor, documentos, pagos) {
   function docUrl(tipo) {
     const doc = documentos?.find(d => d.tipo === tipo);
     if (!doc) return null;
     return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
   }
 
+  // ===== ESTADO DE PAGO =====
+  const ultimoPago = pagos && pagos.length > 0 ? pagos[0] : null;
+  const ahora = new Date();
+  let paymentHTML = '';
+
+  if (ultimoPago && ultimoPago.estado === 'pagado') {
+    const fechaVenc = ultimoPago.fecha_vencimiento ? new Date(ultimoPago.fecha_vencimiento) : null;
+    if (fechaVenc && fechaVenc > ahora) {
+      const diasRestantes = Math.ceil((fechaVenc - ahora) / (1000 * 60 * 60 * 24));
+      paymentHTML = `
+        <div class="payment-status-banner paid">
+          <div class="payment-status-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="payment-status-info">
+            <h4>Pago al día</h4>
+            <p>Suscripción activa. Vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}.</p>
+          </div>
+        </div>
+      `;
+    } else {
+      paymentHTML = `
+        <div class="payment-status-banner overdue">
+          <div class="payment-status-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="payment-status-info">
+            <h4>Suscripción vencida</h4>
+            <p>El pago anterior ha expirado. Se requiere renovación.</p>
+          </div>
+        </div>
+      `;
+    }
+  } else if (ultimoPago && ultimoPago.estado === 'pendiente') {
+    paymentHTML = `
+      <div class="payment-status-banner pending">
+        <div class="payment-status-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="payment-status-info">
+          <h4>Pago pendiente</h4>
+          <p>El conductor tiene un pago en proceso de verificación.</p>
+        </div>
+      </div>
+    `;
+  } else {
+    paymentHTML = `
+      <div class="payment-status-banner overdue">
+        <div class="payment-status-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+        <div class="payment-status-info">
+          <h4>Pago pendiente</h4>
+          <p>Este conductor no ha realizado el pago de suscripción.</p>
+        </div>
+      </div>
+    `;
+  }
+  document.getElementById("paymentStatus").innerHTML = paymentHTML;
+
+  // ===== ESTADO DEL CONDUCTOR =====
   let statusClass, statusTitle, statusMsg;
   const estado = String(conductor.estado).toLowerCase();
 
@@ -605,6 +898,7 @@ function renderPerfil(conductor, documentos) {
     </div>
   `;
 
+  // ===== FOTOS CON VISTA PREVIA =====
   const fotosCont = document.getElementById("fotos-container");
   fotosCont.innerHTML = "";
 
@@ -613,7 +907,7 @@ function renderPerfil(conductor, documentos) {
 
   if (fotoVeh) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper">
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoVeh}', 'img')">
         <img src="${fotoVeh}" class="foto" alt="Vehículo" loading="lazy">
         <div class="foto-label">Vehículo</div>
       </div>
@@ -621,13 +915,14 @@ function renderPerfil(conductor, documentos) {
   }
   if (fotoCond) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper">
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoCond}', 'img')">
         <img src="${fotoCond}" class="foto" alt="Conductor" loading="lazy">
         <div class="foto-label">Conductor</div>
       </div>
     `;
   }
 
+  // ===== DOCUMENTOS CON VISTA PREVIA =====
   const docSection = document.getElementById("documentos-section");
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
@@ -646,24 +941,84 @@ function renderPerfil(conductor, documentos) {
     const url = docUrl(doc.tipo);
     if (url) {
       tieneDocumentos = true;
-      docGrid.innerHTML += `
-        <a href="${url}" target="_blank" class="btn-doc">
-          ${doc.icon} ${doc.label}
-        </a>
-      `;
+      const isPdf = url.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        docGrid.innerHTML += `
+          <div class="doc-preview" onclick="mostrarModal('${url}', 'pdf')">
+            <div class="doc-preview-pdf">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>PDF</span>
+            </div>
+            <div class="doc-preview-label">${doc.label}</div>
+            <div class="doc-preview-overlay"><span>Ver documento</span></div>
+          </div>
+        `;
+      } else {
+        docGrid.innerHTML += `
+          <div class="doc-preview" onclick="mostrarModal('${url}', 'img')">
+            <img src="${url}" class="doc-preview-img" alt="${doc.label}" loading="lazy">
+            <div class="doc-preview-label">${doc.label}</div>
+            <div class="doc-preview-overlay"><span>Ver documento</span></div>
+          </div>
+        `;
+      }
     }
   });
 
   if (tieneAviso && avisoUrl) {
     tieneDocumentos = true;
-    docGrid.innerHTML += `
-      <a href="${avisoUrl}" target="_blank" class="btn-doc aviso-operaciones">
-        📋 Aviso de Operaciones
-      </a>
-    `;
+    const isPdf = avisoUrl.toLowerCase().endsWith('.pdf');
+    if (isPdf) {
+      docGrid.innerHTML += `
+        <div class="doc-preview" onclick="mostrarModal('${avisoUrl}', 'pdf')">
+          <div class="doc-preview-pdf">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>PDF</span>
+          </div>
+          <div class="doc-preview-label">Aviso de Operaciones</div>
+          <div class="doc-preview-overlay"><span>Ver documento</span></div>
+        </div>
+      `;
+    } else {
+      docGrid.innerHTML += `
+        <div class="doc-preview" onclick="mostrarModal('${avisoUrl}', 'img')">
+          <img src="${avisoUrl}" class="doc-preview-img" alt="Aviso de Operaciones" loading="lazy">
+          <div class="doc-preview-label">Aviso de Operaciones</div>
+          <div class="doc-preview-overlay"><span>Ver documento</span></div>
+        </div>
+      `;
+    }
   }
 
   docSection.style.display = tieneDocumentos ? "block" : "none";
+}
+
+function mostrarModal(src, type) {
+  const modal = document.getElementById("modalPreview");
+  const img = document.getElementById("modalImg");
+  const pdf = document.getElementById("modalPdf");
+
+  if (type === 'pdf') {
+    img.style.display = 'none';
+    pdf.style.display = 'block';
+    pdf.src = src;
+  } else {
+    pdf.style.display = 'none';
+    img.style.display = 'block';
+    img.src = src;
+  }
+
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModal() {
+  document.getElementById("modalPreview").style.display = "none";
+  document.body.style.overflow = "";
 }
 
 document.addEventListener("DOMContentLoaded", cargarPerfil);

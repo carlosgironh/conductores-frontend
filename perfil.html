@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -50,12 +49,12 @@
     padding-bottom: max(40px, env(safe-area-inset-bottom));
     padding-left: max(20px, env(safe-area-inset-left));
     padding-right: max(20px, env(safe-area-inset-right));
-    
+
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
-    
+
     color: var(--text-light);
     display: flex;
     justify-content: center;
@@ -133,14 +132,8 @@
   }
 
   @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .status-banner.active {
@@ -228,18 +221,9 @@
   }
 
   @keyframes pulse-dot {
-    0% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
-    }
-    70% {
-      transform: scale(1);
-      box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
-    }
-    100% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
-    }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
   }
 
   h2 {
@@ -349,6 +333,12 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     transition: all 0.3s ease;
     touch-action: manipulation;
+    cursor: pointer;
+  }
+
+  .foto-wrapper:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
   }
 
   .foto-wrapper:active {
@@ -360,7 +350,6 @@
     aspect-ratio: 16/10;
     object-fit: cover;
     display: block;
-    cursor: pointer;
     transition: transform 0.3s;
     -webkit-user-select: none;
     user-select: none;
@@ -380,6 +369,7 @@
     letter-spacing: 1px;
   }
 
+  /* ===== VISTA PREVIA DE DOCUMENTOS ===== */
   .documentos-section {
     margin: 30px 0;
     padding: 25px;
@@ -409,9 +399,96 @@
   }
 
   .documentos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .doc-preview {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .doc-preview:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .doc-preview-img {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    display: block;
+  }
+
+  .doc-preview-pdf {
+    width: 100%;
+    aspect-ratio: 3/4;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(185, 28, 28, 0.05) 100%);
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .doc-preview-pdf svg {
+    width: 40px;
+    height: 40px;
+    color: #f87171;
+  }
+
+  .doc-preview-pdf span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #f87171;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .doc-preview-label {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    padding: 10px 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .doc-preview-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .doc-preview:hover .doc-preview-overlay {
+    opacity: 1;
+  }
+
+  .doc-preview-overlay span {
+    background: rgba(99, 102, 241, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
   }
 
   .btn-doc {
@@ -466,6 +543,7 @@
     color: #f87171;
   }
 
+  /* ===== BOTÓN ACTUALIZAR - OCULTO POR DEFECTO ===== */
   .btn-update {
     width: 100%;
     padding: 16px 28px;
@@ -497,7 +575,33 @@
     transform: scale(0.96);
   }
 
-  /* ELIMINADO: Estilos del QR container */
+  .btn-update.hidden {
+    display: none !important;
+  }
+
+  /* ===== MENSAJE DE ACTUALIZACIÓN BLOQUEADA ===== */
+  .update-blocked {
+    width: 100%;
+    padding: 16px 24px;
+    margin-top: 25px;
+    border-radius: 16px;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .update-blocked svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
 
   button {
     background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
@@ -543,7 +647,7 @@
     to { opacity: 1; }
   }
 
-  .modal img {
+  .modal img, .modal iframe {
     max-width: 90%;
     max-height: 85%;
     border-radius: 20px;
@@ -554,14 +658,32 @@
   }
 
   @keyframes scaleIn {
-    from { 
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    to { 
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 1001;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
   }
 
   .offline-indicator {
@@ -593,7 +715,7 @@
       padding-top: max(30px, env(safe-area-inset-top));
       border-radius: 24px;
     }
-    
+
     .status-banner {
       margin: calc(-1 * max(30px, env(safe-area-inset-top))) -20px 25px -20px;
       padding: 15px 20px;
@@ -602,24 +724,24 @@
       text-align: center;
       gap: 10px;
     }
-    
+
     .status-banner.active::after {
       display: none;
     }
-    
+
     h2 {
       font-size: 26px;
     }
-    
+
     #contenido {
       padding: 20px;
     }
-    
+
     .campo {
       flex-direction: column;
       gap: 5px;
     }
-    
+
     .campo strong {
       width: 100%;
     }
@@ -629,7 +751,7 @@
     }
 
     .documentos-grid {
-      justify-content: center;
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
@@ -676,6 +798,7 @@
     opacity: 1;
   }
 </style>
+<base target="_blank">
 </head>
 
 <body>
@@ -691,14 +814,14 @@
 
 <div class="card" id="mainCard">
   <h2>Mi Perfil de Conductor</h2>
-  
+
   <div id="contenido">
     <div class="loading">
       <div class="loading-spinner"></div>
       Cargando datos...
     </div>
   </div>
-  
+
   <div class="fotos-container" id="fotos-container"></div>
 
   <div class="documentos-section" id="documentos-section" style="display: none;">
@@ -706,18 +829,28 @@
     <div class="documentos-grid" id="documentos-grid"></div>
   </div>
 
-  <button class="btn-update" onclick="irAPanel()">
+  <!-- Botón Actualizar - controlado por admin -->
+  <button class="btn-update hidden" id="btnUpdate" onclick="irAPanel()">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
     </svg>
     Actualizar Datos
   </button>
 
-  <!-- ELIMINADO: QR container -->
+  <!-- Mensaje cuando actualización está bloqueada -->
+  <div class="update-blocked" id="updateBlocked">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+    </svg>
+    Actualización de documentos bloqueada. Contacta al administrador.
+  </div>
 </div>
 
-<div id="modalFoto" class="modal" onclick="cerrarModal()">
-  <img id="modalImg" src="" alt="Vista ampliada">
+<!-- Modal para vista previa -->
+<div id="modalPreview" class="modal" onclick="cerrarModal()">
+  <div class="modal-close">&times;</div>
+  <img id="modalImg" src="" alt="Vista previa" style="display:none;">
+  <iframe id="modalPdf" src="" style="display:none; width:90%; height:85%; border:none; border-radius:16px;"></iframe>
 </div>
 
 <script>
@@ -732,7 +865,7 @@ let documentosCache = null;
 
 function initConnectivity() {
   const indicator = document.getElementById('offlineIndicator');
-  
+
   function updateOnlineStatus() {
     if (navigator.onLine) {
       indicator.classList.remove('show');
@@ -748,7 +881,7 @@ function initConnectivity() {
 
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
-  
+
   if (!navigator.onLine) {
     indicator.classList.add('show');
   }
@@ -764,14 +897,14 @@ function showToast(message) {
 function renderStatusBanner(estado, motivoDeshabilitado = '') {
   const card = document.getElementById('mainCard');
   const existingBanner = document.querySelector('.status-banner');
-  
+
   if (existingBanner) {
     existingBanner.remove();
   }
-  
+
   let bannerHTML = '';
   const estadoStr = String(estado).toLowerCase();
-  
+
   if (estadoStr === 'true' || estadoStr === 'activo') {
     bannerHTML = `
       <div class="status-banner active">
@@ -823,14 +956,14 @@ function renderStatusBanner(estado, motivoDeshabilitado = '') {
       </div>
     `;
   }
-  
+
   card.insertAdjacentHTML('afterbegin', bannerHTML);
 }
 
 async function cargarPerfil() {
   try {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    
+
     if (userError || !user) {
       window.location.href = "index.html";
       return;
@@ -863,13 +996,13 @@ async function cargarPerfil() {
 
   } catch (error) {
     console.error('Error cargando perfil:', error);
-    
+
     if (perfilCache) {
       showToast('Error de conexión - Mostrando datos guardados');
       renderPerfil(perfilCache, documentosCache, { email: perfilCache.email || 'Usuario' });
       return;
     }
-    
+
     document.getElementById("contenido").innerHTML = `
       <div style="text-align: center; padding: 40px; color: #f87171;">
         <p>Error al cargar el perfil. Intente nuevamente.</p>
@@ -890,6 +1023,19 @@ function renderPerfil(conductor, documentos, user) {
 
   const tieneAviso = conductor.tiene_aviso_operaciones === true;
   const avisoUrl = docUrl("AVISO_OPERACIONES");
+
+  // ===== CONTROL DE ACTUALIZACIÓN POR ADMIN =====
+  const puedeActualizar = conductor.permitir_actualizar === true;
+  const btnUpdate = document.getElementById('btnUpdate');
+  const updateBlocked = document.getElementById('updateBlocked');
+
+  if (puedeActualizar) {
+    btnUpdate.classList.remove('hidden');
+    updateBlocked.style.display = 'none';
+  } else {
+    btnUpdate.classList.add('hidden');
+    updateBlocked.style.display = 'flex';
+  }
 
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre</strong> <span>${conductor.nombres} ${conductor.apellidos}</span></div>
@@ -912,6 +1058,7 @@ function renderPerfil(conductor, documentos, user) {
     <div class="campo"><strong>Teléfono</strong> <span>${conductor.celular}</span></div>
   `;
 
+  // ===== FOTOS CON VISTA PREVIA =====
   const fotosCont = document.getElementById("fotos-container");
   fotosCont.innerHTML = "";
 
@@ -920,7 +1067,7 @@ function renderPerfil(conductor, documentos, user) {
 
   if (fotoVeh) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper" onclick="mostrarModal('${fotoVeh}')">
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoVeh}', 'img')">
         <img src="${fotoVeh}" class="foto" alt="Vehículo" loading="lazy">
         <div class="foto-label">Vehículo</div>
       </div>
@@ -929,13 +1076,14 @@ function renderPerfil(conductor, documentos, user) {
 
   if (fotoCond) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper" onclick="mostrarModal('${fotoCond}')">
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoCond}', 'img')">
         <img src="${fotoCond}" class="foto" alt="Conductor" loading="lazy">
         <div class="foto-label">Conductor</div>
       </div>
     `;
   }
 
+  // ===== DOCUMENTOS CON VISTA PREVIA =====
   const docSection = document.getElementById("documentos-section");
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
@@ -954,40 +1102,83 @@ function renderPerfil(conductor, documentos, user) {
     const url = docUrl(doc.tipo);
     if (url) {
       tieneDocumentos = true;
-      docGrid.innerHTML += `
-        <button class="btn-doc" onclick="window.open('${url}', '_blank')">
-          ${doc.icon} ${doc.label}
-        </button>
-      `;
+      const isPdf = url.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        docGrid.innerHTML += `
+          <div class="doc-preview" onclick="mostrarModal('${url}', 'pdf')">
+            <div class="doc-preview-pdf">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>PDF</span>
+            </div>
+            <div class="doc-preview-label">${doc.label}</div>
+            <div class="doc-preview-overlay"><span>Ver documento</span></div>
+          </div>
+        `;
+      } else {
+        docGrid.innerHTML += `
+          <div class="doc-preview" onclick="mostrarModal('${url}', 'img')">
+            <img src="${url}" class="doc-preview-img" alt="${doc.label}" loading="lazy">
+            <div class="doc-preview-label">${doc.label}</div>
+            <div class="doc-preview-overlay"><span>Ver documento</span></div>
+          </div>
+        `;
+      }
     }
   });
 
   if (tieneAviso && avisoUrl) {
     tieneDocumentos = true;
-    docGrid.innerHTML += `
-      <button class="btn-doc aviso-operaciones" onclick="window.open('${avisoUrl}', '_blank')">
-        📋 Aviso de Operaciones
-      </button>
-    `;
+    const isPdf = avisoUrl.toLowerCase().endsWith('.pdf');
+    if (isPdf) {
+      docGrid.innerHTML += `
+        <div class="doc-preview" onclick="mostrarModal('${avisoUrl}', 'pdf')">
+          <div class="doc-preview-pdf">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>PDF</span>
+          </div>
+          <div class="doc-preview-label">Aviso de Operaciones</div>
+          <div class="doc-preview-overlay"><span>Ver documento</span></div>
+        </div>
+      `;
+    } else {
+      docGrid.innerHTML += `
+        <div class="doc-preview" onclick="mostrarModal('${avisoUrl}', 'img')">
+          <img src="${avisoUrl}" class="doc-preview-img" alt="Aviso de Operaciones" loading="lazy">
+          <div class="doc-preview-label">Aviso de Operaciones</div>
+          <div class="doc-preview-overlay"><span>Ver documento</span></div>
+        </div>
+      `;
+    }
   }
 
   docSection.style.display = tieneDocumentos ? "block" : "none";
-
-  // ELIMINADO: generarQR(conductor.id);
 }
 
-// ELIMINADAS: funciones generarQR() y descargarQR()
-
-function mostrarModal(src) {
-  const modal = document.getElementById("modalFoto");
+function mostrarModal(src, type) {
+  const modal = document.getElementById("modalPreview");
   const img = document.getElementById("modalImg");
-  img.src = src;
+  const pdf = document.getElementById("modalPdf");
+
+  if (type === 'pdf') {
+    img.style.display = 'none';
+    pdf.style.display = 'block';
+    pdf.src = src;
+  } else {
+    pdf.style.display = 'none';
+    img.style.display = 'block';
+    img.src = src;
+  }
+
   modal.style.display = "flex";
   document.body.style.overflow = "hidden";
 }
 
 function cerrarModal() {
-  document.getElementById("modalFoto").style.display = "none";
+  document.getElementById("modalPreview").style.display = "none";
   document.body.style.overflow = "";
 }
 
@@ -1002,7 +1193,7 @@ if (window.Capacitor) {
   window.addEventListener('keyboardWillShow', () => {
     document.body.style.height = window.innerHeight + 'px';
   });
-  
+
   window.addEventListener('keyboardWillHide', () => {
     document.body.style.height = '';
   });
