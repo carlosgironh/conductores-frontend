@@ -99,45 +99,13 @@
     .conductor-details h3 { font-size: 1.05rem; font-weight: 600; }
     .conductor-details p { color: var(--text-muted); font-size: 0.875rem; margin-top: 2px; }
 
-    .plan-card {
-      background: var(--bg-card);
-      border-radius: 16px;
-      padding: 28px 24px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-      text-align: center;
-    }
-    .plan-price {
-      font-size: 3.2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #60a5fa, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      line-height: 1;
-    }
-    .plan-price span { font-size: 1.1rem; font-weight: 500; -webkit-text-fill-color: #94a3b8; }
-    .plan-period { color: var(--text-muted); margin-top: 10px; font-size: 0.9375rem; }
-    .plan-features {
-      list-style: none;
-      margin: 22px 0 0;
-      text-align: left;
-    }
-    .plan-features li {
-      padding: 9px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      border-bottom: 1px solid rgba(71,85,105,0.3);
-    }
-    .plan-features li:last-child { border-bottom: none; }
-    .plan-features li::before {
-      content: "✓";
-      color: var(--success);
-      font-weight: 700;
-      flex-shrink: 0;
-    }
+    
+    
+    
+    
+    
+    
+    
 
     .yappy-section {
       background: var(--bg-card);
@@ -286,7 +254,7 @@
 
     @media (max-width: 480px) {
       body { padding: 12px; }
-      .plan-price { font-size: 2.6rem; }
+      
     }
   </style>
 <base target="_blank">
@@ -314,17 +282,6 @@
       </div>
     </div>
 
-    <div class="plan-card" id="plan-card" style="display:none;">
-      <div class="plan-price">$5.00 <span>/ 24h</span></div>
-      <p class="plan-period">Activación por 24 horas de servicio</p>
-      <ul class="plan-features">
-        <li>Acceso al panel de viajes</li>
-        <li>Notificaciones en tiempo real</li>
-        <li>Soporte prioritario</li>
-        <li>Historial de viajes</li>
-      </ul>
-    </div>
-
     <div class="yappy-section" id="yappy-section" style="display:none;">
       <h3>Pagar con Yappy</h3>
 
@@ -350,7 +307,7 @@
 
         <!-- Fallback si Yappy no carga -->
         <button id="btn-fallback" class="btn-yappy-fallback">
-          <span id="fallback-text">Pagar $5.00 con Yappy</span>
+          <span id="fallback-text">Pagar $0.01 con Yappy</span>
         </button>
       </div>
 
@@ -420,7 +377,7 @@
         text.innerHTML = '<span class="spinner"></span> Procesando...';
       } else {
         btn.disabled = false;
-        text.textContent = 'Pagar $5.00 con Yappy';
+        text.textContent = 'Pagar $0.01 con Yappy';
       }
     }
 
@@ -576,8 +533,7 @@
         }
 
         showSection('status-card');
-        showSection('plan-card');
-        showSection('yappy-section');
+                showSection('yappy-section');
         hideAlert();
 
         initYappyComponent();
@@ -725,8 +681,8 @@
           },
           body: JSON.stringify({
             action: 'create-order',
-            total: '5.00',
-            subtotal: '5.00',
+            total: '0.01',
+            subtotal: '0.01',
             aliasYappy: yappyPhone,  // ← Número ingresado manualmente por el conductor
             conductor_id: conductorData?.id || null,  // ← ID del conductor para tabla pagos
             auth_user_id: authUser?.id || null       // ← Auth user ID para referencia
