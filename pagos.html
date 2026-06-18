@@ -727,7 +727,9 @@
             action: 'create-order',
             total: '5.00',
             subtotal: '5.00',
-            aliasYappy: yappyPhone  // ← Número ingresado manualmente por el conductor
+            aliasYappy: yappyPhone,  // ← Número ingresado manualmente por el conductor
+            conductor_id: conductorData?.id || null,  // ← ID del conductor para tabla pagos
+            auth_user_id: authUser?.id || null       // ← Auth user ID para referencia
           }),
         });
 
