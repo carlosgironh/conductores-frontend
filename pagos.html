@@ -285,6 +285,11 @@
     <div class="yappy-section" id="yappy-section" style="display:none;">
       <h3>Pagar con Yappy</h3>
 
+      <div style="text-align: center; margin-bottom: 20px; padding: 16px; background: rgba(37,99,235,0.1); border-radius: 12px; border: 1px solid rgba(37,99,235,0.2);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: #60a5fa;">$0.01</div>
+        <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;">Monto a pagar</div>
+      </div>
+
       <!-- Input para número de Yappy -->
       <div class="input-group">
         <label for="yappy-phone">📱 Número de celular para recibir la notificación de Yappy</label>
@@ -822,7 +827,6 @@
 
     // ============================================================
     // INICIALIZACIÓN
-    
     // ============================================================
     document.addEventListener('DOMContentLoaded', () => {
       logDebug('DOM cargado. Iniciando autenticación...');
