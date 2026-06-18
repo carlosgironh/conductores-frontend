@@ -421,6 +421,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.3s ease;
     cursor: pointer;
+    aspect-ratio: 3/4;
   }
 
   .doc-preview:hover {
@@ -431,14 +432,14 @@
 
   .doc-preview-img {
     width: 100%;
-    aspect-ratio: 3/4;
+    height: 100%;
     object-fit: cover;
     display: block;
   }
 
   .doc-preview-pdf {
     width: 100%;
-    aspect-ratio: 3/4;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -498,6 +499,14 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+  }
+
+  .doc-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    color: #64748b;
+    font-size: 14px;
   }
 
   .btn-doc {
@@ -611,6 +620,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
+    z-index: 1001;
   }
 
   .modal-close:hover {
@@ -724,10 +734,13 @@ async function cargarPerfil() {
       throw new Error('NOT_FOUND');
     }
 
-    const { data: documentos } = await supabaseClient
+    const { data: documentos, error: docError } = await supabaseClient
       .from("documentos")
       .select("*")
       .eq("conductor_id", conductor.id);
+
+    console.log('[PUBLICO] Documentos cargados:', documentos);
+    console.log('[PUBLICO] Error documentos:', docError);
 
     // Cargar estado de pago desde tabla pagos
     const { data: pagos } = await supabaseClient
@@ -927,6 +940,9 @@ function renderPerfil(conductor, documentos, pagos) {
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
 
+  console.log('[PUBLICO] Renderizando documentos. Total:', documentos?.length || 0);
+  console.log('[PUBLICO] Documentos:', documentos);
+
   const documentosConfig = [
     { tipo: "CEDULA", label: "Cédula", icon: "📄" },
     { tipo: "LICENCIA", label: "Licencia", icon: "🪪" },
@@ -939,6 +955,7 @@ function renderPerfil(conductor, documentos, pagos) {
 
   documentosConfig.forEach(doc => {
     const url = docUrl(doc.tipo);
+    console.log(`[PUBLICO] Doc ${doc.tipo}:`, url ? 'ENCONTRADO' : 'NO ENCONTRADO');
     if (url) {
       tieneDocumentos = true;
       const isPdf = url.toLowerCase().endsWith('.pdf');
@@ -994,7 +1011,21 @@ function renderPerfil(conductor, documentos, pagos) {
     }
   }
 
-  docSection.style.display = tieneDocumentos ? "block" : "none";
+  console.log('[PUBLICO] tieneDocumentos:', tieneDocumentos);
+
+  if (tieneDocumentos) {
+    docSection.style.display = "block";
+  } else {
+    docSection.style.display = "block";
+    docGrid.innerHTML = `
+      <div class="doc-empty">
+        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-bottom: 12px; opacity: 0.5;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p>No hay documentos registrados</p>
+      </div>
+    `;
+  }
 }
 
 function mostrarModal(src, type) {
