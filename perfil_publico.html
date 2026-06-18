@@ -740,7 +740,7 @@ async function cargarPerfil() {
       .select("*")
       .eq("conductor_id", conductor.id);
 
-    console.log('[PUBLICO] Documentos DB cargados:', documentos);
+    console.log('[PUBLICO] Documentos cargados:', documentos);
     console.log('[PUBLICO] Error documentos:', docError);
 
     // Cargar estado de pago desde tabla pagos
@@ -868,42 +868,51 @@ async function renderPerfil(conductor, documentosDB, pagos) {
   }
 
   // ===== ESTADO DE PAGO =====
-  const ultimoPago = pagos && pagos.length > 0 ? pagos[0] : null;
+  // Primero verificar campos del conductor (actualizados por backend IPN)
   const ahora = new Date();
+  const suscripcionActiva = conductor.suscripcion_activa === true;
+  const pagoAlDia = conductor.pago_al_dia === true;
+  const paymentStatus = conductor.payment_status || 'pending';
+  const fechaVencCond = conductor.fecha_vencimiento || conductor.proximo_pago;
+  const fechaVenc = fechaVencCond ? new Date(fechaVencCond) : null;
+  const diasRestantes = fechaVenc ? Math.ceil((fechaVenc - ahora) / (1000 * 60 * 60 * 24)) : null;
+
+  // También verificar tabla pagos como respaldo
+  const ultimoPago = pagos && pagos.length > 0 ? pagos[0] : null;
+  const pagoPagado = ultimoPago && ultimoPago.estado === 'pagado';
+
   let paymentHTML = '';
 
-  if (ultimoPago && ultimoPago.estado === 'pagado') {
-    const fechaVenc = ultimoPago.fecha_vencimiento ? new Date(ultimoPago.fecha_vencimiento) : null;
-    if (fechaVenc && fechaVenc > ahora) {
-      const diasRestantes = Math.ceil((fechaVenc - ahora) / (1000 * 60 * 60 * 24));
-      paymentHTML = `
-        <div class="payment-status-banner paid">
-          <div class="payment-status-icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="payment-status-info">
-            <h4>Pago al día</h4>
-            <p>Suscripción activa. Vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}.</p>
-          </div>
+  // Lógica: si conductor dice que está activo Y no ha vencido = PAID
+  if ((suscripcionActiva || pagoAlDia || paymentStatus === 'paid') && fechaVenc && fechaVenc > ahora) {
+    paymentHTML = `
+      <div class="payment-status-banner paid">
+        <div class="payment-status-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
         </div>
-      `;
-    } else {
-      paymentHTML = `
-        <div class="payment-status-banner overdue">
-          <div class="payment-status-icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="payment-status-info">
-            <h4>Suscripción vencida</h4>
-            <p>El pago anterior ha expirado. Se requiere renovación.</p>
-          </div>
+        <div class="payment-status-info">
+          <h4>Pago al día</h4>
+          <p>Suscripción activa. Vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}.</p>
         </div>
-      `;
-    }
+      </div>
+    `;
+  } else if ((suscripcionActiva || pagoPagado) && (!fechaVenc || fechaVenc <= ahora)) {
+    // Pagado pero vencido
+    paymentHTML = `
+      <div class="payment-status-banner overdue">
+        <div class="payment-status-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="payment-status-info">
+          <h4>Suscripción vencida</h4>
+          <p>El pago anterior ha expirado. Se requiere renovación.</p>
+        </div>
+      </div>
+    `;
   } else if (ultimoPago && ultimoPago.estado === 'pendiente') {
     paymentHTML = `
       <div class="payment-status-banner pending">
