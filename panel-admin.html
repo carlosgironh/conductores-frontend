@@ -1151,6 +1151,28 @@
     color: #f87171;
   }
 
+
+  /* Search inputs */
+  .search-input {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s;
+  }
+  .search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    outline: none;
+  }
+  .search-input::placeholder {
+    color: #64748b;
+  }
+
   /* Responsive */
   
   /* ==================== SECCIÓN VIAJES ==================== */
@@ -1418,6 +1440,7 @@
   #conductoresDisponiblesList::-webkit-scrollbar-track { background: transparent; }
   #conductoresDisponiblesList::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); border-radius: 2px; }
 </style>
+<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
@@ -1762,6 +1785,13 @@
       </div>
     </div>
 
+    <!-- Búsqueda -->
+    <div style="margin-bottom: 15px;">
+      <input type="text" id="searchConductores" placeholder="🔍 Buscar conductor (nombre, email, cédula, placa, marca, celular...)" 
+        style="width: 100%; padding: 12px 18px; border-radius: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; font-family: inherit;"
+        oninput="renderTable()">
+    </div>
+
     <!-- Filtros -->
     <div class="filters">
       <button class="filter-btn active" onclick="filterConductores('todos', this)">Todos</button>
@@ -1822,6 +1852,13 @@
         </div>
       </div>
 
+      <!-- Búsqueda Pasajeros -->
+      <div style="margin-bottom: 15px;">
+        <input type="text" id="searchPasajeros" placeholder="🔍 Buscar pasajero (nombre, email, cédula, celular...)" 
+          style="width: 100%; padding: 12px 18px; border-radius: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; font-family: inherit;"
+          oninput="renderTablePasajeros()">
+      </div>
+
       <!-- Filtros Pasajeros -->
       <div class="filters">
         <button class="filter-btn active" onclick="filterPasajeros('todos', this)">Todos</button>
@@ -1876,6 +1913,13 @@
           <div class="stat-value" id="completadoCountViajes">0</div>
           <div class="stat-label">Completados</div>
         </div>
+      </div>
+
+      <!-- Búsqueda Viajes -->
+      <div style="margin-bottom: 15px;">
+        <input type="text" id="searchViajes" placeholder="🔍 Buscar viaje (origen, destino, pasajero, conductor...)" 
+          style="width: 100%; padding: 12px 18px; border-radius: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; font-family: inherit;"
+          oninput="renderViajesList()">
       </div>
 
       <!-- Filtros Viajes -->
@@ -2132,6 +2176,24 @@ async function renderTablePasajeros() {
     filtered = allPasajeros.filter(p => obtenerEstadoPasajero(p) === currentFilterPasajeros);
   }
 
+  // Apply search filter if search term exists
+  const searchTerm = document.getElementById('searchPasajeros')?.value?.toLowerCase().trim();
+  if (searchTerm) {
+    filtered = filtered.filter(p => {
+      const nombre = `${p.nombres || ''} ${p.apellidos || ''}`.toLowerCase();
+      const email = (p.email || '').toLowerCase();
+      const cedula = (p.cedula || '').toLowerCase();
+      const celular = (p.celular || '').toLowerCase();
+      const direccion = (p.direccion || '').toLowerCase();
+
+      return nombre.includes(searchTerm) || 
+             email.includes(searchTerm) || 
+             cedula.includes(searchTerm) || 
+             celular.includes(searchTerm) || 
+             direccion.includes(searchTerm);
+    });
+  }
+
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
@@ -2218,7 +2280,10 @@ function viewPasajero(id) {
 
 async function toggleEstadoPasajero(id) {
   const pasajero = allPasajeros.find(p => p.id === id);
-  if (!pasajero) return;
+  if (!pasajero) {
+    console.error('[PASAJEROS] No se encontró pasajero con id:', id);
+    return;
+  }
 
   const estadoActual = obtenerEstadoPasajero(pasajero);
   let nuevoStatus;
@@ -2229,14 +2294,30 @@ async function toggleEstadoPasajero(id) {
     nuevoStatus = 'active';
   }
 
+  console.log(`[PASAJEROS] Cambiando estado de ${estadoActual} a ${nuevoStatus} para pasajero ${id}`);
+
   try {
-    const { error } = await supabaseClient
+    showLoading('Actualizando estado...');
+
+    const { data, error } = await supabaseClient
       .from('passengers')
       .update({ status: nuevoStatus })
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
-    if (error) throw error;
+    hideLoading();
 
+    if (error) {
+      console.error('[PASAJEROS] Error Supabase:', error);
+      if (error.code === '42501' || error.message?.includes('row-level security') || error.message?.includes('permission')) {
+        showToast('Error: No tienes permisos para modificar pasajeros. Verifica las políticas RLS en Supabase.', 'error');
+      } else {
+        showToast('Error al actualizar estado: ' + error.message, 'error');
+      }
+      return;
+    }
+
+    console.log('[PASAJEROS] Update exitoso:', data);
     showToast(`Estado actualizado a ${nuevoStatus}`, 'success');
 
     if (pasajeroEditId === id) {
@@ -2248,9 +2329,11 @@ async function toggleEstadoPasajero(id) {
       }
     }
 
-    cargarPasajeros();
+    await cargarPasajeros();
   } catch (error) {
-    showToast('Error al actualizar estado: ' + error.message, 'error');
+    hideLoading();
+    console.error('[PASAJEROS] Error en toggle:', error);
+    showToast('Error al actualizar estado: ' + (error.message || error), 'error');
   }
 }
 
@@ -2551,6 +2634,26 @@ function renderViajesList() {
   let filtered = allViajes;
   if (currentFilterViajes !== 'todos') {
     filtered = allViajes.filter(v => v.estado === currentFilterViajes);
+  }
+
+  // Apply search filter if search term exists
+  const searchTerm = document.getElementById('searchViajes')?.value?.toLowerCase().trim();
+  if (searchTerm) {
+    filtered = filtered.filter(v => {
+      const origen = (v.origen || '').toLowerCase();
+      const destino = (v.destino || '').toLowerCase();
+      const estado = (v.estado || '').toLowerCase();
+      const pasajero = getPasajeroInfoViajes(v.pasajero_id);
+      const conductor = getConductorInfoViajes(v.conductor_asignado_id);
+      const pasajeroNombre = (pasajero?.nombre || '').toLowerCase();
+      const conductorNombre = (conductor?.nombre || '').toLowerCase();
+
+      return origen.includes(searchTerm) || 
+             destino.includes(searchTerm) || 
+             estado.includes(searchTerm) || 
+             pasajeroNombre.includes(searchTerm) || 
+             conductorNombre.includes(searchTerm);
+    });
   }
 
   if (filtered.length === 0) {
@@ -3468,8 +3571,44 @@ async function renderTable() {
   const tbody = document.getElementById('conductoresTable');
   
   let filtered = allConductores;
-  if (currentFilter !== 'todos') {
+
+  // Apply payment filters first if active
+  if (currentFilter === 'con_pago') {
+    filtered = allConductores.filter(c => verificarSuscripcionActiva(c));
+  } else if (currentFilter === 'sin_pago') {
+    filtered = allConductores.filter(c => !verificarSuscripcionActiva(c));
+  } else if (currentFilter !== 'todos') {
     filtered = allConductores.filter(c => obtenerEstadoConductor(c) === currentFilter);
+  }
+
+  // Apply search filter if search term exists
+  const searchTerm = document.getElementById('searchConductores')?.value?.toLowerCase().trim();
+  if (searchTerm) {
+    filtered = filtered.filter(c => {
+      const nombre = `${c.nombres || ''} ${c.apellidos || ''}`.toLowerCase();
+      const email = (c.email || '').toLowerCase();
+      const cedula = (c.cedula || '').toLowerCase();
+      const licencia = (c.licencia || '').toLowerCase();
+      const placa = (c.placa || '').toLowerCase();
+      const marca = (c.marca || '').toLowerCase();
+      const modelo = (c.modelo || '').toLowerCase();
+      const celular = (c.celular || '').toLowerCase();
+      const color = (c.color || '').toLowerCase();
+      const poliza = (c.poliza_numero || '').toLowerCase();
+      const direccion = (c.direccion || '').toLowerCase();
+
+      return nombre.includes(searchTerm) || 
+             email.includes(searchTerm) || 
+             cedula.includes(searchTerm) || 
+             licencia.includes(searchTerm) || 
+             placa.includes(searchTerm) || 
+             marca.includes(searchTerm) || 
+             modelo.includes(searchTerm) || 
+             celular.includes(searchTerm) || 
+             color.includes(searchTerm) || 
+             poliza.includes(searchTerm) || 
+             direccion.includes(searchTerm);
+    });
   }
 
   if (filtered.length === 0) {
@@ -3562,10 +3701,8 @@ async function renderTable() {
 
 function filterConductores(filter, btn) {
   currentFilter = filter;
-  
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#conductoresSection .filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  
   renderTable();
 }
 
