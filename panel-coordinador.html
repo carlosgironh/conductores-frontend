@@ -318,6 +318,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -845,18 +846,28 @@ async function cargarConductores() {
 }
 
 function obtenerEstadoConductor(c) {
-  if (c.estado === true || c.estado === 'activo') return 'activo';
-  if (c.estado === false || c.estado === 'inactivo') return 'inactivo';
+  // Handle multiple possible data types from Supabase
+  // Boolean true/false, string 'true'/'false', string 'activo'/'inactivo'
+  if (c.estado === true || c.estado === 'true' || c.estado === 'activo' || c.estado === 1) return 'activo';
+  if (c.estado === false || c.estado === 'false' || c.estado === 'inactivo' || c.estado === 0) return 'inactivo';
+  // Check status field as fallback
+  if (c.status === 'active' || c.status === 'activo') return 'activo';
+  if (c.status === 'inactive' || c.status === 'inactivo' || c.status === 'banned') return 'inactivo';
   return 'pendiente';
 }
 function tienePagoAlDia(c) {
+  if (!c) return false;
   // Primero verificar campos del backend IPN
-  if (c.suscripcion_activa === true && c.fecha_vencimiento) {
+  if ((c.suscripcion_activa === true || c.suscripcion_activa === 'true') && c.fecha_vencimiento) {
     const vencimiento = new Date(c.fecha_vencimiento);
-    if (vencimiento > new Date()) return true;
+    if (!isNaN(vencimiento) && vencimiento > new Date()) return true;
   }
-  if (c.pago_al_dia === true || c.pago_al_dia === 'si' || c.pago_al_dia === 'pagado') return true;
-  if (c.payment_status === 'paid') return true;
+  if (c.pago_al_dia === true || c.pago_al_dia === 'true' || c.pago_al_dia === 'si' || c.pago_al_dia === 'pagado') return true;
+  if (c.payment_status === 'paid' || c.payment_status === 'completado') return true;
+  if (c.plan && c.fecha_vencimiento) {
+    const venc = new Date(c.fecha_vencimiento);
+    if (!isNaN(venc) && venc > new Date()) return true;
+  }
   return false;
 }
 function estaEnViaje(conductorId) { return allViajes.some(v => v.estado === 'asignado' && v.conductor_asignado_id === conductorId); }
@@ -1113,6 +1124,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let lastTouchEnd = 0;
 document.addEventListener('touchend', (e) => { const now = Date.now(); if (now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, false);
+
+// ===== FUNCIONES DE DOCUMENTOS =====
+async function loadConductorDocs(conductorId) {
+  try {
+    const { data: docs, error } = await supabaseClient
+      .from("documentos")
+      .select("*")
+      .eq("conductor_id", conductorId);
+
+    if (error) {
+      console.error('[COORD] Error cargando documentos:', error);
+      return [];
+    }
+
+    if (!docs || docs.length === 0) return [];
+
+    const result = [];
+    for (const d of docs) {
+      let url = d.url_archivo;
+      // Try to get public URL if it's a storage path
+      if (url && !url.startsWith('http')) {
+        try {
+          const { data: pub } = await supabaseClient.storage
+            .from("documentos-conductores")
+            .getPublicUrl(url);
+          if (pub?.publicUrl) url = pub.publicUrl;
+        } catch (e) {
+          // Keep original url
+        }
+      }
+      const ext = (url || '').split('.').pop().toLowerCase();
+      result.push({
+        tipo: d.tipo,
+        url: url,
+        isImage: ['png','jpg','jpeg','gif','webp'].includes(ext),
+        isPDF: ext === 'pdf'
+      });
+    }
+    return result;
+  } catch (e) {
+    console.error('[COORD] Exception cargando documentos:', e);
+    return [];
+  }
+}
+
+function openDocPreview(url, title, index, isPDF) {
+  const modal = document.getElementById('docPreviewModal');
+  const content = document.getElementById('docPreviewContent');
+  const titleEl = document.getElementById('docPreviewTitle');
+
+  if (!modal || !content) return;
+
+  content.innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div><p style="color:#94a3b8;margin-top:16px;">Cargando documento...</p></div>';
+  titleEl.textContent = title || 'Documento';
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  // Check if PDF or image
+  const isPdfFile = isPDF === 'true' || isPDF === true || (url || '').toLowerCase().endsWith('.pdf');
+
+  if (isPdfFile) {
+    content.innerHTML = `<iframe src="${url}" style="width:90%;height:85vh;border:none;border-radius:12px;" title="${title}"></iframe>`;
+  } else {
+    content.innerHTML = `<img src="${url}" style="max-width:90%;max-height:85vh;border-radius:12px;object-fit:contain;" alt="${title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div style="display:none;flex-direction:column;align-items:center;gap:12px;"><p style="color:#f87171;font-size:16px;">❌ No se pudo cargar la imagen</p><a href="${url}" target="_blank" style="color:#60a5fa;text-decoration:none;font-weight:600;">Abrir en nueva pestaña →</a></div>`;
+  }
+}
+
+function closeDocPreview() {
+  const modal = document.getElementById('docPreviewModal');
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  const content = document.getElementById('docPreviewContent');
+  if (content) content.innerHTML = '';
+}
+
 </script>
 </body>
 </html>
