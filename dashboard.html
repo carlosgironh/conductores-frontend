@@ -216,6 +216,7 @@
   }
 </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
   <header class="app-header">
@@ -372,7 +373,17 @@ async function login() {
       return;
     }
 
-    // 2. Verificar si es conductor (CORREGIDO: busca por auth_user_id, no por id)
+    // 2. Verificar si es coordinador
+    const { data: coordData } = await supabaseClient
+      .from('coordinadores').select('auth_user_id').eq('auth_user_id', userId).maybeSingle();
+
+    if(coordData?.auth_user_id){ 
+      showMessage("¡Bienvenido coordinador! Redirigiendo...", "success");
+      setTimeout(() => window.location.href = "panel-coordinador.html", 1200);
+      return;
+    }
+
+    // 3. Verificar si es conductor (CORREGIDO: busca por auth_user_id, no por id)
     const { data: conductorData } = await supabaseClient
       .from('conductores').select('id').eq('auth_user_id', userId).maybeSingle();
 
@@ -382,7 +393,7 @@ async function login() {
       return;
     }
 
-    // 3. Verificar si es pasajero
+    // 4. Verificar si es pasajero
     const { data: pasajeroData } = await supabaseClient
       .from('passengers').select('id, status').eq('id', userId).maybeSingle();
 
@@ -398,7 +409,7 @@ async function login() {
       return;
     }
 
-    // 4. NO ESTA EN NINGUNA TABLA -> Mostrar formulario de completar perfil
+    // 5. NO ESTA EN NINGUNA TABLA -> Mostrar formulario de completar perfil
     console.log("[LOGIN] Usuario no encontrado en tablas. Mostrando formulario de completar perfil.");
     showMessage("Es necesario completar tu perfil", "success");
     showCompleteProfileForm();
