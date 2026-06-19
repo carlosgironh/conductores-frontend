@@ -726,8 +726,11 @@ async function crearAdmin() {
     // Crear usuario en auth
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) {
-      if (error.message.includes('already registered')) showMessage('createAdminMsg', 'Este correo ya está registrado en el sistema', 'error');
-      else showMessage('createAdminMsg', 'Error: ' + error.message, 'error');
+      if (error.message.includes('already registered') || error.status === 422) {
+        showMessage('createAdminMsg', 'Este correo ya está registrado en auth. Intenta con otro email.', 'error');
+      } else {
+        showMessage('createAdminMsg', 'Error (' + (error.status || '??') + '): ' + error.message, 'error');
+      }
       hideLoading(); btn.disabled = false; resetAdminBtn(); return;
     }
     if (!data.user) { showMessage('createAdminMsg', 'Error creando usuario', 'error'); hideLoading(); btn.disabled = false; resetAdminBtn(); return; }
@@ -735,10 +738,10 @@ async function crearAdmin() {
     // Insertar en tabla admins
     const { error: insertError } = await supabaseClient
       .from('admins')
-      .insert([{ auth_user_id: data.user.id, email: email }]);
+      .insert([{ auth_user_id: data.user.id, email: email }], { returning: 'minimal' });
     if (insertError) {
       console.error("Error insertando en admins:", insertError);
-      showMessage('createAdminMsg', 'Error asignando permisos: ' + insertError.message, 'error');
+      showMessage('createAdminMsg', 'Error insertando en tabla admins (' + (insertError.code || '??') + '): ' + insertError.message, 'error');
       hideLoading(); btn.disabled = false; resetAdminBtn(); return;
     }
 
@@ -798,8 +801,11 @@ async function crearCoordinador() {
     // Crear usuario en auth
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) {
-      if (error.message.includes('already registered')) showMessage('createCoordMsg', 'Este correo ya está registrado en el sistema', 'error');
-      else showMessage('createCoordMsg', 'Error: ' + error.message, 'error');
+      if (error.message.includes('already registered') || error.status === 422) {
+        showMessage('createCoordMsg', 'Este correo ya está registrado en auth. Intenta con otro email.', 'error');
+      } else {
+        showMessage('createCoordMsg', 'Error (' + (error.status || '??') + '): ' + error.message, 'error');
+      }
       hideLoading(); btn.disabled = false; resetCoordBtn(); return;
     }
     if (!data.user) { showMessage('createCoordMsg', 'Error creando usuario', 'error'); hideLoading(); btn.disabled = false; resetCoordBtn(); return; }
@@ -813,10 +819,10 @@ async function crearCoordinador() {
         nombres: nombres,
         apellidos: apellidos,
         celular: celular || null
-      }]);
+      }], { returning: 'minimal' });
     if (insertError) {
       console.error("Error insertando en coordinadores:", insertError);
-      showMessage('createCoordMsg', 'Error asignando permisos: ' + insertError.message, 'error');
+      showMessage('createCoordMsg', 'Error insertando en tabla coordinadores (' + (insertError.code || '??') + '): ' + insertError.message + '. Verifica que la tabla existe y tienes permisos RLS.', 'error');
       hideLoading(); btn.disabled = false; resetCoordBtn(); return;
     }
 
@@ -903,18 +909,26 @@ async function cargarUsuarios() {
     // Cargar admins
     const { data: admins, error: adminErr } = await supabaseClient
       .from('admins')
-      .select('id, email, auth_user_id, created_at')
-      .order('created_at', { ascending: false });
-    if (adminErr) console.error("Error cargando admins:", adminErr);
-    renderAdminsList(admins || []);
+      .select('id, email, auth_user_id')
+      .order('id', { ascending: false });
+    if (adminErr) {
+      console.error("Error cargando admins:", adminErr);
+      document.getElementById('adminsList').innerHTML = '<p style="color:#f87171;font-size:12px;text-align:center;padding:20px;">Error cargando admins: ' + (adminErr.message || adminErr.code || 'Desconocido') + '</p>';
+    } else {
+      renderAdminsList(admins || []);
+    }
 
     // Cargar coordinadores
     const { data: coords, error: coordErr } = await supabaseClient
       .from('coordinadores')
-      .select('id, email, nombres, apellidos, celular, auth_user_id, created_at')
-      .order('created_at', { ascending: false });
-    if (coordErr) console.error("Error cargando coordinadores:", coordErr);
-    renderCoordsList(coords || []);
+      .select('id, email, nombres, apellidos, celular, auth_user_id')
+      .order('id', { ascending: false });
+    if (coordErr) {
+      console.error("Error cargando coordinadores:", coordErr);
+      document.getElementById('coordsList').innerHTML = '<p style="color:#f87171;font-size:12px;text-align:center;padding:20px;">Error cargando coordinadores: ' + (coordErr.message || coordErr.code || 'Desconocido') + '</p>';
+    } else {
+      renderCoordsList(coords || []);
+    }
   } catch (err) {
     console.error("Error cargando usuarios:", err);
   }
