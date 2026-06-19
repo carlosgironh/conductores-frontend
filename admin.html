@@ -5,9 +5,17 @@
   <title>Panel Administrativo - Road To</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data: blob: https://*.supabase.co;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co https://cdn.jsdelivr.net data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; script-src-elem 'self' https://cdn.jsdelivr.net https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data: blob: https://*.supabase.co;">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="capacitor.js"></script>
+  <script>
+// Try to load capacitor.js dynamically, but don't fail if it's not available
+(function() {
+  const script = document.createElement('script');
+  script.src = 'capacitor.js';
+  script.onerror = function() { console.log('Capacitor not available (expected in browser)'); };
+  document.head.appendChild(script);
+})();
+</script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -351,6 +359,7 @@
     }
   </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -551,7 +560,7 @@
 
 <script>
 // Capacitor Detection and Bridge
-const isCapacitor = typeof Capacitor !== 'undefined';
+const isCapacitor = typeof window !== 'undefined' && typeof window.Capacitor !== 'undefined';
 let App, SplashScreen, StatusBar, Keyboard, Haptics, Preferences, Dialog;
 
 async function initializeCapacitor() {
@@ -587,8 +596,29 @@ async function initializeCapacitor() {
 const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Wait for Supabase library to be fully loaded
+let supabaseClient = null;
+
+function initSupabase() {
+  if (typeof supabase === 'undefined' || !supabase.createClient) {
+    console.error('Supabase library not loaded. Check CSP and network.');
+    return false;
+  }
+  try {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase client initialized successfully');
+    return true;
+  } catch (e) {
+    console.error('Error initializing Supabase:', e);
+    return false;
+  }
+}
+
+// Try to initialize immediately and also after DOM ready
+if (!initSupabase()) {
+  // Retry after a short delay in case script loads late
+  setTimeout(initSupabase, 500);
+}
 
 let authChecked = false;
 
@@ -622,6 +652,15 @@ function showMessage(elementId, text, type) {
 async function checkAuth() {
   if (authChecked) return;
   authChecked = true;
+
+  // Ensure supabaseClient is initialized
+  if (!supabaseClient) {
+    if (!initSupabase()) {
+      showMessage('createAdminMsg', 'Error: No se pudo cargar la librería de Supabase. Verifica tu conexión.', 'error');
+      return;
+    }
+  }
+
   try {
     showLoading('Verificando sesión...');
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
@@ -652,6 +691,7 @@ async function checkAuth() {
 
 // ===== CREAR ADMINISTRADOR =====
 async function crearAdmin() {
+  if (!supabaseClient) { showMessage('createAdminMsg', 'Error: Cliente no inicializado. Recarga la página.', 'error'); return; }
   const email = document.getElementById("newAdminEmail").value.trim();
   const password = document.getElementById("newAdminPass").value.trim();
   const btn = document.getElementById("createAdminBtn");
@@ -720,6 +760,7 @@ function resetAdminBtn() {
 
 // ===== CREAR COORDINADOR =====
 async function crearCoordinador() {
+  if (!supabaseClient) { showMessage('createCoordMsg', 'Error: Cliente no inicializado. Recarga la página.', 'error'); return; }
   const nombres = document.getElementById("coordNombres").value.trim();
   const apellidos = document.getElementById("coordApellidos").value.trim();
   const email = document.getElementById("coordEmail").value.trim();
@@ -800,6 +841,7 @@ function resetCoordBtn() {
 
 // ===== CAMBIAR CONTRASEÑA =====
 async function cambiarPassword() {
+  if (!supabaseClient) { showMessage('changeMsg', 'Error: Cliente no inicializado. Recarga la página.', 'error'); return; }
   const currentPass = document.getElementById("currentPass").value;
   const newPass = document.getElementById("newPass").value;
   const confirmPass = document.getElementById("confirmNewPass").value;
@@ -851,6 +893,12 @@ function resetChangeBtn() {
 
 // ===== VER USUARIOS =====
 async function cargarUsuarios() {
+  if (!supabaseClient) { 
+    console.error('supabaseClient not initialized'); 
+    document.getElementById('adminsList').innerHTML = '<p style="color:#f87171;font-size:13px;text-align:center;padding:20px;">⚠️ Error de conexión. Recarga la página.</p>';
+    document.getElementById('coordsList').innerHTML = '<p style="color:#f87171;font-size:13px;text-align:center;padding:20px;">⚠️ Error de conexión. Recarga la página.</p>';
+    return; 
+  }
   try {
     // Cargar admins
     const { data: admins, error: adminErr } = await supabaseClient
@@ -921,6 +969,7 @@ function switchUserTab(tab, btn) {
 
 // ===== LOGOUT =====
 async function logout() {
+  if (!supabaseClient) { window.location.href = 'index.html'; return; }
   let confirmado = true;
   if (isCapacitor && Dialog) {
     const { value } = await Dialog.confirm({
