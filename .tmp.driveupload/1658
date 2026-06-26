@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Administrativo - NRDesignCorp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <!-- CSP para Capacitor -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data: blob: https://*.supabase.co;">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Capacitor Bridge -->
+  <script src="capacitor.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    
+    :root {
+      --safe-area-top: env(safe-area-inset-top);
+      --safe-area-bottom: env(safe-area-inset-bottom);
+      --safe-area-left: env(safe-area-inset-left);
+      --safe-area-right: env(safe-area-inset-right);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      padding: calc(20px + var(--safe-area-top)) 20px calc(20px + var(--safe-area-bottom));
+      background: 
+        radial-gradient(ellipse at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      padding: 35px;
+      animation: slideUp 0.6s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon.blue {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    }
+
+    .card-icon.purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      transition: color 0.3s;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px 14px 48px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #3b82f6;
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      outline: none;
+    }
+
+    input:focus + .input-icon { color: #60a5fa; }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      -webkit-touch-callout: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover, .btn-primary:active {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-secondary:hover, .btn-secondary:active {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .msg {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+
+    .msg.show { display: block; }
+    .msg.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+    .msg.success { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+    .msg.info { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
+
+    .logout-btn {
+      position: fixed;
+      top: calc(20px + var(--safe-area-top));
+      right: calc(20px + var(--safe-area-right));
+      width: auto;
+      padding: 10px 20px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      font-size: 13px;
+      z-index: 100;
+    }
+
+    .logout-btn:hover, .logout-btn:active {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.9);
+      z-index: 3000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(99, 102, 241, 0.3);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .container { 
+        grid-template-columns: 1fr; 
+        gap: 20px;
+      }
+      .card { 
+        padding: 25px; 
+      }
+      .logout-btn {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+      body {
+        flex-direction: column;
+        padding-top: calc(10px + var(--safe-area-top));
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando...</div>
+</div>
+
+<button class="logout-btn" onclick="logout()">
+  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline; vertical-align: middle; margin-right: 5px;">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+  </svg>
+  Cerrar Sesión
+</button>
+
+<div class="container">
+  <!-- Card 1: Crear Administrador -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="card-title">Nuevo Administrador</div>
+        <div class="card-subtitle">Crear acceso administrativo</div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+      </svg>
+      <input id="newAdminEmail" type="email" placeholder="Correo electrónico" autocomplete="email">
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <input id="newAdminPass" type="password" placeholder="Contraseña temporal (mín. 6 caracteres)" autocomplete="new-password">
+    </div>
+
+    <button class="btn-primary" id="createBtn" onclick="crearAdmin()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Crear Administrador
+    </button>
+
+    <div id="createMsg" class="msg"></div>
+  </div>
+
+  <!-- Card 2: Cambiar Contraseña -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon purple">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="card-title">Cambiar Contraseña</div>
+        <div class="card-subtitle">Actualizar credenciales de acceso</div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <input id="currentPass" type="password" placeholder="Contraseña actual" autocomplete="current-password">
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+      </svg>
+      <input id="newPass" type="password" placeholder="Nueva contraseña" autocomplete="new-password">
+    </div>
+
+    <div class="input-group">
+      <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <input id="confirmNewPass" type="password" placeholder="Confirmar nueva contraseña" autocomplete="new-password">
+    </div>
+
+    <button class="btn-secondary" id="changeBtn" onclick="cambiarPassword()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Actualizar Contraseña
+    </button>
+
+    <div id="changeMsg" class="msg"></div>
+  </div>
+</div>
+
+<script>
+// Capacitor Detection and Bridge
+const isCapacitor = typeof Capacitor !== 'undefined';
+let App, SplashScreen, StatusBar, Keyboard, Haptics, Preferences, Dialog;
+
+// Initialize Capacitor plugins
+async function initializeCapacitor() {
+  if (!isCapacitor) return;
+  
+  try {
+    App = Capacitor.Plugins.App;
+    SplashScreen = Capacitor.Plugins.SplashScreen;
+    StatusBar = Capacitor.Plugins.StatusBar;
+    Keyboard = Capacitor.Plugins.Keyboard;
+    Haptics = Capacitor.Plugins.Haptics;
+    Preferences = Capacitor.Plugins.Preferences;
+    Dialog = Capacitor.Plugins.Dialog;
+    
+    // Set status bar style
+    await StatusBar.setStyle({ style: 'Dark' });
+    await StatusBar.setBackgroundColor({ color: '#0f172a' });
+    
+    // Handle back button
+    App.addListener('backButton', ({ canGoBack }) => {
+      if (canGoBack) {
+        window.history.back();
+      } else {
+        Dialog.confirm({
+          title: 'Salir de la aplicación',
+          message: '¿Deseas salir de la aplicación?',
+          okButtonTitle: 'Salir',
+          cancelButtonTitle: 'Cancelar'
+        }).then(({ value }) => {
+          if (value) App.exitApp();
+        });
+      }
+    });
+    
+    // Keyboard handling
+    if (Keyboard) {
+      Keyboard.addListener('keyboardWillShow', () => {
+        document.body.classList.add('keyboard-open');
+      });
+      
+      Keyboard.addListener('keyboardWillHide', () => {
+        document.body.classList.remove('keyboard-open');
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error initializing Capacitor plugins:', error);
+  }
+}
+
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Variable para evitar múltiples redirecciones
+let authChecked = false;
+
+// Initialize Capacitor on load
+document.addEventListener('DOMContentLoaded', initializeCapacitor);
+
+function showLoading(text = 'Cargando...') {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.querySelector('.loading-text').textContent = text;
+  overlay.classList.add('show');
+}
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+function showToast(message, type = 'success') {
+  // Haptic feedback for Capacitor
+  if (isCapacitor && Haptics) {
+    if (type === 'error') {
+      Haptics.impact({ style: 'Heavy' });
+    } else if (type === 'success') {
+      Haptics.notification({ type: 'success' });
+    }
+  }
+}
+
+function showMessage(elementId, text, type) {
+  const msg = document.getElementById(elementId);
+  msg.textContent = text;
+  msg.className = 'msg show ' + type;
+  if (!text) msg.className = 'msg';
+  
+  // Haptic feedback on error
+  if (type === 'error' && isCapacitor && Haptics) {
+    Haptics.impact({ style: 'Medium' });
+  }
+}
+
+// Verificar autenticación solo una vez
+async function checkAuth() {
+  if (authChecked) return;
+  authChecked = true;
+
+  try {
+    showLoading('Verificando sesión...');
+    
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+    
+    if (sessionError) {
+      console.error("Error obteniendo sesión:", sessionError);
+      hideLoading();
+      return;
+    }
+
+    if (!session) {
+      console.log("No hay sesión activa");
+      hideLoading();
+      // Redirigir a login si no hay sesión
+      window.location.href = 'index.html';
+      return;
+    }
+
+    console.log("Sesión activa para:", session.user.email);
+    
+    // Verificar si es admin
+    const { data: adminData, error: adminError } = await supabaseClient
+      .from('admins')
+      .select('auth_user_id')
+      .eq('auth_user_id', session.user.id)
+      .maybeSingle();
+
+    if (adminError) {
+      console.error("Error verificando admin:", adminError);
+    }
+
+    if (!adminData) {
+      console.log("Usuario no es admin");
+      window.location.href = 'perfil.html';
+    } else {
+      console.log("Usuario es admin");
+    }
+
+    hideLoading();
+    
+    // Hide splash screen after load
+    if (isCapacitor && SplashScreen) {
+      await SplashScreen.hide();
+    }
+
+  } catch (err) {
+    console.error("Error en checkAuth:", err);
+    hideLoading();
+  }
+}
+
+async function crearAdmin() {
+  const email = document.getElementById("newAdminEmail").value.trim();
+  const password = document.getElementById("newAdminPass").value.trim();
+  const btn = document.getElementById("createBtn");
+
+  if (!email || !password) {
+    showMessage('createMsg', 'Completa todos los campos', 'error');
+    return;
+  }
+
+  if (password.length < 6) {
+    showMessage('createMsg', 'La contraseña debe tener mínimo 6 caracteres', 'error');
+    return;
+  }
+
+  // Confirmación nativa en Capacitor
+  if (isCapacitor && Dialog) {
+    const { value } = await Dialog.confirm({
+      title: 'Crear Administrador',
+      message: `¿Crear nuevo administrador con correo: ${email}?`,
+      okButtonTitle: 'Crear',
+      cancelButtonTitle: 'Cancelar'
+    });
+    if (!value) return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Creando...';
+  showLoading('Creando administrador...');
+
+  try {
+    // Verificar si ya existe
+    const { data: existing, error: checkError } = await supabaseClient
+      .from('admins')
+      .select('email')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error("Error verificando existencia:", checkError);
+    }
+
+    if (existing) {
+      showMessage('createMsg', 'Este correo ya está registrado', 'error');
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
+      return;
+    }
+
+    // Crear usuario en auth
+    const { data, error } = await supabaseClient.auth.signUp({ 
+      email, 
+      password 
+    });
+
+    if (error) {
+      if (error.message.includes('already registered')) {
+        showMessage('createMsg', 'Este correo ya está registrado en el sistema', 'error');
+      } else {
+        showMessage('createMsg', 'Error: ' + error.message, 'error');
+      }
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
+      return;
+    }
+
+    if (!data.user) {
+      showMessage('createMsg', 'Error creando usuario', 'error');
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
+      return;
+    }
+
+    // Insertar en tabla admins
+    const { error: insertError } = await supabaseClient
+      .from('admins')
+      .insert([{ 
+        auth_user_id: data.user.id, 
+        email: email
+      }]);
+
+    if (insertError) {
+      console.error("Error insertando en admins:", insertError);
+      showMessage('createMsg', 'Error asignando permisos: ' + insertError.message, 'error');
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
+      return;
+    }
+
+    showToast('Administrador creado exitosamente', 'success');
+    showMessage('createMsg', '✅ Administrador creado exitosamente', 'success');
+    document.getElementById("newAdminEmail").value = "";
+    document.getElementById("newAdminPass").value = "";
+
+  } catch (err) {
+    console.error("Error inesperado:", err);
+    showMessage('createMsg', 'Error de conexión: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Crear Administrador';
+  }
+}
+
+async function cambiarPassword() {
+  const currentPass = document.getElementById("currentPass").value;
+  const newPass = document.getElementById("newPass").value;
+  const confirmPass = document.getElementById("confirmNewPass").value;
+  const btn = document.getElementById("changeBtn");
+
+  if (!currentPass || !newPass || !confirmPass) {
+    showMessage('changeMsg', 'Completa todos los campos', 'error');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showMessage('changeMsg', 'Las contraseñas no coinciden', 'error');
+    return;
+  }
+
+  if (newPass.length < 6) {
+    showMessage('changeMsg', 'Mínimo 6 caracteres', 'error');
+    return;
+  }
+
+  // Confirmación nativa en Capacitor
+  if (isCapacitor && Dialog) {
+    const { value } = await Dialog.confirm({
+      title: 'Cambiar Contraseña',
+      message: '¿Estás seguro de cambiar tu contraseña?',
+      okButtonTitle: 'Cambiar',
+      cancelButtonTitle: 'Cancelar'
+    });
+    if (!value) return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Actualizando...';
+  showLoading('Actualizando contraseña...');
+
+  try {
+    // Obtener usuario actual
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      showMessage('changeMsg', 'Error: No se pudo obtener usuario actual', 'error');
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+      return;
+    }
+
+    // Verificar contraseña actual
+    const { error: authError } = await supabaseClient.auth.signInWithPassword({
+      email: user.email,
+      password: currentPass
+    });
+
+    if (authError) {
+      showMessage('changeMsg', 'Contraseña actual incorrecta', 'error');
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+      return;
+    }
+
+    // Actualizar contraseña
+    const { error: updateError } = await supabaseClient.auth.updateUser({ 
+      password: newPass 
+    });
+
+    if (updateError) {
+      showMessage('changeMsg', 'Error: ' + updateError.message, 'error');
+      hideLoading();
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+      return;
+    }
+
+    showToast('Contraseña actualizada correctamente', 'success');
+    showMessage('changeMsg', '✅ Contraseña actualizada', 'success');
+    document.getElementById("currentPass").value = "";
+    document.getElementById("newPass").value = "";
+    document.getElementById("confirmNewPass").value = "";
+
+  } catch (err) {
+    console.error("Error cambiando password:", err);
+    showMessage('changeMsg', 'Error: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar Contraseña';
+  }
+}
+
+async function logout() {
+  let confirmado = true;
+  
+  // Confirmación nativa en Capacitor
+  if (isCapacitor && Dialog) {
+    const { value } = await Dialog.confirm({
+      title: 'Cerrar Sesión',
+      message: '¿Deseas cerrar sesión?',
+      okButtonTitle: 'Sí, cerrar',
+      cancelButtonTitle: 'Cancelar'
+    });
+    confirmado = value;
+  }
+  
+  if (!confirmado) return;
+  
+  showLoading('Cerrando sesión...');
+  await supabaseClient.auth.signOut();
+  
+  if (isCapacitor && Preferences) {
+    await Preferences.clear();
+  }
+  
+  hideLoading();
+  window.location.href = 'index.html';
+}
+
+// Initialize
+checkAuth();
+</script>
+</body>
+</html>

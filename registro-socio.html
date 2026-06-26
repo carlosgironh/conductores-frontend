@@ -2,6 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
@@ -9,6 +13,30 @@
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  /* ===== CAPACITOR / ANDROID SAFE AREA ===== */
+  :root {
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+  }
+
+  /* Prevent pull-to-refresh on Android */
+  html, body {
+    overscroll-behavior: none;
+    -webkit-overscroll-behavior: none;
+  }
+
+  /* Prevent text selection on Android (native feel) */
+  * {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input, textarea {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
 
   * {
     box-sizing: border-box;
@@ -837,6 +865,8 @@
     }
   }
 </style>
+<base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -927,6 +957,21 @@
           <div class="form-group">
             <label>Licencia</label>
             <input id="licencia" type="text" placeholder="Tipo B" required>
+          </div>
+          <div class="form-group full-width">
+            <label>Record Policivo</label>
+            <div class="file-input-wrapper" id="recordPolicivoWrapper">
+              <input type="file" id="record_policivo" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="file-input-label">
+                <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <div class="file-text">
+                  <span class="file-name">Record Policivo</span>
+                  <span class="file-hint">PDF, JPG o PNG - Obligatorio</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1289,6 +1334,9 @@ document.querySelectorAll('input[type="file"]').forEach(input => {
       } else if (this.id === 'foto_conductor') {
         label.textContent = 'Foto del Conductor';
         hint.textContent = 'JPG o PNG';
+      } else if (this.id === 'record_policivo') {
+        label.textContent = 'Record Policivo';
+        hint.textContent = 'PDF, JPG o PNG - Obligatorio';
       }
     }
   });
@@ -1344,6 +1392,7 @@ async function processRegistration() {
       celular: document.getElementById('celular').value,
       cedula: document.getElementById('cedula').value,
       licencia: document.getElementById('licencia').value,
+      // record_policivo: se envía como archivo, no como texto
       placa: document.getElementById('placa').value,
       modelo: document.getElementById('modelo').value,
       marca: document.getElementById('marca').value,
@@ -1365,7 +1414,8 @@ async function processRegistration() {
       { id: 'poliza_doc', nombre: 'poliza' },
       { id: 'foto_vehiculo', nombre: 'foto_vehiculo' },
       { id: 'foto_conductor', nombre: 'foto_conductor' },
-      { id: 'aviso_operaciones', nombre: 'aviso_operaciones' }
+      { id: 'aviso_operaciones', nombre: 'aviso_operaciones' },
+      { id: 'record_policivo', nombre: 'record_policivo' }
     ];
 
     showMessage("Codificando archivos...", "busy");
@@ -1481,9 +1531,32 @@ async function processRegistration() {
   setLoading(false);
 }
 
+// Haptic feedback en botón de registro
+btn.addEventListener('touchstart', () => {
+  if (window.hapticFeedback) window.hapticFeedback('light');
+}, { passive: true });
+
+// ===== MANEJO DE CONECTIVIDAD =====
+function isOnline() {
+  return navigator.onLine;
+}
+
+window.addEventListener('offline', () => {
+  showMessage("Sin conexión a internet. Verifique su red.", "error");
+});
+
+window.addEventListener('online', () => {
+  showMessage("Conexión restaurada.", "ok");
+});
+
 // Manejar submit del formulario
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  if (!isOnline()) {
+    showMessage("No hay conexión a internet. Intente cuando tenga red.", "error");
+    return;
+  }
   
   // Validación: si no es propietario, debe subir autorización
   if (!isOwner && !authFileInput.files[0]) {
@@ -1505,20 +1578,68 @@ form.addEventListener("submit", async (e) => {
   showModal();
 });
 
-// Detectar teclado virtual en móviles (optimización Capacitor)
+// ===== OPTIMIZACIONES CAPACITOR / ANDROID =====
 if (window.Capacitor) {
+  // Manejo del teclado virtual
   window.addEventListener('keyboardWillShow', () => {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
   });
-  
+
   window.addEventListener('keyboardWillHide', () => {
     document.body.style.position = '';
     document.body.style.width = '';
   });
+
+  // Manejo del botón atrás de Android
+  try {
+    const { App } = window.Capacitor.Plugins;
+    if (App) {
+      App.addListener('backButton', ({ canGoBack }) => {
+        if (document.getElementById('agreementModal').classList.contains('show')) {
+          closeModal();
+        } else if (canGoBack) {
+          window.history.back();
+        } else {
+          App.exitApp();
+        }
+      });
+    }
+  } catch (e) { console.log('App plugin not available'); }
+
+  // Splash screen hide cuando todo cargue
+  try {
+    const { SplashScreen } = window.Capacitor.Plugins;
+    if (SplashScreen) {
+      window.addEventListener('load', () => {
+        setTimeout(() => SplashScreen.hide(), 500);
+      });
+    }
+  } catch (e) { console.log('SplashScreen plugin not available'); }
+
+  // Haptic feedback helper
+  window.hapticFeedback = function(type = 'light') {
+    try {
+      const { Haptics } = window.Capacitor.Plugins;
+      if (Haptics) Haptics.impact({ style: type });
+    } catch (e) { /* ignore */ }
+  };
+} else {
+  window.hapticFeedback = function() {}; // noop para web
 }
 
 });
+
+// ===== PREVENT DOUBLE-TAP ZOOM (ANDROID) =====
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
 </script>
 
 </body>

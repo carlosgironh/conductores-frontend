@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mi Perfil - Conductor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { 
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+    padding-top: max(40px, env(safe-area-inset-top));
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    
+    background: 
+      radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+    
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%);
+    background-size: 150px 150px;
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+
+  .card {
+    max-width: 720px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    padding: 50px 45px;
+    padding-top: max(50px, env(safe-area-inset-top));
+    position: relative;
+    z-index: 1;
+    animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  @keyframes cardEntry {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .status-banner {
+    position: relative;
+    margin: calc(-1 * max(50px, env(safe-area-inset-top))) -45px 30px -45px;
+    padding: 20px 45px;
+    padding-top: max(20px, env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    animation: slideDown 0.6s ease-out backwards;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .status-banner.active {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(21, 128, 61, 0.3) 100%);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+
+  .status-banner.inactive {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  .status-banner.pending {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(180, 83, 9, 0.3) 100%);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+  }
+
+  .status-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .status-content {
+    flex: 1;
+  }
+
+  .status-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-message {
+    font-size: 13px;
+    opacity: 0.9;
+    line-height: 1.5;
+  }
+
+  .status-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+  }
+
+  .status-banner.active .status-check {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+  }
+
+  .status-banner.inactive .status-check {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  .status-banner.pending .status-check {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+  }
+
+  .status-banner.active::after {
+    content: '';
+    position: absolute;
+    right: 45px;
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+
+  @keyframes pulse-dot {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+    }
+  }
+
+  h2 {
+    text-align: center;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.5px;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  #contenido {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #contenido::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+  }
+
+  .campo {
+    margin-bottom: 16px;
+    font-size: 15px;
+    display: flex;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+  }
+
+  .campo:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .campo:active {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(0.98);
+  }
+
+  .campo strong {
+    color: #60a5fa;
+    width: 140px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .campo span {
+    color: #e2e8f0;
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .aviso-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+
+  .aviso-badge.si {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  .aviso-badge.no {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .fotos-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .foto-wrapper {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+  }
+
+  .foto-wrapper:active {
+    transform: scale(0.95);
+  }
+
+  .foto {
+    width: 100%;
+    aspect-ratio: 16/10;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .foto-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .documentos-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .documentos-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #60a5fa;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .documentos-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+    border-radius: 2px;
+  }
+
+  .documentos-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn-doc {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    min-height: 44px;
+  }
+
+  .btn-doc:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  .btn-doc:hover {
+    background: #6366f1;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    border-color: transparent;
+  }
+
+  .btn-doc.aviso-operaciones {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+  }
+
+  .btn-doc.aviso-operaciones:hover {
+    background: #8b5cf6;
+    color: white;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+  }
+
+  .btn-doc.missing {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  .btn-update {
+    width: 100%;
+    padding: 16px 28px;
+    margin-top: 25px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+      0 4px 6px -1px rgba(245, 158, 11, 0.2),
+      0 10px 20px -5px rgba(245, 158, 11, 0.4),
+      inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+
+  .btn-update:active {
+    transform: scale(0.96);
+  }
+
+  /* ELIMINADO: Estilos del QR container */
+
+  button {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.2s;
+    box-shadow: 
+      0 4px 6px -1px rgba(79, 70, 229, 0.2),
+      0 10px 20px -5px rgba(79, 70, 229, 0.4);
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+
+  button:active {
+    transform: scale(0.96);
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; 
+    top: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(10, 15, 25, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.3s ease;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal img {
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: scaleIn 0.3s ease;
+    -webkit-user-drag: none;
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .offline-indicator {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(10px);
+    animation: slideDown 0.3s ease;
+  }
+
+  .offline-indicator.show {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @media(max-width: 640px){
+    .card {
+      padding: 30px 20px;
+      padding-top: max(30px, env(safe-area-inset-top));
+      border-radius: 24px;
+    }
+    
+    .status-banner {
+      margin: calc(-1 * max(30px, env(safe-area-inset-top))) -20px 25px -20px;
+      padding: 15px 20px;
+      padding-top: max(15px, env(safe-area-inset-top));
+      flex-direction: column;
+      text-align: center;
+      gap: 10px;
+    }
+    
+    .status-banner.active::after {
+      display: none;
+    }
+    
+    h2 {
+      font-size: 26px;
+    }
+    
+    #contenido {
+      padding: 20px;
+    }
+    
+    .campo {
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .campo strong {
+      width: 100%;
+    }
+
+    .fotos-container {
+      grid-template-columns: 1fr;
+    }
+
+    .documentos-grid {
+      justify-content: center;
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(30, 41, 59, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="offline-indicator" id="offlineIndicator">
+  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
+  </svg>
+  Sin conexión
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="card" id="mainCard">
+  <h2>Mi Perfil de Conductor</h2>
+  
+  <div id="contenido">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      Cargando datos...
+    </div>
+  </div>
+  
+  <div class="fotos-container" id="fotos-container"></div>
+
+  <div class="documentos-section" id="documentos-section" style="display: none;">
+    <div class="documentos-title">Mis Documentos</div>
+    <div class="documentos-grid" id="documentos-grid"></div>
+  </div>
+
+  <button class="btn-update" onclick="irAPanel()">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+    </svg>
+    Actualizar Datos
+  </button>
+
+  <!-- ELIMINADO: QR container -->
+</div>
+
+<div id="modalFoto" class="modal" onclick="cerrarModal()">
+  <img id="modalImg" src="" alt="Vista ampliada">
+</div>
+
+<script>
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let perfilCache = null;
+let documentosCache = null;
+
+function initConnectivity() {
+  const indicator = document.getElementById('offlineIndicator');
+  
+  function updateOnlineStatus() {
+    if (navigator.onLine) {
+      indicator.classList.remove('show');
+      showToast('Conexión restaurada');
+      if (perfilCache === null) {
+        cargarPerfil();
+      }
+    } else {
+      indicator.classList.add('show');
+      showToast('Modo offline - Usando datos en caché');
+    }
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  
+  if (!navigator.onLine) {
+    indicator.classList.add('show');
+  }
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function renderStatusBanner(estado, motivoDeshabilitado = '') {
+  const card = document.getElementById('mainCard');
+  const existingBanner = document.querySelector('.status-banner');
+  
+  if (existingBanner) {
+    existingBanner.remove();
+  }
+  
+  let bannerHTML = '';
+  const estadoStr = String(estado).toLowerCase();
+  
+  if (estadoStr === 'true' || estadoStr === 'activo') {
+    bannerHTML = `
+      <div class="status-banner active">
+        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div class="status-content">
+          <div class="status-title">
+            Cuenta Verificada
+            <span class="status-check">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Activo
+            </span>
+          </div>
+          <div class="status-message">Su cuenta está completamente habilitada.</div>
+        </div>
+      </div>
+    `;
+  } else if (estadoStr === 'pendiente' || estadoStr === 'revision') {
+    bannerHTML = `
+      <div class="status-banner pending">
+        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div class="status-content">
+          <div class="status-title">
+            Verificación Pendiente
+            <span class="status-check">En Revisión</span>
+          </div>
+          <div class="status-message">Su documentación está siendo revisada (24h hábiles).</div>
+        </div>
+      </div>
+    `;
+  } else {
+    bannerHTML = `
+      <div class="status-banner inactive">
+        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <div class="status-content">
+          <div class="status-title">
+            Cuenta Deshabilitada
+            <span class="status-check">Inactivo</span>
+          </div>
+          <div class="status-message">${motivoDeshabilitado || 'Contacte soporte para más información.'}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  card.insertAdjacentHTML('afterbegin', bannerHTML);
+}
+
+async function cargarPerfil() {
+  try {
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    if (!navigator.onLine && perfilCache) {
+      renderPerfil(perfilCache, documentosCache, user);
+      return;
+    }
+
+    const { data: conductor, error: condError } = await supabaseClient
+      .from("conductores")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (condError || !conductor) {
+      throw new Error('No se encontró el perfil');
+    }
+
+    const { data: documentos } = await supabaseClient
+      .from("documentos")
+      .select("*")
+      .eq("conductor_id", conductor.id);
+
+    perfilCache = conductor;
+    documentosCache = documentos;
+
+    renderPerfil(conductor, documentos, user);
+
+  } catch (error) {
+    console.error('Error cargando perfil:', error);
+    
+    if (perfilCache) {
+      showToast('Error de conexión - Mostrando datos guardados');
+      renderPerfil(perfilCache, documentosCache, { email: perfilCache.email || 'Usuario' });
+      return;
+    }
+    
+    document.getElementById("contenido").innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #f87171;">
+        <p>Error al cargar el perfil. Intente nuevamente.</p>
+        <button onclick="cargarPerfil()" style="margin-top: 20px;">Reintentar</button>
+      </div>
+    `;
+  }
+}
+
+function renderPerfil(conductor, documentos, user) {
+  renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
+
+  function docUrl(tipo) {
+    const doc = documentos?.find(d => d.tipo === tipo);
+    if (!doc) return null;
+    return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
+  }
+
+  const tieneAviso = conductor.tiene_aviso_operaciones === true;
+  const avisoUrl = docUrl("AVISO_OPERACIONES");
+
+  document.getElementById("contenido").innerHTML = `
+    <div class="campo"><strong>Nombre</strong> <span>${conductor.nombres} ${conductor.apellidos}</span></div>
+    <div class="campo"><strong>Cédula</strong> <span>${conductor.cedula}</span></div>
+    <div class="campo"><strong>Licencia</strong> <span>${conductor.licencia}</span></div>
+    <div class="campo"><strong>Vehículo</strong> <span>${conductor.marca} ${conductor.modelo}</span></div>
+    <div class="campo"><strong>Placa</strong> <span>${conductor.placa}</span></div>
+    <div class="campo"><strong>Color</strong> <span>${conductor.color}</span></div>
+    <div class="campo"><strong>Póliza</strong> <span>${conductor.poliza_numero}</span></div>
+    <div class="campo">
+      <strong>Aviso Operaciones</strong> 
+      <span>
+        ${tieneAviso ? 
+          `<span class="aviso-badge si">✓ Sí</span>` : 
+          `<span class="aviso-badge no">✕ No</span>`
+        }
+      </span>
+    </div>
+    <div class="campo"><strong>Correo</strong> <span>${user.email}</span></div>
+    <div class="campo"><strong>Teléfono</strong> <span>${conductor.celular}</span></div>
+  `;
+
+  const fotosCont = document.getElementById("fotos-container");
+  fotosCont.innerHTML = "";
+
+  const fotoVeh = docUrl("FOTO_VEHICULO");
+  const fotoCond = docUrl("FOTO_CONDUCTOR");
+
+  if (fotoVeh) {
+    fotosCont.innerHTML += `
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoVeh}')">
+        <img src="${fotoVeh}" class="foto" alt="Vehículo" loading="lazy">
+        <div class="foto-label">Vehículo</div>
+      </div>
+    `;
+  }
+
+  if (fotoCond) {
+    fotosCont.innerHTML += `
+      <div class="foto-wrapper" onclick="mostrarModal('${fotoCond}')">
+        <img src="${fotoCond}" class="foto" alt="Conductor" loading="lazy">
+        <div class="foto-label">Conductor</div>
+      </div>
+    `;
+  }
+
+  const docSection = document.getElementById("documentos-section");
+  const docGrid = document.getElementById("documentos-grid");
+  docGrid.innerHTML = "";
+
+  const documentosConfig = [
+    { tipo: "CEDULA", label: "Cédula", icon: "📄" },
+    { tipo: "LICENCIA", label: "Licencia", icon: "🪪" },
+    { tipo: "REGISTRO", label: "Registro", icon: "🚗" },
+    { tipo: "POLIZA", label: "Seguro", icon: "🛡️" },
+    { tipo: "AUTH_PROPIETARIO", label: "Autorización", icon: "✉️" }
+  ];
+
+  let tieneDocumentos = false;
+
+  documentosConfig.forEach(doc => {
+    const url = docUrl(doc.tipo);
+    if (url) {
+      tieneDocumentos = true;
+      docGrid.innerHTML += `
+        <button class="btn-doc" onclick="window.open('${url}', '_blank')">
+          ${doc.icon} ${doc.label}
+        </button>
+      `;
+    }
+  });
+
+  if (tieneAviso && avisoUrl) {
+    tieneDocumentos = true;
+    docGrid.innerHTML += `
+      <button class="btn-doc aviso-operaciones" onclick="window.open('${avisoUrl}', '_blank')">
+        📋 Aviso de Operaciones
+      </button>
+    `;
+  }
+
+  docSection.style.display = tieneDocumentos ? "block" : "none";
+
+  // ELIMINADO: generarQR(conductor.id);
+}
+
+// ELIMINADAS: funciones generarQR() y descargarQR()
+
+function mostrarModal(src) {
+  const modal = document.getElementById("modalFoto");
+  const img = document.getElementById("modalImg");
+  img.src = src;
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModal() {
+  document.getElementById("modalFoto").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function irAPanel() {
+  document.body.style.opacity = "0.5";
+  setTimeout(() => {
+    window.location.href = "panel-usuario.html";
+  }, 200);
+}
+
+if (window.Capacitor) {
+  window.addEventListener('keyboardWillShow', () => {
+    document.body.style.height = window.innerHeight + 'px';
+  });
+  
+  window.addEventListener('keyboardWillHide', () => {
+    document.body.style.height = '';
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initConnectivity();
+  cargarPerfil();
+});
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+</script>
+
+</body>
+</html>

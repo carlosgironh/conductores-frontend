@@ -1,0 +1,59 @@
+{
+  "name": "road-to-app",
+  "version": "2.0.0",
+  "description": "Road To - Plataforma de gestión de conductores",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'Build completed'",
+    "cap:sync": "npx cap sync",
+    "cap:android": "npx cap add android",
+    "cap:ios": "npx cap add ios",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:run:android": "npx cap run android",
+    "cap:run:ios": "npx cap run ios",
+    "ionic:build": "npm run build",
+    "ionic:serve": "npm run start"
+  },
+  "keywords": [
+    "road-to",
+    "conductores",
+    "transporte",
+    "capacitor",
+    "ionic",
+    "mobile",
+    "kotlin"
+  ],
+  "author": "Road To Team",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@ionic/core": "^8.0.0",
+    "@supabase/supabase-js": "^2.48.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@ionic/cli": "^7.2.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "browserslist": [
+    "Chrome >= 100",
+    "Safari >= 15",
+    "iOS >= 15"
+  ]
+}
