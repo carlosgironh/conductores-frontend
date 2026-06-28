@@ -364,6 +364,84 @@
   .action-btn.toggle.inactive:hover { color: #f87171; background: rgba(239, 68, 68, 0.15); }
   .action-btn.qr:hover { color: #a78bfa; background: rgba(139, 92, 246, 0.15); }
 
+  /* Permisos Panel Style */
+  .permissions-card {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(251, 146, 60, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .permissions-info h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--corp-orange-light);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .permissions-info p {
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  /* Custom Switch */
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .switch-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .switch-main {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 13px;
+    transition: background 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .switch-main.active {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+
+  .switch-thumb-main {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  .switch-main.active .switch-thumb-main {
+    transform: translateX(24px);
+  }
+
+  .switch-main.readonly {
+    cursor: not-allowed;
+    opacity: 0.85;
+  }
+
   .btn-group { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; justify-content: center; }
   .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info { padding: 14px 28px; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; -webkit-touch-callout: none; user-select: none; }
   .btn-primary { background: linear-gradient(135deg, #f97316 0%, #d97706 100%); color: white; }
@@ -612,6 +690,20 @@
       </div>
     </div>
 
+    <!-- ESTADO DE PERMISOS (CONTROLADO POR ADMIN) -->
+    <div class="permissions-card">
+      <div class="permissions-info">
+        <h4>🔒 Permiso de Edición/Eliminación</h4>
+        <p>Habilitado o deshabilitado por el Administrador. Permite Editar/Eliminar conductores.</p>
+      </div>
+      <div class="switch-container">
+        <span class="switch-label" id="labelPermisoCoord">Deshabilitado</span>
+        <div class="switch-main readonly" id="permisoCoordinadoresSwitch">
+          <div class="switch-thumb-main"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- VIAJES SECTION -->
     <div id="viajesSection" class="section-content active">
       <div class="stats-grid">
@@ -814,23 +906,37 @@
       }
     });
 
-    // CARGAR PERMISOS REALES DEL COORDINADOR AUTENTICADO
+    // CARGAR PERMISOS REALES DEL COORDINADOR DESDE LA CONFIG GLOBAL
     async function cargarPermisosCoordinador() {
       try {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) return;
         const { data, error } = await supabaseClient
           .from('coordinadores')
-          .select('permiso_editar')
-          .eq('auth_user_id', user.id)
+          .select('celular')
+          .eq('id', '00000000-0000-0000-0000-000000000000')
           .maybeSingle();
+        
         if (error) {
-          console.warn('Columna permiso_editar no existe o error de permisos:', error);
+          console.warn('Error cargando permisos globales:', error);
           permCoordinadoresEditar = false;
-          return;
+        } else if (data) {
+          permCoordinadoresEditar = data.celular === 'true';
+        } else {
+          permCoordinadoresEditar = false;
         }
-        if (data && data.permiso_editar !== undefined) {
-          permCoordinadoresEditar = data.permiso_editar === true || data.permiso_editar === 'true';
+
+        // Actualizar UI del Switch
+        const sw = document.getElementById('permisoCoordinadoresSwitch');
+        const lbl = document.getElementById('labelPermisoCoord');
+        if (sw && lbl) {
+          if (permCoordinadoresEditar) {
+            sw.classList.add('active');
+            lbl.textContent = "Habilitado";
+            lbl.style.color = "#4ade80";
+          } else {
+            sw.classList.remove('active');
+            lbl.textContent = "Deshabilitado";
+            lbl.style.color = "#ef4444";
+          }
         }
       } catch (e) {
         console.error("Error cargando permisos:", e);
@@ -1350,6 +1456,10 @@
     }
 
     function openEditConductor(id) {
+      if (!permCoordinadoresEditar) {
+        showToast('Esta función está deshabilitada por el administrador.', 'error');
+        return;
+      }
       const c = allConductores.find(x => x.id === id);
       if (!c) return;
       document.getElementById('editId').value = c.id;
@@ -1367,6 +1477,10 @@
 
     document.getElementById('editFormConductor').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!permCoordinadoresEditar) {
+        showToast('Esta función está deshabilitada por el administrador.', 'error');
+        return;
+      }
       const id = document.getElementById('editId').value;
       const nombres = document.getElementById('editNombres').value.trim();
       const apellidos = document.getElementById('editApellidos').value.trim();
@@ -1391,6 +1505,10 @@
     });
 
     async function deleteConductor(id) {
+      if (!permCoordinadoresEditar) {
+        showToast('Esta función está deshabilitada por el administrador.', 'error');
+        return;
+      }
       if (!confirm('¿Seguro de eliminar permanentemente a este conductor?')) return;
       showLoading('Eliminando...');
       try {
