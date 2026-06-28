@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sugerencias y opiniones | Road To</title>
+  <meta name="theme-color" content="#09100d">
+
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* Estilos específicos de la página de sugerencias - Base en theme.css */
+    html, body { height: 100%; background: linear-gradient(180deg, #0f1814 0%, var(--bg-base) 100%); }
+
+    .container {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-2xl) var(--sp-md);
+    }
+
+    .wrapper {
+      width: 920px;
+      max-width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: var(--sp-2xl);
+      align-items: start;
+    }
+
+    .info-side {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-xl);
+      padding: var(--sp-md) 0;
+    }
+
+    .kicker {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: var(--sp-md);
+    }
+
+    .info-side > div:nth-child(2) h1 {
+      margin: var(--sp-sm) 0 var(--sp-md);
+      font-size: var(--font-size-4xl);
+    }
+
+    p.lead {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .contact-items {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-md);
+    }
+
+    .contact-item {
+      display: flex;
+      gap: var(--sp-md);
+      align-items: flex-start;
+    }
+
+    .contact-item .icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .contact-item h4 {
+      margin: 0 0 var(--sp-xs);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .contact-item p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+
+    .contact-item a {
+      color: var(--color-green-primary);
+      text-decoration: none;
+    }
+
+    .contact-item a:hover {
+      text-decoration: underline;
+      color: var(--color-green-light);
+    }
+
+    .form-side {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12));
+      border-radius: var(--radius-lg);
+      padding: var(--sp-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-lighter);
+    }
+
+    .form-group { margin-bottom: var(--sp-md); }
+
+    .form-group label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--sp-sm);
+      color: var(--text-primary);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: var(--sp-md);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: var(--font-size-base);
+      transition: all var(--transition-base);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-green-primary);
+      background: rgba(118, 179, 44, 0.08);
+      box-shadow: 0 0 0 3px rgba(118, 179, 44, 0.12);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(90deg, var(--color-orange-primary), var(--color-green-primary));
+      width: 100%;
+      margin-top: var(--sp-md);
+      box-shadow: 0 8px 20px rgba(247, 123, 29, 0.25);
+      transition: all var(--transition-base);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(247, 123, 29, 0.3);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--sp-lg);
+      transition: color var(--transition-fast);
+    }
+
+    .back-link:hover {
+      color: var(--text-primary);
+    }
+
+    .success-message {
+      display: none;
+      color: var(--color-green-primary);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--sp-md);
+    }
+
+    @media (max-width: 768px) {
+      .wrapper {
+        grid-template-columns: 1fr;
+        gap: var(--sp-xl);
+      }
+      .info-side { gap: var(--sp-lg); }
+      .form-side { padding: var(--sp-lg); }
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="container">
+    <div class="wrapper">
+      <div class="info-side">
+        <a href="empresa.html" class="back-link">← Volver</a>
+        <div>
+          <div class="kicker">Sugerencias y opiniones</div>
+          <h1>¿Quieres ayudarnos a mejorar?</h1>
+          <p class="lead">Tu opinión es muy importante para nosotros. Cuéntanos qué te gustaría ver en Road To, qué podemos hacer mejor o cualquier idea que tengas para mejorar la plataforma.</p>
+        </div>
+        <div class="contact-items">
+          <div class="contact-item">
+            <div class="icon">📧</div>
+            <div>
+              <h4>Correo electrónico</h4>
+              <p><a href="mailto:admin.roadto@gmail.com">admin.roadto@gmail.com</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="form-side" onsubmit="handleSubmit(event)">
+        <div class="success-message" id="successMsg">✓ Gracias por tu sugerencia. La tendremos en cuenta.</div>
+
+        <div class="form-group">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="asunto">Tema de la sugerencia</label>
+          <input type="text" id="asunto" name="asunto" placeholder="¿Sobre qué quieres darnos tu opinión?" required>
+        </div>
+
+        <div class="form-group">
+          <label for="mensaje">Tu sugerencia u opinión</label>
+          <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos en detalle tu idea, sugerencia o opinión..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-submit">Enviar sugerencia</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const successMsg = document.getElementById('successMsg');
+
+      // Show success message
+      successMsg.style.display = 'block';
+
+      // Reset form
+      form.reset();
+
+      // Hide message after 4 seconds
+      setTimeout(() => {
+        successMsg.style.display = 'none';
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

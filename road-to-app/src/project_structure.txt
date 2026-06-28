@@ -1,0 +1,3427 @@
+Listado de rutas de carpetas
+El n�mero de serie del volumen es 00000017 9C54:E5D0
+C:.
+�   .gitignore
+�   admin.html
+�   consultas.html
+�   dashboard.html
+�   empresa.html
+�   home.html
+�   index.html
+�   logo.png
+�   logo2.png
+�   logo3.png
+�   palette.css
+�   panel-admin.html
+�   panel-usuario.html
+�   panel-viajes-admin.html
+�   panel-viajes.html
+�   perfil-pasajero.html
+�   perfil.html
+�   perfil_publico.html
+�   project_structure.txt
+�   Promt de seguimiento Road To.txt
+�   prueba.html
+�   registro-cliente.html
+�   registro-socio.html
+�   registro.html
+�   reservar-viaje.html
+�   reset-password.html
+�   RoadTo.zip
+�   terminos.txt
+�   theme.css
+�   vercel.json
+�   web-empresa.html
+�   
++---.continue
+�   +---agents
+�           new-config-1.yaml
+�           new-config.yaml
+�           
++---.sixth
+�   +---skills
++---.vs
+�   �   VSWorkspaceState.json
+�   �   
+�   +---conductores-frontend.slnx
+�       +---v18
+�               .wsuo
+�               DocumentLayout.json
+�               
++---.vscode
+�       extensions.json
+�       settings.json
+�       
++---android-native
+�   +---app
+�   �   +---src
+�   �       +---main
+�   �           +---assets
+�   +---gradle
+�       +---wrapper
++---road-to-app
+�   �   package-lock.json
+�   �   package.json
+�   �   
+�   +---.github
+�   �   +---modernize
+�   �       +---code-migration
+�   �               .gitignore
+�   �               
+�   +---.idea
+�   �   �   .gitignore
+�   �   �   misc.xml
+�   �   �   modules.xml
+�   �   �   road-to-app.iml
+�   �   �   vcs.xml
+�   �   �   
+�   �   +---caches
+�   �           deviceStreaming.xml
+�   �           
+�   +---node_modules
+�   �   �   .package-lock.json
+�   �   �   
+�   �   +---.bin
+�   �   �       cap
+�   �   �       cap.cmd
+�   �   �       cap.ps1
+�   �   �       capacitor
+�   �   �       capacitor.cmd
+�   �   �       capacitor.ps1
+�   �   �       is-docker
+�   �   �       is-docker.cmd
+�   �   �       is-docker.ps1
+�   �   �       native-run
+�   �   �       native-run.cmd
+�   �   �       native-run.ps1
+�   �   �       node-which
+�   �   �       node-which.cmd
+�   �   �       node-which.ps1
+�   �   �       qrcode
+�   �   �       qrcode.cmd
+�   �   �       qrcode.ps1
+�   �   �       rimraf
+�   �   �       rimraf.cmd
+�   �   �       rimraf.ps1
+�   �   �       semver
+�   �   �       semver.cmd
+�   �   �       semver.ps1
+�   �   �       tree-kill
+�   �   �       tree-kill.cmd
+�   �   �       tree-kill.ps1
+�   �   �       
+�   �   +---@capacitor
+�   �   �   +---app
+�   �   �   �   �   CapacitorApp.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---camera
+�   �   �   �   �   CapacitorCamera.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---cli
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---assets
+�   �   �   �   �       android-template.tar.gz
+�   �   �   �   �       capacitor-cordova-android-plugins.tar.gz
+�   �   �   �   �       capacitor-cordova-ios-plugins.tar.gz
+�   �   �   �   �       ios-pods-template.tar.gz
+�   �   �   �   �       ios-spm-template.tar.gz
+�   �   �   �   �       
+�   �   �   �   +---bin
+�   �   �   �   �       capacitor
+�   �   �   �   �       
+�   �   �   �   +---dist
+�   �   �   �       �   colors.js
+�   �   �   �       �   common.js
+�   �   �   �       �   config.js
+�   �   �   �       �   cordova.js
+�   �   �   �       �   declarations.d.ts
+�   �   �   �       �   declarations.js
+�   �   �   �       �   definitions.js
+�   �   �   �       �   errors.js
+�   �   �   �       �   framework-configs.js
+�   �   �   �       �   index.js
+�   �   �   �       �   ipc.js
+�   �   �   �       �   log.js
+�   �   �   �       �   plugin.js
+�   �   �   �       �   sysconfig.js
+�   �   �   �       �   telemetry.js
+�   �   �   �       �   
+�   �   �   �       +---tasks
+�   �   �   �       �       add.js
+�   �   �   �       �       build.js
+�   �   �   �       �       config.js
+�   �   �   �       �       copy.js
+�   �   �   �       �       create.js
+�   �   �   �       �       doctor.js
+�   �   �   �       �       init.js
+�   �   �   �       �       list.js
+�   �   �   �       �       migrate-spm.js
+�   �   �   �       �       migrate.js
+�   �   �   �       �       new-plugin.js
+�   �   �   �       �       open.js
+�   �   �   �       �       run.js
+�   �   �   �       �       serve.js
+�   �   �   �       �       sourcemaps.js
+�   �   �   �       �       sync.js
+�   �   �   �       �       telemetry.js
+�   �   �   �       �       update.js
+�   �   �   �       �       
+�   �   �   �       +---util
+�   �   �   �               cli.js
+�   �   �   �               emoji.js
+�   �   �   �               fn.js
+�   �   �   �               fs.js
+�   �   �   �               iosplugin.js
+�   �   �   �               js.js
+�   �   �   �               livereload.js
+�   �   �   �               monorepotools.js
+�   �   �   �               native-run.js
+�   �   �   �               node.js
+�   �   �   �               promise.js
+�   �   �   �               spm.js
+�   �   �   �               subprocess.js
+�   �   �   �               template.js
+�   �   �   �               term.js
+�   �   �   �               uuid.js
+�   �   �   �               xml.js
+�   �   �   �               
+�   �   �   +---core
+�   �   �   �   �   cookies.md
+�   �   �   �   �   cordova.js
+�   �   �   �   �   http.md
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �       capacitor.js
+�   �   �   �   �       capacitor.js.map
+�   �   �   �   �       index.cjs.js
+�   �   �   �   �       index.cjs.js.map
+�   �   �   �   �       index.js
+�   �   �   �   �       index.js.map
+�   �   �   �   �       
+�   �   �   �   +---types
+�   �   �   �           core-plugins.d.ts
+�   �   �   �           definitions-internal.d.ts
+�   �   �   �           definitions.d.ts
+�   �   �   �           global.d.ts
+�   �   �   �           index.d.ts
+�   �   �   �           runtime.d.ts
+�   �   �   �           util.d.ts
+�   �   �   �           web-plugin.d.ts
+�   �   �   �           
+�   �   �   +---filesystem
+�   �   �   �   �   CapacitorFilesystem.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---geolocation
+�   �   �   �   �   CapacitorGeolocation.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---haptics
+�   �   �   �   �   CapacitorHaptics.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---keyboard
+�   �   �   �   �   CapacitorKeyboard.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               
+�   �   �   +---preferences
+�   �   �   �   �   CapacitorPreferences.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---share
+�   �   �   �   �   CapacitorShare.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---splash-screen
+�   �   �   �   �   CapacitorSplashScreen.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               web.d.ts
+�   �   �   �               web.js
+�   �   �   �               web.js.map
+�   �   �   �               
+�   �   �   +---status-bar
+�   �   �   �   �   CapacitorStatusBar.podspec
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   Package.swift
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �       �   docs.json
+�   �   �   �       �   plugin.cjs.js
+�   �   �   �       �   plugin.cjs.js.map
+�   �   �   �       �   plugin.js
+�   �   �   �       �   plugin.js.map
+�   �   �   �       �   
+�   �   �   �       +---esm
+�   �   �   �               definitions.d.ts
+�   �   �   �               definitions.js
+�   �   �   �               definitions.js.map
+�   �   �   �               index.d.ts
+�   �   �   �               index.js
+�   �   �   �               index.js.map
+�   �   �   �               
+�   �   �   +---synapse
+�   �   �       �   LICENSE.md
+�   �   �       �   package.json
+�   �   �       �   README.md
+�   �   �       �   
+�   �   �       +---dist
+�   �   �               index.d.ts
+�   �   �               synapse.cjs
+�   �   �               synapse.js
+�   �   �               synapse.mjs
+�   �   �               
+�   �   +---@capacitor-community
+�   �   �   +---background-geolocation
+�   �   �           CapacitorCommunityBackgroundGeolocation.podspec
+�   �   �           definitions.d.ts
+�   �   �           LICENSE
+�   �   �           package.json
+�   �   �           Package.swift
+�   �   �           README.md
+�   �   �           
+�   �   +---@ionic
+�   �   �   +---cli-framework-output
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �           colors.d.ts
+�   �   �   �           colors.js
+�   �   �   �           index.d.ts
+�   �   �   �           index.js
+�   �   �   �           logger.d.ts
+�   �   �   �           logger.js
+�   �   �   �           output.d.ts
+�   �   �   �           output.js
+�   �   �   �           tasks.d.ts
+�   �   �   �           tasks.js
+�   �   �   �           utils.d.ts
+�   �   �   �           utils.js
+�   �   �   �           
+�   �   �   +---utils-array
+�   �   �   �   �   CHANGELOG.md
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �           index.d.ts
+�   �   �   �           index.js
+�   �   �   �           
+�   �   �   +---utils-fs
+�   �   �   �   �   CHANGELOG.md
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �       index.d.ts
+�   �   �   �   �       index.js
+�   �   �   �   �       safe.d.ts
+�   �   �   �   �       safe.js
+�   �   �   �   �       
+�   �   �   �   +---node_modules
+�   �   �   �       +---fs-extra
+�   �   �   �           �   CHANGELOG.md
+�   �   �   �           �   LICENSE
+�   �   �   �           �   package.json
+�   �   �   �           �   README.md
+�   �   �   �           �   
+�   �   �   �           +---lib
+�   �   �   �               �   index.js
+�   �   �   �               �   
+�   �   �   �               +---copy
+�   �   �   �               �       copy.js
+�   �   �   �               �       index.js
+�   �   �   �               �       
+�   �   �   �               +---copy-sync
+�   �   �   �               �       copy-sync.js
+�   �   �   �               �       index.js
+�   �   �   �               �       
+�   �   �   �               +---empty
+�   �   �   �               �       index.js
+�   �   �   �               �       
+�   �   �   �               +---ensure
+�   �   �   �               �       file.js
+�   �   �   �               �       index.js
+�   �   �   �               �       link.js
+�   �   �   �               �       symlink-paths.js
+�   �   �   �               �       symlink-type.js
+�   �   �   �               �       symlink.js
+�   �   �   �               �       
+�   �   �   �               +---fs
+�   �   �   �               �       index.js
+�   �   �   �               �       
+�   �   �   �               +---json
+�   �   �   �               �       index.js
+�   �   �   �               �       jsonfile.js
+�   �   �   �               �       output-json-sync.js
+�   �   �   �               �       output-json.js
+�   �   �   �               �       
+�   �   �   �               +---mkdirs
+�   �   �   �               �       index.js
+�   �   �   �               �       make-dir.js
+�   �   �   �               �       
+�   �   �   �               +---move
+�   �   �   �               �       index.js
+�   �   �   �               �       move.js
+�   �   �   �               �       
+�   �   �   �               +---move-sync
+�   �   �   �               �       index.js
+�   �   �   �               �       move-sync.js
+�   �   �   �               �       
+�   �   �   �               +---output
+�   �   �   �               �       index.js
+�   �   �   �               �       
+�   �   �   �               +---path-exists
+�   �   �   �               �       index.js
+�   �   �   �               �       
+�   �   �   �               +---remove
+�   �   �   �               �       index.js
+�   �   �   �               �       rimraf.js
+�   �   �   �               �       
+�   �   �   �               +---util
+�   �   �   �                       stat.js
+�   �   �   �                       utimes.js
+�   �   �   �                       
+�   �   �   +---utils-object
+�   �   �   �   �   CHANGELOG.md
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �           index.d.ts
+�   �   �   �           index.js
+�   �   �   �           
+�   �   �   +---utils-process
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �           index.d.ts
+�   �   �   �           index.js
+�   �   �   �           
+�   �   �   +---utils-stream
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �           index.d.ts
+�   �   �   �           index.js
+�   �   �   �           
+�   �   �   +---utils-subprocess
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �           index.d.ts
+�   �   �   �           index.js
+�   �   �   �           
+�   �   �   +---utils-terminal
+�   �   �       �   LICENSE
+�   �   �       �   package.json
+�   �   �       �   README.md
+�   �   �       �   
+�   �   �       +---dist
+�   �   �               ansi.d.ts
+�   �   �               ansi.js
+�   �   �               cursor.d.ts
+�   �   �               cursor.js
+�   �   �               format.d.ts
+�   �   �               format.js
+�   �   �               index.d.ts
+�   �   �               index.js
+�   �   �               info.d.ts
+�   �   �               info.js
+�   �   �               
+�   �   +---@isaacs
+�   �   �   +---fs-minipass
+�   �   �       �   LICENSE
+�   �   �       �   package.json
+�   �   �       �   README.md
+�   �   �       �   
+�   �   �       +---dist
+�   �   �           +---commonjs
+�   �   �           �       index.d.ts
+�   �   �           �       index.d.ts.map
+�   �   �           �       index.js
+�   �   �           �       index.js.map
+�   �   �           �       package.json
+�   �   �           �       
+�   �   �           +---esm
+�   �   �                   index.d.ts
+�   �   �                   index.d.ts.map
+�   �   �                   index.js
+�   �   �                   index.js.map
+�   �   �                   package.json
+�   �   �                   
+�   �   +---@supabase
+�   �   �   +---auth-js
+�   �   �   �   �   LICENSE
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �   �   tsconfig.module.tsbuildinfo
+�   �   �   �   �   �   tsconfig.tsbuildinfo
+�   �   �   �   �   �   
+�   �   �   �   �   +---main
+�   �   �   �   �   �   �   AuthAdminApi.d.ts
+�   �   �   �   �   �   �   AuthAdminApi.d.ts.map
+�   �   �   �   �   �   �   AuthAdminApi.js
+�   �   �   �   �   �   �   AuthAdminApi.js.map
+�   �   �   �   �   �   �   AuthClient.d.ts
+�   �   �   �   �   �   �   AuthClient.d.ts.map
+�   �   �   �   �   �   �   AuthClient.js
+�   �   �   �   �   �   �   AuthClient.js.map
+�   �   �   �   �   �   �   GoTrueAdminApi.d.ts
+�   �   �   �   �   �   �   GoTrueAdminApi.d.ts.map
+�   �   �   �   �   �   �   GoTrueAdminApi.js
+�   �   �   �   �   �   �   GoTrueAdminApi.js.map
+�   �   �   �   �   �   �   GoTrueClient.d.ts
+�   �   �   �   �   �   �   GoTrueClient.d.ts.map
+�   �   �   �   �   �   �   GoTrueClient.js
+�   �   �   �   �   �   �   GoTrueClient.js.map
+�   �   �   �   �   �   �   index.d.ts
+�   �   �   �   �   �   �   index.d.ts.map
+�   �   �   �   �   �   �   index.js
+�   �   �   �   �   �   �   index.js.map
+�   �   �   �   �   �   �   
+�   �   �   �   �   �   +---lib
+�   �   �   �   �   �       �   base64url.d.ts
+�   �   �   �   �   �       �   base64url.d.ts.map
+�   �   �   �   �   �       �   base64url.js
+�   �   �   �   �   �       �   base64url.js.map
+�   �   �   �   �   �       �   constants.d.ts
+�   �   �   �   �   �       �   constants.d.ts.map
+�   �   �   �   �   �       �   constants.js
+�   �   �   �   �   �       �   constants.js.map
+�   �   �   �   �   �       �   error-codes.d.ts
+�   �   �   �   �   �       �   error-codes.d.ts.map
+�   �   �   �   �   �       �   error-codes.js
+�   �   �   �   �   �       �   error-codes.js.map
+�   �   �   �   �   �       �   errors.d.ts
+�   �   �   �   �   �       �   errors.d.ts.map
+�   �   �   �   �   �       �   errors.js
+�   �   �   �   �   �       �   errors.js.map
+�   �   �   �   �   �       �   fetch.d.ts
+�   �   �   �   �   �       �   fetch.d.ts.map
+�   �   �   �   �   �       �   fetch.js
+�   �   �   �   �   �       �   fetch.js.map
+�   �   �   �   �   �       �   helpers.d.ts
+�   �   �   �   �   �       �   helpers.d.ts.map
+�   �   �   �   �   �       �   helpers.js
+�   �   �   �   �   �       �   helpers.js.map
+�   �   �   �   �   �       �   local-storage.d.ts
+�   �   �   �   �   �       �   local-storage.d.ts.map
+�   �   �   �   �   �       �   local-storage.js
+�   �   �   �   �   �       �   local-storage.js.map
+�   �   �   �   �   �       �   locks.d.ts
+�   �   �   �   �   �       �   locks.d.ts.map
+�   �   �   �   �   �       �   locks.js
+�   �   �   �   �   �       �   locks.js.map
+�   �   �   �   �   �       �   polyfills.d.ts
+�   �   �   �   �   �       �   polyfills.d.ts.map
+�   �   �   �   �   �       �   polyfills.js
+�   �   �   �   �   �       �   polyfills.js.map
+�   �   �   �   �   �       �   types.d.ts
+�   �   �   �   �   �       �   types.d.ts.map
+�   �   �   �   �   �       �   types.js
+�   �   �   �   �   �       �   types.js.map
+�   �   �   �   �   �       �   version.d.ts
+�   �   �   �   �   �       �   version.d.ts.map
+�   �   �   �   �   �       �   version.js
+�   �   �   �   �   �       �   version.js.map
+�   �   �   �   �   �       �   webauthn.d.ts
+�   �   �   �   �   �       �   webauthn.d.ts.map
+�   �   �   �   �   �       �   webauthn.dom.d.ts
+�   �   �   �   �   �       �   webauthn.dom.d.ts.map
+�   �   �   �   �   �       �   webauthn.dom.js
+�   �   �   �   �   �       �   webauthn.dom.js.map
+�   �   �   �   �   �       �   webauthn.errors.d.ts
+�   �   �   �   �   �       �   webauthn.errors.d.ts.map
+�   �   �   �   �   �       �   webauthn.errors.js
+�   �   �   �   �   �       �   webauthn.errors.js.map
+�   �   �   �   �   �       �   webauthn.js
+�   �   �   �   �   �       �   webauthn.js.map
+�   �   �   �   �   �       �   
+�   �   �   �   �   �       +---web3
+�   �   �   �   �   �               ethereum.d.ts
+�   �   �   �   �   �               ethereum.d.ts.map
+�   �   �   �   �   �               ethereum.js
+�   �   �   �   �   �               ethereum.js.map
+�   �   �   �   �   �               solana.d.ts
+�   �   �   �   �   �               solana.d.ts.map
+�   �   �   �   �   �               solana.js
+�   �   �   �   �   �               solana.js.map
+�   �   �   �   �   �               
+�   �   �   �   �   +---module
+�   �   �   �   �       �   AuthAdminApi.d.ts
+�   �   �   �   �       �   AuthAdminApi.d.ts.map
+�   �   �   �   �       �   AuthAdminApi.js
+�   �   �   �   �       �   AuthAdminApi.js.map
+�   �   �   �   �       �   AuthClient.d.ts
+�   �   �   �   �       �   AuthClient.d.ts.map
+�   �   �   �   �       �   AuthClient.js
+�   �   �   �   �       �   AuthClient.js.map
+�   �   �   �   �       �   GoTrueAdminApi.d.ts
+�   �   �   �   �       �   GoTrueAdminApi.d.ts.map
+�   �   �   �   �       �   GoTrueAdminApi.js
+�   �   �   �   �       �   GoTrueAdminApi.js.map
+�   �   �   �   �       �   GoTrueClient.d.ts
+�   �   �   �   �       �   GoTrueClient.d.ts.map
+�   �   �   �   �       �   GoTrueClient.js
+�   �   �   �   �       �   GoTrueClient.js.map
+�   �   �   �   �       �   index.d.ts
+�   �   �   �   �       �   index.d.ts.map
+�   �   �   �   �       �   index.js
+�   �   �   �   �       �   index.js.map
+�   �   �   �   �       �   
+�   �   �   �   �       +---lib
+�   �   �   �   �           �   base64url.d.ts
+�   �   �   �   �           �   base64url.d.ts.map
+�   �   �   �   �           �   base64url.js
+�   �   �   �   �           �   base64url.js.map
+�   �   �   �   �           �   constants.d.ts
+�   �   �   �   �           �   constants.d.ts.map
+�   �   �   �   �           �   constants.js
+�   �   �   �   �           �   constants.js.map
+�   �   �   �   �           �   error-codes.d.ts
+�   �   �   �   �           �   error-codes.d.ts.map
+�   �   �   �   �           �   error-codes.js
+�   �   �   �   �           �   error-codes.js.map
+�   �   �   �   �           �   errors.d.ts
+�   �   �   �   �           �   errors.d.ts.map
+�   �   �   �   �           �   errors.js
+�   �   �   �   �           �   errors.js.map
+�   �   �   �   �           �   fetch.d.ts
+�   �   �   �   �           �   fetch.d.ts.map
+�   �   �   �   �           �   fetch.js
+�   �   �   �   �           �   fetch.js.map
+�   �   �   �   �           �   helpers.d.ts
+�   �   �   �   �           �   helpers.d.ts.map
+�   �   �   �   �           �   helpers.js
+�   �   �   �   �           �   helpers.js.map
+�   �   �   �   �           �   local-storage.d.ts
+�   �   �   �   �           �   local-storage.d.ts.map
+�   �   �   �   �           �   local-storage.js
+�   �   �   �   �           �   local-storage.js.map
+�   �   �   �   �           �   locks.d.ts
+�   �   �   �   �           �   locks.d.ts.map
+�   �   �   �   �           �   locks.js
+�   �   �   �   �           �   locks.js.map
+�   �   �   �   �           �   polyfills.d.ts
+�   �   �   �   �           �   polyfills.d.ts.map
+�   �   �   �   �           �   polyfills.js
+�   �   �   �   �           �   polyfills.js.map
+�   �   �   �   �           �   types.d.ts
+�   �   �   �   �           �   types.d.ts.map
+�   �   �   �   �           �   types.js
+�   �   �   �   �           �   types.js.map
+�   �   �   �   �           �   version.d.ts
+�   �   �   �   �           �   version.d.ts.map
+�   �   �   �   �           �   version.js
+�   �   �   �   �           �   version.js.map
+�   �   �   �   �           �   webauthn.d.ts
+�   �   �   �   �           �   webauthn.d.ts.map
+�   �   �   �   �           �   webauthn.dom.d.ts
+�   �   �   �   �           �   webauthn.dom.d.ts.map
+�   �   �   �   �           �   webauthn.dom.js
+�   �   �   �   �           �   webauthn.dom.js.map
+�   �   �   �   �           �   webauthn.errors.d.ts
+�   �   �   �   �           �   webauthn.errors.d.ts.map
+�   �   �   �   �           �   webauthn.errors.js
+�   �   �   �   �           �   webauthn.errors.js.map
+�   �   �   �   �           �   webauthn.js
+�   �   �   �   �           �   webauthn.js.map
+�   �   �   �   �           �   
+�   �   �   �   �           +---web3
+�   �   �   �   �                   ethereum.d.ts
+�   �   �   �   �                   ethereum.d.ts.map
+�   �   �   �   �                   ethereum.js
+�   �   �   �   �                   ethereum.js.map
+�   �   �   �   �                   solana.d.ts
+�   �   �   �   �                   solana.d.ts.map
+�   �   �   �   �                   solana.js
+�   �   �   �   �                   solana.js.map
+�   �   �   �   �                   
+�   �   �   �   +---src
+�   �   �   �       �   AuthAdminApi.ts
+�   �   �   �       �   AuthClient.ts
+�   �   �   �       �   GoTrueAdminApi.ts
+�   �   �   �       �   GoTrueClient.ts
+�   �   �   �       �   index.ts
+�   �   �   �       �   
+�   �   �   �       +---lib
+�   �   �   �           �   base64url.ts
+�   �   �   �           �   constants.ts
+�   �   �   �           �   error-codes.ts
+�   �   �   �           �   errors.ts
+�   �   �   �           �   fetch.ts
+�   �   �   �           �   helpers.ts
+�   �   �   �           �   local-storage.ts
+�   �   �   �           �   locks.ts
+�   �   �   �           �   polyfills.ts
+�   �   �   �           �   types.ts
+�   �   �   �           �   version.ts
+�   �   �   �           �   webauthn.dom.ts
+�   �   �   �           �   webauthn.errors.ts
+�   �   �   �           �   webauthn.ts
+�   �   �   �           �   
+�   �   �   �           +---web3
+�   �   �   �                   ethereum.ts
+�   �   �   �                   solana.ts
+�   �   �   �                   
+�   �   �   +---functions-js
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �   �   tsconfig.module.tsbuildinfo
+�   �   �   �   �   �   tsconfig.tsbuildinfo
+�   �   �   �   �   �   
+�   �   �   �   �   +---main
+�   �   �   �   �   �       FunctionsClient.d.ts
+�   �   �   �   �   �       FunctionsClient.d.ts.map
+�   �   �   �   �   �       FunctionsClient.js
+�   �   �   �   �   �       FunctionsClient.js.map
+�   �   �   �   �   �       helper.d.ts
+�   �   �   �   �   �       helper.d.ts.map
+�   �   �   �   �   �       helper.js
+�   �   �   �   �   �       helper.js.map
+�   �   �   �   �   �       index.d.ts
+�   �   �   �   �   �       index.d.ts.map
+�   �   �   �   �   �       index.js
+�   �   �   �   �   �       index.js.map
+�   �   �   �   �   �       types.d.ts
+�   �   �   �   �   �       types.d.ts.map
+�   �   �   �   �   �       types.js
+�   �   �   �   �   �       types.js.map
+�   �   �   �   �   �       version.d.ts
+�   �   �   �   �   �       version.d.ts.map
+�   �   �   �   �   �       version.js
+�   �   �   �   �   �       version.js.map
+�   �   �   �   �   �       
+�   �   �   �   �   +---module
+�   �   �   �   �           FunctionsClient.d.ts
+�   �   �   �   �           FunctionsClient.d.ts.map
+�   �   �   �   �           FunctionsClient.js
+�   �   �   �   �           FunctionsClient.js.map
+�   �   �   �   �           helper.d.ts
+�   �   �   �   �           helper.d.ts.map
+�   �   �   �   �           helper.js
+�   �   �   �   �           helper.js.map
+�   �   �   �   �           index.d.ts
+�   �   �   �   �           index.d.ts.map
+�   �   �   �   �           index.js
+�   �   �   �   �           index.js.map
+�   �   �   �   �           types.d.ts
+�   �   �   �   �           types.d.ts.map
+�   �   �   �   �           types.js
+�   �   �   �   �           types.js.map
+�   �   �   �   �           version.d.ts
+�   �   �   �   �           version.d.ts.map
+�   �   �   �   �           version.js
+�   �   �   �   �           version.js.map
+�   �   �   �   �           
+�   �   �   �   +---src
+�   �   �   �           edge-runtime.d.ts
+�   �   �   �           FunctionsClient.ts
+�   �   �   �           helper.ts
+�   �   �   �           index.ts
+�   �   �   �           types.ts
+�   �   �   �           version.ts
+�   �   �   �           
+�   �   �   +---postgrest-js
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �       index.cjs
+�   �   �   �   �       index.cjs.map
+�   �   �   �   �       index.d.cts
+�   �   �   �   �       index.d.cts.map
+�   �   �   �   �       index.d.mts
+�   �   �   �   �       index.d.mts.map
+�   �   �   �   �       index.mjs
+�   �   �   �   �       index.mjs.map
+�   �   �   �   �       
+�   �   �   �   +---src
+�   �   �   �       �   constants.ts
+�   �   �   �       �   index.ts
+�   �   �   �       �   PostgrestBuilder.ts
+�   �   �   �       �   PostgrestClient.ts
+�   �   �   �       �   PostgrestError.ts
+�   �   �   �       �   PostgrestFilterBuilder.ts
+�   �   �   �       �   PostgrestQueryBuilder.ts
+�   �   �   �       �   PostgrestTransformBuilder.ts
+�   �   �   �       �   version.ts
+�   �   �   �       �   
+�   �   �   �       +---select-query-parser
+�   �   �   �       �       parser.ts
+�   �   �   �       �       result.ts
+�   �   �   �       �       types.ts
+�   �   �   �       �       utils.ts
+�   �   �   �       �       
+�   �   �   �       +---types
+�   �   �   �           �   feature-flags.ts
+�   �   �   �           �   types.ts
+�   �   �   �           �   
+�   �   �   �           +---common
+�   �   �   �                   common.ts
+�   �   �   �                   rpc.ts
+�   �   �   �                   
+�   �   �   +---realtime-js
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �   �   tsconfig.module.tsbuildinfo
+�   �   �   �   �   �   tsconfig.tsbuildinfo
+�   �   �   �   �   �   
+�   �   �   �   �   +---main
+�   �   �   �   �   �   �   index.d.ts
+�   �   �   �   �   �   �   index.d.ts.map
+�   �   �   �   �   �   �   index.js
+�   �   �   �   �   �   �   index.js.map
+�   �   �   �   �   �   �   RealtimeChannel.d.ts
+�   �   �   �   �   �   �   RealtimeChannel.d.ts.map
+�   �   �   �   �   �   �   RealtimeChannel.js
+�   �   �   �   �   �   �   RealtimeChannel.js.map
+�   �   �   �   �   �   �   RealtimeClient.d.ts
+�   �   �   �   �   �   �   RealtimeClient.d.ts.map
+�   �   �   �   �   �   �   RealtimeClient.js
+�   �   �   �   �   �   �   RealtimeClient.js.map
+�   �   �   �   �   �   �   RealtimePresence.d.ts
+�   �   �   �   �   �   �   RealtimePresence.d.ts.map
+�   �   �   �   �   �   �   RealtimePresence.js
+�   �   �   �   �   �   �   RealtimePresence.js.map
+�   �   �   �   �   �   �   
+�   �   �   �   �   �   +---lib
+�   �   �   �   �   �           constants.d.ts
+�   �   �   �   �   �           constants.d.ts.map
+�   �   �   �   �   �           constants.js
+�   �   �   �   �   �           constants.js.map
+�   �   �   �   �   �           push.d.ts
+�   �   �   �   �   �           push.d.ts.map
+�   �   �   �   �   �           push.js
+�   �   �   �   �   �           push.js.map
+�   �   �   �   �   �           serializer.d.ts
+�   �   �   �   �   �           serializer.d.ts.map
+�   �   �   �   �   �           serializer.js
+�   �   �   �   �   �           serializer.js.map
+�   �   �   �   �   �           timer.d.ts
+�   �   �   �   �   �           timer.d.ts.map
+�   �   �   �   �   �           timer.js
+�   �   �   �   �   �           timer.js.map
+�   �   �   �   �   �           transformers.d.ts
+�   �   �   �   �   �           transformers.d.ts.map
+�   �   �   �   �   �           transformers.js
+�   �   �   �   �   �           transformers.js.map
+�   �   �   �   �   �           version.d.ts
+�   �   �   �   �   �           version.d.ts.map
+�   �   �   �   �   �           version.js
+�   �   �   �   �   �           version.js.map
+�   �   �   �   �   �           websocket-factory.d.ts
+�   �   �   �   �   �           websocket-factory.d.ts.map
+�   �   �   �   �   �           websocket-factory.js
+�   �   �   �   �   �           websocket-factory.js.map
+�   �   �   �   �   �           
+�   �   �   �   �   +---module
+�   �   �   �   �       �   index.d.ts
+�   �   �   �   �       �   index.d.ts.map
+�   �   �   �   �       �   index.js
+�   �   �   �   �       �   index.js.map
+�   �   �   �   �       �   RealtimeChannel.d.ts
+�   �   �   �   �       �   RealtimeChannel.d.ts.map
+�   �   �   �   �       �   RealtimeChannel.js
+�   �   �   �   �       �   RealtimeChannel.js.map
+�   �   �   �   �       �   RealtimeClient.d.ts
+�   �   �   �   �       �   RealtimeClient.d.ts.map
+�   �   �   �   �       �   RealtimeClient.js
+�   �   �   �   �       �   RealtimeClient.js.map
+�   �   �   �   �       �   RealtimePresence.d.ts
+�   �   �   �   �       �   RealtimePresence.d.ts.map
+�   �   �   �   �       �   RealtimePresence.js
+�   �   �   �   �       �   RealtimePresence.js.map
+�   �   �   �   �       �   
+�   �   �   �   �       +---lib
+�   �   �   �   �               constants.d.ts
+�   �   �   �   �               constants.d.ts.map
+�   �   �   �   �               constants.js
+�   �   �   �   �               constants.js.map
+�   �   �   �   �               push.d.ts
+�   �   �   �   �               push.d.ts.map
+�   �   �   �   �               push.js
+�   �   �   �   �               push.js.map
+�   �   �   �   �               serializer.d.ts
+�   �   �   �   �               serializer.d.ts.map
+�   �   �   �   �               serializer.js
+�   �   �   �   �               serializer.js.map
+�   �   �   �   �               timer.d.ts
+�   �   �   �   �               timer.d.ts.map
+�   �   �   �   �               timer.js
+�   �   �   �   �               timer.js.map
+�   �   �   �   �               transformers.d.ts
+�   �   �   �   �               transformers.d.ts.map
+�   �   �   �   �               transformers.js
+�   �   �   �   �               transformers.js.map
+�   �   �   �   �               version.d.ts
+�   �   �   �   �               version.d.ts.map
+�   �   �   �   �               version.js
+�   �   �   �   �               version.js.map
+�   �   �   �   �               websocket-factory.d.ts
+�   �   �   �   �               websocket-factory.d.ts.map
+�   �   �   �   �               websocket-factory.js
+�   �   �   �   �               websocket-factory.js.map
+�   �   �   �   �               
+�   �   �   �   +---src
+�   �   �   �       �   index.ts
+�   �   �   �       �   RealtimeChannel.ts
+�   �   �   �       �   RealtimeClient.ts
+�   �   �   �       �   RealtimePresence.ts
+�   �   �   �       �   
+�   �   �   �       +---lib
+�   �   �   �               constants.ts
+�   �   �   �               push.ts
+�   �   �   �               serializer.ts
+�   �   �   �               timer.ts
+�   �   �   �               transformers.ts
+�   �   �   �               version.ts
+�   �   �   �               websocket-factory.ts
+�   �   �   �               
+�   �   �   +---storage-js
+�   �   �   �   �   package.json
+�   �   �   �   �   README.md
+�   �   �   �   �   
+�   �   �   �   +---dist
+�   �   �   �   �   �   index.cjs
+�   �   �   �   �   �   index.cjs.map
+�   �   �   �   �   �   index.d.cts
+�   �   �   �   �   �   index.d.cts.map
+�   �   �   �   �   �   index.d.mts
+�   �   �   �   �   �   index.d.mts.map
+�   �   �   �   �   �   index.mjs
+�   �   �   �   �   �   index.mjs.map
+�   �   �   �   �   �   
+�   �   �   �   �   +---umd
+�   �   �   �   �           supabase.js
+�   �   �   �   �           
+�   �   �   �   +---src
+�   �   �   �       �   index.ts
+�   �   �   �       �   StorageClient.ts
+�   �   �   �       �   
+�   �   �   �       +---lib
+�   �   �   �       �   �   constants.ts
+�   �   �   �       �   �   types.ts
+�   �   �   �       �   �   version.ts
+�   �   �   �       �   �   
+�   �   �   �       �   +---common
+�   �   �   �       �           BaseApiClient.ts
+�   �   �   �       �           errors.ts
+�   �   �   �       �           fetch.ts
+�   �   �   �       �           helpers.ts
+�   �   �   �       �           
+�   �   �   �       +---packages
+�   �   �   �               BlobDownloadBuilder.ts
+�   �   �   �               StorageAnalyticsClient.ts
+�   �   �   �               StorageBucketApi.ts
+�   �   �   �               StorageFileApi.ts
+�   �   �   �               StorageVectorsClient.ts
+�   �   �   �               StreamDownloadBuilder.ts
+�   �   �   �               VectorBucketApi.ts
+�   �   �   �               VectorDataApi.ts
+�   �   �   �               VectorIndexApi.ts
+�   �   �   �               
+�   �   �   +---supabase-js
+�   �   �       �   package.json
+�   �   �       �   README.md
+�   �   �       �   
+�   �   �       +---dist
+�   �   �       �   �   cors.cjs
+�   �   �       �   �   cors.cjs.map
+�   �   �       �   �   cors.d.cts
+�   �   �       �   �   cors.d.cts.map
+�   �   �       �   �   cors.d.mts
+�   �   �       �   �   cors.d.mts.map
+�   �   �       �   �   cors.mjs
+�   �   �       �   �   cors.mjs.map
+�   �   �       �   �   index.cjs
+�   �   �       �   �   index.cjs.map
+�   �   �       �   �   index.d.cts
+�   �   �       �   �   index.d.cts.map
+�   �   �       �   �   index.d.mts
+�   �   �       �   �   index.d.mts.map
+�   �   �       �   �   index.mjs
+�   �   �       �   �   index.mjs.map
+�   �   �       �   �   
+�   �   �       �   +---umd
+�   �   �       �           supabase.js
+�   �   �       �           
+�   �   �       +---src
+�   �   �           �   cors.ts
+�   �   �           �   index.ts
+�   �   �           �   SupabaseClient.ts
+�   �   �           �   
+�   �   �           +---lib
+�   �   �               �   constants.ts
+�   �   �               �   fetch.ts
+�   �   �               �   helpers.ts
+�   �   �               �   SupabaseAuthClient.ts
+�   �   �               �   types.ts
+�   �   �               �   version.ts
+�   �   �               �   
+�   �   �               +---rest
+�   �   �                   +---types
+�   �   �                       +---common
+�   �   �                               common.ts
+�   �   �                               rpc.ts
+�   �   �                               
+�   �   +---@types
+�   �   �   +---fs-extra
+�   �   �   �       index.d.ts
+�   �   �   �       LICENSE
+�   �   �   �       package.json
+�   �   �   �       README.md
+�   �   �   �       
+�   �   �   +---node
+�   �   �   �   �   assert.d.ts
+�   �   �   �   �   async_hooks.d.ts
+�   �   �   �   �   buffer.buffer.d.ts
+�   �   �   �   �   buffer.d.ts
+�   �   �   �   �   child_process.d.ts
+�   �   �   �   �   cluster.d.ts
+�   �   �   �   �   console.d.ts
+�   �   �   �   �   constants.d.ts
+�   �   �   �   �   crypto.d.ts
+�   �   �   �   �   dgram.d.ts
+�   �   �   �   �   diagnostics_channel.d.ts
+�   �   �   �   �   dns.d.ts
+�   �   �   �   �   domain.d.ts
+�   �   �   �   �   events.d.ts
+�   �   �   �   �   fs.d.ts
+�   �   �   �   �   globals.d.ts
+�   �   �   �   �   globals.typedarray.d.ts
+�   �   �   �   �   http.d.ts
+�   �   �   �   �   http2.d.ts
+�   �   �   �   �   https.d.ts
+�   �   �   �   �   index.d.ts
+�   �   �   �   �   inspector.d.ts
+�   �   �   �   �   inspector.generated.d.ts
+�   �   �   �   �   LICENSE
+�   �   �   �   �   module.d.ts
+�   �   �   �   �   net.d.ts
+�   �   �   �   �   os.d.ts
+�   �   �   �   �   package.json
+�   �   �   �   �   path.d.ts
+�   �   �   �   �   perf_hooks.d.ts
+�   �   �   �   �   process.d.ts
+�   �   �   �   �   punycode.d.ts
+�   �   �   �   �   querystring.d.ts
+�   �   �   �   �   quic.d.ts
+�   �   �   �   �   readline.d.ts
+�   �   �   �   �   README.md
+�   �   �   �   �   repl.d.ts
+�   �   �   �   �   sea.d.ts
+�   �   �   �   �   sqlite.d.ts
+�   �   �   �   �   stream.d.ts
+�   �   �   �   �   string_decoder.d.ts
+�   �   �   �   �   test.d.ts
+�   �   �   �   �   timers.d.ts
+�   �   �   �   �   tls.d.ts
+�   �   �   �   �   trace_events.d.ts
+�   �   �   �   �   tty.d.ts
+�   �   �   �   �   url.d.ts
+�   �   �   �   �   util.d.ts
+�   �   �   �   �   v8.d.ts
+�   �   �   �   �   vm.d.ts
+�   �   �   �   �   wasi.d.ts
+�   �   �   �   �   worker_threads.d.ts
+�   �   �   �   �   zlib.d.ts
+�   �   �   �   �   
+�   �   �   �   +---assert
+�   �   �   �   �       strict.d.ts
+�   �   �   �   �       
+�   �   �   �   +---compatibility
+�   �   �   �   �       iterators.d.ts
+�   �   �   �   �       
+�   �   �   �   +---dns
+�   �   �   �   �       promises.d.ts
+�   �   �   �   �       
+�   �   �   �   +---fs
+�   �   �   �   �       promises.d.ts
+�   �   �   �   �       
+�   �   �   �   +---inspector
+�   �   �   �   �       promises.d.ts
+�   �   �   �   �       
+�   �   �   �   +---path
+�   �   �   �   �       posix.d.ts
+�   �   �   �   �       win32.d.ts
+�   �   �   �   �       
+�   �   �   �   +---readline
+�   �   �   �   �       promises.d.ts
+�   �   �   �   �       
+�   �   �   �   +---stream
+�   �   �   �   �       consumers.d.ts
+�   �   �   �   �       promises.d.ts
+�   �   �   �   �       web.d.ts
+�   �   �   �   �       
+�   �   �   �   +---test
+�   �   �   �   �       reporters.d.ts
+�   �   �   �   �       
+�   �   �   �   +---timers
+�   �   �   �   �       promises.d.ts
+�   �   �   �   �       
+�   �   �   �   +---ts5.6
+�   �   �   �   �   �   buffer.buffer.d.ts
+�   �   �   �   �   �   globals.typedarray.d.ts
+�   �   �   �   �   �   index.d.ts
+�   �   �   �   �   �   
+�   �   �   �   �   +---compatibility
+�   �   �   �   �           float16array.d.ts
+�   �   �   �   �           
+�   �   �   �   +---ts5.7
+�   �   �   �   �   �   index.d.ts
+�   �   �   �   �   �   
+�   �   �   �   �   +---compatibility
+�   �   �   �   �           float16array.d.ts
+�   �   �   �   �           
+�   �   �   �   +---util
+�   �   �   �   �       types.d.ts
+�   �   �   �   �       
+�   �   �   �   +---web-globals
+�   �   �   �           abortcontroller.d.ts
+�   �   �   �           blob.d.ts
+�   �   �   �           console.d.ts
+�   �   �   �           crypto.d.ts
+�   �   �   �           domexception.d.ts
+�   �   �   �           encoding.d.ts
+�   �   �   �           events.d.ts
+�   �   �   �           fetch.d.ts
+�   �   �   �           importmeta.d.ts
+�   �   �   �           messaging.d.ts
+�   �   �   �           navigator.d.ts
+�   �   �   �           performance.d.ts
+�   �   �   �           storage.d.ts
+�   �   �   �           streams.d.ts
+�   �   �   �           timers.d.ts
+�   �   �   �           url.d.ts
+�   �   �   �           
+�   �   �   +---phoenix
+�   �   �   �       index.d.ts
+�   �   �   �       LICENSE
+�   �   �   �       package.json
+�   �   �   �       README.md
+�   �   �   �       
+�   �   �   +---slice-ansi
+�   �   �   �       index.d.ts
+�   �   �   �       LICENSE
+�   �   �   �       package.json
+�   �   �   �       README.md
+�   �   �   �       
+�   �   �   +---ws
+�   �   �           index.d.mts
+�   �   �           index.d.ts
+�   �   �           LICENSE
+�   �   �           package.json
+�   �   �           README.md
+�   �   �           
+�   �   +---@xmldom
+�   �   �   +---xmldom
+�   �   �       �   CHANGELOG.md
+�   �   �       �   index.d.ts
+�   �   �       �   LICENSE
+�   �   �       �   package.json
+�   �   �       �   readme.md
+�   �   �       �   SECURITY.md
+�   �   �       �   
+�   �   �       +---lib
+�   �   �               .eslintrc.yml
+�   �   �               conventions.js
+�   �   �               dom-parser.js
+�   �   �               dom.js
+�   �   �               entities.js
+�   �   �               index.js
+�   �   �               sax.js
+�   �   �               
+�   �   +---ansi-regex
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---ansi-styles
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---astral-regex
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---at-least-node
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---balanced-match
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---base64-js
+�   �   �       base64js.min.js
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---big-integer
+�   �   �       BigInteger.d.ts
+�   �   �       BigInteger.js
+�   �   �       BigInteger.min.js
+�   �   �       bower.json
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       tsconfig.json
+�   �   �       
+�   �   +---bplist-parser
+�   �   �       .editorconfig
+�   �   �       .eslintignore
+�   �   �       .eslintrc.js
+�   �   �       bplistParser.d.ts
+�   �   �       bplistParser.js
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---brace-expansion
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---buffer-crc32
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---camelcase
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---chownr
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---cliui
+�   �   �   �   CHANGELOG.md
+�   �   �   �   index.js
+�   �   �   �   LICENSE.txt
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---node_modules
+�   �   �       +---wrap-ansi
+�   �   �               index.js
+�   �   �               license
+�   �   �               package.json
+�   �   �               readme.md
+�   �   �               
+�   �   +---color-convert
+�   �   �       CHANGELOG.md
+�   �   �       conversions.js
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       route.js
+�   �   �       
+�   �   +---color-name
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---commander
+�   �   �   �   esm.mjs
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   package-support.json
+�   �   �   �   package.json
+�   �   �   �   Readme.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �   �       argument.js
+�   �   �   �       command.js
+�   �   �   �       error.js
+�   �   �   �       help.js
+�   �   �   �       option.js
+�   �   �   �       suggestSimilar.js
+�   �   �   �       
+�   �   �   +---typings
+�   �   �           esm.d.mts
+�   �   �           index.d.ts
+�   �   �           
+�   �   +---cross-spawn
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �       �   enoent.js
+�   �   �       �   parse.js
+�   �   �       �   
+�   �   �       +---util
+�   �   �               escape.js
+�   �   �               readShebang.js
+�   �   �               resolveCommand.js
+�   �   �               
+�   �   +---debug
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---src
+�   �   �           browser.js
+�   �   �           common.js
+�   �   �           index.js
+�   �   �           node.js
+�   �   �           
+�   �   +---decamelize
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---define-lazy-prop
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---dijkstrajs
+�   �   �   �   .travis.yml
+�   �   �   �   CONTRIBUTING.md
+�   �   �   �   dijkstra.js
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---test
+�   �   �           dijkstra.test.js
+�   �   �           
+�   �   +---elementtree
+�   �   �   �   .npmignore
+�   �   �   �   .travis.yml
+�   �   �   �   CHANGES.md
+�   �   �   �   LICENSE.txt
+�   �   �   �   Makefile
+�   �   �   �   NOTICE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �   �   �   constants.js
+�   �   �   �   �   elementpath.js
+�   �   �   �   �   elementtree.js
+�   �   �   �   �   errors.js
+�   �   �   �   �   parser.js
+�   �   �   �   �   sprintf.js
+�   �   �   �   �   treebuilder.js
+�   �   �   �   �   utils.js
+�   �   �   �   �   
+�   �   �   �   +---parsers
+�   �   �   �           index.js
+�   �   �   �           sax.js
+�   �   �   �           
+�   �   �   +---tests
+�   �   �       �   test-simple.js
+�   �   �       �   
+�   �   �       +---data
+�   �   �               bom-xml.xml
+�   �   �               xml1.xml
+�   �   �               xml2.xml
+�   �   �               
+�   �   +---emoji-regex
+�   �   �   �   index.d.ts
+�   �   �   �   index.js
+�   �   �   �   LICENSE-MIT.txt
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   text.js
+�   �   �   �   
+�   �   �   +---es2015
+�   �   �           index.js
+�   �   �           text.js
+�   �   �           
+�   �   +---env-paths
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---fd-slicer
+�   �   �   �   .npmignore
+�   �   �   �   .travis.yml
+�   �   �   �   CHANGELOG.md
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---test
+�   �   �           test.js
+�   �   �           
+�   �   +---find-up
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---fs-extra
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �       �   esm.mjs
+�   �   �       �   index.js
+�   �   �       �   
+�   �   �       +---copy
+�   �   �       �       copy-sync.js
+�   �   �       �       copy.js
+�   �   �       �       index.js
+�   �   �       �       
+�   �   �       +---empty
+�   �   �       �       index.js
+�   �   �       �       
+�   �   �       +---ensure
+�   �   �       �       file.js
+�   �   �       �       index.js
+�   �   �       �       link.js
+�   �   �       �       symlink-paths.js
+�   �   �       �       symlink-type.js
+�   �   �       �       symlink.js
+�   �   �       �       
+�   �   �       +---fs
+�   �   �       �       index.js
+�   �   �       �       
+�   �   �       +---json
+�   �   �       �       index.js
+�   �   �       �       jsonfile.js
+�   �   �       �       output-json-sync.js
+�   �   �       �       output-json.js
+�   �   �       �       
+�   �   �       +---mkdirs
+�   �   �       �       index.js
+�   �   �       �       make-dir.js
+�   �   �       �       utils.js
+�   �   �       �       
+�   �   �       +---move
+�   �   �       �       index.js
+�   �   �       �       move-sync.js
+�   �   �       �       move.js
+�   �   �       �       
+�   �   �       +---output-file
+�   �   �       �       index.js
+�   �   �       �       
+�   �   �       +---path-exists
+�   �   �       �       index.js
+�   �   �       �       
+�   �   �       +---remove
+�   �   �       �       index.js
+�   �   �       �       
+�   �   �       +---util
+�   �   �               async.js
+�   �   �               stat.js
+�   �   �               utimes.js
+�   �   �               
+�   �   +---get-caller-file
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       index.js.map
+�   �   �       LICENSE.md
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---glob
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       glob.d.ts
+�   �   �       �       glob.d.ts.map
+�   �   �       �       glob.js
+�   �   �       �       glob.js.map
+�   �   �       �       has-magic.d.ts
+�   �   �       �       has-magic.d.ts.map
+�   �   �       �       has-magic.js
+�   �   �       �       has-magic.js.map
+�   �   �       �       ignore.d.ts
+�   �   �       �       ignore.d.ts.map
+�   �   �       �       ignore.js
+�   �   �       �       ignore.js.map
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       index.min.js
+�   �   �       �       index.min.js.map
+�   �   �       �       package.json
+�   �   �       �       pattern.d.ts
+�   �   �       �       pattern.d.ts.map
+�   �   �       �       pattern.js
+�   �   �       �       pattern.js.map
+�   �   �       �       processor.d.ts
+�   �   �       �       processor.d.ts.map
+�   �   �       �       processor.js
+�   �   �       �       processor.js.map
+�   �   �       �       walker.d.ts
+�   �   �       �       walker.d.ts.map
+�   �   �       �       walker.js
+�   �   �       �       walker.js.map
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               glob.d.ts
+�   �   �               glob.d.ts.map
+�   �   �               glob.js
+�   �   �               glob.js.map
+�   �   �               has-magic.d.ts
+�   �   �               has-magic.d.ts.map
+�   �   �               has-magic.js
+�   �   �               has-magic.js.map
+�   �   �               ignore.d.ts
+�   �   �               ignore.d.ts.map
+�   �   �               ignore.js
+�   �   �               ignore.js.map
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               index.min.js
+�   �   �               index.min.js.map
+�   �   �               package.json
+�   �   �               pattern.d.ts
+�   �   �               pattern.d.ts.map
+�   �   �               pattern.js
+�   �   �               pattern.js.map
+�   �   �               processor.d.ts
+�   �   �               processor.d.ts.map
+�   �   �               processor.js
+�   �   �               processor.js.map
+�   �   �               walker.d.ts
+�   �   �               walker.d.ts.map
+�   �   �               walker.js
+�   �   �               walker.js.map
+�   �   �               
+�   �   +---graceful-fs
+�   �   �       clone.js
+�   �   �       graceful-fs.js
+�   �   �       legacy-streams.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       polyfills.js
+�   �   �       README.md
+�   �   �       
+�   �   +---iceberg-js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �           index.cjs
+�   �   �           index.cjs.map
+�   �   �           index.d.cts
+�   �   �           index.d.ts
+�   �   �           index.mjs
+�   �   �           index.mjs.map
+�   �   �           
+�   �   +---inherits
+�   �   �       inherits.js
+�   �   �       inherits_browser.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---ini
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �           ini.js
+�   �   �           
+�   �   +---is-docker
+�   �   �       cli.js
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---is-fullwidth-code-point
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---is-wsl
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---isexe
+�   �   �   �   .npmignore
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   mode.js
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   windows.js
+�   �   �   �   
+�   �   �   +---test
+�   �   �           basic.js
+�   �   �           
+�   �   +---jsonfile
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       utils.js
+�   �   �       
+�   �   +---kleur
+�   �   �       colors.d.ts
+�   �   �       colors.js
+�   �   �       colors.mjs
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       index.mjs
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---locate-path
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---lru-cache
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       index.min.js
+�   �   �       �       index.min.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               index.min.js
+�   �   �               index.min.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---minimatch
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       assert-valid-pattern.d.ts
+�   �   �       �       assert-valid-pattern.d.ts.map
+�   �   �       �       assert-valid-pattern.js
+�   �   �       �       assert-valid-pattern.js.map
+�   �   �       �       ast.d.ts
+�   �   �       �       ast.d.ts.map
+�   �   �       �       ast.js
+�   �   �       �       ast.js.map
+�   �   �       �       brace-expressions.d.ts
+�   �   �       �       brace-expressions.d.ts.map
+�   �   �       �       brace-expressions.js
+�   �   �       �       brace-expressions.js.map
+�   �   �       �       escape.d.ts
+�   �   �       �       escape.d.ts.map
+�   �   �       �       escape.js
+�   �   �       �       escape.js.map
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       unescape.d.ts
+�   �   �       �       unescape.d.ts.map
+�   �   �       �       unescape.js
+�   �   �       �       unescape.js.map
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               assert-valid-pattern.d.ts
+�   �   �               assert-valid-pattern.d.ts.map
+�   �   �               assert-valid-pattern.js
+�   �   �               assert-valid-pattern.js.map
+�   �   �               ast.d.ts
+�   �   �               ast.d.ts.map
+�   �   �               ast.js
+�   �   �               ast.js.map
+�   �   �               brace-expressions.d.ts
+�   �   �               brace-expressions.d.ts.map
+�   �   �               brace-expressions.js
+�   �   �               brace-expressions.js.map
+�   �   �               escape.d.ts
+�   �   �               escape.d.ts.map
+�   �   �               escape.js
+�   �   �               escape.js.map
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               unescape.d.ts
+�   �   �               unescape.d.ts.map
+�   �   �               unescape.js
+�   �   �               unescape.js.map
+�   �   �               
+�   �   +---minipass
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---minizlib
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       constants.d.ts
+�   �   �       �       constants.d.ts.map
+�   �   �       �       constants.js
+�   �   �       �       constants.js.map
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               constants.d.ts
+�   �   �               constants.d.ts.map
+�   �   �               constants.js
+�   �   �               constants.js.map
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---ms
+�   �   �       index.js
+�   �   �       license.md
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---native-run
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---bin
+�   �   �   �       native-run
+�   �   �   �       
+�   �   �   +---dist
+�   �   �       �   constants.js
+�   �   �       �   errors.js
+�   �   �       �   help.js
+�   �   �       �   index.js
+�   �   �       �   list.js
+�   �   �       �   
+�   �   �       +---utils
+�   �   �               cli.js
+�   �   �               fn.js
+�   �   �               fs.js
+�   �   �               ini.js
+�   �   �               json.js
+�   �   �               list.js
+�   �   �               log.js
+�   �   �               object.js
+�   �   �               process.js
+�   �   �               unzip.js
+�   �   �               
+�   �   +---open
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       xdg-open
+�   �   �       
+�   �   +---p-limit
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---p-locate
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---p-try
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---package-json-from-dist
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---path-exists
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---path-key
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---path-scurry
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---pend
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       test.js
+�   �   �       
+�   �   +---plist
+�   �   �   �   .jshintrc
+�   �   �   �   History.md
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   Makefile
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---.github
+�   �   �   �   +---workflows
+�   �   �   �           ci.yml
+�   �   �   �           
+�   �   �   +---dist
+�   �   �   �       plist-build.js
+�   �   �   �       plist-parse.js
+�   �   �   �       plist.js
+�   �   �   �       
+�   �   �   +---examples
+�   �   �   �   +---browser
+�   �   �   �           index.html
+�   �   �   �           
+�   �   �   +---lib
+�   �   �           build.js
+�   �   �           parse.js
+�   �   �           
+�   �   +---pngjs
+�   �   �   �   .eslintignore
+�   �   �   �   .eslintrc.json
+�   �   �   �   .prettierignore
+�   �   �   �   browser.js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---coverage
+�   �   �   �   �   lcov.info
+�   �   �   �   �   
+�   �   �   �   +---lcov-report
+�   �   �   �           base.css
+�   �   �   �           bitmapper.js.html
+�   �   �   �           bitpacker.js.html
+�   �   �   �           block-navigation.js
+�   �   �   �           chunkstream.js.html
+�   �   �   �           constants.js.html
+�   �   �   �           crc.js.html
+�   �   �   �           favicon.png
+�   �   �   �           filter-pack.js.html
+�   �   �   �           filter-parse-async.js.html
+�   �   �   �           filter-parse-sync.js.html
+�   �   �   �           filter-parse.js.html
+�   �   �   �           format-normaliser.js.html
+�   �   �   �           index.html
+�   �   �   �           interlace.js.html
+�   �   �   �           packer-async.js.html
+�   �   �   �           packer-sync.js.html
+�   �   �   �           packer.js.html
+�   �   �   �           paeth-predictor.js.html
+�   �   �   �           parser-async.js.html
+�   �   �   �           parser-sync.js.html
+�   �   �   �           parser.js.html
+�   �   �   �           png-sync.js.html
+�   �   �   �           png.js.html
+�   �   �   �           prettify.css
+�   �   �   �           prettify.js
+�   �   �   �           sort-arrow-sprite.png
+�   �   �   �           sorter.js
+�   �   �   �           sync-inflate.js.html
+�   �   �   �           sync-reader.js.html
+�   �   �   �           
+�   �   �   +---lib
+�   �   �           bitmapper.js
+�   �   �           bitpacker.js
+�   �   �           chunkstream.js
+�   �   �           constants.js
+�   �   �           crc.js
+�   �   �           filter-pack.js
+�   �   �           filter-parse-async.js
+�   �   �           filter-parse-sync.js
+�   �   �           filter-parse.js
+�   �   �           format-normaliser.js
+�   �   �           interlace.js
+�   �   �           packer-async.js
+�   �   �           packer-sync.js
+�   �   �           packer.js
+�   �   �           paeth-predictor.js
+�   �   �           parser-async.js
+�   �   �           parser-sync.js
+�   �   �           parser.js
+�   �   �           png-sync.js
+�   �   �           png.js
+�   �   �           sync-inflate.js
+�   �   �           sync-reader.js
+�   �   �           
+�   �   +---prompts
+�   �   �   �   index.js
+�   �   �   �   license
+�   �   �   �   package.json
+�   �   �   �   readme.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �   �   �   index.js
+�   �   �   �   �   prompts.js
+�   �   �   �   �   
+�   �   �   �   +---dateparts
+�   �   �   �   �       datepart.js
+�   �   �   �   �       day.js
+�   �   �   �   �       hours.js
+�   �   �   �   �       index.js
+�   �   �   �   �       meridiem.js
+�   �   �   �   �       milliseconds.js
+�   �   �   �   �       minutes.js
+�   �   �   �   �       month.js
+�   �   �   �   �       seconds.js
+�   �   �   �   �       year.js
+�   �   �   �   �       
+�   �   �   �   +---elements
+�   �   �   �   �       autocomplete.js
+�   �   �   �   �       autocompleteMultiselect.js
+�   �   �   �   �       confirm.js
+�   �   �   �   �       date.js
+�   �   �   �   �       index.js
+�   �   �   �   �       multiselect.js
+�   �   �   �   �       number.js
+�   �   �   �   �       prompt.js
+�   �   �   �   �       select.js
+�   �   �   �   �       text.js
+�   �   �   �   �       toggle.js
+�   �   �   �   �       
+�   �   �   �   +---util
+�   �   �   �           action.js
+�   �   �   �           clear.js
+�   �   �   �           entriesToDisplay.js
+�   �   �   �           figures.js
+�   �   �   �           index.js
+�   �   �   �           lines.js
+�   �   �   �           strip.js
+�   �   �   �           style.js
+�   �   �   �           wrap.js
+�   �   �   �           
+�   �   �   +---lib
+�   �   �   �   �   index.js
+�   �   �   �   �   prompts.js
+�   �   �   �   �   
+�   �   �   �   +---dateparts
+�   �   �   �   �       datepart.js
+�   �   �   �   �       day.js
+�   �   �   �   �       hours.js
+�   �   �   �   �       index.js
+�   �   �   �   �       meridiem.js
+�   �   �   �   �       milliseconds.js
+�   �   �   �   �       minutes.js
+�   �   �   �   �       month.js
+�   �   �   �   �       seconds.js
+�   �   �   �   �       year.js
+�   �   �   �   �       
+�   �   �   �   +---elements
+�   �   �   �   �       autocomplete.js
+�   �   �   �   �       autocompleteMultiselect.js
+�   �   �   �   �       confirm.js
+�   �   �   �   �       date.js
+�   �   �   �   �       index.js
+�   �   �   �   �       multiselect.js
+�   �   �   �   �       number.js
+�   �   �   �   �       prompt.js
+�   �   �   �   �       select.js
+�   �   �   �   �       text.js
+�   �   �   �   �       toggle.js
+�   �   �   �   �       
+�   �   �   �   +---util
+�   �   �   �           action.js
+�   �   �   �           clear.js
+�   �   �   �           entriesToDisplay.js
+�   �   �   �           figures.js
+�   �   �   �           index.js
+�   �   �   �           lines.js
+�   �   �   �           strip.js
+�   �   �   �           style.js
+�   �   �   �           wrap.js
+�   �   �   �           
+�   �   �   +---node_modules
+�   �   �       +---kleur
+�   �   �               index.js
+�   �   �               kleur.d.ts
+�   �   �               license
+�   �   �               package.json
+�   �   �               readme.md
+�   �   �               
+�   �   +---qrcode
+�   �   �   �   license
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---bin
+�   �   �   �       qrcode
+�   �   �   �       
+�   �   �   +---helper
+�   �   �   �       to-sjis-browser.js
+�   �   �   �       to-sjis.js
+�   �   �   �       
+�   �   �   +---lib
+�   �   �       �   browser.js
+�   �   �       �   can-promise.js
+�   �   �       �   index.js
+�   �   �       �   server.js
+�   �   �       �   
+�   �   �       +---core
+�   �   �       �       alignment-pattern.js
+�   �   �       �       alphanumeric-data.js
+�   �   �       �       bit-buffer.js
+�   �   �       �       bit-matrix.js
+�   �   �       �       byte-data.js
+�   �   �       �       error-correction-code.js
+�   �   �       �       error-correction-level.js
+�   �   �       �       finder-pattern.js
+�   �   �       �       format-info.js
+�   �   �       �       galois-field.js
+�   �   �       �       kanji-data.js
+�   �   �       �       mask-pattern.js
+�   �   �       �       mode.js
+�   �   �       �       numeric-data.js
+�   �   �       �       polynomial.js
+�   �   �       �       qrcode.js
+�   �   �       �       reed-solomon-encoder.js
+�   �   �       �       regex.js
+�   �   �       �       segments.js
+�   �   �       �       utils.js
+�   �   �       �       version-check.js
+�   �   �       �       version.js
+�   �   �       �       
+�   �   �       +---renderer
+�   �   �           �   canvas.js
+�   �   �           �   png.js
+�   �   �           �   svg-tag.js
+�   �   �           �   svg.js
+�   �   �           �   terminal.js
+�   �   �           �   utf8.js
+�   �   �           �   utils.js
+�   �   �           �   
+�   �   �           +---terminal
+�   �   �                   terminal-small.js
+�   �   �                   terminal.js
+�   �   �                   
+�   �   +---readable-stream
+�   �   �   �   CONTRIBUTING.md
+�   �   �   �   errors-browser.js
+�   �   �   �   errors.js
+�   �   �   �   experimentalWarning.js
+�   �   �   �   GOVERNANCE.md
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   readable-browser.js
+�   �   �   �   readable.js
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �       �   _stream_duplex.js
+�   �   �       �   _stream_passthrough.js
+�   �   �       �   _stream_readable.js
+�   �   �       �   _stream_transform.js
+�   �   �       �   _stream_writable.js
+�   �   �       �   
+�   �   �       +---internal
+�   �   �           +---streams
+�   �   �                   async_iterator.js
+�   �   �                   buffer_list.js
+�   �   �                   destroy.js
+�   �   �                   end-of-stream.js
+�   �   �                   from-browser.js
+�   �   �                   from.js
+�   �   �                   pipeline.js
+�   �   �                   state.js
+�   �   �                   stream-browser.js
+�   �   �                   stream.js
+�   �   �                   
+�   �   +---require-directory
+�   �   �       .jshintrc
+�   �   �       .npmignore
+�   �   �       .travis.yml
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.markdown
+�   �   �       
+�   �   +---require-main-filename
+�   �   �       CHANGELOG.md
+�   �   �       index.js
+�   �   �       LICENSE.txt
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---rimraf
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       default-tmp.d.ts
+�   �   �       �       default-tmp.d.ts.map
+�   �   �       �       default-tmp.js
+�   �   �       �       default-tmp.js.map
+�   �   �       �       error.d.ts
+�   �   �       �       error.d.ts.map
+�   �   �       �       error.js
+�   �   �       �       error.js.map
+�   �   �       �       fix-eperm.d.ts
+�   �   �       �       fix-eperm.d.ts.map
+�   �   �       �       fix-eperm.js
+�   �   �       �       fix-eperm.js.map
+�   �   �       �       fs.d.ts
+�   �   �       �       fs.d.ts.map
+�   �   �       �       fs.js
+�   �   �       �       fs.js.map
+�   �   �       �       ignore-enoent.d.ts
+�   �   �       �       ignore-enoent.d.ts.map
+�   �   �       �       ignore-enoent.js
+�   �   �       �       ignore-enoent.js.map
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       opt-arg.d.ts
+�   �   �       �       opt-arg.d.ts.map
+�   �   �       �       opt-arg.js
+�   �   �       �       opt-arg.js.map
+�   �   �       �       package.json
+�   �   �       �       path-arg.d.ts
+�   �   �       �       path-arg.d.ts.map
+�   �   �       �       path-arg.js
+�   �   �       �       path-arg.js.map
+�   �   �       �       readdir-or-error.d.ts
+�   �   �       �       readdir-or-error.d.ts.map
+�   �   �       �       readdir-or-error.js
+�   �   �       �       readdir-or-error.js.map
+�   �   �       �       retry-busy.d.ts
+�   �   �       �       retry-busy.d.ts.map
+�   �   �       �       retry-busy.js
+�   �   �       �       retry-busy.js.map
+�   �   �       �       rimraf-manual.d.ts
+�   �   �       �       rimraf-manual.d.ts.map
+�   �   �       �       rimraf-manual.js
+�   �   �       �       rimraf-manual.js.map
+�   �   �       �       rimraf-move-remove.d.ts
+�   �   �       �       rimraf-move-remove.d.ts.map
+�   �   �       �       rimraf-move-remove.js
+�   �   �       �       rimraf-move-remove.js.map
+�   �   �       �       rimraf-native.d.ts
+�   �   �       �       rimraf-native.d.ts.map
+�   �   �       �       rimraf-native.js
+�   �   �       �       rimraf-native.js.map
+�   �   �       �       rimraf-posix.d.ts
+�   �   �       �       rimraf-posix.d.ts.map
+�   �   �       �       rimraf-posix.js
+�   �   �       �       rimraf-posix.js.map
+�   �   �       �       rimraf-windows.d.ts
+�   �   �       �       rimraf-windows.d.ts.map
+�   �   �       �       rimraf-windows.js
+�   �   �       �       rimraf-windows.js.map
+�   �   �       �       use-native.d.ts
+�   �   �       �       use-native.d.ts.map
+�   �   �       �       use-native.js
+�   �   �       �       use-native.js.map
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               bin.d.mts
+�   �   �               bin.d.mts.map
+�   �   �               bin.mjs
+�   �   �               bin.mjs.map
+�   �   �               default-tmp.d.ts
+�   �   �               default-tmp.d.ts.map
+�   �   �               default-tmp.js
+�   �   �               default-tmp.js.map
+�   �   �               error.d.ts
+�   �   �               error.d.ts.map
+�   �   �               error.js
+�   �   �               error.js.map
+�   �   �               fix-eperm.d.ts
+�   �   �               fix-eperm.d.ts.map
+�   �   �               fix-eperm.js
+�   �   �               fix-eperm.js.map
+�   �   �               fs.d.ts
+�   �   �               fs.d.ts.map
+�   �   �               fs.js
+�   �   �               fs.js.map
+�   �   �               ignore-enoent.d.ts
+�   �   �               ignore-enoent.d.ts.map
+�   �   �               ignore-enoent.js
+�   �   �               ignore-enoent.js.map
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               opt-arg.d.ts
+�   �   �               opt-arg.d.ts.map
+�   �   �               opt-arg.js
+�   �   �               opt-arg.js.map
+�   �   �               package.json
+�   �   �               path-arg.d.ts
+�   �   �               path-arg.d.ts.map
+�   �   �               path-arg.js
+�   �   �               path-arg.js.map
+�   �   �               readdir-or-error.d.ts
+�   �   �               readdir-or-error.d.ts.map
+�   �   �               readdir-or-error.js
+�   �   �               readdir-or-error.js.map
+�   �   �               retry-busy.d.ts
+�   �   �               retry-busy.d.ts.map
+�   �   �               retry-busy.js
+�   �   �               retry-busy.js.map
+�   �   �               rimraf-manual.d.ts
+�   �   �               rimraf-manual.d.ts.map
+�   �   �               rimraf-manual.js
+�   �   �               rimraf-manual.js.map
+�   �   �               rimraf-move-remove.d.ts
+�   �   �               rimraf-move-remove.d.ts.map
+�   �   �               rimraf-move-remove.js
+�   �   �               rimraf-move-remove.js.map
+�   �   �               rimraf-native.d.ts
+�   �   �               rimraf-native.d.ts.map
+�   �   �               rimraf-native.js
+�   �   �               rimraf-native.js.map
+�   �   �               rimraf-posix.d.ts
+�   �   �               rimraf-posix.d.ts.map
+�   �   �               rimraf-posix.js
+�   �   �               rimraf-posix.js.map
+�   �   �               rimraf-windows.d.ts
+�   �   �               rimraf-windows.d.ts.map
+�   �   �               rimraf-windows.js
+�   �   �               rimraf-windows.js.map
+�   �   �               use-native.d.ts
+�   �   �               use-native.d.ts.map
+�   �   �               use-native.js
+�   �   �               use-native.js.map
+�   �   �               
+�   �   +---safe-buffer
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---sax
+�   �   �   �   LICENSE
+�   �   �   �   LICENSE-W3C.html
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �           sax.js
+�   �   �           
+�   �   +---semver
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   preload.js
+�   �   �   �   range.bnf
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---bin
+�   �   �   �       semver.js
+�   �   �   �       
+�   �   �   +---classes
+�   �   �   �       comparator.js
+�   �   �   �       index.js
+�   �   �   �       range.js
+�   �   �   �       semver.js
+�   �   �   �       
+�   �   �   +---functions
+�   �   �   �       clean.js
+�   �   �   �       cmp.js
+�   �   �   �       coerce.js
+�   �   �   �       compare-build.js
+�   �   �   �       compare-loose.js
+�   �   �   �       compare.js
+�   �   �   �       diff.js
+�   �   �   �       eq.js
+�   �   �   �       gt.js
+�   �   �   �       gte.js
+�   �   �   �       inc.js
+�   �   �   �       lt.js
+�   �   �   �       lte.js
+�   �   �   �       major.js
+�   �   �   �       minor.js
+�   �   �   �       neq.js
+�   �   �   �       parse.js
+�   �   �   �       patch.js
+�   �   �   �       prerelease.js
+�   �   �   �       rcompare.js
+�   �   �   �       rsort.js
+�   �   �   �       satisfies.js
+�   �   �   �       sort.js
+�   �   �   �       valid.js
+�   �   �   �       
+�   �   �   +---internal
+�   �   �   �       constants.js
+�   �   �   �       debug.js
+�   �   �   �       identifiers.js
+�   �   �   �       lrucache.js
+�   �   �   �       parse-options.js
+�   �   �   �       re.js
+�   �   �   �       
+�   �   �   +---ranges
+�   �   �           gtr.js
+�   �   �           intersects.js
+�   �   �           ltr.js
+�   �   �           max-satisfying.js
+�   �   �           min-satisfying.js
+�   �   �           min-version.js
+�   �   �           outside.js
+�   �   �           simplify.js
+�   �   �           subset.js
+�   �   �           to-comparators.js
+�   �   �           valid.js
+�   �   �           
+�   �   +---set-blocking
+�   �   �       CHANGELOG.md
+�   �   �       index.js
+�   �   �       LICENSE.txt
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---shebang-command
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---shebang-regex
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---signal-exit
+�   �   �       index.js
+�   �   �       LICENSE.txt
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       signals.js
+�   �   �       
+�   �   +---sisteransi
+�   �   �   �   license
+�   �   �   �   package.json
+�   �   �   �   readme.md
+�   �   �   �   
+�   �   �   +---src
+�   �   �           index.js
+�   �   �           sisteransi.d.ts
+�   �   �           
+�   �   +---slice-ansi
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---split2
+�   �   �       bench.js
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       test.js
+�   �   �       
+�   �   +---string-width
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---string_decoder
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �           string_decoder.js
+�   �   �           
+�   �   +---strip-ansi
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---tar
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       create.d.ts
+�   �   �       �       create.d.ts.map
+�   �   �       �       create.js
+�   �   �       �       create.js.map
+�   �   �       �       cwd-error.d.ts
+�   �   �       �       cwd-error.d.ts.map
+�   �   �       �       cwd-error.js
+�   �   �       �       cwd-error.js.map
+�   �   �       �       extract.d.ts
+�   �   �       �       extract.d.ts.map
+�   �   �       �       extract.js
+�   �   �       �       extract.js.map
+�   �   �       �       get-write-flag.d.ts
+�   �   �       �       get-write-flag.d.ts.map
+�   �   �       �       get-write-flag.js
+�   �   �       �       get-write-flag.js.map
+�   �   �       �       header.d.ts
+�   �   �       �       header.d.ts.map
+�   �   �       �       header.js
+�   �   �       �       header.js.map
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       index.min.js
+�   �   �       �       index.min.js.map
+�   �   �       �       large-numbers.d.ts
+�   �   �       �       large-numbers.d.ts.map
+�   �   �       �       large-numbers.js
+�   �   �       �       large-numbers.js.map
+�   �   �       �       list.d.ts
+�   �   �       �       list.d.ts.map
+�   �   �       �       list.js
+�   �   �       �       list.js.map
+�   �   �       �       make-command.d.ts
+�   �   �       �       make-command.d.ts.map
+�   �   �       �       make-command.js
+�   �   �       �       make-command.js.map
+�   �   �       �       mkdir.d.ts
+�   �   �       �       mkdir.d.ts.map
+�   �   �       �       mkdir.js
+�   �   �       �       mkdir.js.map
+�   �   �       �       mode-fix.d.ts
+�   �   �       �       mode-fix.d.ts.map
+�   �   �       �       mode-fix.js
+�   �   �       �       mode-fix.js.map
+�   �   �       �       normalize-unicode.d.ts
+�   �   �       �       normalize-unicode.d.ts.map
+�   �   �       �       normalize-unicode.js
+�   �   �       �       normalize-unicode.js.map
+�   �   �       �       normalize-windows-path.d.ts
+�   �   �       �       normalize-windows-path.d.ts.map
+�   �   �       �       normalize-windows-path.js
+�   �   �       �       normalize-windows-path.js.map
+�   �   �       �       options.d.ts
+�   �   �       �       options.d.ts.map
+�   �   �       �       options.js
+�   �   �       �       options.js.map
+�   �   �       �       pack.d.ts
+�   �   �       �       pack.d.ts.map
+�   �   �       �       pack.js
+�   �   �       �       pack.js.map
+�   �   �       �       package.json
+�   �   �       �       parse.d.ts
+�   �   �       �       parse.d.ts.map
+�   �   �       �       parse.js
+�   �   �       �       parse.js.map
+�   �   �       �       path-reservations.d.ts
+�   �   �       �       path-reservations.d.ts.map
+�   �   �       �       path-reservations.js
+�   �   �       �       path-reservations.js.map
+�   �   �       �       pax.d.ts
+�   �   �       �       pax.d.ts.map
+�   �   �       �       pax.js
+�   �   �       �       pax.js.map
+�   �   �       �       process-umask.d.ts
+�   �   �       �       process-umask.d.ts.map
+�   �   �       �       process-umask.js
+�   �   �       �       process-umask.js.map
+�   �   �       �       read-entry.d.ts
+�   �   �       �       read-entry.d.ts.map
+�   �   �       �       read-entry.js
+�   �   �       �       read-entry.js.map
+�   �   �       �       replace.d.ts
+�   �   �       �       replace.d.ts.map
+�   �   �       �       replace.js
+�   �   �       �       replace.js.map
+�   �   �       �       strip-absolute-path.d.ts
+�   �   �       �       strip-absolute-path.d.ts.map
+�   �   �       �       strip-absolute-path.js
+�   �   �       �       strip-absolute-path.js.map
+�   �   �       �       strip-trailing-slashes.d.ts
+�   �   �       �       strip-trailing-slashes.d.ts.map
+�   �   �       �       strip-trailing-slashes.js
+�   �   �       �       strip-trailing-slashes.js.map
+�   �   �       �       symlink-error.d.ts
+�   �   �       �       symlink-error.d.ts.map
+�   �   �       �       symlink-error.js
+�   �   �       �       symlink-error.js.map
+�   �   �       �       types.d.ts
+�   �   �       �       types.d.ts.map
+�   �   �       �       types.js
+�   �   �       �       types.js.map
+�   �   �       �       unpack.d.ts
+�   �   �       �       unpack.d.ts.map
+�   �   �       �       unpack.js
+�   �   �       �       unpack.js.map
+�   �   �       �       update.d.ts
+�   �   �       �       update.d.ts.map
+�   �   �       �       update.js
+�   �   �       �       update.js.map
+�   �   �       �       warn-method.d.ts
+�   �   �       �       warn-method.d.ts.map
+�   �   �       �       warn-method.js
+�   �   �       �       warn-method.js.map
+�   �   �       �       winchars.d.ts
+�   �   �       �       winchars.d.ts.map
+�   �   �       �       winchars.js
+�   �   �       �       winchars.js.map
+�   �   �       �       write-entry.d.ts
+�   �   �       �       write-entry.d.ts.map
+�   �   �       �       write-entry.js
+�   �   �       �       write-entry.js.map
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               create.d.ts
+�   �   �               create.d.ts.map
+�   �   �               create.js
+�   �   �               create.js.map
+�   �   �               cwd-error.d.ts
+�   �   �               cwd-error.d.ts.map
+�   �   �               cwd-error.js
+�   �   �               cwd-error.js.map
+�   �   �               extract.d.ts
+�   �   �               extract.d.ts.map
+�   �   �               extract.js
+�   �   �               extract.js.map
+�   �   �               get-write-flag.d.ts
+�   �   �               get-write-flag.d.ts.map
+�   �   �               get-write-flag.js
+�   �   �               get-write-flag.js.map
+�   �   �               header.d.ts
+�   �   �               header.d.ts.map
+�   �   �               header.js
+�   �   �               header.js.map
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               index.min.js
+�   �   �               index.min.js.map
+�   �   �               large-numbers.d.ts
+�   �   �               large-numbers.d.ts.map
+�   �   �               large-numbers.js
+�   �   �               large-numbers.js.map
+�   �   �               list.d.ts
+�   �   �               list.d.ts.map
+�   �   �               list.js
+�   �   �               list.js.map
+�   �   �               make-command.d.ts
+�   �   �               make-command.d.ts.map
+�   �   �               make-command.js
+�   �   �               make-command.js.map
+�   �   �               mkdir.d.ts
+�   �   �               mkdir.d.ts.map
+�   �   �               mkdir.js
+�   �   �               mkdir.js.map
+�   �   �               mode-fix.d.ts
+�   �   �               mode-fix.d.ts.map
+�   �   �               mode-fix.js
+�   �   �               mode-fix.js.map
+�   �   �               normalize-unicode.d.ts
+�   �   �               normalize-unicode.d.ts.map
+�   �   �               normalize-unicode.js
+�   �   �               normalize-unicode.js.map
+�   �   �               normalize-windows-path.d.ts
+�   �   �               normalize-windows-path.d.ts.map
+�   �   �               normalize-windows-path.js
+�   �   �               normalize-windows-path.js.map
+�   �   �               options.d.ts
+�   �   �               options.d.ts.map
+�   �   �               options.js
+�   �   �               options.js.map
+�   �   �               pack.d.ts
+�   �   �               pack.d.ts.map
+�   �   �               pack.js
+�   �   �               pack.js.map
+�   �   �               package.json
+�   �   �               parse.d.ts
+�   �   �               parse.d.ts.map
+�   �   �               parse.js
+�   �   �               parse.js.map
+�   �   �               path-reservations.d.ts
+�   �   �               path-reservations.d.ts.map
+�   �   �               path-reservations.js
+�   �   �               path-reservations.js.map
+�   �   �               pax.d.ts
+�   �   �               pax.d.ts.map
+�   �   �               pax.js
+�   �   �               pax.js.map
+�   �   �               process-umask.d.ts
+�   �   �               process-umask.d.ts.map
+�   �   �               process-umask.js
+�   �   �               process-umask.js.map
+�   �   �               read-entry.d.ts
+�   �   �               read-entry.d.ts.map
+�   �   �               read-entry.js
+�   �   �               read-entry.js.map
+�   �   �               replace.d.ts
+�   �   �               replace.d.ts.map
+�   �   �               replace.js
+�   �   �               replace.js.map
+�   �   �               strip-absolute-path.d.ts
+�   �   �               strip-absolute-path.d.ts.map
+�   �   �               strip-absolute-path.js
+�   �   �               strip-absolute-path.js.map
+�   �   �               strip-trailing-slashes.d.ts
+�   �   �               strip-trailing-slashes.d.ts.map
+�   �   �               strip-trailing-slashes.js
+�   �   �               strip-trailing-slashes.js.map
+�   �   �               symlink-error.d.ts
+�   �   �               symlink-error.d.ts.map
+�   �   �               symlink-error.js
+�   �   �               symlink-error.js.map
+�   �   �               types.d.ts
+�   �   �               types.d.ts.map
+�   �   �               types.js
+�   �   �               types.js.map
+�   �   �               unpack.d.ts
+�   �   �               unpack.d.ts.map
+�   �   �               unpack.js
+�   �   �               unpack.js.map
+�   �   �               update.d.ts
+�   �   �               update.d.ts.map
+�   �   �               update.js
+�   �   �               update.js.map
+�   �   �               warn-method.d.ts
+�   �   �               warn-method.d.ts.map
+�   �   �               warn-method.js
+�   �   �               warn-method.js.map
+�   �   �               winchars.d.ts
+�   �   �               winchars.d.ts.map
+�   �   �               winchars.js
+�   �   �               winchars.js.map
+�   �   �               write-entry.d.ts
+�   �   �               write-entry.d.ts.map
+�   �   �               write-entry.js
+�   �   �               write-entry.js.map
+�   �   �               
+�   �   +---through2
+�   �   �       LICENSE.md
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       through2.js
+�   �   �       
+�   �   +---tree-kill
+�   �   �       cli.js
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---tslib
+�   �   �   �   CopyrightNotice.txt
+�   �   �   �   LICENSE.txt
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   SECURITY.md
+�   �   �   �   tslib.d.ts
+�   �   �   �   tslib.es6.html
+�   �   �   �   tslib.es6.js
+�   �   �   �   tslib.es6.mjs
+�   �   �   �   tslib.html
+�   �   �   �   tslib.js
+�   �   �   �   
+�   �   �   +---modules
+�   �   �           index.d.ts
+�   �   �           index.js
+�   �   �           package.json
+�   �   �           
+�   �   +---undici-types
+�   �   �       agent.d.ts
+�   �   �       api.d.ts
+�   �   �       balanced-pool.d.ts
+�   �   �       cache-interceptor.d.ts
+�   �   �       cache.d.ts
+�   �   �       client-stats.d.ts
+�   �   �       client.d.ts
+�   �   �       connector.d.ts
+�   �   �       content-type.d.ts
+�   �   �       cookies.d.ts
+�   �   �       diagnostics-channel.d.ts
+�   �   �       dispatcher.d.ts
+�   �   �       env-http-proxy-agent.d.ts
+�   �   �       errors.d.ts
+�   �   �       eventsource.d.ts
+�   �   �       fetch.d.ts
+�   �   �       formdata.d.ts
+�   �   �       global-dispatcher.d.ts
+�   �   �       global-origin.d.ts
+�   �   �       h2c-client.d.ts
+�   �   �       handlers.d.ts
+�   �   �       header.d.ts
+�   �   �       index.d.ts
+�   �   �       interceptors.d.ts
+�   �   �       LICENSE
+�   �   �       mock-agent.d.ts
+�   �   �       mock-call-history.d.ts
+�   �   �       mock-client.d.ts
+�   �   �       mock-errors.d.ts
+�   �   �       mock-interceptor.d.ts
+�   �   �       mock-pool.d.ts
+�   �   �       package.json
+�   �   �       patch.d.ts
+�   �   �       pool-stats.d.ts
+�   �   �       pool.d.ts
+�   �   �       proxy-agent.d.ts
+�   �   �       readable.d.ts
+�   �   �       README.md
+�   �   �       retry-agent.d.ts
+�   �   �       retry-handler.d.ts
+�   �   �       round-robin-pool.d.ts
+�   �   �       snapshot-agent.d.ts
+�   �   �       util.d.ts
+�   �   �       utility.d.ts
+�   �   �       webidl.d.ts
+�   �   �       websocket.d.ts
+�   �   �       
+�   �   +---universalify
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---untildify
+�   �   �       index.d.ts
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---util-deprecate
+�   �   �       browser.js
+�   �   �       History.md
+�   �   �       LICENSE
+�   �   �       node.js
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---which
+�   �   �   �   CHANGELOG.md
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   which.js
+�   �   �   �   
+�   �   �   +---bin
+�   �   �           node-which
+�   �   �           
+�   �   +---which-module
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---wrap-ansi
+�   �   �       index.js
+�   �   �       license
+�   �   �       package.json
+�   �   �       readme.md
+�   �   �       
+�   �   +---ws
+�   �   �   �   browser.js
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   wrapper.mjs
+�   �   �   �   
+�   �   �   +---lib
+�   �   �           buffer-util.js
+�   �   �           constants.js
+�   �   �           event-target.js
+�   �   �           extension.js
+�   �   �           limiter.js
+�   �   �           permessage-deflate.js
+�   �   �           receiver.js
+�   �   �           sender.js
+�   �   �           stream.js
+�   �   �           subprotocol.js
+�   �   �           validation.js
+�   �   �           websocket-server.js
+�   �   �           websocket.js
+�   �   �           
+�   �   +---xml2js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �   �       bom.js
+�   �   �   �       builder.js
+�   �   �   �       defaults.js
+�   �   �   �       parser.js
+�   �   �   �       processors.js
+�   �   �   �       xml2js.bc.js
+�   �   �   �       xml2js.js
+�   �   �   �       
+�   �   �   +---node_modules
+�   �   �       +---xmlbuilder
+�   �   �           �   appveyor.yml
+�   �   �           �   CHANGELOG.md
+�   �   �           �   LICENSE
+�   �   �           �   package.json
+�   �   �           �   README.md
+�   �   �           �   
+�   �   �           +---lib
+�   �   �           �       Derivation.js
+�   �   �           �       DocumentPosition.js
+�   �   �           �       index.js
+�   �   �           �       NodeType.js
+�   �   �           �       OperationType.js
+�   �   �           �       Utility.js
+�   �   �           �       WriterState.js
+�   �   �           �       XMLAttribute.js
+�   �   �           �       XMLCData.js
+�   �   �           �       XMLCharacterData.js
+�   �   �           �       XMLComment.js
+�   �   �           �       XMLDeclaration.js
+�   �   �           �       XMLDocType.js
+�   �   �           �       XMLDocument.js
+�   �   �           �       XMLDocumentCB.js
+�   �   �           �       XMLDocumentFragment.js
+�   �   �           �       XMLDOMConfiguration.js
+�   �   �           �       XMLDOMErrorHandler.js
+�   �   �           �       XMLDOMImplementation.js
+�   �   �           �       XMLDOMStringList.js
+�   �   �           �       XMLDTDAttList.js
+�   �   �           �       XMLDTDElement.js
+�   �   �           �       XMLDTDEntity.js
+�   �   �           �       XMLDTDNotation.js
+�   �   �           �       XMLDummy.js
+�   �   �           �       XMLElement.js
+�   �   �           �       XMLNamedNodeMap.js
+�   �   �           �       XMLNode.js
+�   �   �           �       XMLNodeFilter.js
+�   �   �           �       XMLNodeList.js
+�   �   �           �       XMLProcessingInstruction.js
+�   �   �           �       XMLRaw.js
+�   �   �           �       XMLStreamWriter.js
+�   �   �           �       XMLStringifier.js
+�   �   �           �       XMLStringWriter.js
+�   �   �           �       XMLText.js
+�   �   �           �       XMLTypeInfo.js
+�   �   �           �       XMLUserDataHandler.js
+�   �   �           �       XMLWriterBase.js
+�   �   �           �       
+�   �   �           +---typings
+�   �   �                   index.d.ts
+�   �   �                   
+�   �   +---xmlbuilder
+�   �   �   �   .nycrc
+�   �   �   �   CHANGELOG.md
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---.vscode
+�   �   �   �       launch.json
+�   �   �   �       
+�   �   �   +---lib
+�   �   �   �       Derivation.js
+�   �   �   �       DocumentPosition.js
+�   �   �   �       index.js
+�   �   �   �       NodeType.js
+�   �   �   �       OperationType.js
+�   �   �   �       Utility.js
+�   �   �   �       WriterState.js
+�   �   �   �       XMLAttribute.js
+�   �   �   �       XMLCData.js
+�   �   �   �       XMLCharacterData.js
+�   �   �   �       XMLComment.js
+�   �   �   �       XMLDeclaration.js
+�   �   �   �       XMLDocType.js
+�   �   �   �       XMLDocument.js
+�   �   �   �       XMLDocumentCB.js
+�   �   �   �       XMLDocumentFragment.js
+�   �   �   �       XMLDOMConfiguration.js
+�   �   �   �       XMLDOMErrorHandler.js
+�   �   �   �       XMLDOMImplementation.js
+�   �   �   �       XMLDOMStringList.js
+�   �   �   �       XMLDTDAttList.js
+�   �   �   �       XMLDTDElement.js
+�   �   �   �       XMLDTDEntity.js
+�   �   �   �       XMLDTDNotation.js
+�   �   �   �       XMLDummy.js
+�   �   �   �       XMLElement.js
+�   �   �   �       XMLNamedNodeMap.js
+�   �   �   �       XMLNode.js
+�   �   �   �       XMLNodeFilter.js
+�   �   �   �       XMLNodeList.js
+�   �   �   �       XMLProcessingInstruction.js
+�   �   �   �       XMLRaw.js
+�   �   �   �       XMLStreamWriter.js
+�   �   �   �       XMLStringifier.js
+�   �   �   �       XMLStringWriter.js
+�   �   �   �       XMLText.js
+�   �   �   �       XMLTypeInfo.js
+�   �   �   �       XMLUserDataHandler.js
+�   �   �   �       XMLWriterBase.js
+�   �   �   �       
+�   �   �   +---perf
+�   �   �   �   �   index.coffee
+�   �   �   �   �   perf.list
+�   �   �   �   �   
+�   �   �   �   +---basic
+�   �   �   �           escaping.coffee
+�   �   �   �           object.coffee
+�   �   �   �           
+�   �   �   +---typings
+�   �   �           index.d.ts
+�   �   �           
+�   �   +---y18n
+�   �   �       CHANGELOG.md
+�   �   �       index.js
+�   �   �       LICENSE
+�   �   �       package.json
+�   �   �       README.md
+�   �   �       
+�   �   +---yallist
+�   �   �   �   LICENSE.md
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---dist
+�   �   �       +---commonjs
+�   �   �       �       index.d.ts
+�   �   �       �       index.d.ts.map
+�   �   �       �       index.js
+�   �   �       �       index.js.map
+�   �   �       �       package.json
+�   �   �       �       
+�   �   �       +---esm
+�   �   �               index.d.ts
+�   �   �               index.d.ts.map
+�   �   �               index.js
+�   �   �               index.js.map
+�   �   �               package.json
+�   �   �               
+�   �   +---yargs
+�   �   �   �   CHANGELOG.md
+�   �   �   �   index.js
+�   �   �   �   LICENSE
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   yargs.js
+�   �   �   �   
+�   �   �   +---build
+�   �   �   �   +---lib
+�   �   �   �           apply-extends.d.ts
+�   �   �   �           apply-extends.js
+�   �   �   �           argsert.d.ts
+�   �   �   �           argsert.js
+�   �   �   �           command.d.ts
+�   �   �   �           command.js
+�   �   �   �           common-types.d.ts
+�   �   �   �           common-types.js
+�   �   �   �           completion-templates.d.ts
+�   �   �   �           completion-templates.js
+�   �   �   �           completion.d.ts
+�   �   �   �           completion.js
+�   �   �   �           is-promise.d.ts
+�   �   �   �           is-promise.js
+�   �   �   �           levenshtein.d.ts
+�   �   �   �           levenshtein.js
+�   �   �   �           middleware.d.ts
+�   �   �   �           middleware.js
+�   �   �   �           obj-filter.d.ts
+�   �   �   �           obj-filter.js
+�   �   �   �           parse-command.d.ts
+�   �   �   �           parse-command.js
+�   �   �   �           process-argv.d.ts
+�   �   �   �           process-argv.js
+�   �   �   �           usage.d.ts
+�   �   �   �           usage.js
+�   �   �   �           validation.d.ts
+�   �   �   �           validation.js
+�   �   �   �           yargs.d.ts
+�   �   �   �           yargs.js
+�   �   �   �           yerror.d.ts
+�   �   �   �           yerror.js
+�   �   �   �           
+�   �   �   +---locales
+�   �   �           be.json
+�   �   �           de.json
+�   �   �           en.json
+�   �   �           es.json
+�   �   �           fi.json
+�   �   �           fr.json
+�   �   �           hi.json
+�   �   �           hu.json
+�   �   �           id.json
+�   �   �           it.json
+�   �   �           ja.json
+�   �   �           ko.json
+�   �   �           nb.json
+�   �   �           nl.json
+�   �   �           nn.json
+�   �   �           pirate.json
+�   �   �           pl.json
+�   �   �           pt.json
+�   �   �           pt_BR.json
+�   �   �           ru.json
+�   �   �           th.json
+�   �   �           tr.json
+�   �   �           zh_CN.json
+�   �   �           zh_TW.json
+�   �   �           
+�   �   +---yargs-parser
+�   �   �   �   CHANGELOG.md
+�   �   �   �   index.js
+�   �   �   �   LICENSE.txt
+�   �   �   �   package.json
+�   �   �   �   README.md
+�   �   �   �   
+�   �   �   +---lib
+�   �   �           tokenize-arg-string.js
+�   �   �           
+�   �   +---yauzl
+�   �           index.js
+�   �           LICENSE
+�   �           package.json
+�   �           README.md
+�   �           
+�   +---src
+�   �   �   admin.html
+�   �   �   capacitor.config.json
+�   �   �   dashboard-supervisor.html
+�   �   �   dashboard.html
+�   �   �   home.html
+�   �   �   index.html
+�   �   �   logo.png
+�   �   �   mapa.html
+�   �   �   package.json
+�   �   �   panel-admin.html
+�   �   �   panel-usuario.html
+�   �   �   perfil.html
+�   �   �   perfil_publico.html
+�   �   �   README.md
+�   �   �   registro-socio.html
+�   �   �   reset-password.html
+�   �   �   
+�   �   +---.github
+�   �   �   +---modernize
+�   �   �       +---code-migration
+�   �   �               .gitignore
+�   �   �               
+�   �   +---JS
+�   �           tracking.js
+�   �           
+�   +---www
+�           admin.html
+�           capacitor.config.json
+�           dashboard.html
+�           home.html
+�           index.html
+�           logo.png
+�           package.json
+�           panel-admin.html
+�           panel-usuario.html
+�           perfil.html
+�           perfil_publico.html
+�           README.md
+�           registro-socio.html
+�           reset-password.html
+�           
++---supabase
+    �   .gitignore
+    �   config.toml
+    �   npm
+    �   
+    +---functions
+    �   +---nuevo-registro-conductorcd
+    �   �       .npmrc
+    �   �       deno.json
+    �   �       index.ts
+    �   �       
+    �   +---perfil
+    �   �       .npmrc
+    �   �       deno.json
+    �   �       index.ts
+    �   �       
+    �   +---registro
+    �           .npmrc
+    �           deno.json
+    �           index.ts
+    �           
+    +---supabase
+            .gitignore
+            config.toml
+            
+
+
+

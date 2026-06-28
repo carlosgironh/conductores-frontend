@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Registro de Pasajeros</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --corp-green: #8ac725;
+    --corp-green-dark: #448414;
+    --corp-green-lime: #9ad93a;
+    --corp-green-light: #b8e85c;
+    --corp-blue: #2563eb;
+    --corp-blue-light: #3b82f6;
+    --corp-orange: #f97316;
+    --bg-dark: #0a1208;
+    --text-light: #eef8e4;
+    --text-muted: #8a9e7d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    background:
+      radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(68, 132, 20, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at top left, #0a1208, #0a1208);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 2%),
+      radial-gradient(circle at 40% 40%, rgba(255,255,255,0.02) 0%, transparent 1.5%);
+    background-size: 150px 150px;
+    animation: float 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+  .card {
+    max-width: 640px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 1px 1px rgba(255, 255, 255, 0.05) inset;
+    padding: 50px 45px;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+    animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+    transform-style: preserve-3d;
+  }
+  @keyframes cardEntry {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .header { text-align: center; margin-bottom: 40px; }
+  .header-icon {
+    width: 70px; height: 70px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(138, 199, 37, 0.2) 0%, rgba(68, 132, 20, 0.1) 100%);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(138, 199, 37, 0.35);
+    box-shadow: 0 10px 30px rgba(138, 199, 37, 0.15);
+    animation: iconPulse 3s ease-in-out infinite;
+  }
+  @keyframes iconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(138, 199, 37, 0.15); }
+    50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(138, 199, 37, 0.25); }
+  }
+  .header-icon svg { width: 35px; height: 35px; color: var(--corp-green-light); }
+  h2 {
+    color: #ffffff; font-weight: 800; font-size: 32px; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 8px;
+  }
+  .subtitle { color: #94a3b8; font-size: 15px; font-weight: 400; }
+  .form-section { margin-bottom: 35px; animation: fadeInUp 0.6s ease-out backwards; }
+  .form-section:nth-child(2) { animation-delay: 0.1s; }
+  .form-section:nth-child(3) { animation-delay: 0.2s; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--corp-green); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: ''; width: 4px; height: 16px;
+    background: linear-gradient(to bottom, var(--corp-green), var(--corp-green-dark));
+    border-radius: 2px;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { position: relative; }
+  .form-group.full-width { grid-column: 1 / -1; }
+  label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: #cbd5e1; margin-bottom: 8px; margin-left: 4px;
+    transition: color 0.3s;
+  }
+  .form-group:focus-within label { color: var(--corp-green-light); }
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
+    width: 100%; padding: 14px 18px; border-radius: 14px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff; font-size: 16px; font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input::placeholder { color: #64748b; }
+  input:hover { border-color: rgba(255, 255, 255, 0.2); background: rgba(10, 18, 8, 0.8); }
+  input:focus {
+    border-color: var(--corp-green);
+    box-shadow: 0 0 0 4px rgba(138, 199, 37, 0.15), 0 4px 20px rgba(138, 199, 37, 0.1);
+    background: rgba(10, 18, 8, 0.9); outline: none;
+  }
+  .file-input-wrapper { position: relative; margin-bottom: 16px; }
+  input[type="file"] {
+    position: absolute; opacity: 0; width: 100%; height: 100%;
+    cursor: pointer; z-index: 2;
+  }
+  .file-input-label {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px; border-radius: 14px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    color: #94a3b8; font-size: 14px;
+    transition: all 0.3s; cursor: pointer; touch-action: manipulation;
+  }
+  .file-input-wrapper:hover .file-input-label,
+  .file-input-wrapper:focus-within .file-input-label {
+    border-color: var(--corp-green); background: rgba(138, 199, 37, 0.1); color: #ffffff;
+  }
+  .file-input-wrapper.has-file .file-input-label {
+    border-style: solid; border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1); color: #4ade80;
+  }
+  .file-input-wrapper.required .file-input-label {
+    border-color: #ef4444; background: rgba(239, 68, 68, 0.05);
+    animation: shake 0.5s;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .file-icon { width: 24px; height: 24px; flex-shrink: 0; }
+  .file-text { display: flex; flex-direction: column; gap: 2px; }
+  .file-name { font-weight: 600; color: #ffffff; font-size: 14px; }
+  .file-hint { font-size: 12px; color: #64748b; }
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(138, 199, 37, 0.25), transparent);
+    margin: 35px 0; position: relative;
+  }
+  .divider::before {
+    content: ''; position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px; height: 3px;
+    background: linear-gradient(90deg, var(--corp-green), var(--corp-green-dark));
+    border-radius: 3px;
+  }
+  button[type="submit"] {
+    width: 100%; padding: 18px 28px; border: none; border-radius: 16px;
+    background: linear-gradient(135deg, var(--corp-green) 0%, var(--corp-green-dark) 100%);
+    color: #0a1208; font-size: 16px; font-weight: 700; font-family: inherit;
+    cursor: pointer; position: relative; overflow: hidden;
+    box-shadow:
+      0 4px 6px -1px rgba(138, 199, 37, 0.2),
+      0 10px 20px -5px rgba(138, 199, 37, 0.4),
+      inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 10px; touch-action: manipulation;
+  }
+  button[type="submit"]::before {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+  button[type="submit"]:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+      0 10px 25px -5px rgba(138, 199, 37, 0.5),
+      0 8px 10px -6px rgba(138, 199, 37, 0.3);
+  }
+  button[type="submit"]:hover::before { left: 100%; }
+  button[type="submit"]:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  button[type="submit"]:disabled {
+    background: #334155; color: #64748b; cursor: not-allowed;
+    box-shadow: none; transform: none;
+  }
+  #mensaje {
+    margin-top: 25px; padding: 16px; border-radius: 12px;
+    font-weight: 600; font-size: 14px; text-align: center;
+    min-height: 50px; display: flex; align-items: center; justify-content: center; gap: 10px;
+    opacity: 0; transform: translateY(-10px); transition: all 0.3s ease;
+  }
+  #mensaje.show { opacity: 1; transform: translateY(0); }
+  #mensaje.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+  #mensaje.ok { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+  #mensaje.busy { background: rgba(138, 199, 37, 0.08); border: 1px solid rgba(138, 199, 37, 0.3); color: var(--corp-green-light); }
+  .loader {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .upload-progress {
+    position: fixed; top: 0; left: 0; width: 0%; height: 3px;
+    background: linear-gradient(90deg, var(--corp-green), var(--corp-green-dark));
+    z-index: 1000; transition: width 0.3s;
+    box-shadow: 0 0 10px rgba(138, 199, 37, 0.5);
+  }
+  .btn-back {
+    width: 100%; padding: 12px 24px; margin-top: 12px;
+    background: transparent; border: 1.5px solid rgba(138, 199, 37, 0.35);
+    border-radius: 12px; color: var(--corp-green-light); font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: all 0.3s ease;
+    text-decoration: none; display: inline-flex;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-back:hover {
+    background: rgba(138, 199, 37, 0.08);
+    border-color: rgba(138, 199, 37, 0.6);
+    color: var(--corp-green-light);
+  }
+
+  /* Modal de términos */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    z-index: 2000; display: none; align-items: center; justify-content: center;
+    padding: 20px; opacity: 0; transition: opacity 0.3s ease;
+  }
+  .modal-overlay.active { display: flex; opacity: 1; }
+  .modal-content {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; max-width: 560px; width: 100%;
+    max-height: 80vh; overflow-y: auto;
+    padding: 32px; position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    transform: translateY(20px); transition: transform 0.3s ease;
+  }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  .modal-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 16px; }
+  .modal-text {
+    color: #cbd5e1; font-size: 14px; line-height: 1.7;
+    white-space: pre-line; margin-bottom: 24px;
+  }
+  .modal-actions { display: flex; gap: 12px; }
+  .modal-actions button {
+    flex: 1; padding: 14px; border-radius: 12px; border: none;
+    font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-accept {
+    background: linear-gradient(135deg, var(--corp-green), var(--corp-green-dark));
+    color: #0a1208;
+  }
+  .btn-accept:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(138,199,37,0.3); }
+  .btn-decline {
+    background: transparent; border: 1.5px solid rgba(255,255,255,0.2);
+    color: #94a3b8;
+  }
+  .btn-decline:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+  .id-toggle {
+    display: flex;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 10px;
+  }
+  .id-toggle-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .id-toggle-btn.active {
+    background: linear-gradient(135deg, var(--corp-green) 0%, var(--corp-green-dark) 100%);
+    color: #0a1208;
+    box-shadow: 0 2px 8px rgba(138, 199, 37, 0.3);
+  }
+  .id-toggle-btn:hover:not(.active) {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  @media (max-width: 640px) {
+    .card { padding: 35px 25px; border-radius: 24px; }
+    h2 { font-size: 26px; }
+    .header-icon { width: 60px; height: 60px; }
+    .modal-content { padding: 24px; }
+  }
+</style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+  <div class="upload-progress" id="progressBar"></div>
+
+  <div class="card">
+    <div class="header">
+      <div class="header-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+      </div>
+      <h2>Registro de Pasajeros</h2>
+      <p class="subtitle">Complete todos los campos para registrarse en la plataforma</p>
+    </div>
+
+    <form id="formPasajero">
+
+      <!-- Sección: Cuenta -->
+      <div class="form-section">
+        <div class="section-title">Información de Cuenta</div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Correo Electrónico</label>
+            <input id="email" type="email" placeholder="pasajero@email.com" required>
+          </div>
+          <div class="form-group full-width">
+            <label>Contraseña</label>
+            <input id="password" type="password" placeholder="Mínimo 6 caracteres" required minlength="6">
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Sección: Personal -->
+      <div class="form-section">
+        <div class="section-title">Datos Personales</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombres</label>
+            <input id="nombres" type="text" placeholder="Juan" required>
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input id="apellidos" type="text" placeholder="Pérez" required>
+          </div>
+          <div class="form-group full-width">
+            <label>Dirección</label>
+            <input id="direccion" type="text" placeholder="Av. Principal #123" required>
+          </div>
+          <div class="form-group">
+            <label>Celular (WhatsApp)</label>
+            <input id="celular" type="tel" inputmode="numeric" maxlength="8" placeholder="61234567" required
+              pattern="^6[0-9]{7}$" title="Debe ser un número de 8 dígitos que empiece con 6. Ejemplo: 61234567">
+          </div>
+          <div class="form-group full-width">
+            <div class="id-toggle">
+              <button type="button" class="id-toggle-btn active" data-type="cedula" onclick="setIdType('cedula')">Cédula</button>
+              <button type="button" class="id-toggle-btn" data-type="pasaporte" onclick="setIdType('pasaporte')">Pasaporte</button>
+            </div>
+            <input id="cedula" type="text" placeholder="00-0000-0000" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Sección: Documentos -->
+      <div class="form-section">
+        <div class="section-title">Documentos Requeridos</div>
+
+        <div class="file-input-wrapper" id="docCedulaWrapper">
+          <input type="file" id="cedula_doc" accept=".pdf,.jpg,.jpeg,.png" required>
+          <div class="file-input-label">
+            <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <div class="file-text">
+              <span class="file-name" id="docCedulaLabel">Cédula de Identidad</span>
+              <span class="file-hint" id="docCedulaHint">PDF, JPG o PNG</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="file-input-wrapper">
+          <input type="file" id="foto_perfil" accept=".jpg,.jpeg,.png" required>
+          <div class="file-input-label">
+            <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <div class="file-text">
+              <span class="file-name">Foto de Perfil</span>
+              <span class="file-hint">JPG o PNG</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="btnRegistrar">
+        <span>Completar Registro</span>
+      </button>
+      <a href="index.html" class="btn-back">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Regresar al inicio
+      </a>
+
+      <div id="mensaje"></div>
+
+    </form>
+  </div>
+
+  <!-- Modal Términos -->
+  <div class="modal-overlay" id="modalTerminos">
+    <div class="modal-content">
+      <div class="modal-title">Términos y Condiciones</div>
+      <div class="modal-text" id="terminosTexto">Cargando...</div>
+      <div class="modal-actions">
+        <button class="btn-decline" onclick="closeModal()">Rechazar</button>
+        <button class="btn-accept" onclick="acceptAgreement()">Aceptar y Registrar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const form = document.getElementById("formPasajero");
+const mensaje = document.getElementById("mensaje");
+const btn = document.getElementById("btnRegistrar");
+const progressBar = document.getElementById("progressBar");
+const modalTerminos = document.getElementById("modalTerminos");
+const terminosTexto = document.getElementById("terminosTexto");
+
+let formDataCache = null;
+
+// Texto de términos por defecto (fallback si no carga el archivo)
+const defaultTerms = `TÉRMINOS Y CONDICIONES DE USO — PASAJERO
+
+1. Aceptación de los Términos
+Al registrarte como pasajero en nuestra plataforma, aceptas cumplir con estos términos y condiciones en su totalidad.
+
+2. Uso del Servicio
+El pasajero se compromete a utilizar el servicio de transporte de manera responsable, proporcionando información veraz y actualizada.
+
+3. Conducta durante el Viaje
+El pasajero debe mantener un comportamiento respetuoso con los conductores y otros usuarios. Está prohibido el consumo de alcohol, sustancias o comportamientos agresivos durante el servicio.
+
+4. Cancelaciones
+Las cancelaciones abusivas o repetidas pueden resultar en la suspensión temporal o permanente de la cuenta.
+
+5. Pagos
+El pasajero se compromete a realizar los pagos correspondientes por los servicios contratados según las tarifas establecidas.
+
+6. Responsabilidad
+La plataforma actúa como intermediaria. Los incidentes durante el viaje deben ser reportados a través de los canales oficiales.
+
+7. Privacidad
+La información personal proporcionada será tratada conforme a nuestra política de privacidad y protección de datos.
+
+8. Modificaciones
+Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones serán notificadas a los usuarios registrados.`;
+
+// Cargar términos desde archivo (con fallback integrado)
+async function loadAgreement() {
+  try {
+    const response = await fetch('./terminos-pasajero.txt');
+    if (response.ok) {
+      const text = await response.text();
+      terminosTexto.textContent = text;
+    } else {
+      throw new Error('Archivo no encontrado');
+    }
+  } catch (e) {
+    terminosTexto.textContent = defaultTerms;
+  }
+}
+
+window.closeModal = function() {
+  modalTerminos.classList.remove('active');
+  setLoading(false);
+};
+
+window.acceptAgreement = async function() {
+  modalTerminos.classList.remove('active');
+  await processRegistration();
+};
+
+let idType = 'cedula';
+
+window.setIdType = function(type) {
+  idType = type;
+  document.querySelectorAll('.id-toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+  const input = document.getElementById('cedula');
+  const docLabel = document.getElementById('docCedulaLabel');
+  const docHint = document.getElementById('docCedulaHint');
+  if (type === 'cedula') {
+    input.placeholder = '00-0000-0000';
+    input.value = input.value.replace(/[^0-9-]/g, '').substring(0, 13);
+    if (docLabel) docLabel.textContent = 'Cédula de Identidad';
+    if (docHint) docHint.textContent = 'PDF, JPG o PNG';
+  } else {
+    input.placeholder = 'Pasaporte';
+    if (docLabel) docLabel.textContent = 'Foto de Pasaporte';
+    if (docHint) docHint.textContent = 'JPG o PNG';
+  }
+  input.focus();
+};
+
+// Validación en tiempo real: cédula solo números y guiones, formato panameño
+document.getElementById('cedula').addEventListener('input', function(e) {
+  if (idType === 'cedula') {
+    let val = this.value.replace(/[^0-9-]/g, '');
+    if (val.length > 13) val = val.substring(0, 13);
+    this.value = val;
+  }
+});
+
+// Validación en tiempo real: celular solo números, máximo 8, empieza con 6
+document.getElementById('celular').addEventListener('input', function(e) {
+  // Remover todo lo que no sea número
+  let val = this.value.replace(/[^0-9]/g, '');
+  // Limitar a 8 dígitos
+  if (val.length > 8) val = val.substring(0, 8);
+  // Si empieza con algo que no sea 6, mostrar error visual
+  if (val.length > 0 && val[0] !== '6') {
+    this.style.borderColor = '#ef4444';
+    this.style.boxShadow = '0 0 0 4px rgba(239,68,68,0.15)';
+  } else {
+    this.style.borderColor = '';
+    this.style.boxShadow = '';
+  }
+  this.value = val;
+});
+
+document.getElementById('celular').addEventListener('blur', function() {
+  const val = this.value;
+  if (val.length > 0 && val.length !== 8) {
+    this.style.borderColor = '#ef4444';
+    this.style.boxShadow = '0 0 0 4px rgba(239,68,68,0.15)';
+  } else if (val.length === 8 && val[0] === '6') {
+    this.style.borderColor = 'var(--corp-green)';
+    this.style.boxShadow = '0 0 0 4px rgba(138,199,37,0.15)';
+  }
+});
+
+// Manejar visualización de archivos seleccionados
+document.querySelectorAll('input[type="file"]').forEach(input => {
+  input.addEventListener('change', function() {
+    const wrapper = this.closest('.file-input-wrapper');
+    const label = wrapper.querySelector('.file-name');
+    const hint = wrapper.querySelector('.file-hint');
+
+    if (this.files && this.files[0]) {
+      wrapper.classList.add('has-file');
+      label.textContent = this.files[0].name;
+      hint.textContent = 'Archivo seleccionado ✓';
+      wrapper.classList.remove('required');
+    } else {
+      wrapper.classList.remove('has-file');
+      if (this.id === 'cedula_doc') {
+        label.textContent = idType === 'pasaporte' ? 'Foto de Pasaporte' : 'Cédula de Identidad';
+        hint.textContent = idType === 'pasaporte' ? 'JPG o PNG' : 'PDF, JPG o PNG';
+      } else if (this.id === 'foto_perfil') {
+        label.textContent = 'Foto de Perfil';
+        hint.textContent = 'JPG o PNG';
+      }
+    }
+  });
+});
+
+function showMessage(text, type=""){
+  mensaje.textContent = text;
+  mensaje.className = type + ' show';
+  setTimeout(() => {
+    mensaje.classList.remove('show');
+  }, 5000);
+}
+
+function setLoading(state){
+  btn.disabled = state;
+  if (state) {
+    btn.innerHTML = '<div class="loader"></div><span>Procesando...</span>';
+    progressBar.style.width = '30%';
+  } else {
+    btn.innerHTML = '<span>Completar Registro</span>';
+    progressBar.style.width = '0%';
+  }
+}
+
+function updateProgress(percent) {
+  progressBar.style.width = percent + '%';
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+async function processRegistration() {
+  setLoading(true);
+  showMessage("Preparando datos de registro...", "busy");
+  updateProgress(10);
+
+  try {
+    const pasajeroData = {
+      email: document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value,
+      nombres: document.getElementById('nombres').value.trim(),
+      apellidos: document.getElementById('apellidos').value.trim(),
+      direccion: document.getElementById('direccion').value.trim(),
+      celular: document.getElementById('celular').value.trim(),
+      cedula: document.getElementById('cedula').value.trim()
+    };
+
+    updateProgress(20);
+
+    const archivos = {};
+    const archivosObligatorios = [
+      { id: 'cedula_doc', nombre: 'cedula' },
+      { id: 'foto_perfil', nombre: 'foto_perfil' }
+    ];
+
+    showMessage("Codificando archivos...", "busy");
+
+    for (const archivo of archivosObligatorios) {
+      const fileInput = document.getElementById(archivo.id);
+      if (fileInput.files[0]) {
+        archivos[archivo.nombre] = await fileToBase64(fileInput.files[0]);
+      }
+    }
+
+    updateProgress(40);
+    showMessage("Enviando datos al servidor...", "busy");
+
+    const requestBody = {
+      pasajero: pasajeroData,
+      archivos: archivos
+    };
+
+    const functionUrl = `${SUPABASE_URL}/functions/v1/nuevo-registro-pasajero`;
+
+    console.log('Enviando request a:', functionUrl);
+    console.log('Body keys:', Object.keys(requestBody));
+    console.log('Archivos:', Object.keys(archivos));
+
+    // ESTRATEGIA 1: Intentar con supabase.functions.invoke() (maneja auth automáticamente)
+    let responseData = null;
+    let responseError = null;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('nuevo-registro-pasajero', {
+        body: requestBody
+      });
+      if (error) throw error;
+      responseData = data;
+    } catch (invokeError) {
+      console.warn('supabase.functions.invoke falló, usando fallback fetch:', invokeError.message);
+
+      // ESTRATEGIA 2: Fallback con fetch nativo + Authorization header
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const responseText = await response.text();
+      console.log('Response status:', response.status);
+      console.log('Response text:', responseText.substring(0, 500));
+
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error('Respuesta inválida del servidor: ' + responseText.substring(0, 200));
+      }
+
+      if (!response.ok) {
+        throw new Error(responseData.error || responseData.message || `Error del servidor: ${response.status}`);
+      }
+    }
+
+    updateProgress(70);
+
+    if (!responseData || !responseData.success) {
+      throw new Error(responseData?.error || 'Error desconocido en el registro');
+    }
+
+    console.log('Registro exitoso:', responseData);
+
+    updateProgress(85);
+    showMessage("Registro exitoso. Iniciando sesión...", "ok");
+
+    // AUTO-LOGIN: El usuario ya fue creado con email_confirm=true, podemos loguear directamente
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+      email: pasajeroData.email,
+      password: pasajeroData.password
+    });
+
+    if (loginError) {
+      console.warn('Auto-login falló:', loginError.message);
+      showMessage("¡Registro exitoso! Por favor inicia sesión manualmente.", "ok");
+    } else {
+      console.log('Login exitoso:', loginData);
+      updateProgress(100);
+      showMessage("¡Registro y sesión iniciados! Redirigiendo...", "ok");
+
+      setTimeout(() => {
+        window.location.href = "perfil-pasajero.html";
+      }, 1500);
+    }
+
+  } catch(error) {
+    console.error('Error completo:', error);
+
+    let errorMessage = error.message || "Error en el registro. Intente nuevamente.";
+
+    if (error.message?.includes('400')) {
+      errorMessage = "Error en los datos enviados. Verifique toda la información.";
+    } else if (error.message?.includes('401')) {
+      errorMessage = "Error de autenticación. Verifique que la Edge Function tenga Verify JWT desactivado o que los headers sean correctos.";
+    } else if (error.message?.includes('403')) {
+      errorMessage = "No tiene permisos para realizar esta acción.";
+    } else if (error.message?.includes('422')) {
+      errorMessage = "Datos inválidos. Verifique el formato de los archivos.";
+    } else if (error.message?.includes('CORS')) {
+      errorMessage = "Error de configuración CORS. Contacte soporte.";
+    } else if (error.message?.includes('fetch') || error.message?.includes('network')) {
+      errorMessage = "Error de conexión. Verifique su internet.";
+    } else if (error.message?.includes('User already registered') || error.message?.includes('already exists')) {
+      errorMessage = "Este correo ya está registrado. Use otro o inicie sesión.";
+    }
+
+    showMessage(errorMessage, "error");
+    progressBar.style.width = '0%';
+    setLoading(false);
+  }
+}
+
+// Manejar submit: mostrar términos primero
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Validar contraseña mínima
+  const password = document.getElementById('password').value;
+  if (password.length < 6) {
+    showMessage("La contraseña debe tener al menos 6 caracteres.", "error");
+    return;
+  }
+
+  // Validar cédula/pasaporte
+  const cedulaVal = document.getElementById('cedula').value.trim();
+  if (idType === 'cedula' && !/^[0-9]{2}-[0-9]{4}-[0-9]{4}$/.test(cedulaVal)) {
+    showMessage("Formato de cédula inválido. Use: 00-0000-0000", "error");
+    document.getElementById('cedula').focus();
+    return;
+  }
+  if (idType === 'pasaporte' && cedulaVal.length < 3) {
+    showMessage("Ingrese el número de pasaporte", "error");
+    document.getElementById('cedula').focus();
+    return;
+  }
+
+  // Validar celular
+  const celular = document.getElementById('celular').value.trim();
+  if (!/^6[0-9]{7}$/.test(celular)) {
+    showMessage("El celular debe tener exactamente 8 dígitos numéricos y empezar con 6. Ejemplo: 61234567", "error");
+    document.getElementById('celular').focus();
+    return;
+  }
+
+  // Validar archivos
+  const cedulaFile = document.getElementById('cedula_doc').files[0];
+  const fotoFile = document.getElementById('foto_perfil').files[0];
+
+  if (!cedulaFile) {
+    document.getElementById('cedula_doc').closest('.file-input-wrapper').classList.add('required');
+    showMessage("Debe subir la cédula de identidad.", "error");
+    return;
+  }
+  if (!fotoFile) {
+    document.getElementById('foto_perfil').closest('.file-input-wrapper').classList.add('required');
+    showMessage("Debe subir la foto de perfil.", "error");
+    return;
+  }
+
+  await loadAgreement();
+  modalTerminos.classList.add('active');
+});
+
+// Detectar teclado virtual en móviles (optimización Capacitor)
+if (window.Capacitor) {
+  window.addEventListener('keyboardWillShow', () => {
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  });
+
+  window.addEventListener('keyboardWillHide', () => {
+    document.body.style.position = '';
+    document.body.style.width = '';
+  });
+}
+
+});
+</script>
+
+</body>
+</html>

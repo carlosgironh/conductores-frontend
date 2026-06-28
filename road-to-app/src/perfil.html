@@ -18,6 +18,30 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  :root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --corp-green: #8ac725;
+    --corp-green-dark: #448414;
+    --corp-green-lime: #9ad93a;
+    --corp-green-light: #b8e85c;
+    --corp-gray: #7d7d7d;
+    --corp-gray-dark: #4a4a4a;
+    --corp-gray-light: #9e9e9e;
+    --corp-gray-soft: #cbd5e1;
+    --corp-blue: #2563eb;
+    --corp-blue-dark: #1e40af;
+    --corp-blue-light: #3b82f6;
+    --corp-orange: #f97316;
+    --corp-orange-light: #fb923c;
+    --primary: var(--corp-green);
+    --primary-dark: var(--corp-green-dark);
+    --accent: var(--corp-green-lime);
+    --bg-dark: #0a1208;
+    --text-light: #eef8e4;
+    --text-muted: #8a9e7d;
+  }
+
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
@@ -28,11 +52,11 @@
     padding-right: max(20px, env(safe-area-inset-right));
     
     background: 
-      radial-gradient(ellipse at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
     
-    color: #f8fafc;
+    color: var(--text-light);
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -651,7 +675,161 @@
     transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
+
+  /* ===== VISTA PREVIA DE DOCUMENTOS ===== */
+  .documentos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .doc-preview {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    aspect-ratio: 3/4;
+  }
+
+  .doc-preview:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .doc-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .doc-preview-pdf {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(185, 28, 28, 0.05) 100%);
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .doc-preview-pdf svg { width: 40px; height: 40px; color: #f87171; }
+  .doc-preview-pdf span { font-size: 11px; font-weight: 600; color: #f87171; text-transform: uppercase; }
+
+  .doc-preview-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 10px 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .doc-preview-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .doc-preview:hover .doc-preview-overlay { opacity: 1; }
+
+  .doc-preview-overlay span {
+    background: rgba(99, 102, 241, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .doc-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    color: #64748b;
+    font-size: 14px;
+  }
+
+  /* ===== BOTÓN ACTUALIZAR CONTROLADO POR ADMIN ===== */
+  .btn-update.hidden { display: none !important; }
+
+  .update-blocked {
+    width: 100%;
+    padding: 16px 24px;
+    margin-top: 25px;
+    border-radius: 16px;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* ===== MODAL VISTA PREVIA ===== */
+  .modal-preview {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(10, 15, 25, 0.95);
+    backdrop-filter: blur(20px);
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-preview img, .modal-preview iframe {
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 16px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 1001;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+
 </style>
+<base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -682,7 +860,7 @@
     <div class="documentos-grid" id="documentos-grid"></div>
   </div>
 
-  <button class="btn-update" onclick="irAPanel()">
+  <button class="btn-update hidden" id="btnUpdate" onclick="irAPanel()">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
     </svg>
@@ -835,7 +1013,7 @@ async function cargarPerfil() {
     perfilCache = conductor;
     documentosCache = documentos;
 
-    renderPerfil(conductor, documentos, user);
+    await renderPerfil(conductor, documentos, user);
 
   } catch (error) {
     console.error('Error cargando perfil:', error);
@@ -855,17 +1033,91 @@ async function cargarPerfil() {
   }
 }
 
-function renderPerfil(conductor, documentos, user) {
-  renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
+async function listarDocumentosBucket(conductorId) {
+  try {
+    const { data: files, error } = await supabaseClient
+      .storage
+      .from("documentos-conductores")
+      .list(conductorId, { limit: 100 });
+    if (error || !files || files.length === 0) {
+      console.log('[PERFIL] Bucket list empty or error:', error?.message);
+      return [];
+    }
+    console.log('[PERFIL] Bucket files found:', files.map(f => f.name));
 
-  function docUrl(tipo) {
-    const doc = documentos?.find(d => d.tipo === tipo);
-    if (!doc) return null;
-    return supabaseClient.storage.from("documentos-conductores").getPublicUrl(doc.url_archivo).data.publicUrl;
+    const tipoMap = {
+      'cedula': 'CEDULA',
+      'licencia': 'LICENCIA',
+      'registro': 'REGISTRO',
+      'poliza': 'POLIZA',
+      'foto_conductor': 'FOTO_CONDUCTOR',
+      'foto_vehiculo': 'FOTO_VEHICULO',
+      'aviso_operaciones': 'AVISO_OPERACIONES',
+      'auth_propietario': 'AUTH_PROPIETARIO'
+    };
+
+    return files.map(f => {
+      const lowerName = f.name.toLowerCase();
+      let tipo = null;
+      for (const prefix in tipoMap) {
+        if (lowerName.startsWith(prefix + '_') || lowerName.startsWith(prefix + '.')) {
+          tipo = tipoMap[prefix];
+          break;
+        }
+      }
+      return {
+        tipo: tipo || 'OTRO',
+        url_archivo: conductorId + '/' + f.name,
+        name: f.name
+      };
+    }).filter(d => d.tipo !== 'OTRO');
+  } catch (e) {
+    console.error('[PERFIL] Error listing bucket:', e);
+    return [];
+  }
+}
+
+async function docUrl(tipo, documentos) {
+  const doc = documentos?.find(d => d.tipo === tipo);
+  if (!doc) return null;
+  try {
+    const { data: signedUrl, error } = await supabaseClient
+      .storage
+      .from("documentos-conductores")
+      .createSignedUrl(doc.url_archivo, 3600);
+    if (error) {
+      console.error(`[PERFIL] Error signedUrl ${tipo}:`, error.message);
+      return null;
+    }
+    console.log(`[PERFIL] Doc ${tipo}: resolvedUrl=OK path=${doc.url_archivo}`);
+    return signedUrl.signedUrl;
+  } catch (e) {
+    console.error(`[PERFIL] Exception signedUrl ${tipo}:`, e);
+    return null;
+  }
+}
+
+async function renderPerfil(conductor, documentosDB, user) {
+  renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
+  console.log('[PERFIL] renderPerfil called, documentosDB count:', documentosDB?.length || 0);
+
+  // Fallback: if table is empty, read directly from bucket
+  let documentos = documentosDB;
+  if (!documentos || documentos.length === 0) {
+    console.log('[PERFIL] Table empty, trying bucket fallback...');
+    documentos = await listarDocumentosBucket(conductor.id);
+    console.log('[PERFIL] Bucket fallback result:', documentos);
+  }
+
+  // Pre-resolve all document URLs
+  const urls = {};
+  const tipos = ["CEDULA", "LICENCIA", "REGISTRO", "POLIZA", "AUTH_PROPIETARIO", "FOTO_VEHICULO", "FOTO_CONDUCTOR", "AVISO_OPERACIONES"];
+  for (const tipo of tipos) {
+    urls[tipo] = await docUrl(tipo, documentos);
   }
 
   const tieneAviso = conductor.tiene_aviso_operaciones === true;
-  const avisoUrl = docUrl("AVISO_OPERACIONES");
+  const avisoUrl = urls['AVISO_OPERACIONES'];
 
   document.getElementById("contenido").innerHTML = `
     <div class="campo"><strong>Nombre</strong> <span>${conductor.nombres} ${conductor.apellidos}</span></div>
@@ -891,12 +1143,12 @@ function renderPerfil(conductor, documentos, user) {
   const fotosCont = document.getElementById("fotos-container");
   fotosCont.innerHTML = "";
 
-  const fotoVeh = docUrl("FOTO_VEHICULO");
-  const fotoCond = docUrl("FOTO_CONDUCTOR");
+  const fotoVeh = urls['FOTO_VEHICULO'];
+  const fotoCond = urls['FOTO_CONDUCTOR'];
 
   if (fotoVeh) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper" onclick="mostrarModal('${fotoVeh}')">
+      <div class="foto-wrapper" onclick="mostrarModalPreview('${fotoVeh}', 'img')">
         <img src="${fotoVeh}" class="foto" alt="Vehículo" loading="lazy">
         <div class="foto-label">Vehículo</div>
       </div>
@@ -905,7 +1157,7 @@ function renderPerfil(conductor, documentos, user) {
 
   if (fotoCond) {
     fotosCont.innerHTML += `
-      <div class="foto-wrapper" onclick="mostrarModal('${fotoCond}')">
+      <div class="foto-wrapper" onclick="mostrarModalPreview('${fotoCond}', 'img')">
         <img src="${fotoCond}" class="foto" alt="Conductor" loading="lazy">
         <div class="foto-label">Conductor</div>
       </div>
@@ -916,38 +1168,99 @@ function renderPerfil(conductor, documentos, user) {
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
 
+  // ===== CONTROL DE ACTUALIZACIÓN POR ADMIN =====
+  const puedeActualizar = conductor.permitir_actualizar === true;
+  const btnUpdate = document.getElementById('btnUpdate');
+  const updateBlocked = document.getElementById('updateBlocked');
+
+  if (puedeActualizar) {
+    btnUpdate.classList.remove('hidden');
+    if (updateBlocked) updateBlocked.style.display = 'none';
+  } else {
+    btnUpdate.classList.add('hidden');
+    if (updateBlocked) updateBlocked.style.display = 'flex';
+  }
+
   const documentosConfig = [
-    { tipo: "CEDULA", label: "Cédula", icon: "📄" },
-    { tipo: "LICENCIA", label: "Licencia", icon: "🪪" },
-    { tipo: "REGISTRO", label: "Registro", icon: "🚗" },
-    { tipo: "POLIZA", label: "Seguro", icon: "🛡️" },
-    { tipo: "AUTH_PROPIETARIO", label: "Autorización", icon: "✉️" }
+    { tipo: "CEDULA", label: "Cédula" },
+    { tipo: "LICENCIA", label: "Licencia" },
+    { tipo: "REGISTRO", label: "Registro" },
+    { tipo: "POLIZA", label: "Seguro" },
+    { tipo: "AUTH_PROPIETARIO", label: "Autorización" }
   ];
 
   let tieneDocumentos = false;
 
   documentosConfig.forEach(doc => {
-    const url = docUrl(doc.tipo);
+    const url = urls[doc.tipo];
     if (url) {
       tieneDocumentos = true;
-      docGrid.innerHTML += `
-        <button class="btn-doc" onclick="window.open('${url}', '_blank')">
-          ${doc.icon} ${doc.label}
-        </button>
-      `;
+      const isPdf = url.toLowerCase().endsWith('.pdf');
+      if (isPdf) {
+        docGrid.innerHTML += `
+          <div class="doc-preview" onclick="mostrarModalPreview('${url}', 'pdf')">
+            <div class="doc-preview-pdf">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>PDF</span>
+            </div>
+            <div class="doc-preview-label">${doc.label}</div>
+            <div class="doc-preview-overlay"><span>Ver</span></div>
+          </div>
+        `;
+      } else {
+        docGrid.innerHTML += `
+          <div class="doc-preview" onclick="mostrarModalPreview('${url}', 'img')">
+            <img src="${url}" class="doc-preview-img" alt="${doc.label}" loading="lazy">
+            <div class="doc-preview-label">${doc.label}</div>
+            <div class="doc-preview-overlay"><span>Ver</span></div>
+          </div>
+        `;
+      }
     }
   });
 
   if (tieneAviso && avisoUrl) {
     tieneDocumentos = true;
-    docGrid.innerHTML += `
-      <button class="btn-doc aviso-operaciones" onclick="window.open('${avisoUrl}', '_blank')">
-        📋 Aviso de Operaciones
-      </button>
-    `;
+    const isPdf = avisoUrl.toLowerCase().endsWith('.pdf');
+    if (isPdf) {
+      docGrid.innerHTML += `
+        <div class="doc-preview" onclick="mostrarModalPreview('${avisoUrl}', 'pdf')">
+          <div class="doc-preview-pdf">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>PDF</span>
+          </div>
+          <div class="doc-preview-label">Aviso de Operaciones</div>
+          <div class="doc-preview-overlay"><span>Ver</span></div>
+        </div>
+      `;
+    } else {
+      docGrid.innerHTML += `
+        <div class="doc-preview" onclick="mostrarModalPreview('${avisoUrl}', 'img')">
+          <img src="${avisoUrl}" class="doc-preview-img" alt="Aviso de Operaciones" loading="lazy">
+          <div class="doc-preview-label">Aviso de Operaciones</div>
+          <div class="doc-preview-overlay"><span>Ver</span></div>
+        </div>
+      `;
+    }
   }
 
-  docSection.style.display = tieneDocumentos ? "block" : "none";
+  if (tieneDocumentos) {
+    docSection.style.display = "block";
+  } else {
+    docSection.style.display = "block";
+    docGrid.innerHTML = `
+      <div class="doc-empty">
+        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-bottom: 12px; opacity: 0.5;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p>No hay documentos registrados</p>
+      </div>
+    `;
+  }
 
   // ELIMINADO: generarQR(conductor.id);
 }
@@ -964,6 +1277,30 @@ function mostrarModal(src) {
 
 function cerrarModal() {
   document.getElementById("modalFoto").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function mostrarModalPreview(src, type) {
+  const modal = document.getElementById("modalPreview");
+  const img = document.getElementById("modalImg");
+  const pdf = document.getElementById("modalPdf");
+
+  if (type === 'pdf') {
+    img.style.display = 'none';
+    pdf.style.display = 'block';
+    pdf.src = src;
+  } else {
+    pdf.style.display = 'none';
+    img.style.display = 'block';
+    img.src = src;
+  }
+
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModalPreview() {
+  document.getElementById("modalPreview").style.display = "none";
   document.body.style.overflow = "";
 }
 
@@ -998,6 +1335,15 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, false);
 </script>
+
+
+
+<!-- Modal para vista previa de documentos -->
+<div id="modalPreview" class="modal-preview" onclick="cerrarModalPreview()">
+  <div class="modal-close">&times;</div>
+  <img id="modalImg" src="" alt="Vista previa" style="display:none;">
+  <iframe id="modalPdf" src="" style="display:none; width:90%; height:85%; border:none; border-radius:16px;"></iframe>
+</div>
 
 </body>
 </html>

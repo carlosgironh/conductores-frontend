@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a1208">
+    <title>Panel de Viajes - Conductor | Road To</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --corp-green: #8ac725;
+            --corp-green-dark: #448414;
+            --corp-green-lime: #9ad93a;
+            --corp-green-light: #b8e85c;
+            --corp-gray: #7d7d7d;
+            --corp-gray-dark: #4a4a4a;
+            --corp-gray-light: #9e9e9e;
+            --corp-gray-soft: #cbd5e1;
+            --corp-blue: #2563eb;
+            --corp-blue-dark: #1e40af;
+            --corp-blue-light: #3b82f6;
+            --corp-orange: #f97316;
+            --corp-orange-light: #fb923c;
+            --primary: var(--corp-green);
+            --primary-dark: var(--corp-green-dark);
+            --accent: var(--corp-green-lime);
+            --bg-dark: #0a1208;
+            --text-light: #eef8e4;
+            --text-muted: #8a9e7d;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 10% 20%, rgba(138,199,37,0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 90% 80%, rgba(154,217,58,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
+            color: var(--text-light);
+            padding-top: calc(70px + var(--safe-top));
+            padding-bottom: calc(20px + var(--safe-bottom));
+        }
+
+        .app-header {
+            position: fixed;
+            top: calc(10px + var(--safe-top));
+            left: calc(10px + env(safe-area-inset-left));
+            right: calc(10px + env(safe-area-inset-right));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .brand-small {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--corp-orange);
+            text-decoration: none;
+        }
+
+        .brand-small svg { width: 24px; height: 24px; color: var(--corp-orange-light); }
+
+        .nav-buttons { display: flex; gap: 8px; }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn svg { width: 20px; height: 20px; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* ===== TARJETA ESTADO DE PAGO ===== */
+        .payment-status-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-status-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+
+        .payment-status-card.active::before {
+            background: linear-gradient(90deg, var(--success), #34d399);
+        }
+
+        .payment-status-card.inactive::before {
+            background: linear-gradient(90deg, var(--danger), #f87171);
+        }
+
+        .payment-status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .payment-status-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-status-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-status-badge.active {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .payment-status-badge.inactive {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .payment-status-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .payment-status-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .payment-status-text strong {
+            color: var(--text-light);
+        }
+
+        .btn-activate {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            min-height: 48px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-activate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .yappy-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .yappy-logo svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            border-color: rgba(138, 199, 37, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--corp-green-light);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 1024px) {
+            .grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pendiente { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+        .badge-asignado { background: rgba(37,99,235,0.15); color: var(--corp-blue-light); border: 1px solid rgba(37,99,235,0.25); }
+        .badge-completado { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+        .badge-cancelado { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+        .viaje-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .viaje-item:hover {
+            border-color: rgba(138, 199, 37, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .viaje-item.asignado {
+            border-left: 3px solid var(--corp-green);
+        }
+
+        .viaje-route {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .viaje-route .origin { color: var(--warning); }
+        .viaje-route .arrow { color: var(--text-muted); }
+        .viaje-route .destiny { color: var(--success); }
+
+        .viaje-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pasajero-info {
+            background: rgba(138, 199, 37, 0.08);
+            border: 1px solid rgba(138, 199, 37, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .pasajero-info strong { color: var(--corp-green-light); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: inherit;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--corp-green) 0%, var(--corp-green-dark) 100%);
+            color: #0a1208;
+            box-shadow: 0 4px 15px rgba(68, 132, 20, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(68, 132, 20, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn:active { transform: scale(0.97); }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; }
+
+        .loading { display: flex; justify-content: center; padding: 30px; }
+
+        .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--corp-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed;
+            bottom: max(20px, var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(10, 18, 8, 0.95);
+            color: var(--text-light);
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-success { border-color: rgba(16, 185, 129, 0.3); color: #4ade80; }
+        .toast-error { border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
+
+        .nav-perfil {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: rgba(138, 199, 37, 0.1);
+            border: 1px solid rgba(138, 199, 37, 0.2);
+            border-radius: 12px;
+            color: var(--corp-green-light);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-perfil:hover {
+            background: rgba(138, 199, 37, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .nav-perfil svg { width: 18px; height: 18px; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(30,41,59,0.98);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 35px 25px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .bloqueo-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .bloqueo-icono { font-size: 64px; margin-bottom: 20px; }
+        .bloqueo-titulo { color: white; margin-bottom: 15px; font-size: 24px; font-weight: 700; }
+        .bloqueo-mensaje { color: #ccc; max-width: 400px; line-height: 1.5; margin-bottom: 30px; }
+        .bloqueo-btn {
+            padding: 12px 24px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .bloqueo-pago-box {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(15,23,42,0.5);
+            border-radius: 20px;
+            border: 1px solid rgba(239,68,68,0.2);
+            margin-top: 20px;
+        }
+
+        .bloqueo-pago-box .icono { font-size: 48px; margin-bottom: 16px; }
+        .bloqueo-pago-box h3 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .bloqueo-pago-box p { color: #94a3b8; font-size: 14px; max-width: 400px; margin: 0 auto 20px; line-height: 1.5; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
+
+        @media (max-width: 640px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .stat-item { padding: 12px 8px; }
+            .stat-value { font-size: 22px; }
+            .card { padding: 18px; }
+            .payment-status-info { flex-direction: column; align-items: stretch; }
+            .payment-status-text { text-align: center; }
+        }
+    </style>
+    <base target="_blank">
+<base target="_blank">
+</head>
+<body>
+
+    <header class="app-header">
+        <a href="index.html" class="brand-small">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+            </svg>
+            Road To
+        </a>
+        <div class="nav-buttons">
+            <a class="nav-perfil" href="perfil.html">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Mi Perfil
+            </a>
+            <button class="nav-btn" onclick="logout()" title="Cerrar sesión">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="container" id="app-container">
+        <h1 class="page-title">🚗 Panel de Viajes</h1>
+        <p class="page-subtitle">Gestiona tus viajes disponibles y pasajeros asignados</p>
+
+        <!-- ===== TARJETA ESTADO DE PAGO ===== -->
+        <div id="paymentStatusCard" class="payment-status-card inactive" style="display:none;">
+            <div class="payment-status-header">
+                <div class="payment-status-title">
+                    <span>💳</span> Estado de Cuenta
+                </div>
+                <span id="paymentStatusBadge" class="payment-status-badge inactive">Inactivo</span>
+            </div>
+            <div class="payment-status-info">
+                <div class="payment-status-text" id="paymentStatusText">
+                    Tu cuenta requiere activación para recibir solicitudes de viajes.
+                </div>
+                <a href="pagos.html" class="btn-activate" id="btnActivar">
+                    <span class="yappy-logo">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        Activar con Yappy
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-disponibles">0</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-asignados">0</div>
+                <div class="stat-label">Mis Viajes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-completados">0</div>
+                <div class="stat-label">Completados</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-cancelados">0</div>
+                <div class="stat-label">Cancelados</div>
+            </div>
+        </div>
+
+        <div class="grid" id="viajesGrid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        📍 Viajes Disponibles
+                        <span class="badge badge-pendiente">En vivo</span>
+                    </div>
+                </div>
+                <div id="lista-disponibles">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        👥 Mis Pasajeros Asignados
+                        <span class="badge badge-asignado">Activos</span>
+                    </div>
+                </div>
+                <div id="lista-asignados">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Modal Cancelar/Revertir Viaje -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeCancelModal()">×</button>
+
+            <div style="margin-bottom:25px;">
+                <h3 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">⚠️ Cancelar Viaje</h3>
+                <p style="color:#94a3b8;font-size:14px;">Por favor, indica el motivo de la cancelación.</p>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:8px;">Motivo de cancelación *</label>
+                <textarea id="cancelMotivo" rows="3" style="width:100%;padding:14px 18px;border-radius:12px;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Ej: Problema mecánico, emergencia personal, etc."></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="closeCancelModal()" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;cursor:pointer;">Volver</button>
+                <button onclick="confirmarCancelarViaje('pendiente')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">🔄 Dejar en Pendiente</button>
+                <button onclick="confirmarCancelarViaje('cancelado')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">❌ Cancelar Definitivo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let conductorNombre = "Conductor";
+        let subscriptions = [];
+        let cancelViajeId = null;
+        let currentConductor = null;
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('es-ES', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function getEstadoBadge(estado) {
+            const badges = {
+                'pendiente': '<span class="badge badge-pendiente">Pendiente</span>',
+                'asignado': '<span class="badge badge-asignado">Asignado</span>',
+                'completado': '<span class="badge badge-completado">Completado</span>',
+                'cancelado': '<span class="badge badge-cancelado">Cancelado</span>'
+            };
+            return badges[estado] || estado;
+        }
+
+        // ============================================
+        // VERIFICAR ESTADO DE PAGO
+        // ============================================
+        function verificarPagoActivo(conductor) {
+            if (!conductor) return false;
+            // Si tiene fecha_vencimiento, verificar que no haya vencido
+            if (conductor.fecha_vencimiento) {
+                const ahora = new Date();
+                const vencimiento = new Date(conductor.fecha_vencimiento);
+                return vencimiento > ahora;
+            }
+            // Fallback: usar campo suscripcion_activa o pago_al_dia
+            return conductor.suscripcion_activa === true || conductor.pago_al_dia === true;
+        }
+
+        // ============================================
+        // RENDERIZAR TARJETA ESTADO DE PAGO
+        // ============================================
+        function renderPaymentStatusCard() {
+            const card = document.getElementById('paymentStatusCard');
+            const badge = document.getElementById('paymentStatusBadge');
+            const text = document.getElementById('paymentStatusText');
+            const btn = document.getElementById('btnActivar');
+
+            if (!currentConductor) return;
+
+            const pagoActivo = verificarPagoActivo(currentConductor);
+
+            card.style.display = 'block';
+
+            if (pagoActivo) {
+                card.className = 'payment-status-card active';
+                badge.className = 'payment-status-badge active';
+                badge.textContent = '✅ Activo';
+                text.innerHTML = 'Tu cuenta está <strong>activa</strong>. Puedes recibir y gestionar solicitudes de viajes.';
+                btn.style.display = 'none';
+            } else {
+                card.className = 'payment-status-card inactive';
+                badge.className = 'payment-status-badge inactive';
+                badge.textContent = '❌ Inactivo';
+                text.innerHTML = 'Tu cuenta requiere <strong>activación</strong> para recibir solicitudes de viajes. Activa tu cuenta con Yappy.';
+                btn.style.display = 'inline-flex';
+            }
+        }
+
+        // ============================================
+        // BLOQUEO: Verificar que el usuario es conductor
+        // ============================================
+        async function verificarConductor() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'dashboard.html';
+                return false;
+            }
+
+            console.log('[AUTH] auth.uid():', user.id);
+            currentUser = user;
+
+            // Verificar que existe en tabla conductores (por auth_user_id)
+            let { data: conductor, error } = await supabaseClient
+                .from('conductores')
+                .select('id, auth_user_id, status, nombres, apellidos, vehiculo, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
+                .eq('auth_user_id', user.id)
+                .maybeSingle();
+
+            if (error && error.code === '42703') {
+                console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
+                const result = await supabaseClient
+                    .from('conductores')
+                    .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
+                    .eq('auth_user_id', user.id)
+                    .maybeSingle();
+                conductor = result.data;
+                error = result.error;
+            }
+
+            if (error) {
+                console.error('[CONDUCTOR] Error:', error);
+                showToast('Error verificando conductor: ' + error.message, 'error');
+                return false;
+            }
+
+            if (!conductor) {
+                mostrarBloqueo('No estás registrado como conductor. Tu auth_user_id (' + user.id + ') no existe en la tabla conductores.');
+                return false;
+            }
+
+            console.log('[CONDUCTOR] Encontrado:', conductor);
+            currentConductor = conductor;
+            conductorNombre = ((conductor.nombres || '') + ' ' + (conductor.apellidos || '')).trim() || 'Conductor';
+
+            // Validar status si existe
+            if (conductor.status && conductor.status !== 'active') {
+                let mensaje = '';
+                switch(conductor.status) {
+                    case 'inactive': mensaje = 'Tu cuenta está inactiva. Contacta al administrador.'; break;
+                    case 'banned': mensaje = 'Tu cuenta ha sido suspendida.'; break;
+                    case 'pending': mensaje = 'Tu cuenta está pendiente de aprobación.'; break;
+                    default: mensaje = 'No puedes acceder. Estado: ' + conductor.status;
+                }
+                mostrarBloqueo(mensaje);
+                return false;
+            }
+
+            // Renderizar tarjeta de estado SIEMPRE
+            renderPaymentStatusCard();
+
+            // Verificar si el pago está activo
+            const pagoActivo = verificarPagoActivo(conductor);
+
+            if (!pagoActivo) {
+                // Bloquear acceso a viajes pero mantener panel visible
+                mostrarBloqueoPago();
+                showToast('Tu cuenta requiere activación. Dirígete a pagos.html para activarla.', 'warning');
+                return true; // Retornamos true para que init() continúe, pero bloqueamos viajes
+            }
+
+            return true;
+        }
+
+        function mostrarBloqueo(mensaje) {
+            document.getElementById('app-container').style.display = 'none';
+            const bloqueo = document.createElement('div');
+            bloqueo.className = 'bloqueo-overlay';
+            bloqueo.innerHTML = `
+                <div class="bloqueo-icono">🚫</div>
+                <h2 class="bloqueo-titulo">Acceso Restringido</h2>
+                <p class="bloqueo-mensaje">${mensaje}</p>
+                <button class="bloqueo-btn" onclick="logout()">Cerrar Sesión</button>
+            `;
+            document.body.appendChild(bloqueo);
+        }
+
+        function mostrarBloqueoPago() {
+            const grid = document.getElementById('viajesGrid');
+            const statsBar = document.querySelector('.stats-bar');
+            if (grid) grid.style.display = 'none';
+            if (statsBar) statsBar.style.display = 'none';
+
+            const container = document.getElementById('app-container');
+            let bloqueo = document.getElementById('bloqueo-pago');
+            if (!bloqueo) {
+                bloqueo = document.createElement('div');
+                bloqueo.id = 'bloqueo-pago';
+                bloqueo.innerHTML = `
+                    <div class="bloqueo-pago-box">
+                        <div class="icono">🔒</div>
+                        <h3>Viajes Bloqueados</h3>
+                        <p>Tu cuenta requiere activación para recibir solicitudes de viajes. Activa tu cuenta con Yappy.</p>
+                        <a href="pagos.html" class="btn-activate" style="max-width:300px;margin:0 auto;display:inline-flex;">
+                            <span class="yappy-logo">
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                                Activar con Yappy
+                            </span>
+                        </a>
+                    </div>
+                `;
+                container.appendChild(bloqueo);
+            } else {
+                bloqueo.style.display = 'block';
+            }
+        }
+
+        // ============================================
+        // PASAJERO INFO
+        // ============================================
+        async function getPasajeroInfo(pasajeroId) {
+            if (!pasajeroId) return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
+            try {
+                const { data, error } = await supabaseClient
+                    .from('passengers')
+                    .select('nombres, apellidos, celular, email')
+                    .eq('id', pasajeroId)
+                    .maybeSingle();
+                if (error || !data) return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
+                return {
+                    nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+                    apellidos: data.apellidos || '',
+                    telefono: data.celular || 'No disponible',
+                    celular_raw: data.celular || '',
+                    email: data.email || 'No disponible'
+                };
+            } catch (e) {
+                return { nombre: 'Sin nombre', apellidos: '', telefono: 'No disponible', celular_raw: '', email: 'No disponible' };
+            }
+        }
+
+        // ============================================
+        // CARGAR VIAJES DISPONIBLES
+        // ============================================
+        async function cargarViajesDisponibles() {
+            const container = document.getElementById('lista-disponibles');
+            try {
+                const { data: viajes, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .select('*')
+                    .eq('estado', 'pendiente')
+                    .order('fecha_hora', { ascending: true });
+
+                if (error) throw error;
+                document.getElementById('stat-disponibles').textContent = viajes?.length ?? 0;
+
+                if (!viajes || viajes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🛣️</div>
+                            <h3>No hay viajes disponibles</h3>
+                            <p>Los nuevos viajes aparecerán aquí automáticamente</p>
+                        </div>`;
+                    return;
+                }
+
+                const viajesConPasajero = await Promise.all(
+                    viajes.map(async (viaje) => {
+                        const pasajero = await getPasajeroInfo(viaje.pasajero_id);
+                        return { ...viaje, pasajero };
+                    })
+                );
+
+                container.innerHTML = viajesConPasajero.map(viaje => `
+                    <div class="viaje-item" data-id="${viaje.id}">
+                        <div class="viaje-route">
+                            <span class="origin">📍 ${viaje.origen}</span>
+                            <span class="arrow">→</span>
+                            <span class="destiny">🏁 ${viaje.destino}</span>
+                        </div>
+                        <div class="viaje-meta">
+                            <span>📅 ${formatDate(viaje.fecha_hora)}</span>
+                            <span>${getEstadoBadge(viaje.estado)}</span>
+                        </div>
+                        <div class="pasajero-info">
+                            <strong>Pasajero:</strong> ${viaje.pasajero.nombre}<br>
+                            <strong>Teléfono:</strong> ${viaje.pasajero.telefono}
+                        </div>
+                        <button class="btn btn-primary" onclick="aceptarViaje('${viaje.id}', this)">
+                            ✋ Aceptar Viaje
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Error cargando viajes:', err);
+                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+            }
+        }
+
+        // ============================================
+        // CARGAR MIS VIAJES — usa auth.uid()
+        // ============================================
+        async function cargarMisViajes() {
+            const container = document.getElementById('lista-asignados');
+            try {
+                const { data: viajes, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .select('*')
+                    .eq('conductor_asignado_id', currentUser.id)
+                    .in('estado', ['asignado', 'completado', 'cancelado'])
+                    .order('fecha_hora', { ascending: true });
+
+                if (error) throw error;
+
+                const asignados = viajes?.filter(v => v.estado === 'asignado') ?? [];
+                const completados = viajes?.filter(v => v.estado === 'completado') ?? [];
+                const cancelados = viajes?.filter(v => v.estado === 'cancelado') ?? [];
+
+                document.getElementById('stat-asignados').textContent = asignados.length;
+                document.getElementById('stat-completados').textContent = completados.length;
+                document.getElementById('stat-cancelados').textContent = cancelados.length;
+
+                if (!viajes || viajes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👤</div>
+                            <h3>No tienes viajes asignados</h3>
+                            <p>Acepta un viaje desde el panel izquierdo</p>
+                        </div>`;
+                    return;
+                }
+
+                const viajesConPasajero = await Promise.all(
+                    viajes.map(async (viaje) => {
+                        const pasajero = await getPasajeroInfo(viaje.pasajero_id);
+                        return { ...viaje, pasajero };
+                    })
+                );
+
+                container.innerHTML = viajesConPasajero.map(viaje => `
+                    <div class="viaje-item asignado" data-id="${viaje.id}">
+                        <div class="viaje-route">
+                            <span class="origin">📍 ${viaje.origen}</span>
+                            <span class="arrow">→</span>
+                            <span class="destiny">🏁 ${viaje.destino}</span>
+                        </div>
+                        <div class="viaje-meta">
+                            <span>📅 ${formatDate(viaje.fecha_hora)}</span>
+                            <span>${getEstadoBadge(viaje.estado)}</span>
+                        </div>
+                        <div class="pasajero-info">
+                            <strong>👤 Pasajero:</strong> ${viaje.pasajero.nombre}<br>
+                            <strong>📞 Teléfono:</strong> ${viaje.pasajero.telefono}<br>
+                            <strong>✉️ Email:</strong> ${viaje.pasajero.email}
+                        </div>
+                        ${viaje.estado === 'asignado' ? `
+                            <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
+                                <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;min-width:120px;">✅ Completar</button>
+                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;min-width:120px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
+                            </div>
+                            <button class="btn" onclick="contactarWhatsApp('${viaje.pasajero.celular_raw}', '${viaje.pasajero.apellidos}')" style="background:linear-gradient(135deg,#25D366 0%,#128C7E 100%);color:#fff;width:100%;">
+                                📱 Contactar Pasajero
+                            </button>
+                        ` : viaje.estado === 'completado' ? '<div style="text-align:center;color:var(--success);font-weight:600;font-size:14px;">✓ Viaje Completado</div>' : '<div style="text-align:center;color:#f87171;font-weight:600;font-size:14px;">❌ Viaje Cancelado</div>'}
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Error cargando mis viajes:', err);
+                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+            }
+        }
+
+        // ============================================
+        // ACEPTAR VIAJE
+        // ============================================
+        async function aceptarViaje(viajeId, btnElement) {
+            if (!verificarPagoActivo(currentConductor)) {
+                showToast('Tu cuenta está inactiva. Activa tu suscripción para aceptar viajes.', 'error');
+                return;
+            }
+
+            btnElement.disabled = true;
+            btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
+
+            try {
+                console.log('[ACEPTAR] Usando auth.uid():', currentUser.id);
+                const { data, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update({
+                        estado: 'asignado',
+                        conductor_asignado_id: currentUser.id,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', viajeId)
+                    .eq('estado', 'pendiente')
+                    .select();
+
+                if (error) {
+                    console.error('[ACEPTAR] Error Supabase:', error);
+                    throw error;
+                }
+
+                if (!data || data.length === 0) {
+                    throw new Error('Este viaje ya fue aceptado por otro conductor. 🏃‍♂️');
+                }
+
+                console.log('[ACEPTAR] Éxito:', data);
+                showToast('¡Viaje aceptado exitosamente! 🎉');
+                await cargarViajesDisponibles();
+                await cargarMisViajes();
+            } catch (err) {
+                console.error('[ACEPTAR] Error:', err);
+                showToast(err.message || 'No se pudo asignar el viaje', 'error');
+                await cargarViajesDisponibles();
+            } finally {
+                btnElement.disabled = false;
+                btnElement.innerHTML = '✋ Aceptar Viaje';
+            }
+        }
+
+        // ============================================
+        // COMPLETAR VIAJE
+        // ============================================
+        async function completarViaje(viajeId) {
+            if (!verificarPagoActivo(currentConductor)) {
+                showToast('Tu cuenta está inactiva. No puedes completar viajes.', 'error');
+                return;
+            }
+            try {
+                const { data, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update({ estado: 'completado', updated_at: new Date().toISOString() })
+                    .eq('id', viajeId)
+                    .eq('conductor_asignado_id', currentUser.id)
+                    .select();
+
+                if (error) { console.error('[COMPLETAR] Error:', error); throw error; }
+                console.log('[COMPLETAR] Éxito:', data);
+                showToast('Viaje marcado como completado ✅');
+                await cargarMisViajes();
+            } catch (err) {
+                console.error('[COMPLETAR] Error:', err);
+                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
+            }
+        }
+
+        // ============================================
+        // CANCELAR VIAJE
+        // ============================================
+        function abrirCancelModal(viajeId) {
+            cancelViajeId = viajeId;
+            document.getElementById('cancelMotivo').value = '';
+            document.getElementById('cancelModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+            document.body.style.overflow = '';
+            cancelViajeId = null;
+        }
+
+        async function confirmarCancelarViaje(nuevoEstado) {
+            if (!cancelViajeId) return;
+            const motivo = document.getElementById('cancelMotivo').value.trim();
+            if (!motivo) { showToast('Debes ingresar un motivo', 'error'); return; }
+
+            try {
+                const updateData = {
+                    estado: nuevoEstado,
+                    updated_at: new Date().toISOString()
+                };
+                if (nuevoEstado === 'cancelado') {
+                    updateData.motivo_cancelacion = motivo;
+                    updateData.conductor_asignado_id = null;
+                } else {
+                    updateData.motivo_revertir = motivo;
+                    updateData.conductor_asignado_id = null;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update(updateData)
+                    .eq('id', cancelViajeId)
+                    .eq('conductor_asignado_id', currentUser.id)
+                    .select();
+
+                if (error) { console.error('[CANCELAR] Error:', error); throw error; }
+                console.log('[CANCELAR] Éxito:', data);
+
+                showToast(nuevoEstado === 'cancelado' ? 'Viaje cancelado definitivamente ❌' : 'Viaje devuelto a pendiente 🔄');
+                closeCancelModal();
+                await cargarMisViajes();
+                await cargarViajesDisponibles();
+            } catch (err) {
+                console.error('[CANCELAR] Error:', err);
+                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
+            }
+        }
+
+        // ============================================
+        // CONTACTAR PASAJERO POR WHATSAPP
+        // ============================================
+        function generarSaludo() {
+            const hora = new Date().getHours();
+            return (hora >= 6 && hora < 18) ? 'Buen día' : 'Buenas noches';
+        }
+
+        function formatearWhatsApp(numero) {
+            if (!numero) return null;
+            let limpio = numero.toString().replace(/[^0-9]/g, '');
+            if (limpio.startsWith('507')) {
+                return '+507' + limpio.substring(3);
+            }
+            if (limpio.startsWith('05') && limpio.length === 8) {
+                return '+507' + limpio.substring(1);
+            }
+            return '+507' + limpio;
+        }
+
+        function contactarWhatsApp(celular, apellidosPasajero) {
+            const numero = formatearWhatsApp(celular);
+            if (!numero) {
+                showToast('El pasajero no tiene número de teléfono registrado', 'error');
+                return;
+            }
+            const saludo = generarSaludo();
+            const apellido = (apellidosPasajero || 'Pasajero').toUpperCase();
+            const conductor = (conductorNombre || 'Conductor').toUpperCase();
+            const mensaje = encodeURIComponent(
+                `${saludo}, estimado Sr(a). ${apellido} me llamo ${conductor} soy su conductor asignado para su viaje reservado en la plataforma RoadTo, un gusto saludarle.`
+            );
+            const url = `https://wa.me/${numero.replace('+', '')}?text=${mensaje}`;
+            window.open(url, '_blank');
+        }
+
+        // ============================================
+        // LOGOUT & SUSCRIPCIONES
+        // ============================================
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'dashboard.html';
+        }
+
+        function iniciarSuscripciones() {
+            // Solo suscribirse si tiene pago activo
+            if (!verificarPagoActivo(currentConductor)) return;
+
+            const sub1 = supabaseClient
+                .channel('viajes-pendientes')
+                .on('postgres_changes', {
+                    event: '*', schema: 'public', table: 'viajes_reservados',
+                    filter: 'estado=eq.pendiente'
+                }, () => cargarViajesDisponibles())
+                .subscribe();
+
+            const sub2 = supabaseClient
+                .channel('mis-viajes')
+                .on('postgres_changes', {
+                    event: '*', schema: 'public', table: 'viajes_reservados',
+                    filter: `conductor_asignado_id=eq.${currentUser.id}`
+                }, () => cargarMisViajes())
+                .subscribe();
+
+            subscriptions.push(sub1, sub2);
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'dashboard.html'; return; }
+
+            currentUser = session.user;
+            console.log('[INIT] auth.uid():', currentUser.id);
+
+            // 1. Verificar que es conductor
+            const esConductor = await verificarConductor();
+            if (!esConductor) return;
+
+            // 2. Si tiene pago activo, cargar datos
+            if (verificarPagoActivo(currentConductor)) {
+                await cargarViajesDisponibles();
+                await cargarMisViajes();
+                // 3. Suscripciones
+                iniciarSuscripciones();
+            }
+
+            // 4. Modal listeners
+            document.getElementById('cancelModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeCancelModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCancelModal();
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            subscriptions.forEach(sub => sub.unsubscribe());
+        });
+
+        init();
+    </script>
+
+</body>
+</html>

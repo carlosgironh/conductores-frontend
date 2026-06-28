@@ -1,0 +1,185 @@
+/**
+ * ═════════════════════════════════════════════════════════════════════════════
+ * ROAD TO - PALETA DE COLORES CENTRALIZADA
+ * ═════════════════════════════════════════════════════════════════════════════
+ * 
+ * Colores exactos extraídos del logo.png
+ * Usar este archivo como referencia única para toda la aplicación
+ * 
+ * @updated 2026-05-28
+ * @version 1.0
+ */
+
+:root {
+  /* ─────────────────────────────────────────────────────────────────────────
+     COLORES DEL LOGO (Fuente de verdad única)
+     ───────────────────────────────────────────────────────────────────────── */
+  --corp-green: #8ac725;           /* Verde principal del logo */
+  --corp-green-dark: #448414;      /* Verde oscuro (sombra) */
+  --corp-green-lime: #9ad93a;      /* Verde lima/claro (acento) */
+  --corp-green-light: #b8e85c;     /* Verde muy claro (highlights) */
+  --corp-blue: #2563eb;            /* Azul corporativo de índice */
+  --corp-blue-dark: #1e40af;
+  --corp-blue-light: #3b82f6;
+  --corp-blue-soft: #60a5fa;
+  --corp-gray: #7d7d7d;            /* Gris corporativo */
+  --corp-gray-dark: #4a4a4a;
+  --corp-gray-light: #9e9e9e;
+  --corp-gray-soft: #cbd5e1;
+  --corp-orange: #f97316;
+  --corp-orange-dark: #ea580c;
+  --corp-orange-light: #fb923c;
+  --corp-orange-soft: #fdba74;
+
+  --logo-green: var(--corp-green);
+  --logo-green-dark: var(--corp-green-dark);
+  --logo-green-lime: var(--corp-green-lime);
+  --logo-green-light: var(--corp-green-light);
+  
+  /* ─────────────────────────────────────────────────────────────────────────
+     GRISES DE LA CARRETERA
+     ───────────────────────────────────────────────────────────────────────── */
+  --road-gray: #7d7d7d;            /* Gris medio */
+  --road-dark: #4a4a4a;            /* Gris oscuro */
+  --road-light: #9e9e9e;           /* Gris claro */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     COLORES DERIVADOS PARA UI (Abstracción semántica)
+     ───────────────────────────────────────────────────────────────────────── */
+  --primary: var(--logo-green);              /* Verde principal */
+  --primary-dark: var(--logo-green-dark);    /* Verde oscuro */
+  --accent: var(--logo-green-lime);          /* Verde lima (acentos) */
+  --highlight: var(--logo-green-light);      /* Verde claro (highlights) */
+  --success: #5a9e1c;                        /* Verde éxito */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     FONDOS
+     ───────────────────────────────────────────────────────────────────────── */
+  --bg-dark: #0a1208;                        /* Fondo muy oscuro */
+  --bg-card: rgba(12, 20, 10, 0.92);         /* Tarjeta oscura */
+  --bg-elevated: rgba(18, 28, 14, 0.95);     /* Elemento elevado */
+  --bg-overlay: rgba(68, 132, 20, 0.08);     /* Overlay semi-transparente */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     TEXTOS
+     ───────────────────────────────────────────────────────────────────────── */
+  --text-light: #eef8e4;                     /* Texto claro en fondo oscuro */
+  --text-muted: #8a9e7d;                     /* Texto tenue/secundario */
+  --text-dim: #5a7a4a;                       /* Texto muy tenue */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     BORDES
+     ───────────────────────────────────────────────────────────────────────── */
+  --border-light: rgba(255, 255, 255, 0.1);  /* Borde claro */
+  --border-muted: rgba(255, 255, 255, 0.05); /* Borde muy tenue */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     SOMBRAS (con colores del tema)
+     ───────────────────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 4px 15px rgba(138, 199, 37, 0.1);
+  --shadow-md: 0 8px 25px rgba(138, 199, 37, 0.2);
+  --shadow-lg: 0 16px 40px rgba(138, 199, 37, 0.3);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   MODO CLARO
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   GRADIENTES PREDEFINIDOS
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--logo-green) 0%, var(--logo-green-dark) 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--logo-green-lime) 0%, var(--logo-green) 100%);
+}
+
+.gradient-hero-title {
+  background: linear-gradient(135deg, var(--text-light) 0%, var(--logo-green-lime) 50%, var(--logo-green) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-hero-title-light {
+  background: linear-gradient(135deg, #1a2e14 0%, #5a8e3a 50%, #1a2e14 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   FONDOS ANIMADOS REUTILIZABLES
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.bg-animated-dark {
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 0%, #0c1a0a 0%, #0a1208 100%);
+}
+
+.bg-animated-light {
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(154, 217, 58, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 0%, #f0f7ec 0%, #eef5ea 100%);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   ANIMACIONES GLOBALES
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(50px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   UTILIDADES DE COLOR
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.text-primary { color: var(--primary); }
+.text-accent { color: var(--accent); }
+.text-highlight { color: var(--highlight); }
+.text-muted { color: var(--text-muted); }
+.text-light { color: var(--text-light); }
+
+.bg-primary { background-color: var(--primary); }
+.bg-accent { background-color: var(--accent); }
+.bg-dark { background-color: var(--bg-dark); }
+
+.border-primary { border-color: var(--primary); }
+.border-accent { border-color: var(--accent); }

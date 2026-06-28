@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/conductor",
+      "destination": "/conductor.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/home.html",
+      "destination": "/",
+      "permanent": true
+    }
+  ]
+}

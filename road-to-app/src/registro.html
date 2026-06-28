@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Registro | Road To</title>
+  <meta name="theme-color" content="#09100d">
+  
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* Estilos específicos de la página de elección - Base en theme.css */
+    html, body { height: 100%; background: linear-gradient(180deg, #0f1814 0%, var(--bg-base) 100%); }
+    
+    .container {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-2xl);
+    }
+
+    .card {
+      width: 920px;
+      max-width: 96%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-lg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12));
+      border-radius: var(--radius-lg);
+      padding: var(--sp-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-lighter);
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-md);
+      padding: var(--sp-md);
+    }
+
+    .side:first-child {
+      align-items: flex-start;
+      padding-left: var(--sp-xl);
+    }
+
+    .side:last-child {
+      align-items: stretch;
+    }
+
+    .kicker {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: var(--sp-md);
+    }
+
+    h1 {
+      font-size: var(--font-size-3xl);
+      margin: 0 0 var(--sp-lg);
+    }
+
+    p.lead {
+      color: var(--text-secondary);
+      max-width: 42ch;
+      line-height: 1.6;
+    }
+
+    .option {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
+      border-radius: var(--radius-md);
+      padding: var(--sp-md);
+      text-align: center;
+      border: 1px solid var(--border-lighter);
+      margin-bottom: var(--sp-md);
+    }
+
+    .option .emoji {
+      font-size: 48px;
+      margin-bottom: var(--sp-md);
+    }
+
+    .option h3 {
+      margin: 0 0 var(--sp-sm);
+      font-size: var(--font-size-lg);
+    }
+
+    .option .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    @media (max-width: 700px) {
+      .card { grid-template-columns: 1fr; }
+      .side:first-child { align-items: center; padding-left: var(--sp-md); }
+      .kicker { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card" role="main" aria-labelledby="reg-title">
+      <div class="side" style="align-items:flex-start;padding-left:36px">
+        <div class="kicker">Registro</div>
+        <h1 id="reg-title">Regístrate como cliente para reservar viajes o como socio para ofrecer tus rutas y generar ingresos.</h1>
+      </div>
+
+      <div class="side" style="align-items:stretch">
+        <div class="option">
+          <div class="emoji">🧳</div>
+          <h3>¿Deseas ser cliente?</h3>
+          <a class="btn btn-primary" href="registro-cliente.html" id="btn-pasajero">Sí, quiero ser cliente</a>
+        </div>
+        <div style="height:12px"></div>
+        <div class="option">
+          <div class="emoji">🚗</div>
+          <h3>¿Deseas ser socio?</h3>
+          <a class="btn btn-primary" href="registro-socio.html" id="btn-socio">Sí, quiero ser socio</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    // preserve querystrings if present
+    function preserveQsAndGo(evt, href){
+      if(evt){evt.preventDefault();}
+      const qs = location.search || '';
+      location.href = href + qs;
+    }
+    document.getElementById('btn-pasajero').addEventListener('click', function(e){ preserveQsAndGo(e, 'registro-cliente.html'); });
+    document.getElementById('btn-socio').addEventListener('click', function(e){ preserveQsAndGo(e, 'registro-socio.html'); });
+  </script>
+</body>
+</html>

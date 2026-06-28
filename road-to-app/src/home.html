@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Road To - Inicio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0a1208">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
@@ -32,9 +32,25 @@
     :root {
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
-      --primary: #3b82f6;
-      --primary-dark: #2563eb;
-      --accent: #8b5cf6;
+      --corp-green: #8ac725;
+      --corp-green-dark: #448414;
+      --corp-green-lime: #9ad93a;
+      --corp-green-light: #b8e85c;
+      --corp-gray: #7d7d7d;
+      --corp-gray-dark: #4a4a4a;
+      --corp-gray-light: #9e9e9e;
+      --corp-gray-soft: #cbd5e1;
+      --corp-blue: #2563eb;
+      --corp-blue-dark: #1e40af;
+      --corp-blue-light: #3b82f6;
+      --corp-orange: #f97316;
+      --corp-orange-light: #fb923c;
+      --primary: var(--corp-green);
+      --primary-dark: var(--corp-green-dark);
+      --accent: var(--corp-green-lime);
+      --bg-dark: #0a1208;
+      --text-light: #eef8e4;
+      --text-muted: #8a9e7d;
     }
 
     body {
@@ -51,10 +67,10 @@
       padding-right: calc(20px + env(safe-area-inset-right));
       
       background: 
-        radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
-      color: #f8fafc;
+        radial-gradient(ellipse at 20% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
+      color: var(--text-light);
       overflow: hidden;
       position: relative;
       overscroll-behavior: none;
