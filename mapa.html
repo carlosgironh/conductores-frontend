@@ -760,9 +760,51 @@
         userRole = 'conductor';
         conductorData = conductor;
         document.getElementById('btnDriverList').style.display = 'none';
+        initPushNotifications();
       }
     } catch (e) {
       console.warn('Error identificando usuario:', e);
+    }
+  }
+
+  // 🔔 NOTIFICACIONES PUSH (FCM) 🔔
+  async function initPushNotifications() {
+    if (typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform()) {
+      try {
+        const push = Capacitor.Plugins.PushNotifications;
+        
+        let permStatus = await push.checkPermissions();
+        if (permStatus.receive === 'prompt') {
+          permStatus = await push.requestPermissions();
+        }
+
+        if (permStatus.receive !== 'granted') {
+          console.warn('Permisos de notificaciones denegados');
+          return;
+        }
+
+        await push.register();
+
+        push.addListener('registration', async (token) => {
+          console.log('FCM Token:', token.value);
+          if (conductorData) {
+             await supabaseClient.from('conductores').update({
+               fcm_token: token.value
+             }).eq('id', conductorData.id);
+          }
+        });
+
+        push.addListener('registrationError', (error) => {
+          console.error('Error registrando FCM:', JSON.stringify(error));
+        });
+
+        push.addListener('pushNotificationReceived', (notification) => {
+          showToast('🔔 NUEVO VIAJE: ' + notification.title, 'success');
+        });
+
+      } catch (err) {
+        console.warn('PushNotifications plugin no disponible o error:', err);
+      }
     }
   }
 

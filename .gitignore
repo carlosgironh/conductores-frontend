@@ -7,3 +7,6 @@ ios/
 capacitor.config.json
 capacitor.config.ts
 \.continue\*
+# Google Cloud Service Account Credentials
+supabase/functions/notificar-conductor/service-account.json
+supabase/functions/notificar-conductor/serviceAccount.ts

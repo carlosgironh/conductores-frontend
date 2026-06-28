@@ -20,6 +20,7 @@
 
 <!-- Config centralizada -->
 <script src="config.js"></script>
+<script src="JS/backgroundTracking-bundle.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -812,12 +813,7 @@
     }
   }
 
-  function startTracking() {
-    if (!navigator.geolocation) {
-      showToast('Geolocalización no disponible');
-      return;
-    }
-
+  async function startTracking() {
     isTracking = true;
     startTime = Date.now();
     totalDistance = 0;
@@ -830,15 +826,45 @@
     btn.innerHTML = '⏹ Detener Viaje';
     document.getElementById('liveIndicator').classList.add('active');
 
-    // Iniciar watchPosition
-    watchId = navigator.geolocation.watchPosition(
-      (pos) => handlePositionUpdate(pos),
-      (err) => {
-        console.error('GPS error:', err);
-        showToast('Error de GPS: ' + err.message);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 }
-    );
+    // Intentar usar Background Geolocation de Capacitor
+    if (window.BackgroundGeolocation) {
+      try {
+        watchId = await window.BackgroundGeolocation.addWatcher(
+          {
+            backgroundMessage: "Rastreando ubicación en segundo plano.",
+            backgroundTitle: "Road To Activo",
+            requestPermissions: true,
+            stale: false,
+            distanceFilter: 2
+          },
+          function (location, error) {
+            if (error) {
+              if (error.code === 'NOT_AUTHORIZED') {
+                showToast('Permisos de GPS denegados');
+              }
+              return console.error(error);
+            }
+            
+            // Adaptar formato a lo que espera handlePositionUpdate
+            handlePositionUpdate({
+              coords: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                accuracy: location.accuracy,
+                speed: location.speed,
+                heading: location.bearing
+              }
+            });
+          }
+        );
+        showToast('🟢 Viaje iniciado (Modo Segundo Plano)');
+      } catch (e) {
+        console.error("Fallo al iniciar Background Geolocation", e);
+        startWebTrackingFallback();
+      }
+    } else {
+      startWebTrackingFallback();
+    }
 
     // Timer para actualizar tiempo
     timerInterval = setInterval(updateTimer, 1000);
@@ -853,14 +879,33 @@
         if (error) console.warn('Error creando sesión:', error);
       });
     }
-
-    showToast('🟢 Viaje iniciado');
   }
 
-  function stopTracking() {
+  function startWebTrackingFallback() {
+    if (!navigator.geolocation) {
+      showToast('Geolocalización no disponible');
+      return;
+    }
+    
+    // Iniciar watchPosition normal
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => handlePositionUpdate(pos),
+      (err) => {
+        console.error('GPS error:', err);
+        showToast('Error de GPS: ' + err.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 }
+    );
+    showToast('🟢 Viaje iniciado (Modo Básico)');
+  }
+
+  async function stopTracking() {
     isTracking = false;
 
-    if (watchId !== null) {
+    if (window.BackgroundGeolocation && watchId !== null && typeof watchId === 'string') {
+      await window.BackgroundGeolocation.removeWatcher({ id: watchId });
+      watchId = null;
+    } else if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
     }

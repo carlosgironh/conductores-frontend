@@ -3419,6 +3419,27 @@
         // Quitar al conductor de la cola virtual si estaba en ella
         await supabaseClient.from('lista_espera_zonas').update({ estado: 'asignado' }).eq('conductor_id', id).eq('estado', 'en_cola');
         
+        // Notificar al conductor por Push Notification
+        try {
+          const session = await supabaseClient.auth.getSession();
+          if (session.data.session) {
+             fetch(`${SUPABASE_URL}/functions/v1/notificar-conductor`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.data.session.access_token}`
+                },
+                body: JSON.stringify({
+                  conductor_id: id,
+                  titulo: 'Nuevo Viaje Asignado',
+                  mensaje: 'Se te ha asignado un nuevo viaje. Revisa la aplicación.'
+                })
+             });
+          }
+        } catch (e) {
+          console.warn('No se pudo notificar al conductor', e);
+        }
+
         showToast('Conductor asignado con éxito', 'success');
         closeAsignarModal();
         await refreshData();
