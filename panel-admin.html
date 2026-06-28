@@ -1795,7 +1795,13 @@
   }
 
 </style>
+</style>
 <base target="_blank">
+<!-- Leaflet & Leaflet.draw -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 </head>
 
 <body>
@@ -2023,7 +2029,8 @@
       <div class="section-tabs">
         <button class="section-tab active" onclick="switchSection('conductores', this)">🚗 Conductores</button>
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
-        <button class="section-tab" onclick="switchSection('viajes', this)">🚕 Viajes</button>
+        <button class="section-tab" onclick="switchSection('viajes', this)">🚙 Viajes</button>
+        <button class="section-tab" onclick="switchSection('zonas', this)">🗺️ Zonas</button>
       </div>
     </div>
 
@@ -2183,6 +2190,43 @@
 
       <div class="viajes-list" id="viajesList">
         <div style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</div>
+      </div>
+      </div>
+    </div>
+
+    <!-- ZONAS SECTION -->
+    <div id="zonasSection" class="section-content">
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px;">
+        <h3 style="color: white; margin-bottom: 10px;">Gestión de Zonas (Geofencing)</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Dibuja polígonos en el mapa para definir zonas. El sistema detectará cuando un conductor entre o salga de estas áreas.</p>
+        <div id="zonasMap" style="height: 400px; width: 100%; border-radius: 12px; z-index: 1;"></div>
+      </div>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre de Zona</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="zonasList">
+            <tr><td colspan="4" style="text-align:center;">Cargando zonas...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- COLAS DE ESPERA POR ZONA -->
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <h3 style="color: white; margin: 0;">Conductores en Fila (Colas Virtuales)</h3>
+          <button class="btn-primary" onclick="renderColas()" style="padding: 6px 12px; font-size: 13px;">↻ Refrescar</button>
+        </div>
+        <div id="colasContainer">
+           <div style="text-align: center; color: #64748b; padding: 20px;">Cargando colas...</div>
+        </div>
       </div>
     </div>
 
@@ -2381,6 +2425,12 @@
       btn.classList.add('active');
       document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
       document.getElementById(section + 'Section').classList.add('active');
+
+      if (section === 'zonas' && window.zonasMapObj) {
+        setTimeout(() => window.zonasMapObj.invalidateSize(), 100);
+      } else if (section === 'zonas' && !window.zonasMapObj) {
+        setTimeout(initZonasMap, 100);
+      }
     }
 
     // CONDUCTORES MANAGEMENT
@@ -3296,22 +3346,59 @@
       document.getElementById('asignarConductorModal').classList.add('show');
     }
 
-    function renderConductoresDisponiblesAdmin() {
+    async function renderConductoresDisponiblesAdmin() {
       const container = document.getElementById('conductoresDisponiblesList');
       const activos = allConductores.filter(c => c.estado === true || c.estado === 'activo');
       if (activos.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b">No hay conductores activos.</div>';
         return;
       }
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">Cargando prioridades...</div>`;
+
+      let colasMap = {};
+      try {
+        const { data, error } = await supabaseClient.from('lista_espera_zonas')
+          .select('conductor_id, zonas_geofence(nombre), entrado_en')
+          .eq('estado', 'en_cola')
+          .order('entrado_en', { ascending: true });
+        
+        if (!error && data) {
+           data.forEach((item, index) => {
+             colasMap[item.conductor_id] = {
+               zona: item.zonas_geofence?.nombre || 'Zona',
+               pos: index + 1
+             };
+           });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Ordenar: los que están en cola van primero
+      activos.sort((a, b) => {
+        const hasA = colasMap[a.id] ? 1 : 0;
+        const hasB = colasMap[b.id] ? 1 : 0;
+        if (hasA && hasB) {
+           return colasMap[a.id].pos - colasMap[b.id].pos;
+        }
+        return hasB - hasA;
+      });
+
       container.innerHTML = '';
       activos.forEach(c => {
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductorAdmin(c.id);
+        
+        let badgeHtml = '';
+        if (colasMap[c.id]) {
+          badgeHtml = `<span style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px;">En fila: ${colasMap[c.id].zona} (#${colasMap[c.id].pos})</span>`;
+        }
+
         div.innerHTML = `
           <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
+            <div class="name">${c.nombres || ''} ${c.apellidos || ''} ${badgeHtml}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
           </div>
         `;
@@ -3328,6 +3415,10 @@
           updated_at: new Date().toISOString()
         }).eq('id', viajeIdParaAsignar);
         if (error) throw error;
+        
+        // Quitar al conductor de la cola virtual si estaba en ella
+        await supabaseClient.from('lista_espera_zonas').update({ estado: 'asignado' }).eq('conductor_id', id).eq('estado', 'en_cola');
+        
         showToast('Conductor asignado con éxito', 'success');
         closeAsignarModal();
         await refreshData();
@@ -3353,6 +3444,217 @@
         document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
       }
     });
+
+    // ==========================================
+    // ZONAS (GEOFENCING) MANAGEMENT
+    // ==========================================
+    let allZonas = [];
+    let drawnItems;
+
+    async function initZonasMap() {
+      if (window.zonasMapObj) return;
+      
+      const map = L.map('zonasMap').setView([8.9824, -79.5199], 12); // Panama City default
+      window.zonasMapObj = map;
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(map);
+
+      drawnItems = new L.FeatureGroup();
+      map.addLayer(drawnItems);
+
+      const drawControl = new L.Control.Draw({
+        edit: {
+          featureGroup: drawnItems
+        },
+        draw: {
+          polygon: true,
+          polyline: false,
+          rectangle: true,
+          circle: false,
+          marker: false,
+          circlemarker: false
+        }
+      });
+      map.addControl(drawControl);
+
+      map.on(L.Draw.Event.CREATED, function (event) {
+        const layer = event.layer;
+        const geojson = layer.toGeoJSON();
+        const coords = geojson.geometry.coordinates[0];
+        
+        // Formato para guardar
+        const poligonoObj = coords.map(c => ({ lng: c[0], lat: c[1] }));
+        
+        const nombre = prompt('Ingresa el nombre para esta zona (Ej. Aeropuerto):');
+        if (!nombre) return;
+        
+        const desc = prompt('Descripción de la zona (opcional):');
+        
+        guardarZona(nombre, desc || '', poligonoObj);
+      });
+
+      await cargarZonas();
+    }
+
+    async function cargarZonas() {
+      const { data, error } = await supabaseClient.from('zonas_geofence').select('*').order('created_at', { ascending: false });
+      if (!error) {
+        allZonas = data || [];
+        renderZonasList();
+        dibujarZonasEnMapa();
+        renderColas();
+      }
+    }
+
+    function dibujarZonasEnMapa() {
+      if (!drawnItems) return;
+      drawnItems.clearLayers();
+      allZonas.forEach(z => {
+        if (!z.activa) return;
+        // Convertir {lat, lng} a [lat, lng]
+        const latlngs = z.poligono.map(p => [p.lat, p.lng]);
+        const polygon = L.polygon(latlngs, {color: '#8b5cf6'}).bindTooltip(z.nombre);
+        drawnItems.addLayer(polygon);
+      });
+    }
+
+    async function guardarZona(nombre, desc, poligono) {
+      showLoading('Guardando zona...');
+      try {
+        const { error } = await supabaseClient.from('zonas_geofence').insert({
+          nombre: nombre,
+          descripcion: desc,
+          poligono: poligono,
+          activa: true
+        });
+        if (error) throw error;
+        showToast('Zona guardada con éxito', 'success');
+        await cargarZonas();
+      } catch(e) {
+        showToast(e.message || 'Error al guardar zona', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function toggleZona(id, estadoActual) {
+      showLoading('Actualizando zona...');
+      try {
+        const { error } = await supabaseClient.from('zonas_geofence').update({
+          activa: !estadoActual
+        }).eq('id', id);
+        if (error) throw error;
+        showToast('Estado actualizado', 'success');
+        await cargarZonas();
+      } catch(e) {
+        showToast(e.message || 'Error al actualizar', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function eliminarZona(id) {
+      if(!confirm('¿Eliminar esta zona permanentemente?')) return;
+      showLoading('Eliminando...');
+      try {
+        const { error } = await supabaseClient.from('zonas_geofence').delete().eq('id', id);
+        if (error) throw error;
+        showToast('Zona eliminada', 'success');
+        await cargarZonas();
+      } catch(e) {
+        showToast(e.message || 'Error al eliminar', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function renderZonasList() {
+      const tbody = document.getElementById('zonasList');
+      if (!tbody) return;
+      
+      if (allZonas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No hay zonas definidas.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = '';
+      allZonas.forEach(z => {
+        const statusBadge = z.activa 
+          ? '<span style="background:rgba(34,197,94,0.2);color:#4ade80;padding:4px 8px;border-radius:4px;font-size:12px;">Activa</span>' 
+          : '<span style="background:rgba(239,68,68,0.2);color:#f87171;padding:4px 8px;border-radius:4px;font-size:12px;">Inactiva</span>';
+          
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color:white;font-weight:600;">${z.nombre}</td>
+          <td style="color:#94a3b8;">${z.descripcion || '-'}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button class="action-btn view" onclick="toggleZona('${z.id}', ${z.activa})" title="Activar/Desactivar">👁️</button>
+            <button class="action-btn delete" onclick="eliminarZona('${z.id}')" title="Eliminar">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function renderColas() {
+      const container = document.getElementById('colasContainer');
+      if (!container) return;
+
+      const { data, error } = await supabaseClient.from('lista_espera_zonas')
+        .select('*, zonas_geofence(nombre), conductores(nombres, apellidos, placa)')
+        .eq('estado', 'en_cola')
+        .order('entrado_en', { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">No hay conductores en fila actualmente.</div>';
+        return;
+      }
+
+      // Agrupar por zona
+      const colasPorZona = {};
+      data.forEach(item => {
+        const zonaNombre = item.zonas_geofence?.nombre || 'Desconocida';
+        if (!colasPorZona[zonaNombre]) colasPorZona[zonaNombre] = [];
+        colasPorZona[zonaNombre].push(item);
+      });
+
+      let html = '';
+      for (const zona in colasPorZona) {
+        html += `<div style="margin-bottom: 20px;">
+          <h4 style="color:#a78bfa; margin-bottom: 10px; font-size: 16px;">📍 ${zona}</h4>
+          <div class="table-container" style="background: rgba(0,0,0,0.2);">
+            <table style="font-size: 13px;">
+              <thead>
+                <tr>
+                  <th style="padding: 12px;">Posición</th>
+                  <th style="padding: 12px;">Conductor</th>
+                  <th style="padding: 12px;">Placa</th>
+                  <th style="padding: 12px;">Hora de Entrada</th>
+                </tr>
+              </thead>
+              <tbody>`;
+        
+        colasPorZona[zona].forEach((c, index) => {
+          const timeStr = new Date(c.entrado_en).toLocaleTimeString();
+          const driverName = c.conductores ? `${c.conductores.nombres || ''} ${c.conductores.apellidos || ''}` : 'Desconocido';
+          const placa = c.conductores ? c.conductores.placa : '-';
+          
+          html += `<tr>
+            <td style="font-weight:bold; color: white; padding: 12px;">#${index + 1}</td>
+            <td style="padding: 12px;">${driverName}</td>
+            <td style="padding: 12px;">${placa}</td>
+            <td style="padding: 12px;">${timeStr}</td>
+          </tr>`;
+        });
+
+        html += `</tbody></table></div></div>`;
+      }
+
+      container.innerHTML = html;
+    }
 
   </script>
 </body>

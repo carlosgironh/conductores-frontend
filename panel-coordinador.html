@@ -1332,7 +1332,7 @@
       document.getElementById('asignarConductorModal').classList.remove('show');
     }
 
-    function renderConductoresDisponibles() {
+    async function renderConductoresDisponibles() {
       const container = document.getElementById('conductoresDisponiblesList');
       const activos = allConductores.filter(c => c.estado === true);
 
@@ -1340,16 +1340,52 @@
         container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">No hay conductores activos.</div>`;
         return;
       }
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">Cargando prioridades...</div>`;
+
+      let colasMap = {};
+      try {
+        const { data, error } = await supabaseClient.from('lista_espera_zonas')
+          .select('conductor_id, zonas_geofence(nombre), entrado_en')
+          .eq('estado', 'en_cola')
+          .order('entrado_en', { ascending: true });
+        
+        if (!error && data) {
+           data.forEach((item, index) => {
+             colasMap[item.conductor_id] = {
+               zona: item.zonas_geofence?.nombre || 'Zona',
+               pos: index + 1
+             };
+           });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Ordenar: los que están en cola van primero
+      activos.sort((a, b) => {
+        const hasA = colasMap[a.id] ? 1 : 0;
+        const hasB = colasMap[b.id] ? 1 : 0;
+        if (hasA && hasB) {
+           return colasMap[a.id].pos - colasMap[b.id].pos;
+        }
+        return hasB - hasA;
+      });
 
       container.innerHTML = '';
       activos.forEach(c => {
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductor(c.id);
+        
+        let badgeHtml = '';
+        if (colasMap[c.id]) {
+          badgeHtml = `<span style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px;">En fila: ${colasMap[c.id].zona} (#${colasMap[c.id].pos})</span>`;
+        }
+
         div.innerHTML = `
           <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
+            <div class="name">${c.nombres || ''} ${c.apellidos || ''} ${badgeHtml}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
           </div>
         `;
@@ -1366,6 +1402,10 @@
           updated_at: new Date().toISOString()
         }).eq('id', viajeIdParaAsignar);
         if (error) throw error;
+        
+        // Quitar al conductor de la cola virtual si estaba en ella
+        await supabaseClient.from('lista_espera_zonas').update({ estado: 'asignado' }).eq('conductor_id', id).eq('estado', 'en_cola');
+        
         showToast('Conductor asignado con éxito', 'success');
         closeAsignarModal();
         await refreshData();

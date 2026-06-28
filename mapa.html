@@ -17,6 +17,8 @@
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Turf.js para Geofencing -->
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <!-- Config centralizada -->
 <script src="config.js"></script>
@@ -645,13 +647,17 @@
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ═══ ESTADO GLOBAL ═══
-  let map, userMarker, routePolyline;
-  let isTracking = false;
+  let map, userMarker;
   let watchId = null;
-  let startTime = null;
-  let totalDistance = 0;
-  let lastPosition = null;
   let timerInterval = null;
+  let startTime = null;
+  let routePolyline;
+  let totalDistance = 0; // en metros
+  let lastPosition = null;
+
+  // ═══ GEOFENCING ═══
+  let activeGeofenceZones = [];
+  let currentZonesInside = new Set();
   let driverMarkers = {};
   let realtimeChannel = null;
   let currentUser = null;
@@ -675,8 +681,16 @@
     initMap();
     await identifyUser();
     await getUserLocation();
+    await loadGeofenceZones();
     hideLoading();
   });
+
+  async function loadGeofenceZones() {
+    try {
+      const { data } = await supabaseClient.from('zonas_geofence').select('*').eq('activa', true);
+      if (data) activeGeofenceZones = data;
+    } catch(e) { console.error('Error loading zones:', e); }
+  }
 
   function initMap() {
     map = L.map('map', {
@@ -911,6 +925,71 @@
       }
     }
     lastPosition = [latitude, longitude];
+
+    // Check Geofencing
+    if (typeof turf !== 'undefined' && activeGeofenceZones.length > 0) {
+      const pt = turf.point([longitude, latitude]);
+      activeGeofenceZones.forEach(async (zona) => {
+        let coords = zona.poligono.map(p => [p.lng, p.lat]);
+        if (coords.length >= 3) {
+           if (coords[0][0] !== coords[coords.length - 1][0] || coords[0][1] !== coords[coords.length - 1][1]) {
+             coords.push([...coords[0]]);
+           }
+           const poly = turf.polygon([coords]);
+           const isInside = turf.booleanPointInPolygon(pt, poly);
+           
+           if (isInside && !currentZonesInside.has(zona.id)) {
+             currentZonesInside.add(zona.id);
+             if (conductorData) {
+               // 1. Notificación
+               supabaseClient.from('notificaciones').insert({
+                 tipo: 'geofence_enter',
+                 titulo: 'Entrada a Zona: ' + zona.nombre,
+                 mensaje: `El conductor ${conductorData.nombres || ''} ha entrado a la zona ${zona.nombre}.`,
+                 leida: false
+               }).then();
+               
+               // 2. Entrar a Lista de Espera
+               const { data: colaData } = await supabaseClient.from('lista_espera_zonas').insert({
+                 zona_id: zona.id,
+                 conductor_id: conductorData.id,
+                 estado: 'en_cola'
+               }).select();
+               
+               // Informar posición
+               const { count } = await supabaseClient.from('lista_espera_zonas')
+                 .select('*', { count: 'exact', head: true })
+                 .eq('zona_id', zona.id)
+                 .eq('estado', 'en_cola');
+               
+               showToast(`🚗 Entraste a: ${zona.nombre}. Eres el #${count || 1} en la fila.`);
+             }
+           } else if (!isInside && currentZonesInside.has(zona.id)) {
+             currentZonesInside.delete(zona.id);
+             if (conductorData) {
+               // 1. Notificación
+               supabaseClient.from('notificaciones').insert({
+                 tipo: 'geofence_exit',
+                 titulo: 'Salida de Zona: ' + zona.nombre,
+                 mensaje: `El conductor ${conductorData.nombres || ''} ha salido de la zona ${zona.nombre}.`,
+                 leida: false
+               }).then();
+               
+               // 2. Salir de Lista de Espera
+               supabaseClient.from('lista_espera_zonas').update({
+                 estado: 'salio',
+                 salio_en: new Date().toISOString()
+               })
+               .eq('zona_id', zona.id)
+               .eq('conductor_id', conductorData.id)
+               .eq('estado', 'en_cola').then();
+               
+               showToast(`👋 Saliste de: ${zona.nombre}. Tu turno ha sido cancelado.`);
+             }
+           }
+        }
+      });
+    }
 
     // Actualizar stats UI
     document.getElementById('distanceValue').textContent = (totalDistance / 1000).toFixed(1);
