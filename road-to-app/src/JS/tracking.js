@@ -1,4 +1,4 @@
-// tracking.js - Versión estable sin plugins de terceros
+// tracking.js - Versión con soporte nativo Android (Foreground Service)
 
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera } from '@capacitor/camera';
@@ -6,6 +6,15 @@ import { Preferences } from '@capacitor/preferences';
 import { Capacitor } from '@capacitor/core';
 
 const isNative = Capacitor.isNativePlatform();
+const isAndroid = Capacitor.getPlatform() === 'android';
+
+// Intentar cargar el plugin nativo de tracking (solo existe en Android)
+let NativeTracking = null;
+try {
+  NativeTracking = Capacitor.Plugins.NativeTracking || null;
+} catch (e) {
+  console.log('[Tracking] Plugin NativeTracking no disponible, usando fallback');
+}
 
 class DriverTracking {
   constructor() {
@@ -131,6 +140,7 @@ class DriverTracking {
     if (!hasPermission) throw new Error('Permisos denegados');
 
     this.isTracking = true;
+    this.useNativeService = false;
 
     // Crear sesión en Supabase
     await this.supabase.from('tracking_sessions').insert({
@@ -139,8 +149,42 @@ class DriverTracking {
       status: 'active'
     });
 
+    // ═══ ANDROID NATIVO: Usar Foreground Service ═══
+    // Esto mantiene el GPS activo incluso cuando la app está minimizada
+    if (isAndroid && NativeTracking) {
+      try {
+        const result = await NativeTracking.startTracking({ driverId: this.driverId });
+        console.log('[Tracking] Servicio nativo Android iniciado:', result.message);
+        this.useNativeService = true;
+
+        // En modo nativo, el servicio Kotlin maneja el envío a Supabase directamente.
+        // Aún usamos watchPosition para actualizar la UI en tiempo real.
+        this.watchId = await Geolocation.watchPosition(
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 },
+          (position, err) => {
+            if (position) {
+              // Solo actualizar UI, no enviar a servidor (el servicio nativo ya lo hace)
+              window.dispatchEvent(new CustomEvent('locationUpdate', {
+                detail: {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  speed: position.coords.speed || 0,
+                  accuracy: position.coords.accuracy,
+                  source: 'gps_native_android'
+                }
+              }));
+            }
+          }
+        );
+        return true;
+      } catch (e) {
+        console.warn('[Tracking] Servicio nativo falló, usando fallback Capacitor:', e);
+        // Continuar con fallback normal
+      }
+    }
+
+    // ═══ FALLBACK: Capacitor watchPosition o Web API ═══
     if (isNative) {
-      // Usar watchPosition nativo de Capacitor
       this.watchId = await Geolocation.watchPosition(
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 },
         (position, err) => {
@@ -212,6 +256,17 @@ class DriverTracking {
 
   async stopTracking() {
     this.isTracking = false;
+
+    // ═══ Detener servicio nativo Android si estaba activo ═══
+    if (this.useNativeService && NativeTracking) {
+      try {
+        await NativeTracking.stopTracking();
+        console.log('[Tracking] Servicio nativo Android detenido');
+      } catch (e) {
+        console.warn('[Tracking] Error deteniendo servicio nativo:', e);
+      }
+      this.useNativeService = false;
+    }
 
     // Detener watch
     if (isNative && this.watchId !== null) {
