@@ -1835,6 +1835,44 @@
     </div>
   </header>
 
+  
+  <!-- MODAL REGISTRO COORDINADOR -->
+  <div class="modal-overlay centered" id="registroCoordModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="modal-close" onclick="closeRegistroCoordModal()">✕</button>
+      <div class="modal-header">
+        <h3 class="modal-title">👔 Nuevo Coordinador</h3>
+      </div>
+      <form id="registroCoordForm" onsubmit="saveNuevoCoordinador(event)">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" id="coordNombres" required placeholder="Ej: Juan">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" id="coordApellidos" required placeholder="Ej: Pérez">
+        </div>
+        <div class="form-group">
+          <label>Celular</label>
+          <input type="text" id="coordCelular" placeholder="Ej: +50761234567">
+        </div>
+        <div class="form-group">
+          <label>Correo Electrónico * (Se usará para iniciar sesión)</label>
+          <input type="email" id="coordEmail" required placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Contraseña Temporal *</label>
+          <input type="text" id="coordPassword" required placeholder="Ej: password123">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn-secondary" onclick="closeRegistroCoordModal()">Cancelar</button>
+          <button type="submit" class="btn-success">Crear Cuenta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <!-- Modal Zona -->
   <div class="modal-overlay centered" id="zonaModal">
     <div class="modal-content">
@@ -2116,21 +2154,38 @@
         <button class="section-tab" onclick="switchSection('viajes', this)">🚕 Viajes</button>
         <button class="section-tab" onclick="switchSection('zonas', this)">📍 Zonas</button>
         <button class="section-tab" onclick="switchSection('flota', this)">📊 Estado de Flota</button>
+        <button class="section-tab" onclick="switchSection('gestionCoordinadores', this)">👔 Coordinadores</button>
       </div>
     </div>
 
+    
+    <!-- GESTION COORDINADORES SECTION -->
+    <div id="gestionCoordinadoresSection" class="section-content" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>Gestión de Coordinadores</h3>
+        <button class="btn-primary" onclick="openRegistroCoordModal()">+ Nuevo Coordinador</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre Completo</th>
+              <th>Correo</th>
+              <th>Edición/Eliminación</th>
+              <th>Mapa Torre de Control</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="coordinadoresGestTable">
+            <tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Cargando coordinadores...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
     <!-- CONFIGURACIÓN DE PERMISOS PARA COORDINADORES -->
-    <div class="permissions-card">
-      <div class="permissions-info">
-        <h4>🔒 Permisos de Coordinadores</h4>
-        <p>Habilitar o deshabilitar que los coordinadores puedan Editar/Eliminar conductores en su panel.</p>
-      </div>
-      <div class="switch-container">
-        <span class="switch-label" id="labelPermisoCoord">Deshabilitado</span>
-        <div class="switch-main" id="permisoCoordinadoresSwitch" onclick="togglePermisoCoordinadoresClick()">
-          <div class="switch-thumb-main"></div>
-        </div>
-      </div>
+    
     </div>
 
     <!-- CONDUCTORES SECTION -->
@@ -2481,7 +2536,7 @@
           return;
         }
 
-        await cargarPermisosCoordinadores();
+        await // cargarPermisosCoordinadores();
         await refreshData();
         hideLoading();
       } catch (error) {
@@ -3036,6 +3091,14 @@
           window.open(url, '_blank');
         };
 
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-secondary';
+        editBtn.style.padding = '8px 12px';
+        editBtn.style.marginRight = '5px';
+        editBtn.innerHTML = '✏️';
+        editBtn.title = 'Editar Zona';
+        editBtn.onclick = () => openEditZonaModal(z.id);
+        
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'btn-danger';
@@ -3045,6 +3108,7 @@
         deleteBtn.onclick = () => eliminarDocumento(doc.id, doc.path, conductorId);
 
         actions.appendChild(viewBtn);
+        actions.appendChild(editBtn);
         actions.appendChild(deleteBtn);
         item.appendChild(info);
         item.appendChild(actions);
@@ -3584,6 +3648,7 @@
     let allZonas = [];
     window.adminMapInstance = null;
     let selectedLatLng = null;
+    let editZonaId = null;
     let zonasLayers = [];
 
     async function cargarZonas() {
@@ -3636,6 +3701,22 @@
         return;
       }
       document.getElementById('zonaForm').reset();
+      document.getElementById('zonaModal').classList.add('show');
+    }
+
+    
+    function openEditZonaModal(id) {
+      const zona = allZonas.find(z => z.id === id);
+      if(!zona) return;
+      
+      editZonaId = zona.id;
+      selectedLatLng = { lat: zona.latitud, lng: zona.longitud };
+      
+      document.getElementById('zonaModalTitle').textContent = 'Editar Zona Especial';
+      document.getElementById('zonaNombre').value = zona.nombre || '';
+      document.getElementById('zonaDescripcion').value = zona.descripcion || '';
+      document.getElementById('zonaRadio').value = zona.radio_metros || 1500;
+      
       document.getElementById('zonaModal').classList.add('show');
     }
 

@@ -812,6 +812,200 @@
               <th>Estado</th>
               <th>Pasajero</th>
               <th>Correo</th>
+  <!-- MODAL REGISTRO RÁPIDO PASAJERO -->
+  <div class="modal-overlay centered" id="registroPasajeroModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="modal-close" onclick="closeRegistroPasajeroModal()">✕</button>
+      <div class="modal-header">
+        <h3 class="modal-title">👤 Registro Rápido</h3>
+      </div>
+      <form id="registroPasajeroForm">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" id="regNombres" required placeholder="Ingresa nombres">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" id="regApellidos" required placeholder="Ingresa apellidos">
+        </div>
+        <div class="form-group">
+          <label>Celular * (WhatsApp)</label>
+          <input type="tel" id="regCelular" required placeholder="Ej: 61234567" maxlength="8" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label>Correo Electrónico (Opcional)</label>
+          <input type="email" id="regEmail" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Cédula (Opcional)</label>
+          <input type="text" id="regCedula" placeholder="00-0000-0000">
+        </div>
+        <div class="form-group">
+          <label>Dirección (Opcional)</label>
+          <input type="text" id="regDireccion" placeholder="Dirección de residencia">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn-secondary" onclick="closeRegistroPasajeroModal()">Cancelar</button>
+          <button type="submit" class="btn-success">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ASIGNAR CONDUCTOR -->
+  <div class="modal-overlay centered" id="asignarConductorModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="modal-close" onclick="closeAsignarModal()">✕</button>
+      <div class="modal-header" style="justify-content: center; padding-right: 0;">
+        <h3 class="modal-title">Asignar Conductor</h3>
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 20px;">
+        Selecciona un conductor activo para este viaje
+      </p>
+      <div id="conductoresDisponiblesList" style="max-height: 400px; overflow-y: auto; padding-right: 4px;">
+        <div style="text-align: center; padding: 30px; color: #64748b;">Cargando conductores...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="header">
+      <div class="header-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+      </div>
+      <h2>Base de Operaciones</h2>
+      <p class="subtitle">Panel de Coordinación Integral - Control de Flota y Tráfico</p>
+
+      <div class="section-tabs">
+        <button class="section-tab active" onclick="switchSection('viajes', this)">🚕 Viajes</button>
+        <button class="section-tab" onclick="switchSection('conductores', this)">🚗 Conductores</button>
+        <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
+        <button class="section-tab" onclick="switchSection('flota', this)">📊 Estado de Flota</button>
+      </div>
+    </div>
+
+    <!-- ESTADO DE PERMISOS (CONTROLADO POR ADMIN) -->
+    <div class="permissions-card">
+      <div class="permissions-info">
+        <h4>🔒 Permiso de Edición/Eliminación</h4>
+        <p>Habilitado o deshabilitado por el Administrador. Permite Editar/Eliminar conductores.</p>
+      </div>
+      <div class="switch-container">
+        <span class="switch-label" id="labelPermisoCoord">Deshabilitado</span>
+        <div class="switch-main readonly" id="permisoCoordinadoresSwitch">
+          <div class="switch-thumb-main"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIAJES SECTION -->
+    <div id="viajesSection" class="section-content active">
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalCountViajes">0</div>
+          <div class="stat-label">Total Viajes</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-value" id="pendienteCountViajes">0</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-value" id="asignadoCountViajes">0</div>
+          <div class="stat-label">Asignados</div>
+        </div>
+        <div class="stat-card inactive">
+          <div class="stat-value" id="completadoCountViajes">0</div>
+          <div class="stat-label">Completados</div>
+        </div>
+      </div>
+      <div style="margin-bottom: 15px;">
+        <input type="text" id="searchViajes" class="search-box" placeholder="🔍 Buscar viaje (origen, destino, pasajero, conductor...)" oninput="renderViajesList()">
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterViajes('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="filterViajes('pendiente', this)">🔴 Pendientes</button>
+        <button class="filter-btn" onclick="filterViajes('asignado', this)">🔵 Asignados</button>
+        <button class="filter-btn" onclick="filterViajes('completado', this)">🟢 Completados</button>
+        <button class="filter-btn" onclick="filterViajes('cancelado', this)">⚫ Cancelados</button>
+      </div>
+      <div class="viajes-list" id="viajesList">
+        <div style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</div>
+      </div>
+    </div>
+
+    <!-- CONDUCTORES SECTION -->
+    <div id="conductoresSection" class="section-content">
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalCountConductores">0</div>
+          <div class="stat-label">Total Conductores</div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-value" id="activosCountConductores">0</div>
+          <div class="stat-label">Activos</div>
+        </div>
+        <div class="stat-card paid">
+          <div class="stat-value" id="pagadosCountConductores">0</div>
+          <div class="stat-label">Con Pago</div>
+        </div>
+        <div class="stat-card available">
+          <div class="stat-value" id="disponiblesCountConductores">0</div>
+          <div class="stat-label">Pago Vencido</div>
+        </div>
+      </div>
+      <div style="margin-bottom: 15px;">
+        <input type="text" id="searchConductores" class="search-box" placeholder="🔍 Buscar conductor..." oninput="renderTablaConductores()">
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterConductores('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="filterConductores('activo', this)">🟢 Activos</button>
+        <button class="filter-btn" onclick="filterConductores('inactivo', this)">🔴 Inactivos</button>
+        <button class="filter-btn" onclick="filterConductores('pagado', this)">💳 Con Pago</button>
+        <button class="filter-btn" onclick="filterConductores('sin-pago', this)">⚠️ Sin Pago</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Conductor</th>
+              <th>Vehículo</th>
+              <th>Pago</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="conductoresTable">
+            <tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Cargando conductores...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PASAJEROS SECTION -->
+    <div id="pasajerosSection" class="section-content">
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalCountPasajeros">0</div>
+          <div class="stat-label">Total Pasajeros</div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-value" id="activosCountPasajeros">0</div>
+          <div class="stat-label">Activos</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+        <input type="text" id="searchPasajeros" class="search-box" style="margin-bottom:0; flex:1" placeholder="🔍 Buscar pasajero..." oninput="renderTablaPasajeros()">
+        <button class="btn-success" onclick="openRegistroPasajeroModal()" style="border-radius:12px; padding:0 20px">+ Registro Rápido</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Pasajero</th>
+              <th>Correo</th>
               <th>Celular</th>
               <th>Acciones</th>
             </tr>
@@ -822,8 +1016,6 @@
         </table>
       </div>
     </div>
-
-    
     
     <!-- ESTADO DE FLOTA SECTION -->
     <div id="flotaSection" class="section-content" style="display: none;">
@@ -849,40 +1041,6 @@
         </div>
       </div>
     </div>
-<div class="stat-label">🔴 Inactivos</div></div>
-        <div class="stat-card paid"><div class="stat-value" id="flotaEnMovimiento">0</div><div class="stat-label">🚗 En Movimiento</div></div>
-        <div class="stat-card available"><div class="stat-value" id="flotaFueraZona">0</div><div class="stat-label">⚠️ Fuera de Zona</div></div>
-      </div>
-      
-      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
-        <!-- Mapa de Flota -->
-        <div style="flex: 1 1 500px;">
-          <div id="mapFlota" style="height: 450px; width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); z-index: 1;"></div>
-        </div>
-        
-        <!-- Lista de Conductores de Flota -->
-        <div style="flex: 1 1 300px; display: flex; flex-direction: column;">
-          <input type="text" id="searchFlota" class="search-box" placeholder="🔍 Buscar conductor..." oninput="renderFlotaList()" style="margin-bottom: 15px;">
-          <div id="flotaList" style="flex: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
-            <div style="text-align: center; padding: 40px; color: #64748b;">Cargando flota...</div>
-          </div>
-        </div>
-      </div>
-    </div>
-<div class="stat-label">🔴 Inactivos</div></div>
-        <div class="stat-card paid"><div class="stat-value" id="flotaPagados">0</div><div class="stat-label">💳 Pagados</div></div>
-        <div class="stat-card available"><div class="stat-value" id="flotaDisponibles">0</div><div class="stat-label">🆓 Disponibles</div></div>
-      </div>
-      <div style="margin-bottom: 15px;">
-        <input type="text" id="searchFlota" class="search-box" placeholder="🔍 Buscar en flota..." oninput="renderFlotaList()">
-      </div>
-      <div class="flota-grid" id="flotaList">
-        <div style="text-align: center; padding: 40px; color: #64748b;">Cargando flota...</div>
-      </div>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn-primary" onclick="refreshData()">Actualizar Datos</button>
       <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
     </div>
   </div>
