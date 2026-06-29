@@ -1409,6 +1409,16 @@
         
       if (error) throw error;
       showToast(nuevoEstado === 'a_bordo' ? 'Pasajero recogido' : 'Viaje finalizado');
+
+      // Si el pasajero se bajó (completado), liberamos 1 cupo
+      if (nuevoEstado === 'completado') {
+         const { data: currentConductor } = await supabaseClient.from('conductores').select('cupos_disponibles').eq('id', conductorData.id).single();
+         if (currentConductor) {
+             const nuevosCupos = Math.min(4, (currentConductor.cupos_disponibles || 0) + 1);
+             await supabaseClient.from('conductores').update({ cupos_disponibles: nuevosCupos }).eq('id', conductorData.id);
+         }
+      }
+
       // La UI se actualizará automáticamente por el Realtime
     } catch (e) {
       showToast('Error al actualizar: ' + e.message, 'error');
@@ -1723,7 +1733,8 @@
       }
 
       const route = data.routes[0];
-      const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); // GeoJSON es [lng,lat]
+      const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+      currentRouteData = route.geometry; // Guardamos la geometria para Supabase // GeoJSON es [lng,lat]
 
       // Dibujar ruta en mapa
       if (routeLayer) map.removeLayer(routeLayer);
@@ -1760,6 +1771,7 @@
     searchOriginEl.value = '';
     searchDestEl.value = '';
     document.getElementById('routeInfo').classList.remove('show');
+    currentRouteData = null;
     showToast('Ruta limpiada');
   }
 

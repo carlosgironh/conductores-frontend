@@ -1018,7 +1018,7 @@
     </div>
     
     <!-- ESTADO DE FLOTA SECTION -->
-    <div id="flotaSection" class="section-content" style="display: none;">
+    <div id="flotaSection" class="section-content">
       <div class="stats-grid">
         <div class="stat-card active"><div class="stat-value" id="flotaActivos">0</div><div class="stat-label">🟢 Activos</div></div>
         <div class="stat-card inactive"><div class="stat-value" id="flotaInactivos">0</div><div class="stat-label">🔴 Inactivos</div></div>
@@ -1151,12 +1151,21 @@
         if (userError || !user) { window.location.href = "index.html"; return; }
 
         const { data: coordData } = await supabaseClient.from('coordinadores').select('*').eq('auth_user_id', user.id).maybeSingle();
+        let coordPermisos = { puede_editar_viajes: true, puede_ver_mapa: true };
         if (!coordData) {
           const { data: adminData } = await supabaseClient.from('admins').select('auth_user_id').eq('auth_user_id', user.id).maybeSingle();
           if (!adminData) { window.location.href = "perfil.html"; return; }
           currentCoordinador = { nombres: 'Admin (Coordinador)', apellidos: '' };
         } else {
           currentCoordinador = coordData;
+          if (coordData.permisos) coordPermisos = coordData.permisos;
+        }
+
+        window.puedeEditarViajes = coordPermisos.puede_editar_viajes !== false;
+        
+        if (coordPermisos.puede_ver_mapa === false) {
+           const tabFlota = document.querySelector('button[onclick="switchSection(\\\'flota\\\', this)"]');
+           if (tabFlota) tabFlota.style.display = 'none';
         }
 
         document.getElementById('coordinadorName').textContent = `${currentCoordinador.nombres} ${currentCoordinador.apellidos || ''}`;
@@ -1386,10 +1395,10 @@
               <button class="action-btn delete" onclick="cancelarViaje('${v.id}')" title="Cancelar Viaje">✕</button>
             `;
           } else if (cleanEstado === 'asignado') {
-            actionButtons = `
-              <button class="action-btn view" onclick="completarViaje('${v.id}')" title="Marcar como Completado" style="color:#22c55e">✓</button>
+            actionButtons = window.puedeEditarViajes ? `
+              <button class="action-btn view" onclick="completarViaje('${v.id}')" title="Marcar como Completado" style="color:#22c55e">V</button>
               <button class="action-btn delete" onclick="cancelarViaje('${v.id}')" title="Cancelar Viaje">✕</button>
-            `;
+            ` : ``;
           } else {
             actionButtons = `
               <button class="action-btn edit" onclick="revertirViaje('${v.id}')" title="Reactivar Viaje" style="color:#eab308">↺</button>
@@ -1421,6 +1430,9 @@
               <span style="color:#64748b">📞 ${conductor.celular} · 🚙 ${conductor.vehiculo}</span>
             </div>
           ` : `<div class="viaje-sin-conductor">⏳ Esperando asignación</div>`}
+          <div class="card-footer">
+            ${window.puedeEditarViajes ? `<button class="btn-secondary outline" onclick="openCambiarEstadoModal('${v.id}')" style="width:100%; justify-content:center; padding:8px;">Modificar Estado</button>` : `<span style="font-size: 12px; color: #94a3b8; font-style: italic;">Sin permisos de edición</span>`}
+          </div>
           <div class="viaje-actions">
             <button class="action-btn view" onclick="verDetalleViaje('${v.id}')" title="Ver Detalle">👁️</button>
             <button class="action-btn call" onclick="llamarCelular('${passengerInfo.celular}')" title="Llamar Pasajero">📞</button>

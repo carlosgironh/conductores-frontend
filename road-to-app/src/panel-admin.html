@@ -1893,6 +1893,10 @@
           <label>Radio (metros)</label>
           <input type="number" id="zonaRadio" required min="10" value="500">
         </div>
+        <div class="form-group">
+          <label>Tarifa Fija ($)</label>
+          <input type="number" step="0.01" id="zonaTarifa" required min="0" value="1.00">
+        </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
           <button type="button" class="btn-secondary" onclick="closeZonaModal()">Cancelar</button>
           <button type="submit" class="btn-primary">Guardar</button>
@@ -3690,7 +3694,8 @@
           fillOpacity: 0.2,
           radius: z.radio_metros
         }).addTo(window.adminMapInstance);
-        circle.bindPopup(`<b>${z.nombre}</b><br>Radio: ${z.radio_metros}m`);
+        const tarifaText = z.tarifa !== undefined ? parseFloat(z.tarifa).toFixed(2) : '1.00';
+        circle.bindPopup(`<b>${z.nombre}</b><br>Radio: ${z.radio_metros}m<br>Tarifa: $${tarifaText}`);
         zonasLayers.push(circle);
       });
     }
@@ -3701,6 +3706,7 @@
         return;
       }
       document.getElementById('zonaForm').reset();
+      document.getElementById('zonaTarifa').value = '1.00';
       document.getElementById('zonaModal').classList.add('show');
     }
 
@@ -3716,6 +3722,7 @@
       document.getElementById('zonaNombre').value = zona.nombre || '';
       document.getElementById('zonaDescripcion').value = zona.descripcion || '';
       document.getElementById('zonaRadio').value = zona.radio_metros || 1500;
+      document.getElementById('zonaTarifa').value = zona.tarifa !== undefined ? zona.tarifa : 1.00;
       
       document.getElementById('zonaModal').classList.add('show');
     }
@@ -3732,25 +3739,37 @@
       const nombre = document.getElementById('zonaNombre').value;
       const desc = document.getElementById('zonaDescripcion').value;
       const radio = parseFloat(document.getElementById('zonaRadio').value);
+      const tarifa = parseFloat(document.getElementById('zonaTarifa').value);
 
       showLoading('Guardando zona...');
       try {
-        const { error } = await supabaseClient.from('zonas_geofence').insert({
+        let payload = {
           nombre: nombre,
           descripcion: desc,
           latitud: selectedLatLng.lat,
           longitud: selectedLatLng.lng,
-          radio_metros: radio
-        });
+          radio_metros: radio,
+          tarifa: tarifa
+        };
+        
+        let error;
+        if (editZonaId) {
+           const res = await supabaseClient.from('zonas_geofence').update(payload).eq('id', editZonaId);
+           error = res.error;
+        } else {
+           const res = await supabaseClient.from('zonas_geofence').insert(payload);
+           error = res.error;
+        }
+        
         if (error) throw error;
         
-        showToast('Zona creada', 'success');
+        showToast('Zona guardada con éxito', 'success');
         closeZonaModal();
         await cargarZonas();
         renderZonasEnMapa();
         renderZonasList();
       } catch (err) {
-        showToast('Error al crear zona', 'error');
+        showToast('Error al guardar zona', 'error');
       } finally {
         hideLoading();
       }
@@ -3774,7 +3793,8 @@
         div.style.alignItems = 'center';
 
         const info = document.createElement('div');
-        info.innerHTML = `<strong>${z.nombre}</strong><br><small style="color: #94a3b8">${z.descripcion || 'Sin desc'}</small><br><span style="color: #60a5fa; font-size: 12px;">Radio: ${z.radio_metros}m</span>`;
+        const tarifaText = z.tarifa !== undefined ? parseFloat(z.tarifa).toFixed(2) : '1.00';
+        info.innerHTML = `<strong>${z.nombre}</strong><br><small style="color: #94a3b8">${z.descripcion || 'Sin desc'}</small><br><span style="color: #60a5fa; font-size: 12px;">Radio: ${z.radio_metros}m | Tarifa: $${tarifaText}</span>`;
         
         const actions = document.createElement('div');
         

@@ -1,0 +1,9 @@
+﻿    // REFRESH & UTILS
+    async function refreshData() {
+      showLoading('Actualizando...');
+      await Promise.all([cargarConductores(), cargarPasajeros(), cargarViajes(), cargarCoordinadoresGest()]);
+      await renderTable();
+      await renderTablePasajeros();
+      await renderViajesList();
+      hideLoading();
+    }

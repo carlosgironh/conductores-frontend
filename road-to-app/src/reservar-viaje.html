@@ -385,6 +385,7 @@
         let routeLayer = null;
         let activeViajeId = null;
         let realtimeChannel = null;
+        let allZonasActivas = [];
 
         // ── Toast ─────────────────────────────────────────────────────────────
         function showToast(message, type = 'success') {
@@ -392,6 +393,28 @@
             toast.textContent = message;
             toast.className = `toast toast-${type} show`;
             setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // 🚗 Utilidades: Geofencing y Tarifas 🚗
+        async function cargarZonasActivas() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('zonas_geofence')
+                    .select('*')
+                    .eq('activa', true);
+                if (!error) allZonasActivas = data || [];
+            } catch(e) { console.error('Error cargando zonas:', e); }
+        }
+
+        function calcularDistanciaHaversine(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Radio de la Tierra en metros
+            const f1 = lat1 * Math.PI / 180;
+            const f2 = lat2 * Math.PI / 180;
+            const df = (lat2 - lat1) * Math.PI / 180;
+            const dl = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(df / 2) * Math.sin(df / 2) + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // en metros
         }
 
         function formatDate(dateString) {
@@ -624,8 +647,20 @@
 
                 if (!origen || !destino || !fechaHora) throw new Error('Completa todos los campos obligatorios');
 
-                // Geocodificar destino para guardarlo
+                // Geocodificar origen y destino
+                const origenCoords = await geocodificar(origen);
                 const destinoCoords = await geocodificar(destino);
+
+                let tarifaFinal = 1.00; // Tarifa base por defecto
+                if (origenCoords && allZonasActivas.length > 0) {
+                    for (const zona of allZonasActivas) {
+                        const dist = calcularDistanciaHaversine(origenCoords.lat, origenCoords.lng, zona.latitud, zona.longitud);
+                        if (dist <= zona.radio_metros) {
+                            tarifaFinal = zona.tarifa !== undefined ? parseFloat(zona.tarifa) : 1.00;
+                            break; // Toma la primera zona coincidente
+                        }
+                    }
+                }
 
                 const insertData = {
                     pasajero_id: currentUser.id,
@@ -634,6 +669,8 @@
                     fecha_hora: fechaHora,
                     estado: 'pendiente',
                     estado_pasajero: 'en_espera',
+                    tarifa: tarifaFinal,
+                    coordenadas_origen: origenCoords ? { lat: origenCoords.lat, lng: origenCoords.lng } : null,
                     coordenadas_destino: destinoCoords ? { lat: destinoCoords.lat, lng: destinoCoords.lng } : null
                 };
 
@@ -788,6 +825,7 @@
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('fecha-hora').min = now.toISOString().slice(0, 16);
 
+            await cargarZonasActivas();
             await cargarMisViajes();
             iniciarRealtime();
         }
