@@ -823,11 +823,53 @@
       </div>
     </div>
 
+    
+    
     <!-- ESTADO DE FLOTA SECTION -->
-    <div id="flotaSection" class="section-content">
+    <div id="flotaSection" class="section-content" style="display: none;">
       <div class="stats-grid">
         <div class="stat-card active"><div class="stat-value" id="flotaActivos">0</div><div class="stat-label">🟢 Activos</div></div>
         <div class="stat-card inactive"><div class="stat-value" id="flotaInactivos">0</div><div class="stat-label">🔴 Inactivos</div></div>
+        <div class="stat-card paid"><div class="stat-value" id="flotaEnMovimiento">0</div><div class="stat-label">🚗 En Movimiento</div></div>
+        <div class="stat-card available"><div class="stat-value" id="flotaFueraZona">0</div><div class="stat-label">⚠️ Fuera de Zona</div></div>
+      </div>
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+        <!-- Mapa de Flota -->
+        <div style="flex: 1 1 500px;">
+          <div id="mapFlota" style="height: 450px; width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); z-index: 1;"></div>
+        </div>
+        
+        <!-- Lista de Conductores de Flota -->
+        <div style="flex: 1 1 300px; display: flex; flex-direction: column;">
+          <input type="text" id="searchFlota" class="search-box" placeholder="🔍 Buscar conductor..." oninput="renderFlotaList()" style="margin-bottom: 15px;">
+          <div id="flotaList" style="flex: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+            <div style="text-align: center; padding: 40px; color: #64748b;">Cargando flota...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="stat-label">🔴 Inactivos</div></div>
+        <div class="stat-card paid"><div class="stat-value" id="flotaEnMovimiento">0</div><div class="stat-label">🚗 En Movimiento</div></div>
+        <div class="stat-card available"><div class="stat-value" id="flotaFueraZona">0</div><div class="stat-label">⚠️ Fuera de Zona</div></div>
+      </div>
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+        <!-- Mapa de Flota -->
+        <div style="flex: 1 1 500px;">
+          <div id="mapFlota" style="height: 450px; width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); z-index: 1;"></div>
+        </div>
+        
+        <!-- Lista de Conductores de Flota -->
+        <div style="flex: 1 1 300px; display: flex; flex-direction: column;">
+          <input type="text" id="searchFlota" class="search-box" placeholder="🔍 Buscar conductor..." oninput="renderFlotaList()" style="margin-bottom: 15px;">
+          <div id="flotaList" style="flex: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+            <div style="text-align: center; padding: 40px; color: #64748b;">Cargando flota...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="stat-label">🔴 Inactivos</div></div>
         <div class="stat-card paid"><div class="stat-value" id="flotaPagados">0</div><div class="stat-label">💳 Pagados</div></div>
         <div class="stat-card available"><div class="stat-value" id="flotaDisponibles">0</div><div class="stat-label">🆓 Disponibles</div></div>
       </div>
@@ -1626,6 +1668,7 @@
       btn.classList.add('active');
       document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
       document.getElementById(section + 'Section').classList.add('active');
+      if (section === 'flota') { setTimeout(() => { initFlotaMap(); if(mapFlotaInstance) mapFlotaInstance.invalidateSize(); }, 200); }
     }
 
     async function refreshData() {

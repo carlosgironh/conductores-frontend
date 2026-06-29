@@ -2115,6 +2115,7 @@
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
         <button class="section-tab" onclick="switchSection('viajes', this)">🚕 Viajes</button>
         <button class="section-tab" onclick="switchSection('zonas', this)">📍 Zonas</button>
+        <button class="section-tab" onclick="switchSection('flota', this)">📊 Estado de Flota</button>
       </div>
     </div>
 
@@ -2292,6 +2293,32 @@
       </div>
     </div>
 
+    
+    <!-- ESTADO DE FLOTA SECTION -->
+    <div id="flotaSection" class="section-content" style="display: none;">
+      <div class="stats-grid">
+        <div class="stat-card active"><div class="stat-value" id="flotaActivos">0</div><div class="stat-label">🟢 Activos</div></div>
+        <div class="stat-card inactive"><div class="stat-value" id="flotaInactivos">0</div><div class="stat-label">🔴 Inactivos</div></div>
+        <div class="stat-card paid"><div class="stat-value" id="flotaEnMovimiento">0</div><div class="stat-label">🚗 En Movimiento</div></div>
+        <div class="stat-card available"><div class="stat-value" id="flotaFueraZona">0</div><div class="stat-label">⚠️ Fuera de Zona</div></div>
+      </div>
+      
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+        <!-- Mapa de Flota -->
+        <div style="flex: 1 1 500px;">
+          <div id="mapFlota" style="height: 450px; width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); z-index: 1;"></div>
+        </div>
+        
+        <!-- Lista de Conductores de Flota -->
+        <div style="flex: 1 1 300px; display: flex; flex-direction: column;">
+          <input type="text" id="searchFlota" class="search-input" placeholder="🔍 Buscar conductor..." oninput="renderFlotaList()" style="margin-bottom: 15px;">
+          <div id="flotaList" style="flex: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+            <div style="text-align: center; padding: 40px; color: #64748b;">Cargando flota...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Botones Principales -->
     <div class="btn-group">
       <button class="btn-primary" onclick="refreshData()">Actualizar</button>
@@ -2338,6 +2365,7 @@
     const emailCache = new Map();
 
     let permCoordinadoresEditar = false;
+    let permFlotaCoordinadores = true;
 
     // QR & Pago vars
     let currentQRConductor = null;
@@ -2462,6 +2490,69 @@
       }
     }
 
+    
+    // CONTROL DE PERMISO MAPA FLOTA COORDINADORES
+    async function togglePermisoMapaFlotaClick() {
+      permFlotaCoordinadores = !permFlotaCoordinadores;
+      const sw = document.getElementById('permisoMapaFlotaSwitch');
+      const lbl = document.getElementById('labelPermisoMapaFlota');
+      
+      if (permFlotaCoordinadores) {
+        sw.classList.add('active');
+        lbl.textContent = "Habilitado";
+        lbl.style.color = "#4ade80";
+      } else {
+        sw.classList.remove('active');
+        lbl.textContent = "Deshabilitado";
+        lbl.style.color = "#ef4444";
+      }
+
+      showLoading('Guardando configuración...');
+      const { error } = await supabaseClient
+        .from('coordinadores')
+        .upsert({
+          id: '11111111-1111-1111-1111-111111111111',
+          nombres: 'Config_Permiso_Mapa_Flota',
+          apellidos: 'Permisos',
+          celular: permFlotaCoordinadores ? 'true' : 'false',
+          email: 'permisos_flota@roadto.app'
+        }, { onConflict: 'id' });
+      hideLoading();
+
+      if (error) {
+        showToast('Error al guardar permisos: ' + error.message, 'error');
+      } else {
+        showToast('Permiso actualizado con éxito', 'success');
+      }
+    }
+
+    async function cargarPermisoMapaFlota() {
+      try {
+        const { data } = await supabaseClient
+          .from('coordinadores')
+          .select('celular')
+          .eq('id', '11111111-1111-1111-1111-111111111111')
+          .maybeSingle();
+
+        if (data) {
+          permFlotaCoordinadores = data.celular === 'true';
+          const sw = document.getElementById('permisoMapaFlotaSwitch');
+          const lbl = document.getElementById('labelPermisoMapaFlota');
+          if (permFlotaCoordinadores) {
+            sw.classList.add('active');
+            lbl.textContent = "Habilitado";
+            lbl.style.color = "#4ade80";
+          } else {
+            sw.classList.remove('active');
+            lbl.textContent = "Deshabilitado";
+            lbl.style.color = "#ef4444";
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     async function obtenerEmailDesdeAuth(authUserId) {
       if (!authUserId) return "No registrado";
       if (emailCache.has(authUserId)) return emailCache.get(authUserId);
@@ -2507,6 +2598,7 @@
       btn.classList.add('active');
       document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
       document.getElementById(section + 'Section').classList.add('active');
+      if (section === 'flota') { setTimeout(() => { initFlotaMap(); if(mapFlotaInstance) mapFlotaInstance.invalidateSize(); }, 200); }
 
       if (section === 'zonas' && !window.adminMapInstance) {
         // Inicializar mapa si es la primera vez que entramos
