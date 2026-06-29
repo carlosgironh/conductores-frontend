@@ -1351,6 +1351,7 @@
           <div class="info">
             <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
+            <div style="font-size: 11px; color: var(--corp-green-light); margin-top: 4px; font-weight: 600;">🚙 Cupos Disp: ${c.capacidad_disponible ?? 4}/4</div>
           </div>
         `;
         container.appendChild(div);

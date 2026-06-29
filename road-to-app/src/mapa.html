@@ -1103,79 +1103,64 @@
   }
 
   async function startTracking() {
-    // Pedir permisos de notificaciones para cuando entre a zonas
-    if (window.LocalNotifications) {
-      try {
-        const permStatus = await window.LocalNotifications.checkPermissions();
-        if (permStatus.display !== 'granted') {
-          await window.LocalNotifications.requestPermissions();
-        }
-      } catch (e) {
-        console.warn('Error pidiendo permisos de notificación:', e);
-      }
-    }
-
     isTracking = true;
     startTime = Date.now();
     totalDistance = 0;
     lastPosition = null;
     routePolyline.setLatLngs([]);
 
-    // Actualizar UI
     const btn = document.getElementById('trackBtn');
     btn.className = 'btn-action btn-stop';
     btn.innerHTML = '⏹ Detener Viaje';
     document.getElementById('liveIndicator').classList.add('active');
 
-    // Intentar usar Background Geolocation de Capacitor
-    if (window.BackgroundGeolocation) {
+    if (window.Capacitor && window.Capacitor.Plugins.RoadToLocation) {
+      try {
+        const RoadToLocation = window.Capacitor.Plugins.RoadToLocation;
+        
+        // Listener de actualización nativa
+        RoadToLocation.addListener('onLocationUpdate', (loc) => {
+          handlePositionUpdate({
+            coords: {
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+              accuracy: loc.accuracy,
+              speed: loc.speed,
+              heading: loc.heading
+            }
+          });
+        });
+
+        // Iniciar servicio nativo
+        await RoadToLocation.startTracking();
+        showToast('🟢 Viaje iniciado (Modo Nativo 100% Background)');
+      } catch (e) {
+        console.error("Fallo al iniciar RoadToLocation nativo", e);
+        startWebTrackingFallback();
+      }
+    } else if (window.BackgroundGeolocation) {
+      // Fallback a plugin de capacitor antiguo
       try {
         watchId = await window.BackgroundGeolocation.addWatcher(
-          {
-            backgroundMessage: "Rastreando ubicación en segundo plano.",
-            backgroundTitle: "Road To Activo",
-            requestPermissions: true,
-            stale: false,
-            distanceFilter: 2
-          },
+          { backgroundMessage: "Rastreando ubicación en segundo plano.", backgroundTitle: "Road To Activo", requestPermissions: true, stale: false, distanceFilter: 2 },
           function (location, error) {
-            if (error) {
-              if (error.code === 'NOT_AUTHORIZED') {
-                showToast('Permisos de GPS denegados');
-              }
-              return console.error(error);
-            }
-            
-            // Adaptar formato a lo que espera handlePositionUpdate
-            handlePositionUpdate({
-              coords: {
-                latitude: location.latitude,
-                longitude: location.longitude,
-                accuracy: location.accuracy,
-                speed: location.speed,
-                heading: location.bearing
-              }
-            });
+            if (error) return console.error(error);
+            handlePositionUpdate({ coords: { latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy, speed: location.speed, heading: location.bearing } });
           }
         );
-        showToast('🟢 Viaje iniciado (Modo Segundo Plano)');
+        showToast('🟢 Viaje iniciado (Modo Capacitor Básico)');
       } catch (e) {
-        console.error("Fallo al iniciar Background Geolocation", e);
         startWebTrackingFallback();
       }
     } else {
       startWebTrackingFallback();
     }
 
-    // Timer para actualizar tiempo
     timerInterval = setInterval(updateTimer, 1000);
 
-    // Guardar sesión en Supabase
     if (conductorData) {
       supabaseClient.from('tracking_sessions').insert({
-        driver_id: conductorData.id,
-        started_at: new Date().toISOString(),
-        status: 'active',
+        driver_id: conductorData.id, started_at: new Date().toISOString(), status: 'active'
       }).then(({ error }) => {
         if (error) console.warn('Error creando sesión:', error);
       });
@@ -1203,7 +1188,11 @@
   async function stopTracking() {
     isTracking = false;
 
-    if (window.BackgroundGeolocation && watchId !== null && typeof watchId === 'string') {
+    if (window.Capacitor && window.Capacitor.Plugins.RoadToLocation) {
+      const RoadToLocation = window.Capacitor.Plugins.RoadToLocation;
+      await RoadToLocation.stopTracking();
+      RoadToLocation.removeAllListeners();
+    } else if (window.BackgroundGeolocation && watchId !== null && typeof watchId === 'string') {
       await window.BackgroundGeolocation.removeWatcher({ id: watchId });
       watchId = null;
     } else if (watchId !== null) {
@@ -1216,13 +1205,11 @@
       timerInterval = null;
     }
 
-    // Actualizar UI
     const btn = document.getElementById('trackBtn');
     btn.className = 'btn-action btn-start';
     btn.innerHTML = '▶ Iniciar Viaje';
     document.getElementById('liveIndicator').classList.remove('active');
 
-    // Cerrar sesión en Supabase
     if (conductorData) {
       supabaseClient.from('tracking_sessions')
         .update({ ended_at: new Date().toISOString(), status: 'completed' })
