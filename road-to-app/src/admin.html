@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co https://cdn.jsdelivr.net data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; script-src-elem 'self' https://cdn.jsdelivr.net https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data: blob: https://*.supabase.co;">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="JS/supabase-bundle.js"></script>
   <script>
 // Try to load capacitor.js dynamically, but don't fail if it's not available
 (function() {
@@ -605,7 +605,7 @@ function initSupabase() {
     return false;
   }
   try {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('Supabase client initialized successfully');
     return true;
   } catch (e) {

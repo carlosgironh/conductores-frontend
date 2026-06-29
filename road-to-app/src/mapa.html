@@ -10,17 +10,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="JS/supabase-bundle.js"></script>
 
 <!-- Leaflet CSS + JS (Open Source, BSD-2) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="JS/leaflet/leaflet.css">
+<script src="JS/leaflet/leaflet.js"></script>
 
 <!-- Config centralizada -->
 <script src="config.js"></script>
 <script src="JS/backgroundTracking-bundle.js"></script>
+<script src="JS/localNotifications-bundle.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -208,6 +207,40 @@
 
   .info-panel.hidden {
     transform: translateY(calc(100% - 60px));
+  }
+
+  .waitlist-banner {
+    position: fixed;
+    top: calc(56px + var(--safe-top));
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, var(--corp-orange) 0%, #f9a8d4 100%);
+    color: white;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .waitlist-banner.visible {
+    transform: translateY(0);
+  }
+  .waitlist-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .waitlist-banner-pos {
+    background: rgba(0,0,0,0.25);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
   }
 
   .panel-handle {
@@ -577,6 +610,15 @@
     </div>
   </header>
 
+  <!-- Waitlist Banner -->
+  <div class="waitlist-banner" id="waitlistBanner">
+    <div class="waitlist-banner-content">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span id="waitlistZoneName">Zona</span>
+    </div>
+    <div class="waitlist-banner-pos" id="waitlistPosition">Turno #--</div>
+  </div>
+
   <!-- Map -->
   <!-- Search Overlay -->
   <div class="search-overlay">
@@ -671,13 +713,42 @@
   const DEFAULT_LNG = -79.5;
   const DEFAULT_ZOOM = 13;
 
+  // ═══ GEOFENCE STATE ═══
+  let activeZonas = [];
+  let notifiedZonas = new Set(); // Para no notificar repetidamente
+
   // ═══ INICIALIZACIÓN ═══
   document.addEventListener('DOMContentLoaded', async () => {
     initMap();
     await identifyUser();
     await getUserLocation();
+    await loadZonas();
     hideLoading();
   });
+
+  async function loadZonas() {
+    try {
+      const { data, error } = await supabaseClient
+        .from('zonas_geofence')
+        .select('*')
+        .eq('activa', true);
+      if (!error && data) {
+        activeZonas = data;
+        // Dibujar las zonas en el mapa para que el conductor las vea (opcional, pero útil)
+        activeZonas.forEach(z => {
+          L.circle([z.latitud, z.longitud], {
+            color: '#8ac725',
+            fillColor: '#8ac725',
+            fillOpacity: 0.1,
+            radius: z.radio_metros,
+            weight: 1
+          }).addTo(map);
+        });
+      }
+    } catch (e) {
+      console.warn('Error cargando zonas', e);
+    }
+  }
 
   function initMap() {
     map = L.map('map', {
@@ -747,9 +818,145 @@
         userRole = 'conductor';
         conductorData = conductor;
         document.getElementById('btnDriverList').style.display = 'none';
+        initConductorRealtime();
       }
     } catch (e) {
       console.warn('Error identificando usuario:', e);
+    }
+  }
+
+  // ═══ REALTIME: CONDUCTOR (FASE 3) ═══
+  function initConductorRealtime() {
+    if (!conductorData) return;
+    
+    // Escuchar cualquier cambio en lista_espera para recalcular posición
+    const canalConductor = supabaseClient.channel(`conductor-waitlist`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'lista_espera' },
+        (payload) => {
+          // Si nos eliminan de la fila (ej. nos despachan o nos salimos de la zona)
+          if (payload.eventType === 'DELETE' && payload.old.conductor_id === conductorData.id) {
+            document.getElementById('waitlistBanner').classList.remove('visible');
+            showToast('Has salido de la lista de espera.', 'info');
+            return;
+          }
+
+          // Si estamos en la lista, recalcular posiciones para todos
+          if (Array.from(notifiedZonas).length > 0) {
+            updateWaitlistUI(Array.from(notifiedZonas)[0]);
+          }
+        }
+      )
+      .subscribe();
+
+    // Escuchar UPDATES en la lista_espera para este conductor
+    const canalConductorPersonal = supabaseClient.channel(`conductor-${conductorData.id}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'lista_espera',
+          filter: `conductor_id=eq.${conductorData.id}` 
+        },
+        (payload) => {
+          if (payload.new.estado === 'aprobado') {
+            showToast('✅ ¡Has sido aprobado en la zona!', 'success');
+          } else if (payload.new.estado === 'rechazado') {
+            showToast('❌ Tu solicitud en la zona fue rechazada.', 'error');
+          }
+        }
+      )
+      .subscribe();
+
+    // Escuchar INSERTS en viajes_reservados para este conductor
+    const canalViajes = supabaseClient.channel(`viajes-${conductorData.id}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'viajes_reservados',
+          filter: `conductor_asignado_id=eq.${conductorData.id}` 
+        },
+        (payload) => {
+          const viaje = payload.new;
+          mostrarModalViajeAsignado(viaje);
+        }
+      )
+      .subscribe();
+  }
+
+  function mostrarModalViajeAsignado(viaje) {
+    // Si ya existe el modal, no lo volvemos a crear, mejor inyectar HTML dinámico
+    let m = document.getElementById('modalViajeAsignado');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'modalViajeAsignado';
+      m.className = 'modal-overlay centered';
+      m.innerHTML = `
+        <div class="modal-content" style="text-align: center; max-width: 90%; background: #0f172a;">
+          <div style="font-size: 40px; margin-bottom: 10px;">🚕</div>
+          <h2 style="color: white; margin-bottom: 10px;">¡Nuevo Viaje Asignado!</h2>
+          <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px;">
+            <p style="margin-bottom: 5px; color: #cbd5e1;"><strong>Pasajero:</strong> <span id="vPasajero" style="color: white;"></span></p>
+            <p style="margin-bottom: 5px; color: #cbd5e1;"><strong>Origen:</strong> <span id="vOrigen" style="color: white;"></span></p>
+            <p style="margin-bottom: 5px; color: #cbd5e1;"><strong>Destino:</strong> <span id="vDestino" style="color: white;"></span></p>
+            <p style="color: #4ade80;"><strong>Tarifa:</strong> $<span id="vTarifa"></span></p>
+          </div>
+          <button class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 16px; font-weight: bold;" onclick="aceptarViajeModal()">Ir al Viaje</button>
+        </div>
+      `;
+      document.body.appendChild(m);
+    }
+    
+    document.getElementById('vPasajero').innerText = viaje.pasajero_nombre || 'Pasajero';
+    document.getElementById('vOrigen').innerText = viaje.origen || 'No especificado';
+    document.getElementById('vDestino').innerText = viaje.destino || 'No especificado';
+    document.getElementById('vTarifa').innerText = parseFloat(viaje.tarifa || 0).toFixed(2);
+    
+    m.classList.add('show');
+    
+    // Reproducir un sonido si fuera posible
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  }
+
+  window.aceptarViajeModal = function() {
+    const m = document.getElementById('modalViajeAsignado');
+    if (m) m.classList.remove('show');
+    showToast('Navegando a ubicación...', 'success');
+    // Aquí iría la lógica para trazar la ruta en el mapa o abrir Google Maps
+  }
+
+  async function updateWaitlistUI(zonaId) {
+    if (!conductorData) return;
+    try {
+      // 1. Obtener toda la lista de espera de la zona actual
+      const { data: lista, error } = await supabaseClient
+        .from('lista_espera')
+        .select(`conductor_id, zonas_geofence!inner(nombre)`)
+        .eq('zona_id', zonaId)
+        .order('created_at', { ascending: true });
+        
+      if (error) throw error;
+
+      // 2. Buscar mi posición
+      const myIndex = lista.findIndex(item => item.conductor_id === conductorData.id);
+      
+      const banner = document.getElementById('waitlistBanner');
+      if (myIndex !== -1) {
+        // Estamos en la fila
+        const zonaName = lista[myIndex].zonas_geofence?.nombre || 'la zona';
+        document.getElementById('waitlistZoneName').innerText = zonaName;
+        document.getElementById('waitlistPosition').innerText = `Turno #${myIndex + 1}`;
+        banner.classList.add('visible');
+      } else {
+        // No estamos en la fila
+        banner.classList.remove('visible');
+      }
+    } catch (err) {
+      console.warn('Error actualizando fila:', err);
     }
   }
 
@@ -814,6 +1021,18 @@
   }
 
   async function startTracking() {
+    // Pedir permisos de notificaciones para cuando entre a zonas
+    if (window.LocalNotifications) {
+      try {
+        const permStatus = await window.LocalNotifications.checkPermissions();
+        if (permStatus.display !== 'granted') {
+          await window.LocalNotifications.requestPermissions();
+        }
+      } catch (e) {
+        console.warn('Error pidiendo permisos de notificación:', e);
+      }
+    }
+
     isTracking = true;
     startTime = Date.now();
     totalDistance = 0;
@@ -975,6 +1194,59 @@
         source: 'gps_web',
       }).then(({ error }) => {
         if (error) console.warn('Error guardando ubicación:', error);
+      });
+
+      // === COMPROBAR ZONAS GEOFENCE ===
+      activeZonas.forEach(zona => {
+        // Calcular distancia desde la posición actual hasta el centro de la zona
+        const distanceToZone = haversineDistance(latitude, longitude, zona.latitud, zona.longitud);
+        
+        // Si estamos dentro del radio (y no lo hemos notificado antes)
+        if (distanceToZone <= zona.radio_metros && !notifiedZonas.has(zona.id)) {
+          notifiedZonas.add(zona.id);
+          showToast(`📍 Entraste a la zona: ${zona.nombre}`);
+          
+          // Notificación Nativa Push (por si la app está en segundo plano)
+          if (window.LocalNotifications) {
+            window.LocalNotifications.schedule({
+              notifications: [
+                {
+                  title: "Zona Especial Alcanzada",
+                  body: `📍 Has entrado a la zona: ${zona.nombre}. Se te añadirá a la lista de espera.`,
+                  id: new Date().getTime(),
+                  schedule: { at: new Date(Date.now() + 1000) },
+                  sound: null,
+                  attachments: null,
+                  actionTypeId: "",
+                  extra: null
+                }
+              ]
+            }).catch(e => console.warn('Error scheduling notification', e));
+          }
+
+          // Entrar a la lista de espera
+          supabaseClient.from('lista_espera').insert({
+            zona_id: zona.id,
+            conductor_id: conductorData.id,
+            estado: 'esperando'
+          }).then(({ error }) => {
+            if (error) {
+              console.warn('Ya en lista de espera o error:', error);
+            } else {
+              showToast(`Añadido a lista de espera en ${zona.nombre}`);
+            }
+          });
+        } 
+        // Opcional: Si salimos de la zona, remover de lista de espera
+        else if (distanceToZone > zona.radio_metros && notifiedZonas.has(zona.id)) {
+          notifiedZonas.delete(zona.id);
+          // Eliminar de lista de espera
+          supabaseClient.from('lista_espera')
+            .delete()
+            .eq('zona_id', zona.id)
+            .eq('conductor_id', conductorData.id)
+            .then(() => showToast(`Saliste de la zona: ${zona.nombre}`));
+        }
       });
     }
   }

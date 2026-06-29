@@ -2,10 +2,12 @@
   "name": "road-to-app",
   "version": "2.0.0",
   "scripts": {
-    "build": "if exist www rmdir /s /q www && xcopy src www /E /I /Y",
+    "bundle": "node scripts/bundle.js && node scripts/patch-cdn.js && node scripts/patch-supabase-init.js",
+    "build": "npm run bundle && if exist www rmdir /s /q www && xcopy src www /E /I /Y",
     "sync": "npm run build && npx cap sync",
     "android": "npm run build && npx cap add android",
-    "open:android": "npx cap open android"
+    "open:android": "npx cap open android",
+    "sync:windows": "set JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr && npm run build && npx cap sync && cd android && gradlew assembleDebug"
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "^1.2.26",
@@ -18,12 +20,14 @@
     "@capacitor/haptics": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
     "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/local-notifications": "^7.0.6",
     "@capacitor/preferences": "^7.0.0",
     "@capacitor/push-notifications": "^7.0.0",
     "@capacitor/share": "^7.0.0",
     "@capacitor/splash-screen": "^7.0.0",
     "@capacitor/status-bar": "^7.0.0",
     "@supabase/supabase-js": "^2.48.0",
+    "leaflet": "^1.9.4",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
