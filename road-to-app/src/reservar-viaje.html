@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#0a1208">
     <title>Reservar Viaje - Pasajero | Road To</title>
     <script src="JS/supabase-bundle.js"></script>
+    <link rel="stylesheet" href="JS/leaflet/leaflet.css">
+    <script src="JS/leaflet/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -18,18 +20,10 @@
             --corp-green-dark: #448414;
             --corp-green-lime: #9ad93a;
             --corp-green-light: #b8e85c;
-            --corp-gray: #7d7d7d;
-            --corp-gray-dark: #4a4a4a;
-            --corp-gray-light: #9e9e9e;
-            --corp-gray-soft: #cbd5e1;
-            --corp-blue: #2563eb;
-            --corp-blue-dark: #1e40af;
-            --corp-blue-light: #3b82f6;
             --corp-orange: #f97316;
             --corp-orange-light: #fb923c;
-            --primary: var(--corp-green);
-            --primary-dark: var(--corp-green-dark);
-            --accent: var(--corp-green-lime);
+            --corp-blue: #2563eb;
+            --corp-blue-light: #3b82f6;
             --bg-dark: #0a1208;
             --text-light: #eef8e4;
             --text-muted: #8a9e7d;
@@ -57,7 +51,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
+            z-index: 1001;
             padding: 10px;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
@@ -66,347 +60,309 @@
         }
 
         .brand-small {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            font-size: 14px;
-            color: var(--corp-orange);
-            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 700; font-size: 14px;
+            color: var(--corp-orange); text-decoration: none;
         }
-
-        .brand-small svg { width: 24px; height: 24px; color: var(--corp-orange-light); }
-
+        .brand-small svg { width: 24px; height: 24px; flex-shrink: 0; }
         .nav-buttons { display: flex; gap: 8px; }
-
         .nav-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            width: 40px; height: 40px; border-radius: 12px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+            color: #e2e8f0; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s ease;
         }
-
-        .nav-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
-        .nav-btn:active { transform: scale(0.95); }
-        .nav-btn svg { width: 20px; height: 20px; }
-
-        .container {
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 0 16px;
+        .nav-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .nav-perfil {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; background: rgba(138,199,37,0.1);
+            border: 1px solid rgba(138,199,37,0.2); border-radius: 12px;
+            color: var(--corp-green-light); text-decoration: none;
+            font-size: 13px; font-weight: 600; cursor: pointer;
         }
+        .nav-perfil svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .container { max-width: 680px; margin: 0 auto; padding: 0 16px; }
 
         .page-title {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
+            font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px;
             background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
-        .page-subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
+        .page-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
 
         .card {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 28px;
-            margin-bottom: 20px;
+            background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px; padding: 24px; margin-bottom: 16px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
         }
-
         .card-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-light);
+            font-size: 15px; font-weight: 700; margin-bottom: 18px;
+            display: flex; align-items: center; gap: 8px; color: var(--text-light);
         }
 
-        .form-group {
-            margin-bottom: 18px;
-        }
-
+        .form-group { margin-bottom: 16px; }
         label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
+            display: block; margin-bottom: 5px; font-weight: 600; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
         }
-
         input, textarea {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            color: var(--text-light);
-            font-size: 15px;
-            font-family: inherit;
+            width: 100%; padding: 13px 16px;
+            background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; color: var(--text-light); font-size: 14px; font-family: inherit;
             transition: all 0.3s ease;
         }
-
         input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--corp-green);
-            box-shadow: 0 0 0 4px rgba(138, 199, 37, 0.15), 0 4px 20px rgba(138, 199, 37, 0.1);
-            background: rgba(15, 23, 42, 0.8);
+            outline: none; border-color: var(--corp-green);
+            box-shadow: 0 0 0 3px rgba(138,199,37,0.15);
         }
-
         input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 16px 28px;
-            border: none;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            font-family: inherit;
-            min-height: 48px;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 15px 24px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s ease; width: 100%; font-family: inherit; min-height: 48px;
         }
-
         .btn-primary {
             background: linear-gradient(135deg, var(--corp-green) 0%, var(--corp-green-dark) 100%);
-            color: #0a1208;
-            box-shadow: 0 4px 15px rgba(68, 132, 20, 0.35);
+            color: #0a1208; box-shadow: 0 4px 15px rgba(68,132,20,0.35);
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(68, 132, 20, 0.5);
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(68,132,20,0.5); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.07); color: var(--text-light);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-            transition: left 0.6s;
-        }
-
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn:active { transform: scale(0.97); }
 
         .spinner {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.2);
-            border-top-color: #0a1208;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 18px; height: 18px; border: 2px solid rgba(10,18,8,0.3);
+            border-top-color: #0a1208; border-radius: 50%; animation: spin 1s linear infinite;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ─── Mapa de Ruta ─────────────────────────────── */
+        #route-card { display: none; }
+        #route-map {
+            width: 100%; height: 260px; border-radius: 14px;
+            overflow: hidden; margin-bottom: 16px;
+            border: 1px solid rgba(138,199,37,0.2);
+        }
+
+        /* Barra de estado del viaje */
+        .trip-status-bar {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px; border-radius: 12px; margin-bottom: 14px;
+            background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.2);
+            transition: all 0.5s ease;
+        }
+        .trip-status-bar.asignado { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); }
+        .trip-status-bar.a_bordo { background: rgba(138,199,37,0.1); border-color: rgba(138,199,37,0.3); }
+        .trip-status-icon { font-size: 24px; flex-shrink: 0; }
+        .trip-status-text { flex: 1; }
+        .trip-status-title { font-weight: 700; font-size: 14px; color: var(--text-light); }
+        .trip-status-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Info del conductor al asignarse */
+        .driver-card {
+            display: none; padding: 14px; border-radius: 12px;
+            background: rgba(138,199,37,0.08); border: 1px solid rgba(138,199,37,0.2);
+            margin-bottom: 14px;
+        }
+        .driver-card.visible { display: block; }
+        .driver-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .driver-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--corp-green), var(--corp-green-dark));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 18px; color: #0a1208; flex-shrink: 0;
+        }
+        .driver-name { font-weight: 700; font-size: 15px; color: var(--text-light); }
+        .driver-plate {
+            font-size: 12px; color: var(--text-muted);
+            background: rgba(255,255,255,0.08); padding: 2px 8px;
+            border-radius: 6px; display: inline-block; margin-top: 2px;
+        }
+        /* Indicador de cupos */
+        .seats-indicator { display: flex; align-items: center; gap: 8px; }
+        .seats-label { font-size: 12px; color: var(--text-muted); }
+        .seats-dots { display: flex; gap: 5px; }
+        .seat-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: background 0.3s ease;
+        }
+        .seat-dot.ocupado { background: var(--corp-orange); }
+        .seat-dot.libre { background: var(--corp-green); }
+
+        /* Ruta info chips */
+        .route-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .route-chip {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 12px; font-weight: 600;
+            padding: 5px 10px; border-radius: 8px;
+            background: rgba(15,23,42,0.5);
+        }
+        .chip-distance { color: var(--corp-blue-light); }
+        .chip-time { color: var(--corp-orange-light); }
+
+        /* ─── Viajes activos ─────────────────────────────── */
         .mis-viajes { margin-top: 8px; }
-
         .viaje-item {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
+            background: rgba(15,23,42,0.5); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px; padding: 16px; margin-bottom: 10px; transition: all 0.3s ease;
         }
-
-        .viaje-item:hover {
-            border-color: rgba(138, 199, 37, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .viaje-route {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
+        .viaje-item:hover { border-color: rgba(138,199,37,0.2); transform: translateY(-2px); }
+        .viaje-route { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 600; font-size: 13px; flex-wrap: wrap; }
         .origin { color: var(--warning); }
         .arrow { color: var(--text-muted); }
         .destiny { color: var(--success); }
-
-        .viaje-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 6px;
+        .viaje-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .conductor-info {
+            margin-top: 10px; padding: 10px; font-size: 13px;
+            background: rgba(138,199,37,0.08); border: 1px solid rgba(138,199,37,0.15);
+            border-radius: 10px;
         }
-
+        .conductor-info strong { color: var(--corp-green-light); }
         .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 8px;
+            display: inline-block; padding: 3px 8px; border-radius: 999px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-top: 6px;
         }
-
         .badge-pendiente { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
         .badge-asignado { background: rgba(37,99,235,0.15); color: var(--corp-blue-light); border: 1px solid rgba(37,99,235,0.25); }
+        .badge-a_bordo { background: rgba(138,199,37,0.15); color: var(--corp-green-light); border: 1px solid rgba(138,199,37,0.25); }
         .badge-completado { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+        .badge-cancelado { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
 
-        .conductor-info {
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(138, 199, 37, 0.08);
-            border: 1px solid rgba(138, 199, 37, 0.15);
-            border-radius: 10px;
-            font-size: 13px;
-        }
-
-        .conductor-info strong { color: var(--corp-green-light); }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
+        .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
 
         .toast {
-            position: fixed;
-            bottom: max(20px, var(--safe-bottom));
-            left: 50%;
+            position: fixed; bottom: max(20px, var(--safe-bottom)); left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: rgba(10, 18, 8, 0.95);
-            color: var(--text-light);
-            padding: 14px 28px;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 1000;
-            opacity: 0;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            white-space: nowrap;
+            background: rgba(10,18,8,0.95); color: var(--text-light);
+            padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600;
+            z-index: 2000; opacity: 0; transition: all 0.3s ease;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap; max-width: 90vw; text-align: center;
         }
-
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-success { border-color: rgba(16, 185, 129, 0.3); color: #4ade80; }
-        .toast-error { border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
-
-        .nav-perfil {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            background: rgba(138, 199, 37, 0.1);
-            border: 1px solid rgba(138, 199, 37, 0.2);
-            border-radius: 12px;
-            color: var(--corp-green-light);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .nav-perfil:hover {
-            background: rgba(138, 199, 37, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .nav-perfil svg { width: 18px; height: 18px; }
+        .toast-success { border-color: rgba(16,185,129,0.3); color: #4ade80; }
+        .toast-error { border-color: rgba(239,68,68,0.3); color: #f87171; }
+        .toast-info { border-color: rgba(37,99,235,0.3); color: var(--corp-blue-light); }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(138,199,37,0.2); border-radius: 3px; }
 
-        @media (max-width: 640px) {
-            .card { padding: 20px; }
-        }
+        @media (max-width: 640px) { .card { padding: 18px; } }
     </style>
-<base target="_blank">
 </head>
 <body>
-
     <header class="app-header">
         <a href="index.html" class="brand-small">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7">
+                </path>
             </svg>
             Road To
         </a>
         <div class="nav-buttons">
             <a class="nav-perfil" href="perfil-pasajero.html">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
                 Mi Perfil
             </a>
             <button class="nav-btn" onclick="logout()" title="Cerrar sesión">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                    </path>
                 </svg>
             </button>
         </div>
     </header>
 
     <div class="container">
-        <h1 class="page-title">🚗 Reservar un Viaje</h1>
-        <p class="page-subtitle">Solicita tu viaje y te conectaremos con un conductor</p>
+        <h1 class="page-title">🚗 Reservar Viaje</h1>
+        <p class="page-subtitle">Solicita tu viaje y te conectaremos con un conductor disponible</p>
 
-        <div class="card">
+        <!-- Formulario de solicitud -->
+        <div class="card" id="form-card">
             <div class="card-title">📋 Datos del Viaje</div>
-
             <form id="form-reserva">
                 <div class="form-group">
                     <label for="origen">📍 Origen</label>
                     <input type="text" id="origen" placeholder="Ej: Centro Comercial, Zona 1, Aeropuerto..." required>
                 </div>
-
                 <div class="form-group">
                     <label for="destino">🏁 Destino</label>
                     <input type="text" id="destino" placeholder="Ej: Hotel Marriott, Terminal de Buses..." required>
                 </div>
-
                 <div class="form-group">
                     <label for="fecha-hora">📅 Fecha y Hora</label>
                     <input type="datetime-local" id="fecha-hora" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="notas">📝 Notas adicionales (opcional)</label>
-                    <textarea id="notas" rows="3" placeholder="Número de pasajeros, equipaje especial, etc."></textarea>
+                    <label for="notas">📝 Notas (opcional)</label>
+                    <textarea id="notas" rows="2" placeholder="Equipaje especial, instrucciones de recogida..."></textarea>
                 </div>
-
                 <button type="submit" class="btn btn-primary" id="btn-submit">
                     🚀 Solicitar Viaje
                 </button>
             </form>
         </div>
 
+        <!-- Tarjeta de Ruta en Mapa (aparece al confirmar el viaje) -->
+        <div class="card" id="route-card">
+            <div class="card-title">🗺️ Tu Ruta</div>
+
+            <!-- Mapa -->
+            <div id="route-map"></div>
+
+            <!-- Chips de distancia y tiempo -->
+            <div class="route-chips" id="route-chips"></div>
+
+            <!-- Barra de estado -->
+            <div class="trip-status-bar" id="trip-status-bar" style="margin-top: 14px;">
+                <div class="trip-status-icon" id="status-icon">⏳</div>
+                <div class="trip-status-text">
+                    <div class="trip-status-title" id="status-title">Buscando conductor...</div>
+                    <div class="trip-status-sub" id="status-sub">Pronto un conductor cercano aceptará tu viaje</div>
+                </div>
+            </div>
+
+            <!-- Info del conductor (visible al asignarse) -->
+            <div class="driver-card" id="driver-card">
+                <div class="driver-card-header">
+                    <div class="driver-avatar" id="driver-avatar">?</div>
+                    <div>
+                        <div class="driver-name" id="driver-name">Conductor</div>
+                        <div class="driver-plate" id="driver-plate"></div>
+                    </div>
+                </div>
+                <div class="seats-indicator">
+                    <span class="seats-label">Cupos en el vehículo:</span>
+                    <div class="seats-dots" id="seats-dots">
+                        <div class="seat-dot libre"></div>
+                        <div class="seat-dot libre"></div>
+                        <div class="seat-dot libre"></div>
+                        <div class="seat-dot libre"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="cancelarViaje()" id="btn-cancelar" style="margin-top: 4px;">
+                Cancelar solicitud
+            </button>
+        </div>
+
+        <!-- Mis Reservas -->
         <div class="mis-viajes">
             <div class="card">
                 <div class="card-title">📜 Mis Reservas</div>
@@ -422,11 +378,15 @@
     <script>
         const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-        const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
+        let routeMap = null;
+        let routeLayer = null;
+        let activeViajeId = null;
+        let realtimeChannel = null;
 
+        // ── Toast ─────────────────────────────────────────────────────────────
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -444,37 +404,215 @@
 
         function getEstadoBadge(estado) {
             const badges = {
-                'pendiente': '<span class="badge badge-pendiente">⏳ Buscando conductor...</span>',
-                'asignado': '<span class="badge badge-asignado">✅ Conductor asignado</span>',
-                'completado': '<span class="badge badge-completado">🏁 Completado</span>'
+                'pendiente':  '<span class="badge badge-pendiente">⏳ Buscando conductor...</span>',
+                'asignado':   '<span class="badge badge-asignado">✅ Conductor asignado</span>',
+                'a_bordo':    '<span class="badge badge-a_bordo">🚗 A bordo</span>',
+                'completado': '<span class="badge badge-completado">🏁 Completado</span>',
+                'cancelado':  '<span class="badge badge-cancelado">❌ Cancelado</span>'
             };
-            return badges[estado] || estado;
+            return badges[estado] || `<span class="badge">${estado}</span>`;
         }
 
-        // Obtener info del conductor por ID
-        async function getConductorInfo(conductorId) {
-            if (!conductorId) return null;
+        // ── Geocodificación (texto → coordenadas) ─────────────────────────────
+        async function geocodificar(texto) {
             try {
-                const { data, error } = await supabaseClient
-                    .from('conductores')
-                    .select('nombres, apellidos, celular, nombre')
-                    .eq('id', conductorId)
-                    .maybeSingle();
-                
-                if (error || !data) return null;
-                
-                return {
-                    nombre: data.nombre || `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
-                    telefono: data.celular || 'No disponible'
-                };
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texto)}&limit=1`;
+                const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                }
             } catch (e) {
-                return null;
+                console.warn('Geocodificación fallida:', e);
+            }
+            return null;
+        }
+
+        // ── Ruta OSRM ────────────────────────────────────────────────────────
+        async function trazarRuta(origenCoords, destinoCoords) {
+            const url = `https://router.project-osrm.org/route/v1/driving/${origenCoords.lng},${origenCoords.lat};${destinoCoords.lng},${destinoCoords.lat}?overview=full&geometries=geojson`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.routes && data.routes.length > 0) {
+                    return {
+                        geometry: data.routes[0].geometry,
+                        distance: (data.routes[0].distance / 1000).toFixed(1), // km
+                        duration: Math.ceil(data.routes[0].duration / 60)       // min
+                    };
+                }
+            } catch (e) {
+                console.warn('Error trazando ruta:', e);
+            }
+            return null;
+        }
+
+        // ── Inicializar Mapa ─────────────────────────────────────────────────
+        async function mostrarMapaRuta(origenTexto, destinoTexto) {
+            document.getElementById('route-card').style.display = 'block';
+
+            // Inicializar mapa solo una vez
+            if (!routeMap) {
+                routeMap = L.map('route-map', { zoomControl: true, attributionControl: false });
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 18
+                }).addTo(routeMap);
+            }
+
+            // Limpiar capas anteriores
+            if (routeLayer) { routeMap.removeLayer(routeLayer); routeLayer = null; }
+
+            try {
+                const [origenCoords, destinoCoords] = await Promise.all([
+                    geocodificar(origenTexto),
+                    geocodificar(destinoTexto)
+                ]);
+
+                if (!origenCoords || !destinoCoords) {
+                    // Sin geocodificación, centrar en posición por defecto
+                    routeMap.setView([14.6349, -90.5069], 12);
+                    showToast('No se pudo trazar la ruta exacta, verifica las direcciones', 'info');
+                    return;
+                }
+
+                // Marcadores de origen y destino
+                const iconOrigen = L.divIcon({
+                    className: '',
+                    html: '<div style="background:#f97316;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.5)"></div>',
+                    iconSize: [16, 16], iconAnchor: [8, 8]
+                });
+                const iconDestino = L.divIcon({
+                    className: '',
+                    html: '<div style="background:#8ac725;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.5)"></div>',
+                    iconSize: [16, 16], iconAnchor: [8, 8]
+                });
+
+                L.marker([origenCoords.lat, origenCoords.lng], { icon: iconOrigen })
+                    .addTo(routeMap).bindPopup(`📍 Origen: ${origenTexto}`);
+                L.marker([destinoCoords.lat, destinoCoords.lng], { icon: iconDestino })
+                    .addTo(routeMap).bindPopup(`🏁 Destino: ${destinoTexto}`);
+
+                // Trazar ruta
+                const ruta = await trazarRuta(origenCoords, destinoCoords);
+                if (ruta) {
+                    routeLayer = L.geoJSON(ruta.geometry, {
+                        style: { color: '#8ac725', weight: 5, opacity: 0.85 }
+                    }).addTo(routeMap);
+
+                    routeMap.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+
+                    // Chips de distancia y tiempo
+                    document.getElementById('route-chips').innerHTML = `
+                        <span class="route-chip chip-distance">📏 ${ruta.distance} km</span>
+                        <span class="route-chip chip-time">⏱️ ~${ruta.duration} min</span>
+                    `;
+                } else {
+                    routeMap.fitBounds([
+                        [origenCoords.lat, origenCoords.lng],
+                        [destinoCoords.lat, destinoCoords.lng]
+                    ], { padding: [30, 30] });
+                }
+            } catch (e) {
+                console.error('Error en mapa:', e);
             }
         }
 
+        // ── Actualizar estado visual del viaje ───────────────────────────────
+        async function actualizarEstadoViaje(viaje) {
+            const statusBar = document.getElementById('trip-status-bar');
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusSub = document.getElementById('status-sub');
+            const driverCard = document.getElementById('driver-card');
+
+            switch (viaje.estado) {
+                case 'pendiente':
+                    statusBar.className = 'trip-status-bar';
+                    statusIcon.textContent = '⏳';
+                    statusTitle.textContent = 'Buscando conductor...';
+                    statusSub.textContent = 'Pronto un conductor cercano aceptará tu viaje';
+                    break;
+                case 'asignado':
+                    statusBar.className = 'trip-status-bar asignado';
+                    statusIcon.textContent = '✅';
+                    statusTitle.textContent = '¡Conductor en camino!';
+                    statusSub.textContent = 'Tu conductor está de camino a recogerte';
+                    // Cargar info del conductor
+                    if (viaje.conductor_asignado_id) {
+                        await cargarInfoConductorEnMapa(viaje.conductor_asignado_id);
+                    }
+                    break;
+                case 'a_bordo':
+                    statusBar.className = 'trip-status-bar a_bordo';
+                    statusIcon.textContent = '🚗';
+                    statusTitle.textContent = '¡Vas a bordo!';
+                    statusSub.textContent = 'Disfruta tu viaje. Te avisamos al llegar.';
+                    break;
+                case 'completado':
+                    statusBar.className = 'trip-status-bar asignado';
+                    statusIcon.textContent = '🏁';
+                    statusTitle.textContent = '¡Llegaste! Viaje completado.';
+                    statusSub.textContent = 'Gracias por usar Road To.';
+                    document.getElementById('btn-cancelar').style.display = 'none';
+                    break;
+            }
+        }
+
+        async function cargarInfoConductorEnMapa(conductorId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('conductores')
+                    .select('nombres, apellidos, vehiculo_marca, vehiculo_modelo, placa, capacidad_disponible')
+                    .eq('id', conductorId)
+                    .maybeSingle();
+
+                if (error || !data) return;
+
+                const nombre = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Conductor';
+                const placa = data.placa || 'Sin placa';
+                const vehiculo = `${data.vehiculo_marca || ''} ${data.vehiculo_modelo || ''}`.trim();
+                const cuposOcupados = 4 - (data.capacidad_disponible ?? 4);
+
+                document.getElementById('driver-avatar').textContent = nombre.charAt(0).toUpperCase();
+                document.getElementById('driver-name').textContent = nombre;
+                document.getElementById('driver-plate').textContent = `${vehiculo} · ${placa}`;
+
+                // Indicador de cupos
+                const dots = document.getElementById('seats-dots');
+                dots.innerHTML = '';
+                for (let i = 0; i < 4; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = `seat-dot ${i < cuposOcupados ? 'ocupado' : 'libre'}`;
+                    dots.appendChild(dot);
+                }
+
+                document.getElementById('driver-card').classList.add('visible');
+            } catch (e) {
+                console.warn('Error cargando conductor:', e);
+            }
+        }
+
+        // ── Cancelar Viaje ───────────────────────────────────────────────────
+        async function cancelarViaje() {
+            if (!activeViajeId) return;
+            if (!confirm('¿Seguro que deseas cancelar este viaje?')) return;
+            try {
+                await supabaseClient.from('viajes_reservados')
+                    .update({ estado: 'cancelado', estado_pasajero: 'cancelado' })
+                    .eq('id', activeViajeId);
+                document.getElementById('route-card').style.display = 'none';
+                document.getElementById('form-card').style.display = 'block';
+                activeViajeId = null;
+                showToast('Viaje cancelado', 'info');
+                await cargarMisViajes();
+            } catch (e) {
+                showToast('Error al cancelar: ' + e.message, 'error');
+            }
+        }
+
+        // ── Formulario de Solicitud ──────────────────────────────────────────
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const btn = document.getElementById('btn-submit');
             btn.disabled = true;
             btn.innerHTML = '<div class="spinner"></div> Solicitando...';
@@ -483,19 +621,20 @@
                 const origen = document.getElementById('origen').value.trim();
                 const destino = document.getElementById('destino').value.trim();
                 const fechaHora = document.getElementById('fecha-hora').value;
-                const notas = document.getElementById('notas').value.trim();
 
-                if (!origen || !destino || !fechaHora) {
-                    throw new Error('Completa todos los campos obligatorios');
-                }
+                if (!origen || !destino || !fechaHora) throw new Error('Completa todos los campos obligatorios');
 
-                // CORREGIDO: Solo insertar columnas que existen en la tabla
+                // Geocodificar destino para guardarlo
+                const destinoCoords = await geocodificar(destino);
+
                 const insertData = {
                     pasajero_id: currentUser.id,
                     origen,
                     destino,
                     fecha_hora: fechaHora,
-                    estado: 'pendiente'
+                    estado: 'pendiente',
+                    estado_pasajero: 'en_espera',
+                    coordenadas_destino: destinoCoords ? { lat: destinoCoords.lat, lng: destinoCoords.lng } : null
                 };
 
                 const { data: viaje, error: insertError } = await supabaseClient
@@ -506,33 +645,15 @@
 
                 if (insertError) throw insertError;
 
-                // Llamar a la Edge Function para notificar conductores
-                try {
-                    const session = await supabaseClient.auth.getSession();
-                    const response = await fetch(EDGE_FUNCTION_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${session.data.session?.access_token}`
-                        },
-                        body: JSON.stringify({
-                            action: 'buscar_candidatos',
-                            viaje_id: viaje.id
-                        })
-                    });
+                activeViajeId = viaje.id;
 
-                    const result = await response.json();
-                    console.log('Notificación a conductores:', result);
-                    
-                    if (!response.ok) {
-                        console.warn('Edge Function warning:', result.error || 'Unknown error');
-                    }
-                } catch (edgeErr) {
-                    console.warn('Edge Function no disponible:', edgeErr);
-                }
+                // Mostrar mapa de ruta
+                document.getElementById('form-card').style.display = 'none';
+                await mostrarMapaRuta(origen, destino);
+                await actualizarEstadoViaje(viaje);
+                iniciarRealtimeViaje(viaje.id);
 
                 showToast('¡Viaje solicitado! Buscando conductor... 🚗');
-                document.getElementById('form-reserva').reset();
                 await cargarMisViajes();
 
             } catch (err) {
@@ -544,35 +665,78 @@
             }
         });
 
+        // ── Realtime: escuchar cambios en el viaje activo ────────────────────
+        function iniciarRealtimeViaje(viajeId) {
+            if (realtimeChannel) {
+                supabaseClient.removeChannel(realtimeChannel);
+            }
+            realtimeChannel = supabaseClient
+                .channel(`viaje-pasajero-${viajeId}`)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'viajes_reservados',
+                    filter: `id=eq.${viajeId}`
+                }, async (payload) => {
+                    const nuevoEstado = payload.new?.estado;
+                    await actualizarEstadoViaje(payload.new);
+                    await cargarMisViajes();
+
+                    if (nuevoEstado === 'asignado') {
+                        showToast('🎉 ¡Un conductor ha aceptado tu viaje!');
+                        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    } else if (nuevoEstado === 'a_bordo') {
+                        showToast('🚗 ¡Estás a bordo! Buen viaje.');
+                    }
+                })
+                .subscribe();
+        }
+
+        // ── Mis Reservas ─────────────────────────────────────────────────────
+        async function getConductorInfo(conductorId) {
+            if (!conductorId) return null;
+            try {
+                const { data } = await supabaseClient
+                    .from('conductores')
+                    .select('nombres, apellidos, celular, vehiculo_marca, vehiculo_modelo, placa, capacidad_disponible')
+                    .eq('id', conductorId)
+                    .maybeSingle();
+                if (!data) return null;
+                return {
+                    nombre: `${data.nombres || ''} ${data.apellidos || ''}`.trim() || 'Sin nombre',
+                    telefono: data.celular || 'No disponible',
+                    vehiculo: `${data.vehiculo_marca || ''} ${data.vehiculo_modelo || ''}`.trim(),
+                    placa: data.placa || '',
+                    cupos: data.capacidad_disponible ?? 4
+                };
+            } catch (e) { return null; }
+        }
+
         async function cargarMisViajes() {
             const container = document.getElementById('lista-mis-viajes');
-
             try {
                 const { data: viajes, error } = await supabaseClient
                     .from('viajes_reservados')
                     .select('*')
                     .eq('pasajero_id', currentUser.id)
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    .limit(10);
 
                 if (error) throw error;
 
                 if (!viajes || viajes.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <p>No tienes reservas activas</p>
-                            <p style="font-size: 13px; margin-top: 6px;">Completa el formulario para solicitar tu primer viaje</p>
-                        </div>`;
+                    container.innerHTML = `<div class="empty-state"><p>No tienes reservas activas</p><p style="font-size:12px;margin-top:6px">Completa el formulario para solicitar tu primer viaje</p></div>`;
                     return;
                 }
 
-                const viajesConductor = await Promise.all(
+                const viajesDetalle = await Promise.all(
                     viajes.map(async (viaje) => {
                         const conductor = await getConductorInfo(viaje.conductor_asignado_id);
                         return { ...viaje, conductor };
                     })
                 );
 
-                container.innerHTML = viajesConductor.map(v => `
+                container.innerHTML = viajesDetalle.map(v => `
                     <div class="viaje-item">
                         <div class="viaje-route">
                             <span class="origin">📍 ${v.origen}</span>
@@ -585,7 +749,9 @@
                         ${v.conductor ? `
                             <div class="conductor-info">
                                 <strong>👤 Conductor:</strong> ${v.conductor.nombre}<br>
-                                <strong>📞 Teléfono:</strong> ${v.conductor.telefono}
+                                <strong>🚗 Vehículo:</strong> ${v.conductor.vehiculo} (${v.conductor.placa})<br>
+                                <strong>📞 Teléfono:</strong> ${v.conductor.telefono}<br>
+                                <strong>💺 Cupos disp.:</strong> ${v.conductor.cupos}/4
                             </div>
                         ` : ''}
                     </div>
@@ -597,22 +763,14 @@
             }
         }
 
+        // ── Realtime general para mis reservas ───────────────────────────────
         function iniciarRealtime() {
             supabaseClient
                 .channel('mis-reservas-pasajero')
                 .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'viajes_reservados',
+                    event: '*', schema: 'public', table: 'viajes_reservados',
                     filter: `pasajero_id=eq.${currentUser.id}`
-                }, (payload) => {
-                    console.log('Cambio en mi reserva:', payload);
-                    cargarMisViajes();
-
-                    if (payload.new?.estado === 'asignado' && payload.old?.estado === 'pendiente') {
-                        showToast('🎉 ¡Un conductor ha aceptado tu viaje!');
-                    }
-                })
+                }, () => { cargarMisViajes(); })
                 .subscribe();
         }
 
@@ -623,12 +781,7 @@
 
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-
-            if (!session) {
-                window.location.href = 'dashboard.html';
-                return;
-            }
-
+            if (!session) { window.location.href = 'dashboard.html'; return; }
             currentUser = session.user;
 
             const now = new Date();
