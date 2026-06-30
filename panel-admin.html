@@ -114,8 +114,10 @@
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductorAdmin(c.id);
+        const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
+        const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+          <div class="avatar">${iniN}${iniA}</div>
           <div class="info">
             <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
@@ -262,8 +264,10 @@
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductorAdmin(c.id);
+        const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
+        const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+          <div class="avatar">${iniN}${iniA}</div>
           <div class="info">
             <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
@@ -2031,6 +2035,7 @@
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
         <button class="section-tab" onclick="switchSection('viajes', this)">🚙 Viajes</button>
         <button class="section-tab" onclick="switchSection('zonas', this)">🗺️ Zonas</button>
+        <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="window.location.href='mapa.html?view=all'">🌍 Mapa en Vivo</button>
       </div>
     </div>
 
@@ -3395,8 +3400,10 @@
           badgeHtml = `<span style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px;">En fila: ${colasMap[c.id].zona} (#${colasMap[c.id].pos})</span>`;
         }
 
+        const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
+        const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+          <div class="avatar">${iniN}${iniA}</div>
           <div class="info">
             <div class="name">${c.nombres || ''} ${c.apellidos || ''} ${badgeHtml}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>

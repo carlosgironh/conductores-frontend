@@ -683,6 +683,9 @@
     await getUserLocation();
     await loadGeofenceZones();
     hideLoading();
+    
+    // Nueva lógica de URL params
+    processURLParams();
   });
 
   async function loadGeofenceZones() {
@@ -1408,6 +1411,116 @@
     } catch (e) {
       // Último fallback
       prompt('Copia este enlace:', googleLink);
+    }
+  }
+
+  // ═══ NUEVA LÓGICA DE URL PARAMS ═══
+  async function processURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    const viajeId = params.get('viaje_id');
+    const mode = params.get('mode');
+    const conductorId = params.get('conductor_id');
+
+    if (view === 'all') {
+      // Vista Global Admin/Coordinador
+      showToast('Cargando todos los conductores activos...');
+      toggleDriverList(); // Abrir panel de conductores si está oculto
+      cargarConductoresActivos(); // Esta función ya hace pooling cada 10s en el script, pero aquí la forzamos
+    } else if (viajeId) {
+      // Rastreo para Pasajero
+      showToast('Cargando viaje en vivo...');
+      await renderViajeEnVivo(viajeId);
+    } else if (mode === 'driver' && conductorId) {
+      // Rastreo y próximas carreras para Conductor
+      showToast('Cargando tu ruta y carreras disponibles...');
+      await renderModoConductor(conductorId);
+    }
+  }
+
+  async function renderViajeEnVivo(viajeId) {
+    try {
+      // 1. Cargar viaje
+      const { data: viaje } = await supabaseClient
+        .from('viajes_reservados')
+        .select('*')
+        .eq('id', viajeId)
+        .maybeSingle();
+      
+      if (!viaje) { showToast('Viaje no encontrado'); return; }
+
+      // 2. Trazar ruta origen-destino
+      if (viaje.lat_origen && viaje.lng_origen && viaje.lat_destino && viaje.lng_destino) {
+        await calculateRoute([viaje.lat_origen, viaje.lng_origen], [viaje.lat_destino, viaje.lng_destino]);
+      } else {
+        // Fallback: buscar por texto
+        await searchAddress(viaje.origen);
+        const originCoord = originCoords;
+        await searchAddress(viaje.destino);
+        if (originCoord && destCoords) await calculateRoute(originCoord, destCoords);
+      }
+
+      // 3. Suscribirse a la ubicación del conductor
+      if (viaje.conductor_asignado_id) {
+        // Cargar última ubicación
+        const { data: loc } = await supabaseClient
+          .from('driver_locations')
+          .select('*')
+          .eq('driver_id', viaje.conductor_asignado_id)
+          .order('timestamp', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (loc) {
+          updateDriverOnMap(loc);
+          if (driverMarkers[loc.driver_id]) {
+            map.setView(driverMarkers[loc.driver_id].getLatLng(), 15);
+          }
+        }
+        
+        // Configurar realtime para este conductor
+        supabaseClient.channel('viaje-vivo')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'driver_locations', filter: `driver_id=eq.${viaje.conductor_asignado_id}` }, payload => {
+            updateDriverOnMap(payload.new);
+          }).subscribe();
+      }
+    } catch(e) {
+      console.error('Error renderViajeEnVivo:', e);
+    }
+  }
+
+  async function renderModoConductor(conductorId) {
+    // 1. Mostrar tu viaje actual si lo hay
+    try {
+      const { data: viaje } = await supabaseClient
+        .from('viajes_reservados')
+        .select('*')
+        .eq('conductor_asignado_id', conductorId)
+        .in('estado', ['asignado', 'en_curso'])
+        .maybeSingle();
+      
+      if (viaje && viaje.lat_destino) {
+        if (lastPosition) {
+           await calculateRoute(lastPosition, [viaje.lat_destino, viaje.lng_destino]);
+        }
+      }
+
+      // 2. Buscar viajes disponibles "pendientes" cercanos o en general
+      const { data: disponibles } = await supabaseClient
+        .from('viajes_reservados')
+        .select('*')
+        .eq('estado', 'pendiente');
+      
+      if (disponibles) {
+        disponibles.forEach(v => {
+          if (v.lat_origen && v.lng_origen) {
+            const m = L.marker([v.lat_origen, v.lng_origen]).addTo(map)
+              .bindPopup(`<b>Viaje Disponible</b><br>${v.origen}<br>➔ ${v.destino}`);
+          }
+        });
+      }
+    } catch(e) {
+      console.error('Error renderModoConductor:', e);
     }
   }
 </script>

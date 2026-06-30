@@ -10,16 +10,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- Supabase SDK -->
-<script src="JS/supabase-bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <!-- Leaflet CSS + JS (Open Source, BSD-2) -->
-<link rel="stylesheet" href="JS/leaflet/leaflet.css">
-<script src="JS/leaflet/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Turf.js para Geofencing -->
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <!-- Config centralizada -->
 <script src="config.js"></script>
-<script src="JS/backgroundTracking-bundle.js"></script>
-<script src="JS/localNotifications-bundle.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -207,40 +209,6 @@
 
   .info-panel.hidden {
     transform: translateY(calc(100% - 60px));
-  }
-
-  .waitlist-banner {
-    position: fixed;
-    top: calc(56px + var(--safe-top));
-    left: 0;
-    right: 0;
-    background: linear-gradient(90deg, var(--corp-orange) 0%, #f9a8d4 100%);
-    color: white;
-    padding: 10px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 999;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transform: translateY(-100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
-  .waitlist-banner.visible {
-    transform: translateY(0);
-  }
-  .waitlist-banner-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .waitlist-banner-pos {
-    background: rgba(0,0,0,0.25);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 800;
   }
 
   .panel-handle {
@@ -580,49 +548,6 @@
     border-color: rgba(239, 68, 68, 0.3);
   }
 
-  
-  /* ═══ Capacity & Passengers (Driver View) ═══ */
-  .capacity-panel {
-    display: none;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(118, 179, 44, 0.2);
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 14px;
-  }
-  .capacity-panel.show { display: block; }
-  .capacity-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-  }
-  .capacity-title { font-size: 13px; font-weight: 700; color: var(--corp-green); }
-  .seats-dots { display: flex; gap: 5px; }
-  .seat-dot {
-    width: 12px; height: 12px; border-radius: 50%;
-    background: rgba(255,255,255,0.2); transition: background 0.3s;
-  }
-  .seat-dot.ocupado { background: var(--corp-orange); }
-  .seat-dot.libre { background: var(--corp-green); }
-
-  .passenger-list {
-    display: flex; flex-direction: column; gap: 8px;
-    max-height: 180px; overflow-y: auto;
-  }
-  .passenger-item {
-    background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px;
-    display: flex; justify-content: space-between; align-items: center;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-  .passenger-info { font-size: 13px; flex: 1; margin-right: 10px; }
-  .passenger-name { font-weight: 700; color: var(--text-light); }
-  .passenger-route { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .passenger-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .btn-passenger {
-    padding: 8px 12px; border-radius: 8px; border: none;
-    font-size: 11px; font-weight: 700; cursor: pointer; color: white;
-  }
-  .btn-abordar { background: var(--corp-blue); }
-  .btn-bajar { background: var(--corp-orange); }
-
   /* ═══ Responsive ═══ */
   @media (max-width: 380px) {
     .stat-value { font-size: 18px; }
@@ -652,15 +577,6 @@
       <button class="btn-icon" onclick="toggleDriverList()" title="Conductores activos" id="btnDriverList">👥</button>
     </div>
   </header>
-
-  <!-- Waitlist Banner -->
-  <div class="waitlist-banner" id="waitlistBanner">
-    <div class="waitlist-banner-content">
-      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      <span id="waitlistZoneName">Zona</span>
-    </div>
-    <div class="waitlist-banner-pos" id="waitlistPosition">Turno #--</div>
-  </div>
 
   <!-- Map -->
   <!-- Search Overlay -->
@@ -708,23 +624,6 @@
       <button class="btn-action btn-secondary" onclick="centerOnUser()" title="Centrar">📍</button>
     </div>
 
-    
-    <!-- Panel de Capacidad y Pasajeros (solo visible para conductores) -->
-    <div class="capacity-panel" id="capacityPanel">
-      <div class="capacity-header">
-        <div class="capacity-title">🚙 Cupos Disponibles (<span id="capacidadCount">4</span>/4)</div>
-        <div class="seats-dots" id="driverSeatsDots">
-          <div class="seat-dot libre"></div>
-          <div class="seat-dot libre"></div>
-          <div class="seat-dot libre"></div>
-          <div class="seat-dot libre"></div>
-        </div>
-      </div>
-      <div class="passenger-list" id="activePassengerList">
-        <div style="font-size: 12px; color: var(--text-muted); text-align: center;">Sin pasajeros asignados</div>
-      </div>
-    </div>
-
     <!-- Lista de conductores activos (solo visible para admin/supervisor) -->
     <div class="driver-list" id="driverList"></div>
   </div>
@@ -748,13 +647,17 @@
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ═══ ESTADO GLOBAL ═══
-  let map, userMarker, routePolyline;
-  let isTracking = false;
+  let map, userMarker;
   let watchId = null;
-  let startTime = null;
-  let totalDistance = 0;
-  let lastPosition = null;
   let timerInterval = null;
+  let startTime = null;
+  let routePolyline;
+  let totalDistance = 0; // en metros
+  let lastPosition = null;
+
+  // ═══ GEOFENCING ═══
+  let activeGeofenceZones = [];
+  let currentZonesInside = new Set();
   let driverMarkers = {};
   let realtimeChannel = null;
   let currentUser = null;
@@ -773,41 +676,23 @@
   const DEFAULT_LNG = -79.5;
   const DEFAULT_ZOOM = 13;
 
-  // ═══ GEOFENCE STATE ═══
-  let activeZonas = [];
-  let notifiedZonas = new Set(); // Para no notificar repetidamente
-
   // ═══ INICIALIZACIÓN ═══
   document.addEventListener('DOMContentLoaded', async () => {
     initMap();
     await identifyUser();
     await getUserLocation();
-    await loadZonas();
+    await loadGeofenceZones();
     hideLoading();
+    
+    // Nueva lógica de URL params
+    processURLParams();
   });
 
-  async function loadZonas() {
+  async function loadGeofenceZones() {
     try {
-      const { data, error } = await supabaseClient
-        .from('zonas_geofence')
-        .select('*')
-        .eq('activa', true);
-      if (!error && data) {
-        activeZonas = data;
-        // Dibujar las zonas en el mapa para que el conductor las vea (opcional, pero útil)
-        activeZonas.forEach(z => {
-          L.circle([z.latitud, z.longitud], {
-            color: '#8ac725',
-            fillColor: '#8ac725',
-            fillOpacity: 0.1,
-            radius: z.radio_metros,
-            weight: 1
-          }).addTo(map);
-        });
-      }
-    } catch (e) {
-      console.warn('Error cargando zonas', e);
-    }
+      const { data } = await supabaseClient.from('zonas_geofence').select('*').eq('activa', true);
+      if (data) activeGeofenceZones = data;
+    } catch(e) { console.error('Error loading zones:', e); }
   }
 
   function initMap() {
@@ -878,167 +763,51 @@
         userRole = 'conductor';
         conductorData = conductor;
         document.getElementById('btnDriverList').style.display = 'none';
-        initConductorRealtime();
+        initPushNotifications();
       }
     } catch (e) {
       console.warn('Error identificando usuario:', e);
     }
   }
 
-  // ═══ REALTIME: CONDUCTOR (FASE 3) ═══
-  function initConductorRealtime() {
-    if (!conductorData) return;
-    
-    // Escuchar cualquier cambio en lista_espera para recalcular posición
-    const canalConductor = supabaseClient.channel(`conductor-waitlist`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'lista_espera' },
-        (payload) => {
-          // Si nos eliminan de la fila (ej. nos despachan o nos salimos de la zona)
-          if (payload.eventType === 'DELETE' && payload.old.conductor_id === conductorData.id) {
-            document.getElementById('waitlistBanner').classList.remove('visible');
-            showToast('Has salido de la lista de espera.', 'info');
-            return;
-          }
-
-          // Si estamos en la lista, recalcular posiciones para todos
-          if (Array.from(notifiedZonas).length > 0) {
-            updateWaitlistUI(Array.from(notifiedZonas)[0]);
-          }
-        }
-      )
-      .subscribe();
-
-    // Escuchar UPDATES en la lista_espera para este conductor
-    const canalConductorPersonal = supabaseClient.channel(`conductor-${conductorData.id}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: 'UPDATE', 
-          schema: 'public', 
-          table: 'lista_espera',
-          filter: `conductor_id=eq.${conductorData.id}` 
-        },
-        (payload) => {
-          if (payload.new.estado === 'aprobado') {
-            showToast('✅ ¡Has sido aprobado en la zona!', 'success');
-          } else if (payload.new.estado === 'rechazado') {
-            showToast('❌ Tu solicitud en la zona fue rechazada.', 'error');
-          }
-        }
-      )
-
-    // Cargar pasajeros activos al iniciar (Capacidad)
-    cargarPasajerosActivos();
-    
-    // Escuchar UPDATES en viajes_reservados
-    const canalViajesUpdate = supabaseClient.channel(`viajes-updates-${conductorData.id}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'viajes_reservados',
-          filter: `conductor_asignado_id=eq.${conductorData.id}` 
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            mostrarModalViajeAsignado(payload.new);
-          }
-          cargarPasajerosActivos();
-        }
-      )
-      .subscribe();
-
-
-    // Escuchar INSERTS en viajes_reservados para este conductor
-    const canalViajes = supabaseClient.channel(`viajes-${conductorData.id}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'viajes_reservados',
-          filter: `conductor_asignado_id=eq.${conductorData.id}` 
-        },
-        (payload) => {
-          const viaje = payload.new;
-          mostrarModalViajeAsignado(viaje);
-        }
-      )
-      .subscribe();
-  }
-
-  function mostrarModalViajeAsignado(viaje) {
-    // Si ya existe el modal, no lo volvemos a crear, mejor inyectar HTML dinámico
-    let m = document.getElementById('modalViajeAsignado');
-    if (!m) {
-      m = document.createElement('div');
-      m.id = 'modalViajeAsignado';
-      m.className = 'modal-overlay centered';
-      m.innerHTML = `
-        <div class="modal-content" style="text-align: center; max-width: 90%; background: #0f172a;">
-          <div style="font-size: 40px; margin-bottom: 10px;">🚕</div>
-          <h2 style="color: white; margin-bottom: 10px;">¡Nuevo Viaje Asignado!</h2>
-          <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px;">
-            <p style="margin-bottom: 5px; color: #cbd5e1;"><strong>Pasajero:</strong> <span id="vPasajero" style="color: white;"></span></p>
-            <p style="margin-bottom: 5px; color: #cbd5e1;"><strong>Origen:</strong> <span id="vOrigen" style="color: white;"></span></p>
-            <p style="margin-bottom: 5px; color: #cbd5e1;"><strong>Destino:</strong> <span id="vDestino" style="color: white;"></span></p>
-            <p style="color: #4ade80;"><strong>Tarifa:</strong> $<span id="vTarifa"></span></p>
-          </div>
-          <button class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 16px; font-weight: bold;" onclick="aceptarViajeModal()">Ir al Viaje</button>
-        </div>
-      `;
-      document.body.appendChild(m);
-    }
-    
-    document.getElementById('vPasajero').innerText = viaje.pasajero_nombre || 'Pasajero';
-    document.getElementById('vOrigen').innerText = viaje.origen || 'No especificado';
-    document.getElementById('vDestino').innerText = viaje.destino || 'No especificado';
-    document.getElementById('vTarifa').innerText = parseFloat(viaje.tarifa || 0).toFixed(2);
-    
-    m.classList.add('show');
-    
-    // Reproducir un sonido si fuera posible
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-  }
-
-  window.aceptarViajeModal = function() {
-    const m = document.getElementById('modalViajeAsignado');
-    if (m) m.classList.remove('show');
-    showToast('Navegando a ubicación...', 'success');
-    // Aquí iría la lógica para trazar la ruta en el mapa o abrir Google Maps
-  }
-
-  async function updateWaitlistUI(zonaId) {
-    if (!conductorData) return;
-    try {
-      // 1. Obtener toda la lista de espera de la zona actual
-      const { data: lista, error } = await supabaseClient
-        .from('lista_espera')
-        .select(`conductor_id, zonas_geofence!inner(nombre)`)
-        .eq('zona_id', zonaId)
-        .order('created_at', { ascending: true });
+  // 🔔 NOTIFICACIONES PUSH (FCM) 🔔
+  async function initPushNotifications() {
+    if (typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform()) {
+      try {
+        const push = Capacitor.Plugins.PushNotifications;
         
-      if (error) throw error;
+        let permStatus = await push.checkPermissions();
+        if (permStatus.receive === 'prompt') {
+          permStatus = await push.requestPermissions();
+        }
 
-      // 2. Buscar mi posición
-      const myIndex = lista.findIndex(item => item.conductor_id === conductorData.id);
-      
-      const banner = document.getElementById('waitlistBanner');
-      if (myIndex !== -1) {
-        // Estamos en la fila
-        const zonaName = lista[myIndex].zonas_geofence?.nombre || 'la zona';
-        document.getElementById('waitlistZoneName').innerText = zonaName;
-        document.getElementById('waitlistPosition').innerText = `Turno #${myIndex + 1}`;
-        banner.classList.add('visible');
-      } else {
-        // No estamos en la fila
-        banner.classList.remove('visible');
+        if (permStatus.receive !== 'granted') {
+          console.warn('Permisos de notificaciones denegados');
+          return;
+        }
+
+        await push.register();
+
+        push.addListener('registration', async (token) => {
+          console.log('FCM Token:', token.value);
+          if (conductorData) {
+             await supabaseClient.from('conductores').update({
+               fcm_token: token.value
+             }).eq('id', conductorData.id);
+          }
+        });
+
+        push.addListener('registrationError', (error) => {
+          console.error('Error registrando FCM:', JSON.stringify(error));
+        });
+
+        push.addListener('pushNotificationReceived', (notification) => {
+          showToast('🔔 NUEVO VIAJE: ' + notification.title, 'success');
+        });
+
+      } catch (err) {
+        console.warn('PushNotifications plugin no disponible o error:', err);
       }
-    } catch (err) {
-      console.warn('Error actualizando fila:', err);
     }
   }
 
@@ -1102,78 +871,25 @@
     }
   }
 
-  async function startTracking() {
+  function startTracking() {
+    if (!navigator.geolocation) {
+      showToast('Geolocalización no disponible');
+      return;
+    }
+
     isTracking = true;
     startTime = Date.now();
     totalDistance = 0;
     lastPosition = null;
     routePolyline.setLatLngs([]);
 
+    // Actualizar UI
     const btn = document.getElementById('trackBtn');
     btn.className = 'btn-action btn-stop';
     btn.innerHTML = '⏹ Detener Viaje';
     document.getElementById('liveIndicator').classList.add('active');
 
-    if (window.Capacitor && window.Capacitor.Plugins.RoadToLocation) {
-      try {
-        const RoadToLocation = window.Capacitor.Plugins.RoadToLocation;
-        
-        // Listener de actualización nativa
-        RoadToLocation.addListener('onLocationUpdate', (loc) => {
-          handlePositionUpdate({
-            coords: {
-              latitude: loc.latitude,
-              longitude: loc.longitude,
-              accuracy: loc.accuracy,
-              speed: loc.speed,
-              heading: loc.heading
-            }
-          });
-        });
-
-        // Iniciar servicio nativo
-        await RoadToLocation.startTracking();
-        showToast('🟢 Viaje iniciado (Modo Nativo 100% Background)');
-      } catch (e) {
-        console.error("Fallo al iniciar RoadToLocation nativo", e);
-        startWebTrackingFallback();
-      }
-    } else if (window.BackgroundGeolocation) {
-      // Fallback a plugin de capacitor antiguo
-      try {
-        watchId = await window.BackgroundGeolocation.addWatcher(
-          { backgroundMessage: "Rastreando ubicación en segundo plano.", backgroundTitle: "Road To Activo", requestPermissions: true, stale: false, distanceFilter: 2 },
-          function (location, error) {
-            if (error) return console.error(error);
-            handlePositionUpdate({ coords: { latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy, speed: location.speed, heading: location.bearing } });
-          }
-        );
-        showToast('🟢 Viaje iniciado (Modo Capacitor Básico)');
-      } catch (e) {
-        startWebTrackingFallback();
-      }
-    } else {
-      startWebTrackingFallback();
-    }
-
-    timerInterval = setInterval(updateTimer, 1000);
-
-    if (conductorData) {
-      supabaseClient.from('tracking_sessions').insert({
-        driver_id: conductorData.id, started_at: new Date().toISOString(), status: 'active'
-      }).then(({ error }) => {
-        if (error) console.warn('Error creando sesión:', error);
-      });
-    }
-  }
-
-  function startWebTrackingFallback() {
-    if (!navigator.geolocation) {
-      showToast('Geolocalización no disponible');
-      return;
-    }
-    
-    // Iniciar watchPosition normal
+    // Iniciar watchPosition
     watchId = navigator.geolocation.watchPosition(
       (pos) => handlePositionUpdate(pos),
       (err) => {
@@ -1182,20 +898,28 @@
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 }
     );
-    showToast('🟢 Viaje iniciado (Modo Básico)');
+
+    // Timer para actualizar tiempo
+    timerInterval = setInterval(updateTimer, 1000);
+
+    // Guardar sesión en Supabase
+    if (conductorData) {
+      supabaseClient.from('tracking_sessions').insert({
+        driver_id: conductorData.id,
+        started_at: new Date().toISOString(),
+        status: 'active',
+      }).then(({ error }) => {
+        if (error) console.warn('Error creando sesión:', error);
+      });
+    }
+
+    showToast('🟢 Viaje iniciado');
   }
 
-  async function stopTracking() {
+  function stopTracking() {
     isTracking = false;
 
-    if (window.Capacitor && window.Capacitor.Plugins.RoadToLocation) {
-      const RoadToLocation = window.Capacitor.Plugins.RoadToLocation;
-      await RoadToLocation.stopTracking();
-      RoadToLocation.removeAllListeners();
-    } else if (window.BackgroundGeolocation && watchId !== null && typeof watchId === 'string') {
-      await window.BackgroundGeolocation.removeWatcher({ id: watchId });
-      watchId = null;
-    } else if (watchId !== null) {
+    if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
     }
@@ -1205,11 +929,13 @@
       timerInterval = null;
     }
 
+    // Actualizar UI
     const btn = document.getElementById('trackBtn');
     btn.className = 'btn-action btn-start';
     btn.innerHTML = '▶ Iniciar Viaje';
     document.getElementById('liveIndicator').classList.remove('active');
 
+    // Cerrar sesión en Supabase
     if (conductorData) {
       supabaseClient.from('tracking_sessions')
         .update({ ended_at: new Date().toISOString(), status: 'completed' })
@@ -1245,6 +971,71 @@
     }
     lastPosition = [latitude, longitude];
 
+    // Check Geofencing
+    if (typeof turf !== 'undefined' && activeGeofenceZones.length > 0) {
+      const pt = turf.point([longitude, latitude]);
+      activeGeofenceZones.forEach(async (zona) => {
+        let coords = zona.poligono.map(p => [p.lng, p.lat]);
+        if (coords.length >= 3) {
+           if (coords[0][0] !== coords[coords.length - 1][0] || coords[0][1] !== coords[coords.length - 1][1]) {
+             coords.push([...coords[0]]);
+           }
+           const poly = turf.polygon([coords]);
+           const isInside = turf.booleanPointInPolygon(pt, poly);
+           
+           if (isInside && !currentZonesInside.has(zona.id)) {
+             currentZonesInside.add(zona.id);
+             if (conductorData) {
+               // 1. Notificación
+               supabaseClient.from('notificaciones').insert({
+                 tipo: 'geofence_enter',
+                 titulo: 'Entrada a Zona: ' + zona.nombre,
+                 mensaje: `El conductor ${conductorData.nombres || ''} ha entrado a la zona ${zona.nombre}.`,
+                 leida: false
+               }).then();
+               
+               // 2. Entrar a Lista de Espera
+               const { data: colaData } = await supabaseClient.from('lista_espera_zonas').insert({
+                 zona_id: zona.id,
+                 conductor_id: conductorData.id,
+                 estado: 'en_cola'
+               }).select();
+               
+               // Informar posición
+               const { count } = await supabaseClient.from('lista_espera_zonas')
+                 .select('*', { count: 'exact', head: true })
+                 .eq('zona_id', zona.id)
+                 .eq('estado', 'en_cola');
+               
+               showToast(`🚗 Entraste a: ${zona.nombre}. Eres el #${count || 1} en la fila.`);
+             }
+           } else if (!isInside && currentZonesInside.has(zona.id)) {
+             currentZonesInside.delete(zona.id);
+             if (conductorData) {
+               // 1. Notificación
+               supabaseClient.from('notificaciones').insert({
+                 tipo: 'geofence_exit',
+                 titulo: 'Salida de Zona: ' + zona.nombre,
+                 mensaje: `El conductor ${conductorData.nombres || ''} ha salido de la zona ${zona.nombre}.`,
+                 leida: false
+               }).then();
+               
+               // 2. Salir de Lista de Espera
+               supabaseClient.from('lista_espera_zonas').update({
+                 estado: 'salio',
+                 salio_en: new Date().toISOString()
+               })
+               .eq('zona_id', zona.id)
+               .eq('conductor_id', conductorData.id)
+               .eq('estado', 'en_cola').then();
+               
+               showToast(`👋 Saliste de: ${zona.nombre}. Tu turno ha sido cancelado.`);
+             }
+           }
+        }
+      });
+    }
+
     // Actualizar stats UI
     document.getElementById('distanceValue').textContent = (totalDistance / 1000).toFixed(1);
     if (speed !== null && speed >= 0) {
@@ -1264,59 +1055,6 @@
       }).then(({ error }) => {
         if (error) console.warn('Error guardando ubicación:', error);
       });
-
-      // === COMPROBAR ZONAS GEOFENCE ===
-      activeZonas.forEach(zona => {
-        // Calcular distancia desde la posición actual hasta el centro de la zona
-        const distanceToZone = haversineDistance(latitude, longitude, zona.latitud, zona.longitud);
-        
-        // Si estamos dentro del radio (y no lo hemos notificado antes)
-        if (distanceToZone <= zona.radio_metros && !notifiedZonas.has(zona.id)) {
-          notifiedZonas.add(zona.id);
-          showToast(`📍 Entraste a la zona: ${zona.nombre}`);
-          
-          // Notificación Nativa Push (por si la app está en segundo plano)
-          if (window.LocalNotifications) {
-            window.LocalNotifications.schedule({
-              notifications: [
-                {
-                  title: "Zona Especial Alcanzada",
-                  body: `📍 Has entrado a la zona: ${zona.nombre}. Se te añadirá a la lista de espera.`,
-                  id: new Date().getTime(),
-                  schedule: { at: new Date(Date.now() + 1000) },
-                  sound: null,
-                  attachments: null,
-                  actionTypeId: "",
-                  extra: null
-                }
-              ]
-            }).catch(e => console.warn('Error scheduling notification', e));
-          }
-
-          // Entrar a la lista de espera
-          supabaseClient.from('lista_espera').insert({
-            zona_id: zona.id,
-            conductor_id: conductorData.id,
-            estado: 'esperando'
-          }).then(({ error }) => {
-            if (error) {
-              console.warn('Ya en lista de espera o error:', error);
-            } else {
-              showToast(`Añadido a lista de espera en ${zona.nombre}`);
-            }
-          });
-        } 
-        // Opcional: Si salimos de la zona, remover de lista de espera
-        else if (distanceToZone > zona.radio_metros && notifiedZonas.has(zona.id)) {
-          notifiedZonas.delete(zona.id);
-          // Eliminar de lista de espera
-          supabaseClient.from('lista_espera')
-            .delete()
-            .eq('zona_id', zona.id)
-            .eq('conductor_id', conductorData.id)
-            .then(() => showToast(`Saliste de la zona: ${zona.nombre}`));
-        }
-      });
     }
   }
 
@@ -1327,140 +1065,6 @@
     const sec = (elapsed % 60).toString().padStart(2, '0');
     document.getElementById('timeValue').textContent = `${min}:${sec}`;
   }
-
-
-  // ═══ GESTIÓN DE CAPACIDAD Y PASAJEROS (CONDUCTOR) ═══
-  let activePassengersLayer = null;
-
-  async function cargarPasajerosActivos() {
-    if (!conductorData || userRole !== 'conductor') return;
-    try {
-      const { data: viajes, error } = await supabaseClient
-        .from('viajes_reservados')
-        .select('*')
-        .eq('conductor_asignado_id', conductorData.id)
-        .in('estado', ['asignado', 'a_bordo']);
-        
-      if (error) throw error;
-      
-      const panel = document.getElementById('capacityPanel');
-      panel.classList.add('show');
-      
-      let cuposOcupados = 0;
-      let html = '';
-      
-      if (!viajes || viajes.length === 0) {
-        html = '<div style="font-size: 12px; color: var(--text-muted); text-align: center;">Sin pasajeros asignados</div>';
-      } else {
-        cuposOcupados = viajes.filter(v => v.estado === 'a_bordo').length;
-        
-        html = viajes.map(v => {
-          let actionBtn = '';
-          if (v.estado === 'asignado') {
-            actionBtn = `<button class="btn-passenger btn-abordar" onclick="cambiarEstadoPasajero('${v.id}', 'a_bordo')">A Bordo</button>`;
-          } else if (v.estado === 'a_bordo') {
-            actionBtn = `<button class="btn-passenger btn-bajar" onclick="cambiarEstadoPasajero('${v.id}', 'completado')">Finalizar</button>`;
-          }
-          return `
-            <div class="passenger-item">
-              <div class="passenger-info">
-                <div class="passenger-name">👤 ${v.pasajero_nombre || 'Pasajero'} (${v.estado === 'a_bordo' ? 'En viaje' : 'Esperando'})</div>
-                <div class="passenger-route">📍 ${v.origen} <br>🏁 ${v.destino}</div>
-              </div>
-              <div class="passenger-actions">
-                ${actionBtn}
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-      
-      document.getElementById('activePassengerList').innerHTML = html;
-      
-      // Actualizar visualización de asientos
-      const cuposDisponibles = 4 - cuposOcupados;
-      document.getElementById('capacidadCount').innerText = cuposDisponibles;
-      
-      const dots = document.getElementById('driverSeatsDots');
-      dots.innerHTML = '';
-      for (let i = 0; i < 4; i++) {
-        dots.innerHTML += `<div class="seat-dot ${i < cuposOcupados ? 'ocupado' : 'libre'}"></div>`;
-      }
-      
-      // Actualizar en base de datos
-      await supabaseClient.from('conductores')
-        .update({ capacidad_disponible: cuposDisponibles })
-        .eq('id', conductorData.id);
-        
-      // Trazar rutas de pasajeros en el mapa
-      dibujarRutasPasajeros(viajes);
-      
-    } catch (e) {
-      console.warn('Error cargando pasajeros activos:', e);
-    }
-  }
-
-  async function cambiarEstadoPasajero(viajeId, nuevoEstado) {
-    try {
-      const { error } = await supabaseClient
-        .from('viajes_reservados')
-        .update({ estado: nuevoEstado, estado_pasajero: nuevoEstado })
-        .eq('id', viajeId);
-        
-      if (error) throw error;
-      showToast(nuevoEstado === 'a_bordo' ? 'Pasajero recogido' : 'Viaje finalizado');
-
-      // Si el pasajero se bajó (completado), liberamos 1 cupo
-      if (nuevoEstado === 'completado') {
-         const { data: currentConductor } = await supabaseClient.from('conductores').select('cupos_disponibles').eq('id', conductorData.id).single();
-         if (currentConductor) {
-             const nuevosCupos = Math.min(4, (currentConductor.cupos_disponibles || 0) + 1);
-             await supabaseClient.from('conductores').update({ cupos_disponibles: nuevosCupos }).eq('id', conductorData.id);
-         }
-      }
-
-      // La UI se actualizará automáticamente por el Realtime
-    } catch (e) {
-      showToast('Error al actualizar: ' + e.message, 'error');
-    }
-  }
-
-  function dibujarRutasPasajeros(viajes) {
-    if (!map) return;
-    if (activePassengersLayer) {
-      map.removeLayer(activePassengersLayer);
-    }
-    activePassengersLayer = L.layerGroup().addTo(map);
-    
-    viajes.forEach(v => {
-      if (v.coordenadas_origen && v.coordenadas_destino) {
-        // En un caso real usaríamos OSRM aquí también para trazar la ruta en el mapa del conductor
-        // Por ahora trazaremos una línea recta y pondremos marcadores para no saturar la API
-        
-        const cOri = v.coordenadas_origen;
-        const cDes = v.coordenadas_destino;
-        
-        if (v.estado === 'asignado') {
-          // Si está asignado, mostrar donde hay que recogerlo
-          L.marker([cOri.lat, cOri.lng], {
-            icon: L.divIcon({
-              html: '<div style="background:#f97316;width:12px;height:12px;border-radius:50%;border:2px solid white;"></div>',
-              className: ''
-            })
-          }).addTo(activePassengersLayer).bindPopup('Recoger a: ' + (v.pasajero_nombre || 'Pasajero'));
-        }
-        
-        // Mostrar siempre donde va a bajar
-        L.marker([cDes.lat, cDes.lng], {
-          icon: L.divIcon({
-            html: '<div style="background:#8ac725;width:12px;height:12px;border-radius:50%;border:2px solid white;"></div>',
-            className: ''
-          })
-        }).addTo(activePassengersLayer).bindPopup('Dejar a: ' + (v.pasajero_nombre || 'Pasajero'));
-      }
-    });
-  }
-
 
   // ═══ FÓRMULA HAVERSINE (distancia entre 2 coordenadas) ═══
   function haversineDistance(lat1, lon1, lat2, lon2) {
@@ -1733,8 +1337,7 @@
       }
 
       const route = data.routes[0];
-      const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-      currentRouteData = route.geometry; // Guardamos la geometria para Supabase // GeoJSON es [lng,lat]
+      const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); // GeoJSON es [lng,lat]
 
       // Dibujar ruta en mapa
       if (routeLayer) map.removeLayer(routeLayer);
@@ -1771,7 +1374,6 @@
     searchOriginEl.value = '';
     searchDestEl.value = '';
     document.getElementById('routeInfo').classList.remove('show');
-    currentRouteData = null;
     showToast('Ruta limpiada');
   }
 
@@ -1809,6 +1411,116 @@
     } catch (e) {
       // Último fallback
       prompt('Copia este enlace:', googleLink);
+    }
+  }
+
+  // ═══ NUEVA LÓGICA DE URL PARAMS ═══
+  async function processURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    const viajeId = params.get('viaje_id');
+    const mode = params.get('mode');
+    const conductorId = params.get('conductor_id');
+
+    if (view === 'all') {
+      // Vista Global Admin/Coordinador
+      showToast('Cargando todos los conductores activos...');
+      toggleDriverList(); // Abrir panel de conductores si está oculto
+      cargarConductoresActivos(); // Esta función ya hace pooling cada 10s en el script, pero aquí la forzamos
+    } else if (viajeId) {
+      // Rastreo para Pasajero
+      showToast('Cargando viaje en vivo...');
+      await renderViajeEnVivo(viajeId);
+    } else if (mode === 'driver' && conductorId) {
+      // Rastreo y próximas carreras para Conductor
+      showToast('Cargando tu ruta y carreras disponibles...');
+      await renderModoConductor(conductorId);
+    }
+  }
+
+  async function renderViajeEnVivo(viajeId) {
+    try {
+      // 1. Cargar viaje
+      const { data: viaje } = await supabaseClient
+        .from('viajes_reservados')
+        .select('*')
+        .eq('id', viajeId)
+        .maybeSingle();
+      
+      if (!viaje) { showToast('Viaje no encontrado'); return; }
+
+      // 2. Trazar ruta origen-destino
+      if (viaje.lat_origen && viaje.lng_origen && viaje.lat_destino && viaje.lng_destino) {
+        await calculateRoute([viaje.lat_origen, viaje.lng_origen], [viaje.lat_destino, viaje.lng_destino]);
+      } else {
+        // Fallback: buscar por texto
+        await searchAddress(viaje.origen);
+        const originCoord = originCoords;
+        await searchAddress(viaje.destino);
+        if (originCoord && destCoords) await calculateRoute(originCoord, destCoords);
+      }
+
+      // 3. Suscribirse a la ubicación del conductor
+      if (viaje.conductor_asignado_id) {
+        // Cargar última ubicación
+        const { data: loc } = await supabaseClient
+          .from('driver_locations')
+          .select('*')
+          .eq('driver_id', viaje.conductor_asignado_id)
+          .order('timestamp', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (loc) {
+          updateDriverOnMap(loc);
+          if (driverMarkers[loc.driver_id]) {
+            map.setView(driverMarkers[loc.driver_id].getLatLng(), 15);
+          }
+        }
+        
+        // Configurar realtime para este conductor
+        supabaseClient.channel('viaje-vivo')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'driver_locations', filter: `driver_id=eq.${viaje.conductor_asignado_id}` }, payload => {
+            updateDriverOnMap(payload.new);
+          }).subscribe();
+      }
+    } catch(e) {
+      console.error('Error renderViajeEnVivo:', e);
+    }
+  }
+
+  async function renderModoConductor(conductorId) {
+    // 1. Mostrar tu viaje actual si lo hay
+    try {
+      const { data: viaje } = await supabaseClient
+        .from('viajes_reservados')
+        .select('*')
+        .eq('conductor_asignado_id', conductorId)
+        .in('estado', ['asignado', 'en_curso'])
+        .maybeSingle();
+      
+      if (viaje && viaje.lat_destino) {
+        if (lastPosition) {
+           await calculateRoute(lastPosition, [viaje.lat_destino, viaje.lng_destino]);
+        }
+      }
+
+      // 2. Buscar viajes disponibles "pendientes" cercanos o en general
+      const { data: disponibles } = await supabaseClient
+        .from('viajes_reservados')
+        .select('*')
+        .eq('estado', 'pendiente');
+      
+      if (disponibles) {
+        disponibles.forEach(v => {
+          if (v.lat_origen && v.lng_origen) {
+            const m = L.marker([v.lat_origen, v.lng_origen]).addTo(map)
+              .bindPopup(`<b>Viaje Disponible</b><br>${v.origen}<br>➔ ${v.destino}`);
+          }
+        });
+      }
+    } catch(e) {
+      console.error('Error renderModoConductor:', e);
     }
   }
 </script>

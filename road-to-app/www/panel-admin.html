@@ -13,17 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <!-- Supabase y QRCode -->
-<script src="JS/supabase-bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
-<!-- Leaflet CSS + JS -->
-<link rel="stylesheet" href="JS/leaflet/leaflet.css">
-<script src="JS/leaflet/leaflet.js"></script>
-
-<!-- Config centralizada -->
-<script src="config.js"></script>
-
-<script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
     // ========== FUNCIONES FALTANTES AÑADIDAS ==========
     let viajeIdParaAsignar = null;
 
@@ -124,8 +114,10 @@
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductorAdmin(c.id);
+        const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
+        const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+          <div class="avatar">${iniN}${iniA}</div>
           <div class="info">
             <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
@@ -171,6 +163,11 @@
     });
 
   </script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
+    // ========== FUNCIONES FALTANTES AÑADIDAS ==========
+    let viajeIdParaAsignar = null;
+
+    async function toggleDesdeModal() {
       if (!conductorEditId) return;
       const c = allConductores.find(x => x.id === conductorEditId);
       if (!c) return;
@@ -267,8 +264,10 @@
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductorAdmin(c.id);
+        const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
+        const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+          <div class="avatar">${iniN}${iniA}</div>
           <div class="info">
             <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
@@ -806,12 +805,6 @@
     position: relative;
   }
 
-  .action-btn svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-
   .action-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: scale(1.1);
@@ -835,7 +828,6 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     pointer-events: none;
   }
-
 
   .action-btn.view:hover { color: #60a5fa; background: rgba(59, 130, 246, 0.15); }
   .action-btn.edit:hover { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
@@ -1807,7 +1799,13 @@
   }
 
 </style>
+</style>
 <base target="_blank">
+<!-- Leaflet & Leaflet.draw -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 </head>
 
 <body>
@@ -1833,83 +1831,6 @@
       </button>
     </div>
   </header>
-
-  <!-- Modal Zona -->
-  <div class="modal-overlay centered" id="zonaModal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeZonaModal()">✕</button>
-      <div class="modal-header">
-        <h3 class="modal-title" id="zonaModalTitle">Nueva Zona Especial</h3>
-      </div>
-      <form id="zonaForm" onsubmit="saveZona(event)">
-        <div class="form-group">
-          <label>Nombre de la Zona</label>
-          <input type="text" id="zonaNombre" required placeholder="Ej: Aeropuerto">
-        </div>
-        <div class="form-group">
-          <label>Descripción</label>
-          <input type="text" id="zonaDescripcion" placeholder="Zona de alta demanda">
-        </div>
-        <div class="form-group">
-          <label>Radio (metros)</label>
-          <input type="number" id="zonaRadio" required min="10" value="500">
-        </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-          <button type="button" class="btn-secondary" onclick="closeZonaModal()">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Lista de Espera -->
-  <div class="modal-overlay centered" id="listaEsperaModal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeListaEsperaModal()">✕</button>
-      <div class="modal-header">
-        <h3 class="modal-title" id="listaEsperaTitle">Conductores en Espera</h3>
-      </div>
-      <div id="listaEsperaContainer" style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
-        <!-- Aquí se renderizan los conductores esperando -->
-        <div style="text-align: center; color: #94a3b8; padding: 20px;">Cargando conductores...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Despachar Viaje -->
-  <div class="modal-overlay centered" id="despachoModal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeDespachoModal()">×</button>
-      <div class="modal-header">
-        <h3 class="modal-title">Despachar Viaje</h3>
-      </div>
-      <div style="margin-top: 15px;">
-        <p style="margin-bottom: 10px; color: var(--text-secondary);">Asignando a: <strong id="despachoConductorNombre"></strong></p>
-        
-        <div class="form-group">
-          <label class="form-label">Nombre del Pasajero / Solicitante</label>
-          <input type="text" class="form-input" id="despachoPasajero" placeholder="Ej. Juan Pérez">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Dirección de Origen</label>
-          <input type="text" class="form-input" id="despachoOrigen" placeholder="Ej. Calle 123">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Dirección de Destino</label>
-          <input type="text" class="form-input" id="despachoDestino" placeholder="Ej. Avenida 456">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Tarifa Estimada ($)</label>
-          <input type="number" class="form-input" id="despachoTarifa" placeholder="Ej. 15.00">
-        </div>
-
-        <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="confirmarDespacho()">Confirmar Despacho</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Modal QR -->
   <div class="modal-overlay centered" id="qrModal">
@@ -2112,8 +2033,9 @@
       <div class="section-tabs">
         <button class="section-tab active" onclick="switchSection('conductores', this)">🚗 Conductores</button>
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
-        <button class="section-tab" onclick="switchSection('viajes', this)">🚕 Viajes</button>
-        <button class="section-tab" onclick="switchSection('zonas', this)">📍 Zonas</button>
+        <button class="section-tab" onclick="switchSection('viajes', this)">🚙 Viajes</button>
+        <button class="section-tab" onclick="switchSection('zonas', this)">🗺️ Zonas</button>
+        <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="window.location.href='mapa.html?view=all'">🌍 Mapa en Vivo</button>
       </div>
     </div>
 
@@ -2274,20 +2196,42 @@
       <div class="viajes-list" id="viajesList">
         <div style="text-align: center; padding: 40px; color: #64748b;">Cargando viajes...</div>
       </div>
+      </div>
     </div>
 
     <!-- ZONAS SECTION -->
-    <div id="zonasSection" class="section-content" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3>Zonas Especiales</h3>
-        <button class="btn-primary" onclick="openCreateZonaModal()">+ Crear Zona</button>
+    <div id="zonasSection" class="section-content">
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px;">
+        <h3 style="color: white; margin-bottom: 10px;">Gestión de Zonas (Geofencing)</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Dibuja polígonos en el mapa para definir zonas. El sistema detectará cuando un conductor entre o salga de estas áreas.</p>
+        <div id="zonasMap" style="height: 400px; width: 100%; border-radius: 12px; z-index: 1;"></div>
       </div>
       
-      <!-- Contenedor del Mapa -->
-      <div id="adminMap" style="height: 400px; width: 100%; border-radius: 16px; margin-bottom: 20px; z-index: 1;"></div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre de Zona</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="zonasList">
+            <tr><td colspan="4" style="text-align:center;">Cargando zonas...</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div class="zonas-list" id="zonasList">
-        <div style="text-align: center; padding: 40px; color: #64748b;">Cargando zonas...</div>
+      <!-- COLAS DE ESPERA POR ZONA -->
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-top: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <h3 style="color: white; margin: 0;">Conductores en Fila (Colas Virtuales)</h3>
+          <button class="btn-primary" onclick="renderColas()" style="padding: 6px 12px; font-size: 13px;">↻ Refrescar</button>
+        </div>
+        <div id="colasContainer">
+           <div style="text-align: center; color: #64748b; padding: 20px;">Cargando colas...</div>
+        </div>
       </div>
     </div>
 
@@ -2481,37 +2425,16 @@
       }
     }
 
-    // ═══ REALTIME: LISTA ESPERA (FASE 3) ═══
-    function initAdminRealtime() {
-      // Escuchar INSERTS en lista_espera para notificar al admin
-      const listaEsperaChannel = supabaseClient.channel('admin-lista-espera')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'lista_espera' },
-          (payload) => {
-            // Notificar al administrador visualmente
-            showToast('🔔 Un conductor ha entrado a una zona de espera.', 'success');
-            
-            // Si el modal de lista de espera está abierto de esa zona, refrescarlo
-            if (window.currentZonaIdLista && window.currentZonaIdLista === payload.new.zona_id) {
-              verListaEspera(payload.new.zona_id);
-            }
-          }
-        )
-        .subscribe();
-    }
-
     function switchSection(section, btn) {
       document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
       document.getElementById(section + 'Section').classList.add('active');
 
-      if (section === 'zonas' && !window.adminMapInstance) {
-        // Inicializar mapa si es la primera vez que entramos
+      if (section === 'zonas' && window.zonasMapObj) {
+        setTimeout(() => window.zonasMapObj.invalidateSize(), 100);
+      } else if (section === 'zonas' && !window.zonasMapObj) {
         setTimeout(initZonasMap, 100);
-      } else if (section === 'zonas' && window.adminMapInstance) {
-        setTimeout(() => window.adminMapInstance.invalidateSize(), 100);
       }
     }
 
@@ -3231,7 +3154,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       verificarAdmin();
-      initAdminRealtime();
 
       // Conductor Edit Form Submission
       const editForm = document.getElementById('editForm');
@@ -3429,22 +3351,61 @@
       document.getElementById('asignarConductorModal').classList.add('show');
     }
 
-    function renderConductoresDisponiblesAdmin() {
+    async function renderConductoresDisponiblesAdmin() {
       const container = document.getElementById('conductoresDisponiblesList');
       const activos = allConductores.filter(c => c.estado === true || c.estado === 'activo');
       if (activos.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b">No hay conductores activos.</div>';
         return;
       }
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">Cargando prioridades...</div>`;
+
+      let colasMap = {};
+      try {
+        const { data, error } = await supabaseClient.from('lista_espera_zonas')
+          .select('conductor_id, zonas_geofence(nombre), entrado_en')
+          .eq('estado', 'en_cola')
+          .order('entrado_en', { ascending: true });
+        
+        if (!error && data) {
+           data.forEach((item, index) => {
+             colasMap[item.conductor_id] = {
+               zona: item.zonas_geofence?.nombre || 'Zona',
+               pos: index + 1
+             };
+           });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Ordenar: los que están en cola van primero
+      activos.sort((a, b) => {
+        const hasA = colasMap[a.id] ? 1 : 0;
+        const hasB = colasMap[b.id] ? 1 : 0;
+        if (hasA && hasB) {
+           return colasMap[a.id].pos - colasMap[b.id].pos;
+        }
+        return hasB - hasA;
+      });
+
       container.innerHTML = '';
       activos.forEach(c => {
         const div = document.createElement('div');
         div.className = 'conductor-select-item';
         div.onclick = () => seleccionarConductorAdmin(c.id);
+        
+        let badgeHtml = '';
+        if (colasMap[c.id]) {
+          badgeHtml = `<span style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px;">En fila: ${colasMap[c.id].zona} (#${colasMap[c.id].pos})</span>`;
+        }
+
+        const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
+        const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+          <div class="avatar">${iniN}${iniA}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
+            <div class="name">${c.nombres || ''} ${c.apellidos || ''} ${badgeHtml}</div>
             <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
           </div>
         `;
@@ -3461,6 +3422,31 @@
           updated_at: new Date().toISOString()
         }).eq('id', viajeIdParaAsignar);
         if (error) throw error;
+        
+        // Quitar al conductor de la cola virtual si estaba en ella
+        await supabaseClient.from('lista_espera_zonas').update({ estado: 'asignado' }).eq('conductor_id', id).eq('estado', 'en_cola');
+        
+        // Notificar al conductor por Push Notification
+        try {
+          const session = await supabaseClient.auth.getSession();
+          if (session.data.session) {
+             fetch(`${SUPABASE_URL}/functions/v1/notificar-conductor`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.data.session.access_token}`
+                },
+                body: JSON.stringify({
+                  conductor_id: id,
+                  titulo: 'Nuevo Viaje Asignado',
+                  mensaje: 'Se te ha asignado un nuevo viaje. Revisa la aplicación.'
+                })
+             });
+          }
+        } catch (e) {
+          console.warn('No se pudo notificar al conductor', e);
+        }
+
         showToast('Conductor asignado con éxito', 'success');
         closeAsignarModal();
         await refreshData();
@@ -3487,354 +3473,217 @@
       }
     });
 
-    // ========== GEOFENCING (ZONAS ESPECIALES) ==========
+    // ==========================================
+    // ZONAS (GEOFENCING) MANAGEMENT
+    // ==========================================
     let allZonas = [];
-    window.adminMapInstance = null;
-    let selectedLatLng = null;
-    let zonasLayers = [];
+    let drawnItems;
+
+    async function initZonasMap() {
+      if (window.zonasMapObj) return;
+      
+      const map = L.map('zonasMap').setView([8.9824, -79.5199], 12); // Panama City default
+      window.zonasMapObj = map;
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(map);
+
+      drawnItems = new L.FeatureGroup();
+      map.addLayer(drawnItems);
+
+      const drawControl = new L.Control.Draw({
+        edit: {
+          featureGroup: drawnItems
+        },
+        draw: {
+          polygon: true,
+          polyline: false,
+          rectangle: true,
+          circle: false,
+          marker: false,
+          circlemarker: false
+        }
+      });
+      map.addControl(drawControl);
+
+      map.on(L.Draw.Event.CREATED, function (event) {
+        const layer = event.layer;
+        const geojson = layer.toGeoJSON();
+        const coords = geojson.geometry.coordinates[0];
+        
+        // Formato para guardar
+        const poligonoObj = coords.map(c => ({ lng: c[0], lat: c[1] }));
+        
+        const nombre = prompt('Ingresa el nombre para esta zona (Ej. Aeropuerto):');
+        if (!nombre) return;
+        
+        const desc = prompt('Descripción de la zona (opcional):');
+        
+        guardarZona(nombre, desc || '', poligonoObj);
+      });
+
+      await cargarZonas();
+    }
 
     async function cargarZonas() {
       const { data, error } = await supabaseClient.from('zonas_geofence').select('*').order('created_at', { ascending: false });
       if (!error) {
         allZonas = data || [];
+        renderZonasList();
+        dibujarZonasEnMapa();
+        renderColas();
       }
     }
 
-    function initZonasMap() {
-      if (window.adminMapInstance) return;
-      window.adminMapInstance = L.map('adminMap').setView([10.4806, -66.9036], 12); // Caracas by default
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO'
-      }).addTo(window.adminMapInstance);
-
-      window.adminMapInstance.on('click', function(e) {
-        if (!document.getElementById('zonaModal').classList.contains('show')) {
-          selectedLatLng = e.latlng;
-          openCreateZonaModal();
-        }
-      });
-
-      renderZonasEnMapa();
-      renderZonasList();
-    }
-
-    function renderZonasEnMapa() {
-      if (!window.adminMapInstance) return;
-      zonasLayers.forEach(l => window.adminMapInstance.removeLayer(l));
-      zonasLayers = [];
-
+    function dibujarZonasEnMapa() {
+      if (!drawnItems) return;
+      drawnItems.clearLayers();
       allZonas.forEach(z => {
         if (!z.activa) return;
-        const color = z.activa ? '#8ac725' : '#ef4444';
-        const circle = L.circle([z.latitud, z.longitud], {
-          color: color,
-          fillColor: color,
-          fillOpacity: 0.2,
-          radius: z.radio_metros
-        }).addTo(window.adminMapInstance);
-        circle.bindPopup(`<b>${z.nombre}</b><br>Radio: ${z.radio_metros}m`);
-        zonasLayers.push(circle);
+        // Convertir {lat, lng} a [lat, lng]
+        const latlngs = z.poligono.map(p => [p.lat, p.lng]);
+        const polygon = L.polygon(latlngs, {color: '#8b5cf6'}).bindTooltip(z.nombre);
+        drawnItems.addLayer(polygon);
       });
     }
 
-    function openCreateZonaModal() {
-      if (!selectedLatLng) {
-        showToast('Haz clic en el mapa para seleccionar la ubicación de la zona', 'warning');
-        return;
-      }
-      document.getElementById('zonaForm').reset();
-      document.getElementById('zonaModal').classList.add('show');
-    }
-
-    function closeZonaModal() {
-      document.getElementById('zonaModal').classList.remove('show');
-      selectedLatLng = null;
-    }
-
-    async function saveZona(e) {
-      e.preventDefault();
-      if (!selectedLatLng) return;
-
-      const nombre = document.getElementById('zonaNombre').value;
-      const desc = document.getElementById('zonaDescripcion').value;
-      const radio = parseFloat(document.getElementById('zonaRadio').value);
-
+    async function guardarZona(nombre, desc, poligono) {
       showLoading('Guardando zona...');
       try {
         const { error } = await supabaseClient.from('zonas_geofence').insert({
           nombre: nombre,
           descripcion: desc,
-          latitud: selectedLatLng.lat,
-          longitud: selectedLatLng.lng,
-          radio_metros: radio
+          poligono: poligono,
+          activa: true
         });
         if (error) throw error;
-        
-        showToast('Zona creada', 'success');
-        closeZonaModal();
+        showToast('Zona guardada con éxito', 'success');
         await cargarZonas();
-        renderZonasEnMapa();
-        renderZonasList();
-      } catch (err) {
-        showToast('Error al crear zona', 'error');
+      } catch(e) {
+        showToast(e.message || 'Error al guardar zona', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function toggleZona(id, estadoActual) {
+      showLoading('Actualizando zona...');
+      try {
+        const { error } = await supabaseClient.from('zonas_geofence').update({
+          activa: !estadoActual
+        }).eq('id', id);
+        if (error) throw error;
+        showToast('Estado actualizado', 'success');
+        await cargarZonas();
+      } catch(e) {
+        showToast(e.message || 'Error al actualizar', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function eliminarZona(id) {
+      if(!confirm('¿Eliminar esta zona permanentemente?')) return;
+      showLoading('Eliminando...');
+      try {
+        const { error } = await supabaseClient.from('zonas_geofence').delete().eq('id', id);
+        if (error) throw error;
+        showToast('Zona eliminada', 'success');
+        await cargarZonas();
+      } catch(e) {
+        showToast(e.message || 'Error al eliminar', 'error');
       } finally {
         hideLoading();
       }
     }
 
     function renderZonasList() {
-      const container = document.getElementById('zonasList');
+      const tbody = document.getElementById('zonasList');
+      if (!tbody) return;
+      
       if (allZonas.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;">No hay zonas especiales creadas. Haz clic en el mapa para crear una.</div>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No hay zonas definidas.</td></tr>';
         return;
       }
-      container.innerHTML = '';
+      
+      tbody.innerHTML = '';
       allZonas.forEach(z => {
-        const div = document.createElement('div');
-        div.style.background = 'rgba(15, 23, 42, 0.4)';
-        div.style.padding = '15px';
-        div.style.marginBottom = '10px';
-        div.style.borderRadius = '12px';
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.alignItems = 'center';
-
-        const info = document.createElement('div');
-        info.innerHTML = `<strong>${z.nombre}</strong><br><small style="color: #94a3b8">${z.descripcion || 'Sin desc'}</small><br><span style="color: #60a5fa; font-size: 12px;">Radio: ${z.radio_metros}m</span>`;
-        
-        const actions = document.createElement('div');
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-danger';
-        deleteBtn.style.padding = '8px 12px';
-        deleteBtn.innerHTML = 'Eliminar';
-        deleteBtn.onclick = async () => {
-          if (!confirm('¿Eliminar esta zona?')) return;
-          showLoading('Eliminando...');
-          await supabaseClient.from('zonas_geofence').delete().eq('id', z.id);
-          hideLoading();
-          await cargarZonas();
-          renderZonasEnMapa();
-          renderZonasList();
-        };
-
-        const viewListaBtn = document.createElement('button');
-        viewListaBtn.className = 'btn-primary';
-        viewListaBtn.style.padding = '8px 12px';
-        viewListaBtn.style.marginLeft = '10px';
-        viewListaBtn.innerHTML = 'Lista Espera';
-        viewListaBtn.onclick = () => verListaEspera(z.id);
-
-        actions.appendChild(deleteBtn);
-        actions.appendChild(viewListaBtn);
-
-        div.appendChild(info);
-        div.appendChild(actions);
-        container.appendChild(div);
+        const statusBadge = z.activa 
+          ? '<span style="background:rgba(34,197,94,0.2);color:#4ade80;padding:4px 8px;border-radius:4px;font-size:12px;">Activa</span>' 
+          : '<span style="background:rgba(239,68,68,0.2);color:#f87171;padding:4px 8px;border-radius:4px;font-size:12px;">Inactiva</span>';
+          
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color:white;font-weight:600;">${z.nombre}</td>
+          <td style="color:#94a3b8;">${z.descripcion || '-'}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button class="action-btn view" onclick="toggleZona('${z.id}', ${z.activa})" title="Activar/Desactivar">👁️</button>
+            <button class="action-btn delete" onclick="eliminarZona('${z.id}')" title="Eliminar">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
     }
 
-    let currentZonaIdLista = null;
-    
-    function closeListaEsperaModal() {
-      document.getElementById('listaEsperaModal').classList.remove('show');
-      currentZonaIdLista = null;
-    }
+    async function renderColas() {
+      const container = document.getElementById('colasContainer');
+      if (!container) return;
 
-    let currentDespachoInfo = null;
+      const { data, error } = await supabaseClient.from('lista_espera_zonas')
+        .select('*, zonas_geofence(nombre), conductores(nombres, apellidos, placa)')
+        .eq('estado', 'en_cola')
+        .order('entrado_en', { ascending: true });
 
-    function abrirModalDespacho(listaId, conductorId, conductorNombre) {
-      currentDespachoInfo = { listaId, conductorId, conductorNombre };
-      document.getElementById('despachoConductorNombre').innerText = conductorNombre;
-      document.getElementById('despachoPasajero').value = '';
-      document.getElementById('despachoOrigen').value = '';
-      document.getElementById('despachoDestino').value = '';
-      document.getElementById('despachoTarifa').value = '';
-      document.getElementById('despachoModal').classList.add('show');
-    }
-
-    function closeDespachoModal() {
-      document.getElementById('despachoModal').classList.remove('show');
-      currentDespachoInfo = null;
-    }
-
-    async function confirmarDespacho() {
-      if (!currentDespachoInfo) return;
-      const pasajero = document.getElementById('despachoPasajero').value;
-      const origen = document.getElementById('despachoOrigen').value;
-      const destino = document.getElementById('despachoDestino').value;
-      const tarifa = document.getElementById('despachoTarifa').value;
-
-      if (!pasajero || !origen || !destino) {
-        showToast('Por favor completa todos los campos del viaje', 'error');
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">No hay conductores en fila actualmente.</div>';
         return;
       }
 
-      showLoading('Despachando...');
-      try {
-        // 1. Crear el viaje en viajes_reservados
-        const { error: viajeError } = await supabaseClient.from('viajes_reservados').insert({
-          conductor_asignado_id: currentDespachoInfo.conductorId,
-          pasajero_nombre: pasajero,
-          origen: origen,
-          destino: destino,
-          tarifa: parseFloat(tarifa) || 0,
-          estado: 'asignado',
-          fecha_hora: new Date().toISOString()
-        });
-        if (viajeError) throw viajeError;
+      // Agrupar por zona
+      const colasPorZona = {};
+      data.forEach(item => {
+        const zonaNombre = item.zonas_geofence?.nombre || 'Desconocida';
+        if (!colasPorZona[zonaNombre]) colasPorZona[zonaNombre] = [];
+        colasPorZona[zonaNombre].push(item);
+      });
 
-        // 2. Eliminar al conductor de la lista_espera
-        const { error: deleteError } = await supabaseClient.from('lista_espera')
-          .delete()
-          .eq('id', currentDespachoInfo.listaId);
+      let html = '';
+      for (const zona in colasPorZona) {
+        html += `<div style="margin-bottom: 20px;">
+          <h4 style="color:#a78bfa; margin-bottom: 10px; font-size: 16px;">📍 ${zona}</h4>
+          <div class="table-container" style="background: rgba(0,0,0,0.2);">
+            <table style="font-size: 13px;">
+              <thead>
+                <tr>
+                  <th style="padding: 12px;">Posición</th>
+                  <th style="padding: 12px;">Conductor</th>
+                  <th style="padding: 12px;">Placa</th>
+                  <th style="padding: 12px;">Hora de Entrada</th>
+                </tr>
+              </thead>
+              <tbody>`;
         
-        if (deleteError) throw deleteError;
-
-        showToast(`Viaje despachado a ${currentDespachoInfo.conductorNombre}`, 'success');
-        closeDespachoModal();
-        if (currentZonaIdLista) verListaEspera(currentZonaIdLista);
-      } catch (err) {
-        console.error(err);
-        showToast('Error al despachar: ' + err.message, 'error');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    async function verListaEspera(zonaId) {
-      currentZonaIdLista = zonaId;
-      document.getElementById('listaEsperaModal').classList.add('show');
-      const container = document.getElementById('listaEsperaContainer');
-      container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">Cargando conductores...</div>';
-      
-      try {
-        const { data, error } = await supabaseClient
-          .from('lista_espera')
-          .select(`
-            id,
-            estado,
-            conductor_id,
-            conductores ( nombres, apellidos, vehiculo_marca, vehiculo_modelo, placa )
-          `)
-          .eq('zona_id', zonaId)
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">No hay conductores esperando en esta zona.</div>';
-          return;
-        }
-
-        container.innerHTML = '';
-        data.forEach((item, index) => {
-          const div = document.createElement('div');
-          div.style.background = 'rgba(15, 23, 42, 0.4)';
-          div.style.padding = '15px';
-          div.style.marginBottom = '10px';
-          div.style.borderRadius = '12px';
-          div.style.display = 'flex';
-          div.style.justifyContent = 'space-between';
-          div.style.alignItems = 'center';
-
-          const c = item.conductores;
-          const conductorName = c ? `${c.nombres} ${c.apellidos}` : 'Conductor Desconocido';
-          const vehicleInfo = c ? `${c.vehiculo_marca} ${c.vehiculo_modelo} (${c.placa})` : '';
-
-          let estadoLabel = '';
-          if (item.estado === 'esperando') {
-             estadoLabel = '<span style="color: #fbbf24;">Esperando</span>';
-          } else if (item.estado === 'aprobado') {
-             estadoLabel = '<span style="color: #4ade80;">Aprobado</span>';
-          } else {
-             estadoLabel = `<span style="color: #f87171;">${item.estado}</span>`;
-          }
-
-          const info = document.createElement('div');
-          info.innerHTML = `<strong>#${index + 1} - ${conductorName}</strong><br><small style="color: #94a3b8">${vehicleInfo}</small><br>Estado: ${estadoLabel}`;
+        colasPorZona[zona].forEach((c, index) => {
+          const timeStr = new Date(c.entrado_en).toLocaleTimeString();
+          const driverName = c.conductores ? `${c.conductores.nombres || ''} ${c.conductores.apellidos || ''}` : 'Desconocido';
+          const placa = c.conductores ? c.conductores.placa : '-';
           
-          const actions = document.createElement('div');
-          actions.style.display = 'flex';
-          actions.style.gap = '8px';
-          actions.style.alignItems = 'center';
-
-          // Botón Despachar (Solo para el #1)
-          if (index === 0) {
-            const btnDespachar = document.createElement('button');
-            btnDespachar.className = 'btn-primary';
-            btnDespachar.style.padding = '6px 12px';
-            btnDespachar.style.fontSize = '12px';
-            btnDespachar.style.fontWeight = 'bold';
-            btnDespachar.innerHTML = '🚀 Despachar';
-            btnDespachar.onclick = () => abrirModalDespacho(item.id, item.conductor_id, conductorName);
-            actions.appendChild(btnDespachar);
-          }
-          
-          if (item.estado === 'esperando') {
-            const btnAprobar = document.createElement('button');
-            btnAprobar.className = 'btn-success';
-            btnAprobar.style.padding = '6px 10px';
-            btnAprobar.style.fontSize = '12px';
-            btnAprobar.innerHTML = 'Aprobar';
-            btnAprobar.onclick = () => cambiarEstadoLista(item.id, 'aprobado');
-            
-            const btnRechazar = document.createElement('button');
-            btnRechazar.className = 'btn-danger';
-            btnRechazar.style.padding = '6px 10px';
-            btnRechazar.style.fontSize = '12px';
-            btnRechazar.innerHTML = 'Rechazar';
-            btnRechazar.onclick = () => cambiarEstadoLista(item.id, 'rechazado');
-            
-            actions.appendChild(btnAprobar);
-            actions.appendChild(btnRechazar);
-          } else {
-            const btnReset = document.createElement('button');
-            btnReset.className = 'btn-secondary';
-            btnReset.style.padding = '6px 10px';
-            btnReset.style.fontSize = '12px';
-            btnReset.innerHTML = 'Resetear';
-            btnReset.onclick = () => cambiarEstadoLista(item.id, 'esperando');
-            actions.appendChild(btnReset);
-          }
-
-          div.appendChild(info);
-          div.appendChild(actions);
-          container.appendChild(div);
+          html += `<tr>
+            <td style="font-weight:bold; color: white; padding: 12px;">#${index + 1}</td>
+            <td style="padding: 12px;">${driverName}</td>
+            <td style="padding: 12px;">${placa}</td>
+            <td style="padding: 12px;">${timeStr}</td>
+          </tr>`;
         });
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = '<div style="color: #ef4444; padding: 20px; text-align: center;">Error al cargar lista</div>';
+
+        html += `</tbody></table></div></div>`;
       }
+
+      container.innerHTML = html;
     }
 
-    async function cambiarEstadoLista(id, nuevoEstado) {
-      showLoading('Actualizando estado...');
-      try {
-        const { error } = await supabaseClient
-          .from('lista_espera')
-          .update({ estado: nuevoEstado })
-          .eq('id', id);
-        if (error) throw error;
-        showToast(`Estado cambiado a ${nuevoEstado}`, 'success');
-        if (currentZonaIdLista) verListaEspera(currentZonaIdLista);
-      } catch (err) {
-        showToast('Error al actualizar estado', 'error');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // Integrar la carga de zonas en refreshData()
-    const originalRefreshDataForZonas = refreshData;
-    refreshData = async function() {
-      await originalRefreshDataForZonas();
-      await cargarZonas();
-      if (document.getElementById('zonasSection').classList.contains('active')) {
-        renderZonasEnMapa();
-        renderZonasList();
-      }
-    };
   </script>
 </body>
 </html>
