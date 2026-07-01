@@ -40,7 +40,7 @@ serve(async (req) => {
     }
 
     // Obtener los datos del cuerpo de la petición
-    const { email, password, role, nombres, apellidos, telefono } = await req.json()
+    const { email, password, role, nombres, apellidos, celular } = await req.json()
 
     if (!email || !password || !role) {
       return new Response(JSON.stringify({ error: 'Faltan campos requeridos (email, password, role)' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -69,7 +69,7 @@ serve(async (req) => {
       insertData = { auth_user_id: newUserId, email: email }
     } else if (role === 'coordinador') {
       table = 'coordinadores'
-      insertData = { auth_user_id: newUserId, nombres, apellidos, email, telefono, permissions: {} }
+      insertData = { auth_user_id: newUserId, nombres, apellidos, email, celular, permisos: {} }
     } else {
       // Rollback
       await supabaseClient.auth.admin.deleteUser(newUserId)

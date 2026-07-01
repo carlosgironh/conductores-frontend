@@ -806,7 +806,7 @@ async function crearCoordinador() {
 
     // Crear usuario invocando la Edge Function
     const { data: result, error: invokeError } = await supabaseClient.functions.invoke('crear-usuario-admin', {
-      body: { email, password, role: 'coordinador', nombres, apellidos, telefono: celular }
+      body: { email, password, role: 'coordinador', nombres, apellidos, celular }
     });
 
     if (invokeError || (result && result.error)) {
