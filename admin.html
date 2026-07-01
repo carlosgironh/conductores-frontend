@@ -376,6 +376,12 @@
 </button>
 
 <div class="container">
+  <div style="margin-bottom: 20px;">
+    <button class="btn-outline" onclick="window.location.href='panel-admin.html'" style="display: inline-flex; align-items: center; gap: 8px;">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      Volver al Panel Principal
+    </button>
+  </div>
   <!-- Card 1: Crear Administrador -->
   <div class="card">
     <div class="card-header">
@@ -723,26 +729,26 @@ async function crearAdmin() {
     if (checkError && checkError.code !== 'PGRST116') console.error("Error verificando existencia:", checkError);
     if (existing) { showMessage('createAdminMsg', 'Este correo ya está registrado como admin', 'error'); hideLoading(); btn.disabled = false; resetAdminBtn(); return; }
 
-    // Crear usuario en auth
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    if (error) {
-      if (error.message.includes('already registered') || error.status === 422) {
-        showMessage('createAdminMsg', 'Este correo ya está registrado en auth. Intenta con otro email.', 'error');
+    // Crear usuario invocando la Edge Function
+    const { data: result, error: invokeError } = await supabaseClient.functions.invoke('crear-usuario-admin', {
+      body: { email, password, role: 'admin' }
+    });
+
+    if (invokeError || (result && result.error)) {
+      const errMsg = (result && result.error) ? result.error : invokeError.message;
+      if (errMsg.includes('already registered')) {
+        showMessage('createAdminMsg', 'Este correo ya está registrado.', 'error');
       } else {
-        showMessage('createAdminMsg', 'Error (' + (error.status || '??') + '): ' + error.message, 'error');
+        showMessage('createAdminMsg', 'Error: ' + errMsg, 'error');
       }
       hideLoading(); btn.disabled = false; resetAdminBtn(); return;
     }
-    if (!data.user) { showMessage('createAdminMsg', 'Error creando usuario', 'error'); hideLoading(); btn.disabled = false; resetAdminBtn(); return; }
-
-    // Insertar en tabla admins
-    const { error: insertError } = await supabaseClient
-      .from('admins')
-      .insert([{ auth_user_id: data.user.id, email: email }], { returning: 'minimal' });
-    if (insertError) {
-      console.error("Error insertando en admins:", insertError);
-      showMessage('createAdminMsg', 'Error insertando en tabla admins (' + (insertError.code || '??') + '): ' + insertError.message, 'error');
-      hideLoading(); btn.disabled = false; resetAdminBtn(); return;
+    
+    // La inserción en la tabla admins ahora la hace la Edge Function
+    // Así que solo confirmamos el éxito
+    const newUserId = result?.user?.id;
+    if (!newUserId) {
+      showMessage('createAdminMsg', 'Error creando usuario (sin ID devuelto)', 'error'); hideLoading(); btn.disabled = false; resetAdminBtn(); return;
     }
 
     showToast('Administrador creado exitosamente', 'success');
@@ -798,32 +804,25 @@ async function crearCoordinador() {
     if (checkError && checkError.code !== 'PGRST116') console.error("Error verificando existencia:", checkError);
     if (existing) { showMessage('createCoordMsg', 'Este correo ya está registrado como coordinador', 'error'); hideLoading(); btn.disabled = false; resetCoordBtn(); return; }
 
-    // Crear usuario en auth
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    if (error) {
-      if (error.message.includes('already registered') || error.status === 422) {
-        showMessage('createCoordMsg', 'Este correo ya está registrado en auth. Intenta con otro email.', 'error');
+    // Crear usuario invocando la Edge Function
+    const { data: result, error: invokeError } = await supabaseClient.functions.invoke('crear-usuario-admin', {
+      body: { email, password, role: 'coordinador', nombres, apellidos, telefono: celular }
+    });
+
+    if (invokeError || (result && result.error)) {
+      const errMsg = (result && result.error) ? result.error : invokeError.message;
+      if (errMsg.includes('already registered')) {
+        showMessage('createCoordMsg', 'Este correo ya está registrado.', 'error');
       } else {
-        showMessage('createCoordMsg', 'Error (' + (error.status || '??') + '): ' + error.message, 'error');
+        showMessage('createCoordMsg', 'Error: ' + errMsg, 'error');
       }
       hideLoading(); btn.disabled = false; resetCoordBtn(); return;
     }
-    if (!data.user) { showMessage('createCoordMsg', 'Error creando usuario', 'error'); hideLoading(); btn.disabled = false; resetCoordBtn(); return; }
 
-    // Insertar en tabla coordinadores
-    const { error: insertError } = await supabaseClient
-      .from('coordinadores')
-      .insert([{
-        auth_user_id: data.user.id,
-        email: email,
-        nombres: nombres,
-        apellidos: apellidos,
-        celular: celular || null
-      }], { returning: 'minimal' });
-    if (insertError) {
-      console.error("Error insertando en coordinadores:", insertError);
-      showMessage('createCoordMsg', 'Error insertando en tabla coordinadores (' + (insertError.code || '??') + '): ' + insertError.message + '. Verifica que la tabla existe y tienes permisos RLS.', 'error');
-      hideLoading(); btn.disabled = false; resetCoordBtn(); return;
+    // La inserción en la tabla coordinadores ahora la hace la Edge Function
+    const newUserId = result?.user?.id;
+    if (!newUserId) { 
+      showMessage('createCoordMsg', 'Error creando coordinador (sin ID devuelto)', 'error'); hideLoading(); btn.disabled = false; resetCoordBtn(); return; 
     }
 
     showToast('Coordinador creado exitosamente', 'success');
