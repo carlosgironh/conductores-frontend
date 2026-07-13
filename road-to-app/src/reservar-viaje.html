@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a1208">
     <title>Reservar Viaje - Pasajero | Road To</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -348,6 +348,11 @@
         }
     </style>
 <base target="_blank">
+
+  <script src="config.js"></script>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -420,11 +425,10 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
+
         const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.RoadTo.createSupabase();
         let currentUser = null;
 
         function showToast(message, type = 'success') {
@@ -522,7 +526,7 @@
                     });
 
                     const result = await response.json();
-                    console.log('Notificación a conductores:', result);
+                    /* log removed */
                     
                     if (!response.ok) {
                         console.warn('Edge Function warning:', result.error || 'Unknown error');
@@ -536,7 +540,7 @@
                 await cargarMisViajes();
 
             } catch (err) {
-                console.error('Error:', err);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
                 showToast(err.message || 'Error al crear la reserva', 'error');
             } finally {
                 btn.disabled = false;
@@ -565,6 +569,15 @@
                     return;
                 }
 
+                
+                const activeTrip = viajes.find(v => ['asignado', 'en_curso'].includes(v.estado));
+                if (activeTrip) {
+                    initActiveMap(activeTrip);
+                } else {
+                    document.getElementById('activeMapContainer').style.display = 'none';
+                    if (activeChannel) supabaseClient.removeChannel(activeChannel);
+                    activeDriverId = null;
+                }
                 const viajesConductor = await Promise.all(
                     viajes.map(async (viaje) => {
                         const conductor = await getConductorInfo(viaje.conductor_asignado_id);
@@ -593,7 +606,7 @@
                 `).join('');
 
             } catch (err) {
-                console.error('Error cargando viajes:', err);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
                 container.innerHTML = `<div class="empty-state">Error al cargar reservas: ${err.message}</div>`;
             }
         }
@@ -607,7 +620,7 @@
                     table: 'viajes_reservados',
                     filter: `pasajero_id=eq.${currentUser.id}`
                 }, (payload) => {
-                    console.log('Cambio en mi reserva:', payload);
+                    /* log removed */
                     cargarMisViajes();
 
                     if (payload.new?.estado === 'asignado' && payload.old?.estado === 'pendiente') {

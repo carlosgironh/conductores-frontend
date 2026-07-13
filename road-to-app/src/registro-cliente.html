@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Registro de Pasajeros</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<script src="JS/supabase-bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -440,6 +440,8 @@
         </div>
       </div>
 
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAAjm3-B4j6dF10qM" data-theme="dark" style="margin: 20px 0; display: flex; justify-content: center;"></div>
+
       <button type="submit" id="btnRegistrar">
         <span>Completar Registro</span>
       </button>
@@ -770,7 +772,7 @@ async function processRegistration() {
     }
 
   } catch(error) {
-    console.error('Error completo:', error);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
 
     let errorMessage = error.message || "Error en el registro. Intente nuevamente.";
 
@@ -804,6 +806,13 @@ form.addEventListener("submit", async (e) => {
   const password = document.getElementById('password').value;
   if (password.length < 6) {
     showMessage("La contraseña debe tener al menos 6 caracteres.", "error");
+    return;
+  }
+
+  // Validar CAPTCHA
+  const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+  if (!turnstileResponse) {
+    showMessage("Por favor, completa la verificación de seguridad.", "error");
     return;
   }
 

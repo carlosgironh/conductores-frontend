@@ -12,8 +12,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" integrity="sha384-Izc791esqyEy3BEIC42q7jbE0AaOkACziN+dyyXgYeDmpeMCLz0xA+xYN3aCd5zz" crossorigin="anonymous"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -549,6 +549,36 @@
 </style>
 <base target="_blank">
 <base target="_blank">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      .filter-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 15px;
+        color: white;
+        min-width: 200px;
+      }
+      .filter-panel label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .filter-panel input[type="checkbox"] {
+        margin-right: 10px;
+        accent-color: #8ac725;
+      }
+    </style>
 </head>
 
 <body>
@@ -687,7 +717,7 @@
         <button class="section-tab" onclick="switchSection('conductores', this)">🚗 Conductores</button>
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
         <button class="section-tab" onclick="switchSection('flota', this)">📊 Estado de Flota</button>
-        <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="window.location.href='mapa.html?view=all'">🌍 Mapa en Vivo</button>
+        <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="switchSection('mapaGlobal', this); setTimeout(initGlobalMap, 300)">🌍 Mapa en Vivo</button>
       </div>
     </div>
 
@@ -850,9 +880,8 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const supabaseClient = window.RoadTo.createSupabase();
 
     let currentCoordinador = null;
     let allViajes = [];
@@ -940,7 +969,7 @@
           }
         }
       } catch (e) {
-        console.error("Error cargando permisos:", e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         permCoordinadoresEditar = false;
       }
     }
@@ -973,7 +1002,7 @@
         }
         showToast(newState ? 'Permiso global habilitado' : 'Permiso global deshabilitado');
       } catch (e) {
-        console.error("Error al togglear permiso:", e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         showToast('Error al actualizar permiso');
       } finally {
         hideLoading();
@@ -1003,7 +1032,7 @@
       } catch (error) {
         hideLoading();
         showToast('Error de conexión', 'error');
-        console.error(error);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
     }
 
@@ -1118,7 +1147,7 @@
         await refreshData();
 
       } catch (error) {
-        console.error('Error registro rápido:', error);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         let msg = error.message || 'Error en el registro';
         if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('unique') || msg.includes('User already registered')) {
           msg = 'Este correo ya está registrado. Use otro o inicie sesión.';
@@ -1142,7 +1171,7 @@
         if (error) throw error;
         allViajes = data || [];
       } catch (e) {
-        console.error('Error cargando viajes:', e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         allViajes = [];
       }
       updateStatsViajes();
@@ -1170,12 +1199,12 @@
       try {
         const { data: pas } = await supabaseClient.from('passengers').select('id, nombres, apellidos, celular, email');
         if (pas) pas.forEach(p => pasajerosMap.set(p.id, { nombre: `${p.nombres || ''} ${p.apellidos || ''}`.trim(), celular: p.celular || '-', email: p.email || '-' }));
-      } catch (e) { console.error('Error precargando pasajeros:', e); }
+      } catch (e) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); }
 
       try {
         const { data: cond } = await supabaseClient.from('conductores').select('id, nombres, apellidos, celular, placa, marca, modelo');
         if (cond) cond.forEach(c => conductoresMap.set(c.id, { nombre: `${c.nombres || ''} ${c.apellidos || ''}`.trim(), celular: c.celular || '-', vehiculo: `${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})`.trim() }));
-      } catch (e) { console.error('Error precargando conductores:', e); }
+      } catch (e) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); }
     }
 
     function renderViajesList() {
@@ -1237,19 +1266,19 @@
         div.className = `viaje-item ${isBlocked ? 'bloqueado' : cleanEstado}`;
         div.innerHTML = `
           <div class="viaje-route">
-            <span class="origin">📍 ${v.origen || '-'}</span>
+            <span class="origin">📍 ${window.RoadTo ? window.RoadTo.escapeHTML(v.origen || '-') : v.origen || '-'}</span>
             <span class="arrow">→</span>
-            <span class="destiny">🏁 ${v.destino || '-'}</span>
+            <span class="destiny">🏁 ${window.RoadTo ? window.RoadTo.escapeHTML(v.destino || '-') : v.destino || '-'}</span>
           </div>
           <div class="viaje-meta">
-            <span>📅 ${formatDate(v.fecha_hora)}</span>
-            <span class="status-badge ${isBlocked ? 'bloqueado' : cleanEstado}">
-              ${isBlocked ? 'BLOQUEADO' : cleanEstado.toUpperCase()}
+            <span>📅 ${window.RoadTo ? window.RoadTo.escapeHTML(formatDate(v.fecha_hora)) : formatDate(v.fecha_hora)}</span>
+            <span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(isBlocked ? 'bloqueado' : cleanEstado) : isBlocked ? 'bloqueado' : cleanEstado}">
+              ${window.RoadTo ? window.RoadTo.escapeHTML(isBlocked ? 'BLOQUEADO' : cleanEstado.toUpperCase()) : isBlocked ? 'BLOQUEADO' : cleanEstado.toUpperCase()}
             </span>
           </div>
           <div class="viaje-pasajero">
-            <strong>👤 Pasajero:</strong> ${passengerInfo.nombre}<br>
-            <span style="color:#64748b">📞 ${passengerInfo.celular} · ✉️ ${passengerInfo.email}</span>
+            <strong>👤 Pasajero:</strong> ${window.RoadTo ? window.RoadTo.escapeHTML(passengerInfo.nombre) : passengerInfo.nombre}<br>
+            <span style="color:#64748b">📞 ${window.RoadTo ? window.RoadTo.escapeHTML(passengerInfo.celular) : passengerInfo.celular} · ✉️ ${window.RoadTo ? window.RoadTo.escapeHTML(passengerInfo.email) : passengerInfo.email}</span>
           </div>
           ${conductor ? `
             <div class="viaje-conductor">
@@ -1283,14 +1312,14 @@
       const cond = getConductorInfo(v.conductor_asignado_id);
 
       content.innerHTML = `
-        <div class="form-group"><label>Origen</label><input type="text" value="${v.origen || ''}" readonly></div>
-        <div class="form-group"><label>Destino</label><input type="text" value="${v.destino || ''}" readonly></div>
-        <div class="form-group"><label>Fecha y Hora</label><input type="text" value="${formatDate(v.fecha_hora)}" readonly></div>
-        <div class="form-group"><label>Estado</label><input type="text" value="${(v.estado || '').toUpperCase()}" readonly></div>
+        <div class="form-group"><label>Origen</label><input type="text" value="${window.RoadTo ? window.RoadTo.escapeHTML(v.origen || '') : v.origen || ''}" readonly></div>
+        <div class="form-group"><label>Destino</label><input type="text" value="${window.RoadTo ? window.RoadTo.escapeHTML(v.destino || '') : v.destino || ''}" readonly></div>
+        <div class="form-group"><label>Fecha y Hora</label><input type="text" value="${window.RoadTo ? window.RoadTo.escapeHTML(formatDate(v.fecha_hora)) : formatDate(v.fecha_hora)}" readonly></div>
+        <div class="form-group"><label>Estado</label><input type="text" value="${window.RoadTo ? window.RoadTo.escapeHTML((v.estado || '').toUpperCase()) : (v.estado || '').toUpperCase()}" readonly></div>
         <div style="background:rgba(255,255,255,0.05);padding:15px;border-radius:12px;margin-bottom:15px">
           <strong style="color:var(--corp-orange);font-size:13px">👤 Pasajero</strong><br>
-          <span style="font-size:14px;color:#fff">${pas.nombre}</span><br>
-          <span style="font-size:12px;color:#94a3b8">Celular: ${pas.celular} · Correo: ${pas.email}</span>
+          <span style="font-size:14px;color:#fff">${window.RoadTo ? window.RoadTo.escapeHTML(pas.nombre) : pas.nombre}</span><br>
+          <span style="font-size:12px;color:#94a3b8">Celular: ${window.RoadTo ? window.RoadTo.escapeHTML(pas.celular) : pas.celular} · Correo: ${window.RoadTo ? window.RoadTo.escapeHTML(pas.email) : pas.email}</span>
         </div>
         ${cond ? `
         <div style="background:rgba(255,255,255,0.05);padding:15px;border-radius:12px">
@@ -1394,7 +1423,7 @@
            });
         }
       } catch (e) {
-        console.error(e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
 
       // Ordenar: los que están en cola van primero
@@ -1421,10 +1450,10 @@
         const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
         const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${iniN}${iniA}</div>
+          <div class="avatar">${window.RoadTo ? window.RoadTo.escapeHTML(iniN) : iniN}${window.RoadTo ? window.RoadTo.escapeHTML(iniA) : iniA}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''} ${badgeHtml}</div>
-            <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
+            <div class="name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(badgeHtml) : badgeHtml}</div>
+            <div class="vehicle">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</div>
           </div>
         `;
         container.appendChild(div);
@@ -1482,7 +1511,7 @@
         if (error) throw error;
         allConductores = data || [];
       } catch (e) {
-        console.error('Error cargando conductores:', e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         allConductores = [];
       }
       updateStatsConductores();
@@ -1526,15 +1555,15 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><span class="status-badge ${est}">${est}</span></td>
-          <td><div class="conductor-name">${c.nombres || ''} ${c.apellidos || ''}</div></td>
-          <td>${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</td>
-          <td><span class="payment-indicator ${pago ? 'paid' : 'expired'}">${pago ? '✅ Al día' : '❌ Vencido'}</span></td>
+          <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}">${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}</span></td>
+          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''}</div></td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</td>
+          <td><span class="payment-indicator ${window.RoadTo ? window.RoadTo.escapeHTML(pago ? 'paid' : 'expired') : pago ? 'paid' : 'expired'}">${window.RoadTo ? window.RoadTo.escapeHTML(pago ? '✅ Al día' : '❌ Vencido') : pago ? '✅ Al día' : '❌ Vencido'}</span></td>
           <td>
             <div class="actions">
-              <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${c.id}', '_blank')" title="Ver Perfil">👁️</button>
-              <button class="action-btn call" onclick="llamarCelular('${c.celular || ''}')" title="Llamar">📞</button>
-              <button class="action-btn edit ${permCoordinadoresEditar ? '' : 'disabled'}" 
+              <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
+              <button class="action-btn call" onclick="llamarCelular('${window.RoadTo ? window.RoadTo.escapeHTML(c.celular || '') : c.celular || ''}')" title="Llamar">📞</button>
+              <button class="action-btn edit ${window.RoadTo ? window.RoadTo.escapeHTML(permCoordinadoresEditar ? '' : 'disabled') : permCoordinadoresEditar ? '' : 'disabled'}" 
                 onclick="${permCoordinadoresEditar ? `openEditConductor('${c.id}')` : 'void(0)'}" 
                 title="${permCoordinadoresEditar ? 'Editar Conductor' : '🔒 Deshabilitado por Administrador'}">✏️</button>
               <button class="action-btn delete ${permCoordinadoresEditar ? '' : 'disabled'}" 
@@ -1634,7 +1663,7 @@
         if (error) throw error;
         allPasajeros = data || [];
       } catch (e) {
-        console.error('Error cargando pasajeros:', e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         allPasajeros = [];
       }
       document.getElementById('totalCountPasajeros').textContent = allPasajeros.length;
@@ -1662,13 +1691,13 @@
       filtered.forEach(p => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><span class="status-badge ${p.status === 'active' ? 'active' : 'inactive'}">${p.status || 'active'}</span></td>
-          <td><div class="conductor-name">${p.nombres || ''} ${p.apellidos || ''}</div></td>
-          <td>${p.email || '-'}</td>
-          <td>${p.celular || '-'}</td>
+          <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(p.status === 'active' ? 'active' : 'inactive') : p.status === 'active' ? 'active' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML(p.status || 'active') : p.status || 'active'}</span></td>
+          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(p.nombres || '') : p.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(p.apellidos || '') : p.apellidos || ''}</div></td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.email || '-') : p.email || '-'}</td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
           <td>
             <div class="actions">
-              <button class="action-btn call" onclick="llamarCelular('${p.celular || ''}')" title="Llamar">📞</button>
+              <button class="action-btn call" onclick="llamarCelular('${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '') : p.celular || ''}')" title="Llamar">📞</button>
             </div>
           </td>
         `;
@@ -1699,15 +1728,15 @@
         div.className = 'flota-card';
         div.innerHTML = `
           <div class="flota-header">
-            <div class="flota-avatar ${activo ? '' : 'inactive'}">${(c.nombres || '')[0]}${(c.apellidos || '')[0]}</div>
+            <div class="flota-avatar ${window.RoadTo ? window.RoadTo.escapeHTML(activo ? '' : 'inactive') : activo ? '' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML((c.nombres || '')[0]) : (c.nombres || '')[0]}${window.RoadTo ? window.RoadTo.escapeHTML((c.apellidos || '')[0]) : (c.apellidos || '')[0]}</div>
             <div style="flex:1">
-              <div style="font-weight:700;color:#fff;font-size:13px">${c.nombres || ''} ${c.apellidos || ''}</div>
-              <div style="font-size:11px;color:#94a3b8">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
+              <div style="font-weight:700;color:#fff;font-size:13px">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''}</div>
+              <div style="font-size:11px;color:#94a3b8">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</div>
             </div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <span class="status-badge ${activo ? 'activo' : 'inactivo'}" style="font-size:10px">${activo ? 'Activo' : 'Inactivo'}</span>
-            <span class="payment-indicator ${pago ? 'paid' : 'expired'}" style="font-size:10px">${pago ? 'Pago al día' : 'Pago Vencido'}</span>
+            <span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(activo ? 'activo' : 'inactivo') : activo ? 'activo' : 'inactivo'}" style="font-size:10px">${window.RoadTo ? window.RoadTo.escapeHTML(activo ? 'Activo' : 'Inactivo') : activo ? 'Activo' : 'Inactivo'}</span>
+            <span class="payment-indicator ${window.RoadTo ? window.RoadTo.escapeHTML(pago ? 'paid' : 'expired') : pago ? 'paid' : 'expired'}" style="font-size:10px">${window.RoadTo ? window.RoadTo.escapeHTML(pago ? 'Pago al día' : 'Pago Vencido') : pago ? 'Pago al día' : 'Pago Vencido'}</span>
           </div>
         `;
         grid.appendChild(div);

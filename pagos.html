@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagos - Panel de Conductor</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
   <!-- CDN del Botón de Pago Yappy -->
   <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
   <style>
@@ -173,14 +173,6 @@
       font-size: 0.875rem;
       margin-top: 2px;
     }
-
-
-
-
-
-
-
-
 
     .yappy-section {
       background: var(--bg-card);
@@ -389,7 +381,8 @@
     }
   </style>
   <base target="_blank">
-</head>
+
+  <script src="config.js"></script></head>
 
 <body>
   <div class="container">
@@ -464,8 +457,7 @@
     // ============================================================
     // CONFIGURACIÓN
     // ============================================================
-    const SUPABASE_URL = 'https://ugchmuhjzzyofoogprlr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4';
+
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
@@ -487,7 +479,7 @@
       line.textContent = `[${time}] ${msg}`;
       log.appendChild(line);
       log.scrollTop = log.scrollHeight;
-      console.log(`[YAPPY] ${msg}`);
+      /* log removed */
     }
 
     // ============================================================
@@ -673,7 +665,7 @@
 
       } catch (err) {
         logDebug(`Error inesperado: ${err.message}`, 'error');
-        console.error(err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         showAlert('Error inesperado. Revisa la consola (F12) para más detalles.');
       }
     }

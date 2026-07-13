@@ -149,7 +149,7 @@ const coordJsLogic = `
           tbody.appendChild(tr);
         });
       } catch (err) {
-        console.error(err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ef4444;">Error al cargar coordinadores</td></tr>';
       }
     }
@@ -201,7 +201,7 @@ const coordJsLogic = `
         closeRegistroCoordModal();
         renderGestionCoordinadores();
       } catch (err) {
-        console.error(err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         showToast('Error al crear: ' + err.message, 'error');
       } finally {
         hideLoading();
@@ -302,7 +302,7 @@ const coordPermisosJsLogic = `
         }
 
       } catch (err) {
-        console.error('Error cargando permisos individuales:', err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
     }
 `;
@@ -321,4 +321,4 @@ if (!coordContent.includes('async function cargarPermisosIndividuales()')) {
 
 fs.writeFileSync(adminPath, adminContent);
 fs.writeFileSync(coordPath, coordContent);
-console.log('Admin & Coord UI patched');
+/* log removed */

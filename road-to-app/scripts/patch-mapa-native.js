@@ -39,7 +39,7 @@ const newStartTracking = `async function startTracking() {
         await RoadToLocation.startTracking();
         showToast('🟢 Viaje iniciado (Modo Nativo 100% Background)');
       } catch (e) {
-        console.error("Fallo al iniciar RoadToLocation nativo", e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         startWebTrackingFallback();
       }
     } else if (window.BackgroundGeolocation) {
@@ -48,7 +48,7 @@ const newStartTracking = `async function startTracking() {
         watchId = await window.BackgroundGeolocation.addWatcher(
           { backgroundMessage: "Rastreando ubicación en segundo plano.", backgroundTitle: "Road To Activo", requestPermissions: true, stale: false, distanceFilter: 2 },
           function (location, error) {
-            if (error) return console.error(error);
+            if (error) return console.error("Error ocurrido en el cliente", "Contacte a soporte");
             handlePositionUpdate({ coords: { latitude: location.latitude, longitude: location.longitude, accuracy: location.accuracy, speed: location.speed, heading: location.bearing } });
           }
         );
@@ -123,4 +123,4 @@ const oldStopTrackingRegex2 = /async function stopTracking\(\) \{[\s\S]*?functio
 content = content.replace(oldStopTrackingRegex2, newStopTracking);
 
 fs.writeFileSync(mapaPath, content);
-console.log('mapa.html native background tracking patched successfully');
+/* log removed */

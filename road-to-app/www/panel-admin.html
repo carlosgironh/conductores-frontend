@@ -1802,11 +1802,12 @@
 </style>
 <base target="_blank">
 <!-- Leaflet & Leaflet.draw -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-</head>
+
+  <script src="../config.js"></script></head>
 
 <body>
 
@@ -2264,9 +2265,8 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const supabaseClient = window.RoadTo.createSupabase();
 
     let allConductores = [];
     let allPasajeros = [];
@@ -2372,7 +2372,7 @@
           }
         }
       } catch (e) {
-        console.error("Error loading coordinator permissions:", e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
     }
 
@@ -2919,7 +2919,7 @@
           return true;
         }
       } catch (err) {
-        console.error('Error uploading document:', err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         try {
           const base64Data = await fileToBase64(file);
           const { error: dbError } = await supabaseClient.from('documentos').insert({
@@ -3377,7 +3377,7 @@
            });
         }
       } catch (e) {
-        console.error(e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
 
       // Ordenar: los que están en cola van primero

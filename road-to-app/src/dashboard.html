@@ -5,7 +5,7 @@
 <title>Ingreso - Road To</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a1208">
-<script src="JS/supabase-bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -163,12 +163,6 @@
     cursor: pointer; position: relative; overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(68, 132, 20, 0.2), 0 10px 20px -5px rgba(68, 132, 20, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .btn-login svg {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
   }
   .btn-login::before {
     content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
@@ -223,6 +217,9 @@
 </style>
 <base target="_blank">
 <base target="_blank">
+
+  <script src="config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <header class="app-header">
@@ -266,7 +263,8 @@
       </svg>
       <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
     </div>
-    <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
+    <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin-bottom: 15px;"></div>
+        <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
     <div class="divider"></div>
     <button class="btn-reset" onclick="recuperar()">¿Olvidaste tu contraseña?</button>
     <div id="msg" class="msg"></div>
@@ -299,9 +297,8 @@
 </div>
 
 <script>
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.RoadTo.createSupabase();
 
 let currentUserId = null;
 let currentUserEmail = null;
@@ -340,6 +337,17 @@ async function login() {
   const password = document.getElementById("password").value.trim();
   const btn = document.getElementById("loginBtn");
 
+  const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+  if (!turnstileResponse) {
+    if (typeof showMessage === 'function') {
+      showMessage("Por favor, completa el Captcha", "error");
+    } else {
+      alert("Por favor, completa el Captcha de seguridad.");
+    }
+    return;
+  }
+
+
   if(!email || !password){
     showMessage("Completa todos los campos", "error");
     return;
@@ -352,7 +360,7 @@ async function login() {
     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if(authError){
-      console.error("[LOGIN] Auth error:", authError);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       if(authError.message?.includes("Invalid login")) {
         showMessage("Correo o contraseña incorrectos", "error");
       } else {
@@ -365,7 +373,7 @@ async function login() {
     const userId = authData.user.id;
     currentUserId = userId;
     currentUserEmail = email;
-    console.log("[LOGIN] Usuario autenticado:", userId);
+    /* log removed */
 
     // 1. Verificar si es admin
     const { data: adminData } = await supabaseClient
@@ -414,13 +422,13 @@ async function login() {
     }
 
     // 5. NO ESTA EN NINGUNA TABLA -> Mostrar formulario de completar perfil
-    console.log("[LOGIN] Usuario no encontrado en tablas. Mostrando formulario de completar perfil.");
+    /* log removed */
     showMessage("Es necesario completar tu perfil", "success");
     showCompleteProfileForm();
     btn.disabled = false;
 
   } catch (err) {
-    console.error("[LOGIN] Error inesperado:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage("Error de conexión: " + err.message, "error");
     btn.disabled = false;
   }
@@ -453,18 +461,18 @@ async function createPassengerProfile() {
       });
 
     if(insertError) {
-      console.error("[LOGIN] Error creando pasajero:", insertError);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       showMessage("Error: " + insertError.message, "error", "cp-msg");
       btn.disabled = false;
       return;
     }
 
-    console.log("[LOGIN] Perfil de pasajero creado exitosamente");
+    /* log removed */
     showMessage("¡Perfil creado! Redirigiendo...", "success", "cp-msg");
     setTimeout(() => window.location.href = "reservar-viaje.html", 1500);
 
   } catch (err) {
-    console.error("[LOGIN] Error inesperado:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage("Error de conexión: " + err.message, "error", "cp-msg");
     btn.disabled = false;
   }

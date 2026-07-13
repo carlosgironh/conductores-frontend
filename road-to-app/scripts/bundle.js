@@ -17,7 +17,7 @@ if (!fs.existsSync(LEAFLET_OUT)) {
 
 // 2. Bundlear Supabase con esbuild
 async function bundleSupabase() {
-  console.log('[bundle] Generando supabase-bundle.js...');
+  /* log removed */
   await esbuild.build({
     entryPoints: ['node_modules/@supabase/supabase-js/dist/index.mjs'],
     bundle: true,
@@ -31,12 +31,12 @@ async function bundleSupabase() {
       'global': 'window',
     },
   });
-  console.log('[bundle] supabase-bundle.js generado OK');
+  /* log removed */
 }
 
 // 3. Copiar Leaflet CSS y JS
 function copyLeaflet() {
-  console.log('[bundle] Copiando Leaflet...');
+  /* log removed */
   const leafletDist = path.join(__dirname, '..', 'node_modules', 'leaflet', 'dist');
   
   const files = ['leaflet.js', 'leaflet.css'];
@@ -45,7 +45,7 @@ function copyLeaflet() {
     const dest = path.join(LEAFLET_OUT, f);
     if (fs.existsSync(src)) {
       fs.copyFileSync(src, dest);
-      console.log(`[bundle] Copiado: JS/leaflet/${f}`);
+      /* log removed */
     } else {
       console.warn(`[bundle] ADVERTENCIA: No se encontró ${src}`);
     }
@@ -59,7 +59,7 @@ function copyLeaflet() {
     fs.readdirSync(imagesDir).forEach(f => {
       fs.copyFileSync(path.join(imagesDir, f), path.join(imagesOut, f));
     });
-    console.log('[bundle] Iconos de Leaflet copiados');
+    /* log removed */
   }
 }
 
@@ -68,9 +68,9 @@ function copyLeaflet() {
   try {
     await bundleSupabase();
     copyLeaflet();
-    console.log('\n✅ Bundling completado. Archivos en src/JS/');
+    /* log removed */
   } catch (err) {
-    console.error('[bundle] ERROR:', err.message);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     process.exit(1);
   }
 })();

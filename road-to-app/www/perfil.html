@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
 <script src="JS/supabase-bundle.js"></script>
-<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
+<!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" integrity="sha384-Izc791esqyEy3BEIC42q7jbE0AaOkACziN+dyyXgYeDmpeMCLz0xA+xYN3aCd5zz" crossorigin="anonymous"></script> -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -830,7 +830,8 @@
 </style>
 <base target="_blank">
 <base target="_blank">
-</head>
+
+  <script src="../config.js"></script></head>
 
 <body>
 
@@ -875,9 +876,8 @@
 </div>
 
 <script>
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.RoadTo.createSupabase();
 
 let perfilCache = null;
 let documentosCache = null;
@@ -1014,7 +1014,7 @@ async function cargarPerfil() {
     await renderPerfil(conductor, documentos, user);
 
   } catch (error) {
-    console.error('Error cargando perfil:', error);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     
     if (perfilCache) {
       showToast('Error de conexión - Mostrando datos guardados');
@@ -1038,10 +1038,10 @@ async function listarDocumentosBucket(conductorId) {
       .from("documentos-conductores")
       .list(conductorId, { limit: 100 });
     if (error || !files || files.length === 0) {
-      console.log('[PERFIL] Bucket list empty or error:', error?.message);
+      /* log removed */
       return [];
     }
-    console.log('[PERFIL] Bucket files found:', files.map(f => f.name));
+    /* log removed */);
 
     const tipoMap = {
       'cedula': 'CEDULA',
@@ -1070,7 +1070,7 @@ async function listarDocumentosBucket(conductorId) {
       };
     }).filter(d => d.tipo !== 'OTRO');
   } catch (e) {
-    console.error('[PERFIL] Error listing bucket:', e);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     return [];
   }
 }
@@ -1087,24 +1087,24 @@ async function docUrl(tipo, documentos) {
       console.error(`[PERFIL] Error signedUrl ${tipo}:`, error.message);
       return null;
     }
-    console.log(`[PERFIL] Doc ${tipo}: resolvedUrl=OK path=${doc.url_archivo}`);
+    /* log removed */
     return signedUrl.signedUrl;
   } catch (e) {
-    console.error(`[PERFIL] Exception signedUrl ${tipo}:`, e);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     return null;
   }
 }
 
 async function renderPerfil(conductor, documentosDB, user) {
   renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
-  console.log('[PERFIL] renderPerfil called, documentosDB count:', documentosDB?.length || 0);
+  /* log removed */
 
   // Fallback: if table is empty, read directly from bucket
   let documentos = documentosDB;
   if (!documentos || documentos.length === 0) {
-    console.log('[PERFIL] Table empty, trying bucket fallback...');
+    /* log removed */
     documentos = await listarDocumentosBucket(conductor.id);
-    console.log('[PERFIL] Bucket fallback result:', documentos);
+    /* log removed */
   }
 
   // Pre-resolve all document URLs
@@ -1333,8 +1333,6 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, false);
 </script>
-
-
 
 <!-- Modal para vista previa de documentos -->
 <div id="modalPreview" class="modal-preview" onclick="cerrarModalPreview()">

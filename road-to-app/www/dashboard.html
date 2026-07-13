@@ -223,6 +223,9 @@
 </style>
 <base target="_blank">
 <base target="_blank">
+
+  <script src="../config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <header class="app-header">
@@ -266,7 +269,8 @@
       </svg>
       <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
     </div>
-    <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
+    <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin-bottom: 15px;"></div>
+        <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
     <div class="divider"></div>
     <button class="btn-reset" onclick="recuperar()">¿Olvidaste tu contraseña?</button>
     <div id="msg" class="msg"></div>
@@ -299,9 +303,8 @@
 </div>
 
 <script>
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.RoadTo.createSupabase();
 
 let currentUserId = null;
 let currentUserEmail = null;
@@ -340,6 +343,17 @@ async function login() {
   const password = document.getElementById("password").value.trim();
   const btn = document.getElementById("loginBtn");
 
+  const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+  if (!turnstileResponse) {
+    if (typeof showMessage === 'function') {
+      showMessage("Por favor, completa el Captcha", "error");
+    } else {
+      alert("Por favor, completa el Captcha de seguridad.");
+    }
+    return;
+  }
+
+
   if(!email || !password){
     showMessage("Completa todos los campos", "error");
     return;
@@ -352,7 +366,7 @@ async function login() {
     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if(authError){
-      console.error("[LOGIN] Auth error:", authError);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       if(authError.message?.includes("Invalid login")) {
         showMessage("Correo o contraseña incorrectos", "error");
       } else {
@@ -365,7 +379,7 @@ async function login() {
     const userId = authData.user.id;
     currentUserId = userId;
     currentUserEmail = email;
-    console.log("[LOGIN] Usuario autenticado:", userId);
+    /* log removed */
 
     // 1. Verificar si es admin
     const { data: adminData } = await supabaseClient
@@ -414,13 +428,13 @@ async function login() {
     }
 
     // 5. NO ESTA EN NINGUNA TABLA -> Mostrar formulario de completar perfil
-    console.log("[LOGIN] Usuario no encontrado en tablas. Mostrando formulario de completar perfil.");
+    /* log removed */
     showMessage("Es necesario completar tu perfil", "success");
     showCompleteProfileForm();
     btn.disabled = false;
 
   } catch (err) {
-    console.error("[LOGIN] Error inesperado:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage("Error de conexión: " + err.message, "error");
     btn.disabled = false;
   }
@@ -453,18 +467,18 @@ async function createPassengerProfile() {
       });
 
     if(insertError) {
-      console.error("[LOGIN] Error creando pasajero:", insertError);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       showMessage("Error: " + insertError.message, "error", "cp-msg");
       btn.disabled = false;
       return;
     }
 
-    console.log("[LOGIN] Perfil de pasajero creado exitosamente");
+    /* log removed */
     showMessage("¡Perfil creado! Redirigiendo...", "success", "cp-msg");
     setTimeout(() => window.location.href = "reservar-viaje.html", 1500);
 
   } catch (err) {
-    console.error("[LOGIN] Error inesperado:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage("Error de conexión: " + err.message, "error", "cp-msg");
     btn.disabled = false;
   }

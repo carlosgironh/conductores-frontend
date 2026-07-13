@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a1208">
     <title>Panel de Viajes - Conductor | Road To</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -586,6 +586,14 @@
     </style>
     <base target="_blank">
 <base target="_blank">
+
+  <script src="config.js"></script>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Turf.js for Geofencing -->
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 </head>
 <body>
 
@@ -660,6 +668,11 @@
             </div>
         </div>
 
+        
+        <div id="driverMapContainer" style="margin-bottom: 24px; border-radius: 20px; overflow: hidden; border: 1px solid rgba(138, 199, 37, 0.3); background: rgba(15, 23, 42, 0.6);">
+            <div style="background: rgba(138, 199, 37, 0.2); padding: 12px; text-align: center; font-weight: 700; color: #b8e85c;">🗺️ Mapa Multi-Paradas y Pasajeros Disponibles</div>
+            <div id="driverMap" style="height: 350px; width: 100%;"></div>
+        </div>
         <div class="grid" id="viajesGrid">
             <div class="card">
                 <div class="card-header">
@@ -713,10 +726,8 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.RoadTo.createSupabase();
 
         let currentUser = null;
         let conductorNombre = "Conductor";
@@ -804,7 +815,7 @@
                 return false;
             }
 
-            console.log('[AUTH] auth.uid():', user.id);
+            /* log removed */:', user.id);
             currentUser = user;
 
             // Verificar que existe en tabla conductores (por auth_user_id)
@@ -815,7 +826,7 @@
                 .maybeSingle();
 
             if (error && error.code === '42703') {
-                console.log('[CONDUCTOR] Columna status no existe, reintentando sin ella...');
+                /* log removed */
                 const result = await supabaseClient
                     .from('conductores')
                     .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
@@ -826,7 +837,7 @@
             }
 
             if (error) {
-                console.error('[CONDUCTOR] Error:', error);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
                 showToast('Error verificando conductor: ' + error.message, 'error');
                 return false;
             }
@@ -836,7 +847,7 @@
                 return false;
             }
 
-            console.log('[CONDUCTOR] Encontrado:', conductor);
+            /* log removed */
             currentConductor = conductor;
             conductorNombre = ((conductor.nombres || '') + ' ' + (conductor.apellidos || '')).trim() || 'Conductor';
 
@@ -876,7 +887,7 @@
             bloqueo.innerHTML = `
                 <div class="bloqueo-icono">🚫</div>
                 <h2 class="bloqueo-titulo">Acceso Restringido</h2>
-                <p class="bloqueo-mensaje">${mensaje}</p>
+                <p class="bloqueo-mensaje">${window.RoadTo ? window.RoadTo.escapeHTML(mensaje) : mensaje}</p>
                 <button class="bloqueo-btn" onclick="logout()">Cerrar Sesión</button>
             `;
             document.body.appendChild(bloqueo);
@@ -989,8 +1000,8 @@
                     </div>
                 `).join('');
             } catch (err) {
-                console.error('Error cargando viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
+                container.innerHTML = `<div class="empty-state"><p>Error: ${window.RoadTo ? window.RoadTo.escapeHTML(err.message) : err.message}</p></div>`;
             }
         }
 
@@ -1062,8 +1073,8 @@
                     </div>
                 `).join('');
             } catch (err) {
-                console.error('Error cargando mis viajes:', err);
-                container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
+                container.innerHTML = `<div class="empty-state"><p>Error: ${window.RoadTo ? window.RoadTo.escapeHTML(err.message) : err.message}</p></div>`;
             }
         }
 
@@ -1080,7 +1091,7 @@
             btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
 
             try {
-                console.log('[ACEPTAR] Usando auth.uid():', currentUser.id);
+                /* log removed */:', currentUser.id);
                 const { data, error } = await supabaseClient
                     .from('viajes_reservados')
                     .update({
@@ -1093,7 +1104,7 @@
                     .select();
 
                 if (error) {
-                    console.error('[ACEPTAR] Error Supabase:', error);
+                    console.error("Error ocurrido en el cliente", "Contacte a soporte");
                     throw error;
                 }
 
@@ -1101,12 +1112,12 @@
                     throw new Error('Este viaje ya fue aceptado por otro conductor. 🏃‍♂️');
                 }
 
-                console.log('[ACEPTAR] Éxito:', data);
+                /* log removed */
                 showToast('¡Viaje aceptado exitosamente! 🎉');
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
             } catch (err) {
-                console.error('[ACEPTAR] Error:', err);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
                 showToast(err.message || 'No se pudo asignar el viaje', 'error');
                 await cargarViajesDisponibles();
             } finally {
@@ -1131,12 +1142,12 @@
                     .eq('conductor_asignado_id', currentUser.id)
                     .select();
 
-                if (error) { console.error('[COMPLETAR] Error:', error); throw error; }
-                console.log('[COMPLETAR] Éxito:', data);
+                if (error) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); throw error; }
+                /* log removed */
                 showToast('Viaje marcado como completado ✅');
                 await cargarMisViajes();
             } catch (err) {
-                console.error('[COMPLETAR] Error:', err);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
                 showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
         }
@@ -1182,15 +1193,15 @@
                     .eq('conductor_asignado_id', currentUser.id)
                     .select();
 
-                if (error) { console.error('[CANCELAR] Error:', error); throw error; }
-                console.log('[CANCELAR] Éxito:', data);
+                if (error) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); throw error; }
+                /* log removed */
 
                 showToast(nuevoEstado === 'cancelado' ? 'Viaje cancelado definitivamente ❌' : 'Viaje devuelto a pendiente 🔄');
                 closeCancelModal();
                 await cargarMisViajes();
                 await cargarViajesDisponibles();
             } catch (err) {
-                console.error('[CANCELAR] Error:', err);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
                 showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
         }
@@ -1256,7 +1267,7 @@
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
                     filter: 'estado=eq.pendiente'
-                }, () => cargarViajesDisponibles())
+                }, () => { cargarViajesDisponibles(); updatePendingMarkers(); })
                 .subscribe();
 
             const sub2 = supabaseClient
@@ -1264,7 +1275,7 @@
                 .on('postgres_changes', {
                     event: '*', schema: 'public', table: 'viajes_reservados',
                     filter: `conductor_asignado_id=eq.${currentUser.id}`
-                }, () => cargarMisViajes())
+                }, () => { cargarMisViajes(); updateDriverRoute(); })
                 .subscribe();
 
             subscriptions.push(sub1, sub2);
@@ -1278,7 +1289,7 @@
             if (!session) { window.location.href = 'dashboard.html'; return; }
 
             currentUser = session.user;
-            console.log('[INIT] auth.uid():', currentUser.id);
+            /* log removed */:', currentUser.id);
 
             // 1. Verificar que es conductor
             const esConductor = await verificarConductor();
@@ -1288,6 +1299,10 @@
             if (verificarPagoActivo(currentConductor)) {
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
+                
+                initDriverMap();
+                updatePendingMarkers();
+                loadGeofenceZones();
                 // 3. Suscripciones
                 iniciarSuscripciones();
             }

@@ -10,3 +10,11 @@ capacitor.config.ts
 # Google Cloud Service Account Credentials
 supabase/functions/notificar-conductor/service-account.json
 supabase/functions/notificar-conductor/serviceAccount.ts
+
+# Scripts temporales
+temp_script*.js
+road-to-app/temp_script*.js
+
+# Configuración con credenciales
+config.js
+road-to-app/src/config.js

@@ -32,7 +32,7 @@
    */
   function createSupabase() {
     if (typeof window.supabase === 'undefined' && typeof window.createClient === 'undefined') {
-      console.error('[RoadTo Config] Supabase SDK no encontrado. Asegúrate de cargar el SDK antes de config.js');
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       return null;
     }
 
@@ -54,5 +54,5 @@
     get SUPABASE_ANON_KEY() { return CONFIG.SUPABASE_ANON_KEY; },
   };
 
-  console.log(`[Road To v${CONFIG.APP_VERSION}] Config cargada`);
+  /* log removed */
 })();

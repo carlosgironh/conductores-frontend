@@ -45,7 +45,7 @@
       var _a;
       return (_a = cap.PluginHeaders) === null || _a === void 0 ? void 0 : _a.find((h) => h.name === pluginName);
     };
-    const handleError = (err) => win.console.error(err);
+    const handleError = (err) => win.console.error("Error ocurrido en el cliente", "Contacte a soporte");
     const registeredPlugins = /* @__PURE__ */ new Map();
     const registerPlugin2 = (pluginName, jsImplementations = {}) => {
       const registeredPlugin = registeredPlugins.get(pluginName);

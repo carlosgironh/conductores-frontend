@@ -9,7 +9,7 @@
 <title>Registro de Conductores</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -867,6 +867,9 @@
 </style>
 <base target="_blank">
 <base target="_blank">
+
+  <script src="config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
@@ -1155,6 +1158,8 @@
         </div>
       </div>
 
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAAjm3-B4j6dF10qM" data-theme="dark" style="margin: 20px 0; display: flex; justify-content: center;"></div>
+
       <button type="submit" id="btnRegistrar">
         <span>Completar Registro</span>
       </button>
@@ -1172,9 +1177,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -1445,9 +1447,9 @@ async function processRegistration() {
     // Enviar usando fetch nativo (bypass de supabase-js para evitar JWT)
     const functionUrl = `${SUPABASE_URL}/functions/v1/nuevo-registro-conductor`;
     
-    console.log('Enviando request a:', functionUrl);
-    console.log('Body keys:', Object.keys(requestBody));
-    console.log('Archivos:', Object.keys(archivos));
+    /* log removed */
+    /* log removed */);
+    /* log removed */);
 
     const response = await fetch(functionUrl, {
       method: 'POST',
@@ -1464,13 +1466,13 @@ async function processRegistration() {
     let data;
     const responseText = await response.text();
     
-    console.log('Response status:', response.status);
-    console.log('Response text (primeros 500 chars):', responseText.substring(0, 500));
+    /* log removed */
+    /* log removed */:', responseText.substring(0, 500));
 
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      console.error('Error parseando JSON:', e);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       throw new Error('Respuesta inválida del servidor: ' + responseText.substring(0, 200));
     }
 
@@ -1494,9 +1496,9 @@ async function processRegistration() {
       });
       
       if (sessionError) {
-        console.error('Error estableciendo sesión:', sessionError);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       } else {
-        console.log('Sesión establecida correctamente');
+        /* log removed */
       }
     }
 
@@ -1505,7 +1507,7 @@ async function processRegistration() {
     }, 2000);
 
   } catch(error) {
-    console.error('Error completo:', error);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     
     // Mensajes de error más específicos
     let errorMessage = error.message || "Error en el registro. Intente nuevamente.";
@@ -1558,6 +1560,13 @@ form.addEventListener("submit", async (e) => {
     return;
   }
   
+  // Validar CAPTCHA
+  const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+  if (!turnstileResponse) {
+    showMessage("Por favor, completa la verificación de seguridad.", "error");
+    return;
+  }
+  
   // Validación: si no es propietario, debe subir autorización
   if (!isOwner && !authFileInput.files[0]) {
     authFileWrapper.classList.add('required');
@@ -1605,7 +1614,7 @@ if (window.Capacitor) {
         }
       });
     }
-  } catch (e) { console.log('App plugin not available'); }
+  } catch (e) { /* log removed */ }
 
   // Splash screen hide cuando todo cargue
   try {
@@ -1615,7 +1624,7 @@ if (window.Capacitor) {
         setTimeout(() => SplashScreen.hide(), 500);
       });
     }
-  } catch (e) { console.log('SplashScreen plugin not available'); }
+  } catch (e) { /* log removed */ }
 
   // Haptic feedback helper
   window.hapticFeedback = function(type = 'light') {

@@ -513,11 +513,11 @@
         if (window.CapacitorPlugins?.Preferences) {
           const { value: savedEmail } = await window.CapacitorPlugins.Preferences.get({ key: 'savedEmail' });
           if (savedEmail) {
-            console.log('Sesión guardada encontrada para:', savedEmail);
+            /* log removed */
           }
         }
       } catch (e) {
-        console.log('No hay sesión guardada');
+        /* log removed */
       }
     }
 

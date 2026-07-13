@@ -31,9 +31,9 @@ htmlFiles.forEach(filename => {
 
   if (content !== original) {
     fs.writeFileSync(filePath, content, 'utf8');
-    console.log(`[patch-supabase] ✅ ${filename}`);
+    /* log removed */
     totalFiles++;
   }
 });
 
-console.log(`\n✅ Listo: ${totalFiles} archivos normalizados.`);
+/* log removed */

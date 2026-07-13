@@ -100,4 +100,4 @@ if (!content.includes("editBtn.innerHTML = '✏️';")) {
 }
 
 fs.writeFileSync(adminPath, content);
-console.log('Patch edit zona aplicado con éxito');
+/* log removed */

@@ -292,4 +292,4 @@ coordContent = injectMapInitHook(injectJS(coordContent));
 
 fs.writeFileSync(adminPath, adminContent);
 fs.writeFileSync(coordPath, coordContent);
-console.log('Paneles Admin y Coordinador actualizados con Torre de Control (Flota).');
+/* log removed */.');

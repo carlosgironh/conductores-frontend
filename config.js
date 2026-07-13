@@ -32,7 +32,7 @@
    */
   function createSupabase() {
     if (typeof window.supabase === 'undefined' && typeof window.createClient === 'undefined') {
-      console.error('[RoadTo Config] Supabase SDK no encontrado. Asegúrate de cargar el SDK antes de config.js');
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       return null;
     }
 
@@ -48,11 +48,23 @@
   window.RoadTo = {
     config: CONFIG,
     createSupabase: createSupabase,
+    escapeHTML: function(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag])
+      );
+    },
 
     // Atajos frecuentes
     get SUPABASE_URL() { return CONFIG.SUPABASE_URL; },
     get SUPABASE_ANON_KEY() { return CONFIG.SUPABASE_ANON_KEY; },
   };
 
-  console.log(`[Road To v${CONFIG.APP_VERSION}] Config cargada`);
+  /* log removed */
 })();

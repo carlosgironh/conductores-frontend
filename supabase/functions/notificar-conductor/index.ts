@@ -4,9 +4,9 @@ import { GoogleAuth } from 'npm:google-auth-library@8.8.0'
 import { serviceAccount } from './serviceAccount.ts'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get("ALLOWED_ORIGIN") || 'https://road-to-app.vercel.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {

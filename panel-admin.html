@@ -117,10 +117,10 @@
         const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
         const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${iniN}${iniA}</div>
+          <div class="avatar">${window.RoadTo ? window.RoadTo.escapeHTML(iniN) : iniN}${window.RoadTo ? window.RoadTo.escapeHTML(iniA) : iniA}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
-            <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
+            <div class="name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''}</div>
+            <div class="vehicle">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</div>
           </div>
         `;
         container.appendChild(div);
@@ -267,10 +267,10 @@
         const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
         const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${iniN}${iniA}</div>
+          <div class="avatar">${window.RoadTo ? window.RoadTo.escapeHTML(iniN) : iniN}${window.RoadTo ? window.RoadTo.escapeHTML(iniA) : iniA}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''}</div>
-            <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
+            <div class="name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''}</div>
+            <div class="vehicle">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</div>
           </div>
         `;
         container.appendChild(div);
@@ -1802,11 +1802,12 @@
 </style>
 <base target="_blank">
 <!-- Leaflet & Leaflet.draw -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-</head>
+
+  <script src="config.js"></script></head>
 
 <body>
 
@@ -2035,7 +2036,7 @@
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
         <button class="section-tab" onclick="switchSection('viajes', this)">🚙 Viajes</button>
         <button class="section-tab" onclick="switchSection('zonas', this)">🗺️ Zonas</button>
-        <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="window.location.href='mapa.html?view=all'">🌍 Mapa en Vivo</button>
+        <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="switchSection('mapaGlobal', this); setTimeout(initGlobalMap, 300)">🌍 Mapa en Vivo</button>
         <button class="section-tab" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: #3b82f6;" onclick="window.location.href='admin.html'">⚙️ Accesos y Cuentas</button>
       </div>
     </div>
@@ -2264,9 +2265,8 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const supabaseClient = window.RoadTo.createSupabase();
 
     let allConductores = [];
     let allPasajeros = [];
@@ -2372,7 +2372,7 @@
           }
         }
       } catch (e) {
-        console.error("Error loading coordinator permissions:", e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
     }
 
@@ -2494,19 +2494,19 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><span class="status-badge ${estado}">${estado}</span></td>
-          <td><div class="conductor-name">${c.nombres} ${c.apellidos}</div></td>
-          <td><div class="conductor-email">${email}</div></td>
-          <td style="color:#60a5fa">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</td>
+          <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}">${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}</span></td>
+          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</div></td>
+          <td><div class="conductor-email">${window.RoadTo ? window.RoadTo.escapeHTML(email) : email}</div></td>
+          <td style="color:#60a5fa">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</td>
           <td>${renderPaymentIndicator(c)}</td>
           <td>
             <div class="actions">
-              <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${c.id}', '_blank')" title="Ver Perfil">👁️</button>
-              <button class="action-btn edit" onclick="openEditModal('${c.id}')" title="Editar Conductor">✏️</button>
-              <button class="action-btn qr" onclick="generateQR('${c.id}')" title="Generar Código QR">📱</button>
-              <button class="action-btn toggle ${estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstado('${c.id}')" title="Habilitar/Deshabilitar">🔄</button>
-              <button class="action-btn qr" onclick="openPaymentDetailModal('${c.id}')" title="Estado de Pago">💳</button>
-              <button class="action-btn delete" onclick="deleteConductor('${c.id}')" title="Eliminar permanentemente">🗑️</button>
+              <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
+              <button class="action-btn edit" onclick="openEditModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Editar Conductor">✏️</button>
+              <button class="action-btn qr" onclick="generateQR('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Generar Código QR">📱</button>
+              <button class="action-btn toggle ${window.RoadTo ? window.RoadTo.escapeHTML(estado === 'inactivo' ? 'inactive' : '') : estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstado('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Habilitar/Deshabilitar">🔄</button>
+              <button class="action-btn qr" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Estado de Pago">💳</button>
+              <button class="action-btn delete" onclick="deleteConductor('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Eliminar permanentemente">🗑️</button>
             </div>
           </td>
         `;
@@ -2585,14 +2585,14 @@
         const est = obtenerEstadoPasajero(p);
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><span class="status-badge ${est === 'active' ? 'active' : 'inactive'}">${est}</span></td>
-          <td><div class="conductor-name">${p.nombres} ${p.apellidos}</div></td>
-          <td>${p.email || 'Sin email'}</td>
-          <td>${p.celular || '-'}</td>
+          <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(est === 'active' ? 'active' : 'inactive') : est === 'active' ? 'active' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}</span></td>
+          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(p.nombres) : p.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(p.apellidos) : p.apellidos}</div></td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.email || 'Sin email') : p.email || 'Sin email'}</td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
           <td>
             <div class="actions">
-              <button class="action-btn edit" onclick="openEditModalPasajero('${p.id}')" title="Editar Pasajero">✏️</button>
-              <button class="action-btn delete" onclick="deletePasajero('${p.id}')" title="Eliminar Pasajero">🗑️</button>
+              <button class="action-btn edit" onclick="openEditModalPasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')" title="Editar Pasajero">✏️</button>
+              <button class="action-btn delete" onclick="deletePasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')" title="Eliminar Pasajero">🗑️</button>
             </div>
           </td>
         `;
@@ -2714,18 +2714,18 @@
         div.className = `viaje-item ${isBlocked ? 'bloqueado' : cleanEstado}`;
         div.innerHTML = `
           <div class="viaje-route">
-            <span class="origin">📍 ${v.origen}</span>
+            <span class="origin">📍 ${window.RoadTo ? window.RoadTo.escapeHTML(v.origen) : v.origen}</span>
             <span class="arrow">→</span>
-            <span class="destiny">🏁 ${v.destino}</span>
+            <span class="destiny">🏁 ${window.RoadTo ? window.RoadTo.escapeHTML(v.destino) : v.destino}</span>
           </div>
           <div class="viaje-meta">
-            <span>📅 ${new Date(v.fecha_hora).toLocaleString()}</span>
-            <span class="status-badge ${isBlocked ? 'bloqueado' : cleanEstado}">
-              ${isBlocked ? '🔒 Bloqueado' : cleanEstado.toUpperCase()}
+            <span>📅 ${window.RoadTo ? window.RoadTo.escapeHTML(new Date(v.fecha_hora).toLocaleString()) : new Date(v.fecha_hora).toLocaleString()}</span>
+            <span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(isBlocked ? 'bloqueado' : cleanEstado) : isBlocked ? 'bloqueado' : cleanEstado}">
+              ${window.RoadTo ? window.RoadTo.escapeHTML(isBlocked ? '🔒 Bloqueado' : cleanEstado.toUpperCase()) : isBlocked ? '🔒 Bloqueado' : cleanEstado.toUpperCase()}
             </span>
           </div>
           <div class="viaje-actions">
-            <button class="action-btn view" onclick="viewViajeDetailAdmin('${v.id}')" title="Ver Detalle">👁️</button>
+            <button class="action-btn view" onclick="viewViajeDetailAdmin('${window.RoadTo ? window.RoadTo.escapeHTML(v.id) : v.id}')" title="Ver Detalle">👁️</button>
             ${isBlocked ? `
               <button class="action-btn unlock" onclick="desbloquearViajeAdmin('${v.id}')" title="Desbloquear Viaje" style="font-size:16px">🔓</button>
             ` : `
@@ -2816,7 +2816,7 @@
         .eq('conductor_id', conductorId);
 
       if (error) {
-        container.innerHTML = `<div style="color:#ef4444">Error al cargar documentos: ${error.message}</div>`;
+        container.innerHTML = `<div style="color:#ef4444">Error al cargar documentos: ${window.RoadTo ? window.RoadTo.escapeHTML(error.message) : error.message}</div>`;
         return;
       }
 
@@ -2850,7 +2850,7 @@
         item.style.border = '1px solid #27272a';
 
         const info = document.createElement('div');
-        info.innerHTML = `<strong style="color:#f4f4f5">${tipoNombres[doc.tipo] || doc.tipo}</strong><br><span style="font-size:11px;color:#71717a">Subido: ${new Date(doc.created_at).toLocaleDateString()}</span>`;
+        info.innerHTML = `<strong style="color:#f4f4f5">${window.RoadTo ? window.RoadTo.escapeHTML(tipoNombres[doc.tipo] || doc.tipo) : tipoNombres[doc.tipo] || doc.tipo}</strong><br><span style="font-size:11px;color:#71717a">Subido: ${window.RoadTo ? window.RoadTo.escapeHTML(new Date(doc.created_at).toLocaleDateString()) : new Date(doc.created_at).toLocaleDateString()}</span>`;
 
         const actions = document.createElement('div');
         actions.style.display = 'flex';
@@ -2919,7 +2919,7 @@
           return true;
         }
       } catch (err) {
-        console.error('Error uploading document:', err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         try {
           const base64Data = await fileToBase64(file);
           const { error: dbError } = await supabaseClient.from('documentos').insert({
@@ -3079,11 +3079,11 @@
         <div class="payment-detail-grid">
           <div class="payment-detail-item">
             <div class="payment-detail-label">Plan</div>
-            <div class="payment-detail-value">${conductor.plan || 'Básico'}</div>
+            <div class="payment-detail-value">${window.RoadTo ? window.RoadTo.escapeHTML(conductor.plan || 'Básico') : conductor.plan || 'Básico'}</div>
           </div>
           <div class="payment-detail-item">
             <div class="payment-detail-label">Vencimiento</div>
-            <div class="payment-detail-value">${conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleDateString() : 'N/A'}</div>
+            <div class="payment-detail-value">${window.RoadTo ? window.RoadTo.escapeHTML(conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleDateString() : 'N/A') : conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleDateString() : 'N/A'}</div>
           </div>
         </div>
         <div style="text-align:center;margin-top:15px">
@@ -3128,7 +3128,7 @@
           const qrContainer = document.getElementById('qrContainer');
           qrContainer.innerHTML = '';
           qrContainer.appendChild(canvas);
-          document.getElementById('qrConductorInfo').innerHTML = `<strong>${c.nombres} ${c.apellidos}</strong><br>${c.email || ''}`;
+          document.getElementById('qrConductorInfo').innerHTML = `<strong>${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</strong><br>${window.RoadTo ? window.RoadTo.escapeHTML(c.email || '') : c.email || ''}`;
           document.getElementById('qrModal').classList.add('show');
         }
       });
@@ -3377,7 +3377,7 @@
            });
         }
       } catch (e) {
-        console.error(e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
 
       // Ordenar: los que están en cola van primero
@@ -3404,10 +3404,10 @@
         const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
         const iniA = (c.apellidos && c.apellidos.length > 0) ? c.apellidos[0] : '';
         div.innerHTML = `
-          <div class="avatar">${iniN}${iniA}</div>
+          <div class="avatar">${window.RoadTo ? window.RoadTo.escapeHTML(iniN) : iniN}${window.RoadTo ? window.RoadTo.escapeHTML(iniA) : iniA}</div>
           <div class="info">
-            <div class="name">${c.nombres || ''} ${c.apellidos || ''} ${badgeHtml}</div>
-            <div class="vehicle">${c.marca || ''} ${c.modelo || ''} (${c.placa || ''})</div>
+            <div class="name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(badgeHtml) : badgeHtml}</div>
+            <div class="vehicle">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</div>
           </div>
         `;
         container.appendChild(div);
@@ -3616,12 +3616,12 @@
           
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="color:white;font-weight:600;">${z.nombre}</td>
-          <td style="color:#94a3b8;">${z.descripcion || '-'}</td>
-          <td>${statusBadge}</td>
+          <td style="color:white;font-weight:600;">${window.RoadTo ? window.RoadTo.escapeHTML(z.nombre) : z.nombre}</td>
+          <td style="color:#94a3b8;">${window.RoadTo ? window.RoadTo.escapeHTML(z.descripcion || '-') : z.descripcion || '-'}</td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(statusBadge) : statusBadge}</td>
           <td>
-            <button class="action-btn view" onclick="toggleZona('${z.id}', ${z.activa})" title="Activar/Desactivar">👁️</button>
-            <button class="action-btn delete" onclick="eliminarZona('${z.id}')" title="Eliminar">✕</button>
+            <button class="action-btn view" onclick="toggleZona('${window.RoadTo ? window.RoadTo.escapeHTML(z.id) : z.id}', ${window.RoadTo ? window.RoadTo.escapeHTML(z.activa) : z.activa})" title="Activar/Desactivar">👁️</button>
+            <button class="action-btn delete" onclick="eliminarZona('${window.RoadTo ? window.RoadTo.escapeHTML(z.id) : z.id}')" title="Eliminar">✕</button>
           </td>
         `;
         tbody.appendChild(tr);

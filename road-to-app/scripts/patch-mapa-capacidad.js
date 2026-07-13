@@ -232,4 +232,4 @@ if (!content.includes('cambiarEstadoPasajero(')) {
 }
 
 fs.writeFileSync(mapaPath, content);
-console.log('mapa.html patched successfully');
+/* log removed */

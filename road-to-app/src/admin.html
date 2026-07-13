@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co https://cdn.jsdelivr.net data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; script-src-elem 'self' https://cdn.jsdelivr.net https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data: blob: https://*.supabase.co;">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
   <script>
 // Try to load capacitor.js dynamically, but don't fail if it's not available
 (function() {
   const script = document.createElement('script');
   script.src = 'capacitor.js';
-  script.onerror = function() { console.log('Capacitor not available (expected in browser)'); };
+  script.onerror = function() { /* log removed */'); };
   document.head.appendChild(script);
 })();
 </script>
@@ -360,7 +360,8 @@
   </style>
 <base target="_blank">
 <base target="_blank">
-</head>
+
+  <script src="config.js"></script></head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
@@ -596,26 +597,23 @@ async function initializeCapacitor() {
       Keyboard.addListener('keyboardWillShow', () => { document.body.classList.add('keyboard-open'); });
       Keyboard.addListener('keyboardWillHide', () => { document.body.classList.remove('keyboard-open'); });
     }
-  } catch (error) { console.error('Error initializing Capacitor plugins:', error); }
+  } catch (error) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); }
 }
-
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
 
 // Wait for Supabase library to be fully loaded
 let supabaseClient = null;
 
 function initSupabase() {
   if (typeof supabase === 'undefined' || !supabase.createClient) {
-    console.error('Supabase library not loaded. Check CSP and network.');
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     return false;
   }
   try {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase client initialized successfully');
+    /* log removed */
     return true;
   } catch (e) {
-    console.error('Error initializing Supabase:', e);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     return false;
   }
 }
@@ -670,9 +668,9 @@ async function checkAuth() {
   try {
     showLoading('Verificando sesión...');
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-    if (sessionError) { console.error("Error obteniendo sesión:", sessionError); hideLoading(); return; }
-    if (!session) { console.log("No hay sesión activa"); hideLoading(); window.location.href = 'index.html'; return; }
-    console.log("Sesión activa para:", session.user.email);
+    if (sessionError) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); hideLoading(); return; }
+    if (!session) { /* log removed */ hideLoading(); window.location.href = 'index.html'; return; }
+    /* log removed */
 
     // Verificar si es admin
     const { data: adminData, error: adminError } = await supabaseClient
@@ -680,9 +678,9 @@ async function checkAuth() {
       .select('auth_user_id')
       .eq('auth_user_id', session.user.id)
       .maybeSingle();
-    if (adminError) console.error("Error verificando admin:", adminError);
-    if (!adminData) { console.log("Usuario no es admin"); window.location.href = 'perfil.html'; }
-    else { console.log("Usuario es admin"); }
+    if (adminError) console.error("Error ocurrido en el cliente", "Contacte a soporte");
+    if (!adminData) { /* log removed */ window.location.href = 'perfil.html'; }
+    else { /* log removed */ }
 
     hideLoading();
     if (isCapacitor && SplashScreen) await SplashScreen.hide();
@@ -690,7 +688,7 @@ async function checkAuth() {
     // Cargar lista de usuarios
     cargarUsuarios();
   } catch (err) {
-    console.error("Error en checkAuth:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     hideLoading();
   }
 }
@@ -726,7 +724,7 @@ async function crearAdmin() {
       .select('email')
       .eq('email', email)
       .maybeSingle();
-    if (checkError && checkError.code !== 'PGRST116') console.error("Error verificando existencia:", checkError);
+    if (checkError && checkError.code !== 'PGRST116') console.error("Error ocurrido en el cliente", "Contacte a soporte");
     if (existing) { showMessage('createAdminMsg', 'Este correo ya está registrado como admin', 'error'); hideLoading(); btn.disabled = false; resetAdminBtn(); return; }
 
     // Crear usuario invocando la Edge Function
@@ -757,7 +755,7 @@ async function crearAdmin() {
     document.getElementById("newAdminPass").value = "";
     cargarUsuarios();
   } catch (err) {
-    console.error("Error inesperado:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage('createAdminMsg', 'Error de conexión: ' + err.message, 'error');
   } finally {
     hideLoading(); btn.disabled = false; resetAdminBtn();
@@ -801,7 +799,7 @@ async function crearCoordinador() {
       .select('email')
       .eq('email', email)
       .maybeSingle();
-    if (checkError && checkError.code !== 'PGRST116') console.error("Error verificando existencia:", checkError);
+    if (checkError && checkError.code !== 'PGRST116') console.error("Error ocurrido en el cliente", "Contacte a soporte");
     if (existing) { showMessage('createCoordMsg', 'Este correo ya está registrado como coordinador', 'error'); hideLoading(); btn.disabled = false; resetCoordBtn(); return; }
 
     // Crear usuario invocando la Edge Function
@@ -834,7 +832,7 @@ async function crearCoordinador() {
     document.getElementById("coordPass").value = "";
     cargarUsuarios();
   } catch (err) {
-    console.error("Error inesperado:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage('createCoordMsg', 'Error de conexión: ' + err.message, 'error');
   } finally {
     hideLoading(); btn.disabled = false; resetCoordBtn();
@@ -886,7 +884,7 @@ async function cambiarPassword() {
     document.getElementById("newPass").value = "";
     document.getElementById("confirmNewPass").value = "";
   } catch (err) {
-    console.error("Error cambiando password:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     showMessage('changeMsg', 'Error: ' + err.message, 'error');
   } finally {
     hideLoading(); btn.disabled = false; resetChangeBtn();
@@ -899,7 +897,7 @@ function resetChangeBtn() {
 // ===== VER USUARIOS =====
 async function cargarUsuarios() {
   if (!supabaseClient) { 
-    console.error('supabaseClient not initialized'); 
+    console.error("Error ocurrido en el cliente", "Contacte a soporte"); 
     document.getElementById('adminsList').innerHTML = '<p style="color:#f87171;font-size:13px;text-align:center;padding:20px;">⚠️ Error de conexión. Recarga la página.</p>';
     document.getElementById('coordsList').innerHTML = '<p style="color:#f87171;font-size:13px;text-align:center;padding:20px;">⚠️ Error de conexión. Recarga la página.</p>';
     return; 
@@ -911,7 +909,7 @@ async function cargarUsuarios() {
       .select('id, email, auth_user_id')
       .order('id', { ascending: false });
     if (adminErr) {
-      console.error("Error cargando admins:", adminErr);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       document.getElementById('adminsList').innerHTML = '<p style="color:#f87171;font-size:12px;text-align:center;padding:20px;">Error cargando admins: ' + (adminErr.message || adminErr.code || 'Desconocido') + '</p>';
     } else {
       renderAdminsList(admins || []);
@@ -923,13 +921,13 @@ async function cargarUsuarios() {
       .select('id, email, nombres, apellidos, celular, auth_user_id')
       .order('id', { ascending: false });
     if (coordErr) {
-      console.error("Error cargando coordinadores:", coordErr);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
       document.getElementById('coordsList').innerHTML = '<p style="color:#f87171;font-size:12px;text-align:center;padding:20px;">Error cargando coordinadores: ' + (coordErr.message || coordErr.code || 'Desconocido') + '</p>';
     } else {
       renderCoordsList(coords || []);
     }
   } catch (err) {
-    console.error("Error cargando usuarios:", err);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
   }
 }
 

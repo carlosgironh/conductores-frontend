@@ -13,7 +13,7 @@ let NativeTracking = null;
 try {
   NativeTracking = Capacitor.Plugins.NativeTracking || null;
 } catch (e) {
-  console.log('[Tracking] Plugin NativeTracking no disponible, usando fallback');
+  /* log removed */
 }
 
 class DriverTracking {
@@ -154,7 +154,7 @@ class DriverTracking {
     if (isAndroid && NativeTracking) {
       try {
         const result = await NativeTracking.startTracking({ driverId: this.driverId });
-        console.log('[Tracking] Servicio nativo Android iniciado:', result.message);
+        /* log removed */
         this.useNativeService = true;
 
         // En modo nativo, el servicio Kotlin maneja el envío a Supabase directamente.
@@ -204,7 +204,7 @@ class DriverTracking {
           },
           timestamp: position.timestamp
         }),
-        (err) => console.error('GPS Error:', err),
+        (err) => console.error("Error ocurrido en el cliente", "Contacte a soporte"),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
       );
     }
@@ -250,7 +250,7 @@ class DriverTracking {
     if (!error) {
       this.locations = [];
     } else {
-      console.error('Error enviando ubicaciones:', error);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
     }
   }
 
@@ -261,7 +261,7 @@ class DriverTracking {
     if (this.useNativeService && NativeTracking) {
       try {
         await NativeTracking.stopTracking();
-        console.log('[Tracking] Servicio nativo Android detenido');
+        /* log removed */
       } catch (e) {
         console.warn('[Tracking] Error deteniendo servicio nativo:', e);
       }

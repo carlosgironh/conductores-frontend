@@ -46,10 +46,10 @@ htmlFiles.forEach(filename => {
 
   if (content !== original) {
     fs.writeFileSync(filePath, content, 'utf8');
-    console.log(`[patch] ✅ ${filename} (${fileChanges} reemplazos)`);
+    /* log removed */`);
     totalFiles++;
     totalChanges += fileChanges;
   }
 });
 
-console.log(`\n✅ Listo: ${totalFiles} archivos actualizados, ${totalChanges} reemplazos en total.`);
+/* log removed */

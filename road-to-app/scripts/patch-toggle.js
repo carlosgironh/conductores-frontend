@@ -100,7 +100,7 @@ const adminJsLogic = `
           }
         }
       } catch (e) {
-        console.error(e);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
     }
 `;
@@ -150,7 +150,7 @@ const coordJsLogic = `
           }
         }
       } catch (err) {
-        console.error('Error revisando permisos:', err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
       }
     }
 `;
@@ -169,4 +169,4 @@ if (!coordContent.includes('checkFlotaPermission()')) {
 
 fs.writeFileSync(adminPath, adminContent);
 fs.writeFileSync(coordPath, coordContent);
-console.log('Patch de permisos aplicado con éxito.');
+/* log removed */

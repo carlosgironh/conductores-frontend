@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
 
 <!-- Leaflet CSS + JS (Open Source, BSD-2) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -18,7 +18,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- Turf.js para Geofencing -->
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js" integrity="sha384-82q0nm29xZzIo5BMtDYnh2/NxeO6FoaK1S/0nF84w3cEsqbBfun3JdMyDVYWfVY5" crossorigin="anonymous"></script>
 
 <!-- Config centralizada -->
 <script src="config.js"></script>
@@ -639,10 +639,7 @@
 
 <script>
   // ═══ CONFIGURACIÓN ═══
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.RoadTo?.config || {
-    SUPABASE_URL: "https://ugchmuhjzzyofoogprlr.supabase.co",
-    SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4"
-  };
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.RoadTo?.config || {};
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -692,7 +689,7 @@
     try {
       const { data } = await supabaseClient.from('zonas_geofence').select('*').eq('activa', true);
       if (data) activeGeofenceZones = data;
-    } catch(e) { console.error('Error loading zones:', e); }
+    } catch(e) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); }
   }
 
   function initMap() {
@@ -789,7 +786,7 @@
         await push.register();
 
         push.addListener('registration', async (token) => {
-          console.log('FCM Token:', token.value);
+          /* log removed */
           if (conductorData) {
              await supabaseClient.from('conductores').update({
                fcm_token: token.value
@@ -798,7 +795,7 @@
         });
 
         push.addListener('registrationError', (error) => {
-          console.error('Error registrando FCM:', JSON.stringify(error));
+          console.error("Error ocurrido en el cliente", "Contacte a soporte"));
         });
 
         push.addListener('pushNotificationReceived', (notification) => {
@@ -893,7 +890,7 @@
     watchId = navigator.geolocation.watchPosition(
       (pos) => handlePositionUpdate(pos),
       (err) => {
-        console.error('GPS error:', err);
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
         showToast('Error de GPS: ' + err.message);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 }
@@ -1485,7 +1482,7 @@
           }).subscribe();
       }
     } catch(e) {
-      console.error('Error renderViajeEnVivo:', e);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
     }
   }
 
@@ -1520,7 +1517,7 @@
         });
       }
     } catch(e) {
-      console.error('Error renderModoConductor:', e);
+      console.error("Error ocurrido en el cliente", "Contacte a soporte");
     }
   }
 </script>

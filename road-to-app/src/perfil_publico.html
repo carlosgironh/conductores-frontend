@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a1208">
 
-<script src="JS/supabase-bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -646,7 +646,8 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
-</head>
+
+  <script src="config.js"></script></head>
 
 <body>
 
@@ -702,9 +703,8 @@
 </div>
 
 <script>
-const SUPABASE_URL = "https://ugchmuhjzzyofoogprlr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2htdWhqenp5b2Zvb2dwcmxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODUyNDQsImV4cCI6MjA4NTY2MTI0NH0.kB4ZjPhfP29JL6apWFKrXfW-AwnsCKHfmVsBUVjPsX4";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.RoadTo.createSupabase();
 
 async function cargarPerfil() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -738,8 +738,8 @@ async function cargarPerfil() {
       .select("*")
       .eq("conductor_id", conductor.id);
 
-    console.log('[PUBLICO] Documentos cargados:', documentos);
-    console.log('[PUBLICO] Error documentos:', docError);
+    /* log removed */
+    /* log removed */
 
     // Cargar estado de pago desde tabla pagos
     const { data: pagos } = await supabaseClient
@@ -752,7 +752,7 @@ async function cargarPerfil() {
     await renderPerfil(conductor, documentos, pagos);
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
 
     if (error.message === 'RLS_BLOCK' || error.code === 'PGRST116' || error.message?.includes('permission')) {
       mostrarError(
@@ -790,10 +790,10 @@ async function listarDocumentosBucket(conductorId) {
       .from("documentos-conductores")
       .list(conductorId, { limit: 100 });
     if (error || !files || files.length === 0) {
-      console.log('[PUBLICO] Bucket list empty or error:', error?.message);
+      /* log removed */
       return [];
     }
-    console.log('[PUBLICO] Bucket files found:', files.map(f => f.name));
+    /* log removed */);
 
     const tipoMap = {
       'cedula': 'CEDULA',
@@ -822,7 +822,7 @@ async function listarDocumentosBucket(conductorId) {
       };
     }).filter(d => d.tipo !== 'OTRO');
   } catch (e) {
-    console.error('[PUBLICO] Error listing bucket:', e);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     return [];
   }
 }
@@ -839,23 +839,23 @@ async function docUrl(tipo, documentos) {
       console.error(`[PUBLICO] Error signedUrl ${tipo}:`, error.message);
       return null;
     }
-    console.log(`[PUBLICO] Doc ${tipo}: resolvedUrl=OK path=${doc.url_archivo}`);
+    /* log removed */
     return signedUrl.signedUrl;
   } catch (e) {
-    console.error(`[PUBLICO] Exception signedUrl ${tipo}:`, e);
+    console.error("Error ocurrido en el cliente", "Contacte a soporte");
     return null;
   }
 }
 
 async function renderPerfil(conductor, documentosDB, pagos) {
-  console.log('[PUBLICO] renderPerfil called, documentosDB count:', documentosDB?.length || 0);
+  /* log removed */
 
   // Fallback: if table is empty, read directly from bucket
   let documentos = documentosDB;
   if (!documentos || documentos.length === 0) {
-    console.log('[PUBLICO] Table empty, trying bucket fallback...');
+    /* log removed */
     documentos = await listarDocumentosBucket(conductor.id);
-    console.log('[PUBLICO] Bucket fallback result:', documentos);
+    /* log removed */
   }
 
   // Pre-resolve all document URLs
@@ -1023,8 +1023,8 @@ async function renderPerfil(conductor, documentosDB, pagos) {
   const docGrid = document.getElementById("documentos-grid");
   docGrid.innerHTML = "";
 
-  console.log('[PUBLICO] Renderizando documentos. Total:', documentos?.length || 0);
-  console.log('[PUBLICO] Documentos:', documentos);
+  /* log removed */
+  /* log removed */
 
   const documentosConfig = [
     { tipo: "CEDULA", label: "Cédula", icon: "📄" },
@@ -1038,7 +1038,7 @@ async function renderPerfil(conductor, documentosDB, pagos) {
 
   documentosConfig.forEach(doc => {
     const url = urls[doc.tipo];
-    console.log(`[PUBLICO] Doc ${doc.tipo}:`, url ? 'ENCONTRADO' : 'NO ENCONTRADO');
+    /* log removed */
     if (url) {
       tieneDocumentos = true;
       const isPdf = url.toLowerCase().endsWith('.pdf');
@@ -1094,7 +1094,7 @@ async function renderPerfil(conductor, documentosDB, pagos) {
     }
   }
 
-  console.log('[PUBLICO] tieneDocumentos:', tieneDocumentos);
+  /* log removed */
 
   if (tieneDocumentos) {
     docSection.style.display = "block";

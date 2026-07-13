@@ -115,7 +115,7 @@ const loadFixedRoutesJS = `
                     }
                 });
             } catch (err) {
-                console.error("Error cargando rutas fijas:", err);
+                console.error("Error ocurrido en el cliente", "Contacte a soporte");
             }
         }
 `;
@@ -210,4 +210,4 @@ fs.writeFileSync(mapaPath, mapaContent);
 fs.writeFileSync(reservarPath, reservarContent);
 fs.writeFileSync(adminPath, adminContent);
 fs.writeFileSync(coordPath, coordContent);
-console.log('Carpooling logic patched across all files');
+/* log removed */
