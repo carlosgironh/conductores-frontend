@@ -46,7 +46,7 @@ htmlFiles.forEach(filename => {
 
   if (content !== original) {
     fs.writeFileSync(filePath, content, 'utf8');
-    /* log removed */`);
+    // log removed
     totalFiles++;
     totalChanges += fileChanges;
   }

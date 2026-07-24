@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagos - Panel de Conductor</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
+  <script src="JS/supabase-bundle.js"></script>
   <!-- CDN del Botón de Pago Yappy -->
   <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
   <style>
@@ -458,7 +458,7 @@
     // CONFIGURACIÓN
     // ============================================================
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
     const YAPPY_DOMAIN = 'https://nrdesingcorp.com';

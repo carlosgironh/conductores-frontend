@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co https://cdn.jsdelivr.net data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; script-src-elem 'self' https://cdn.jsdelivr.net https://ugchmuhjzzyofoogprlr.supabase.co https://*.supabase.co 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob:; img-src 'self' data: blob: https://*.supabase.co;">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
+  <script src="JS/supabase-bundle.js"></script>
   <script>
 // Try to load capacitor.js dynamically, but don't fail if it's not available
 (function() {
@@ -361,7 +361,7 @@
 <base target="_blank">
 <base target="_blank">
 
-  <script src="../config.js"></script></head>
+  <script src="config.js"></script></head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
@@ -609,7 +609,7 @@ function initSupabase() {
     return false;
   }
   try {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     /* log removed */
     return true;
   } catch (e) {
