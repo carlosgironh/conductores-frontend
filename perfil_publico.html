@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a1208">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
+<script src="JS/supabase-bundle.js"></script>
+<script src="config.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -793,7 +794,7 @@ async function listarDocumentosBucket(conductorId) {
       /* log removed */
       return [];
     }
-    /* log removed */);
+    /* log removed */
 
     const tipoMap = {
       'cedula': 'CEDULA',
@@ -828,8 +829,17 @@ async function listarDocumentosBucket(conductorId) {
 }
 
 async function docUrl(tipo, documentos) {
-  const doc = documentos?.find(d => d.tipo === tipo);
+  const doc = documentos?.find(d => d.tipo.toUpperCase() === tipo.toUpperCase() || d.tipo.toLowerCase() === tipo.toLowerCase());
   if (!doc) return null;
+
+  if (doc.path) {
+    if (doc.path.startsWith('http://') || doc.path.startsWith('https://') || doc.path.startsWith('data:')) {
+      return doc.path;
+    }
+    const { data } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(doc.path);
+    return data?.publicUrl || doc.path;
+  }
+
   try {
     const { data: signedUrl, error } = await supabaseClient
       .storage
@@ -839,7 +849,6 @@ async function docUrl(tipo, documentos) {
       console.error(`[PUBLICO] Error signedUrl ${tipo}:`, error.message);
       return null;
     }
-    /* log removed */
     return signedUrl.signedUrl;
   } catch (e) {
     console.error("Error ocurrido en el cliente", "Contacte a soporte");
@@ -860,7 +869,7 @@ async function renderPerfil(conductor, documentosDB, pagos) {
 
   // Pre-resolve all document URLs
   const urls = {};
-  const tipos = ["CEDULA", "LICENCIA", "REGISTRO", "POLIZA", "AUTH_PROPIETARIO", "FOTO_VEHICULO", "FOTO_CONDUCTOR", "AVISO_OPERACIONES"];
+  const tipos = ["CEDULA", "LICENCIA", "REGISTRO", "POLIZA", "AUTH_PROPIETARIO", "FOTO_VEHICULO", "FOTO_CONDUCTOR", "AVISO_OPERACIONES", "RECORD_POLICIVO"];
   for (const tipo of tipos) {
     urls[tipo] = await docUrl(tipo, documentos);
   }
@@ -1031,7 +1040,9 @@ async function renderPerfil(conductor, documentosDB, pagos) {
     { tipo: "LICENCIA", label: "Licencia", icon: "🪪" },
     { tipo: "REGISTRO", label: "Registro Vehicular", icon: "🚗" },
     { tipo: "POLIZA", label: "Póliza de Seguro", icon: "🛡️" },
-    { tipo: "AUTH_PROPIETARIO", label: "Autorización Propietario", icon: "✉️" }
+    { tipo: "AUTH_PROPIETARIO", label: "Autorización Propietario", icon: "✉️" },
+    { tipo: "AVISO_OPERACIONES", label: "Aviso de Operaciones", icon: "🏢" },
+    { tipo: "RECORD_POLICIVO", label: "Record Policivo", icon: "👮" }
   ];
 
   let tieneDocumentos = false;

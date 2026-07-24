@@ -1448,8 +1448,8 @@ async function processRegistration() {
     const functionUrl = `${SUPABASE_URL}/functions/v1/nuevo-registro-conductor`;
     
     /* log removed */
-    /* log removed */);
-    /* log removed */);
+    /* log removed */
+    /* log removed */
 
     const response = await fetch(functionUrl, {
       method: 'POST',
@@ -1467,7 +1467,7 @@ async function processRegistration() {
     const responseText = await response.text();
     
     /* log removed */
-    /* log removed */:', responseText.substring(0, 500));
+    /* log removed */
 
     try {
       data = JSON.parse(responseText);

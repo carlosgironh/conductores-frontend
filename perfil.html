@@ -5,7 +5,8 @@
 <title>Mi Perfil - Conductor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
+<script src="JS/supabase-bundle.js"></script>
+<script src="config.js"></script>
 <!-- ELIMINADO: <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" integrity="sha384-Izc791esqyEy3BEIC42q7jbE0AaOkACziN+dyyXgYeDmpeMCLz0xA+xYN3aCd5zz" crossorigin="anonymous"></script> -->
 
 <style>
@@ -1041,7 +1042,7 @@ async function listarDocumentosBucket(conductorId) {
       /* log removed */
       return [];
     }
-    /* log removed */);
+    /* log removed */
 
     const tipoMap = {
       'cedula': 'CEDULA',
@@ -1076,8 +1077,17 @@ async function listarDocumentosBucket(conductorId) {
 }
 
 async function docUrl(tipo, documentos) {
-  const doc = documentos?.find(d => d.tipo === tipo);
+  const doc = documentos?.find(d => d.tipo.toUpperCase() === tipo.toUpperCase() || d.tipo.toLowerCase() === tipo.toLowerCase());
   if (!doc) return null;
+
+  if (doc.path) {
+    if (doc.path.startsWith('http://') || doc.path.startsWith('https://') || doc.path.startsWith('data:')) {
+      return doc.path;
+    }
+    const { data } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(doc.path);
+    return data?.publicUrl || doc.path;
+  }
+
   try {
     const { data: signedUrl, error } = await supabaseClient
       .storage
@@ -1087,7 +1097,6 @@ async function docUrl(tipo, documentos) {
       console.error(`[PERFIL] Error signedUrl ${tipo}:`, error.message);
       return null;
     }
-    /* log removed */
     return signedUrl.signedUrl;
   } catch (e) {
     console.error("Error ocurrido en el cliente", "Contacte a soporte");
@@ -1109,7 +1118,7 @@ async function renderPerfil(conductor, documentosDB, user) {
 
   // Pre-resolve all document URLs
   const urls = {};
-  const tipos = ["CEDULA", "LICENCIA", "REGISTRO", "POLIZA", "AUTH_PROPIETARIO", "FOTO_VEHICULO", "FOTO_CONDUCTOR", "AVISO_OPERACIONES"];
+  const tipos = ["CEDULA", "LICENCIA", "REGISTRO", "POLIZA", "AUTH_PROPIETARIO", "FOTO_VEHICULO", "FOTO_CONDUCTOR", "AVISO_OPERACIONES", "RECORD_POLICIVO"];
   for (const tipo of tipos) {
     urls[tipo] = await docUrl(tipo, documentos);
   }
@@ -1184,7 +1193,9 @@ async function renderPerfil(conductor, documentosDB, user) {
     { tipo: "LICENCIA", label: "Licencia" },
     { tipo: "REGISTRO", label: "Registro" },
     { tipo: "POLIZA", label: "Seguro" },
-    { tipo: "AUTH_PROPIETARIO", label: "Autorización" }
+    { tipo: "AUTH_PROPIETARIO", label: "Autorización" },
+    { tipo: "AVISO_OPERACIONES", label: "Aviso de Operaciones" },
+    { tipo: "RECORD_POLICIVO", label: "Record Policivo" }
   ];
 
   let tieneDocumentos = false;

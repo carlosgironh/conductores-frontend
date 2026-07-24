@@ -12,7 +12,7 @@
 (function() {
   const script = document.createElement('script');
   script.src = 'capacitor.js';
-  script.onerror = function() { /* log removed */'); };
+  script.onerror = function() { /* log removed */ };
   document.head.appendChild(script);
 })();
 </script>
@@ -669,7 +669,7 @@ async function checkAuth() {
     showLoading('Verificando sesión...');
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
     if (sessionError) { console.error("Error ocurrido en el cliente", "Contacte a soporte"); hideLoading(); return; }
-    if (!session) { /* log removed */ hideLoading(); window.location.href = 'index.html'; return; }
+    if (!session) { /* log removed */ window.location.href = 'index.html'; return; }
     /* log removed */
 
     // Verificar si es admin

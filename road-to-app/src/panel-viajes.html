@@ -815,7 +815,7 @@
                 return false;
             }
 
-            /* log removed */:', user.id);
+            /* log removed */
             currentUser = user;
 
             // Verificar que existe en tabla conductores (por auth_user_id)
@@ -1091,7 +1091,7 @@
             btnElement.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Procesando...';
 
             try {
-                /* log removed */:', currentUser.id);
+                /* log removed */
                 const { data, error } = await supabaseClient
                     .from('viajes_reservados')
                     .update({
@@ -1289,7 +1289,7 @@
             if (!session) { window.location.href = 'dashboard.html'; return; }
 
             currentUser = session.user;
-            /* log removed */:', currentUser.id);
+            /* log removed */
 
             // 1. Verificar que es conductor
             const esConductor = await verificarConductor();

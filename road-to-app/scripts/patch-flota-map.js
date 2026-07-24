@@ -292,4 +292,4 @@ coordContent = injectMapInitHook(injectJS(coordContent));
 
 fs.writeFileSync(adminPath, adminContent);
 fs.writeFileSync(coordPath, coordContent);
-/* log removed */.');
+/* log removed */

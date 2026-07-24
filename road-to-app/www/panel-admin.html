@@ -2591,7 +2591,7 @@
       if (doc.path.startsWith('http://') || doc.path.startsWith('https://') || doc.path.startsWith('data:')) {
         return doc.path;
       }
-      const { data } = supabaseClient.storage.from('documentos').getPublicUrl(doc.path);
+      const { data } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(doc.path);
       return data?.publicUrl || doc.path;
     }
 
@@ -2599,9 +2599,9 @@
       const fileName = `${conductorId}_${tipo}_${Date.now()}_${file.name}`;
       
       try {
-        const { data, error } = await supabaseClient.storage.from('documentos').upload(fileName, file, { cacheControl: '3600', upsert: true });
+        const { data, error } = await supabaseClient.storage.from('documentos-conductores').upload(fileName, file, { cacheControl: '3600', upsert: true });
         if (!error && data) {
-          const { data: urlData } = supabaseClient.storage.from('documentos').getPublicUrl(fileName);
+          const { data: urlData } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(fileName);
           const publicUrl = urlData?.publicUrl || fileName;
           const { error: dbError } = await supabaseClient.from('documentos').insert({
             conductor_id: conductorId,
@@ -2662,7 +2662,7 @@
       if (path && !path.startsWith('data:')) {
         try {
           const filename = path.substring(path.lastIndexOf('/') + 1);
-          await supabaseClient.storage.from('documentos').remove([filename]);
+          await supabaseClient.storage.from('documentos-conductores').remove([filename]);
         } catch (e) {
           console.warn('Could not delete file from storage:', e);
         }
