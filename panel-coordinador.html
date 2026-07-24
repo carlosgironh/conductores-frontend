@@ -1697,6 +1697,7 @@
           <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
           <td>
             <div class="actions">
+              <button class="action-btn view" onclick="window.open('perfil-pasajero.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}', '_blank')" title="Ver Perfil">👁️</button>
               <button class="action-btn call" onclick="llamarCelular('${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '') : p.celular || ''}')" title="Llamar">📞</button>
             </div>
           </td>
