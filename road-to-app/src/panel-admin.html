@@ -2529,19 +2529,31 @@
       }
 
       const tipoNombres = {
-        cedula: 'Cédula',
-        licencia: 'Licencia de Conducir',
-        registro_vehicular: 'Registro Vehicular',
-        poliza: 'Póliza de Seguro',
-        foto_vehiculo: 'Foto del Vehículo',
-        foto_conductor: 'Foto del Conductor',
-        auth_propietario: 'Autorización de Propietario',
-        aviso_operaciones: 'Aviso de Operaciones',
-        record_policivo: 'Record Policivo'
+        cedula: 'Cédula', CEDULA: 'Cédula',
+        licencia: 'Licencia de Conducir', LICENCIA: 'Licencia de Conducir',
+        registro_vehicular: 'Registro Vehicular', REGISTRO: 'Registro Vehicular',
+        poliza: 'Póliza de Seguro', POLIZA: 'Póliza de Seguro',
+        foto_vehiculo: 'Foto del Vehículo', FOTO_VEHICULO: 'Foto del Vehículo',
+        foto_conductor: 'Foto del Conductor', FOTO_CONDUCTOR: 'Foto del Conductor',
+        auth_propietario: 'Autorización de Propietario', AUTH_PROPIETARIO: 'Autorización de Propietario',
+        aviso_operaciones: 'Aviso de Operaciones', AVISO_OPERACIONES: 'Aviso de Operaciones',
+        record_policivo: 'Record Policivo', RECORD_POLICIVO: 'Record Policivo'
       };
 
+      // Deduplicate docs so we don't show old versions (historial)
+      docs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const normalizedDocs = {};
+      for (const doc of docs) {
+        let t = doc.tipo.toUpperCase();
+        if (t === 'REGISTRO_VEHICULAR') t = 'REGISTRO';
+        if (!normalizedDocs[t]) {
+          normalizedDocs[t] = doc;
+        }
+      }
+      const uniqueDocs = Object.values(normalizedDocs);
+
       container.innerHTML = '';
-      docs.forEach(doc => {
+      uniqueDocs.forEach(doc => {
         const item = document.createElement('div');
         item.style.display = 'flex';
         item.style.justifyContent = 'space-between';
@@ -2596,17 +2608,27 @@
     }
 
     async function subirDocumento(conductorId, tipo, file) {
-      const fileName = `${conductorId}_${tipo}_${Date.now()}_${file.name}`;
+      const fileName = `${conductorId}/${tipo}_${Date.now()}_${file.name}`;
       
       try {
+        const { data: existingDocs } = await supabaseClient.from('documentos').select('*').eq('conductor_id', conductorId).eq('tipo', tipo);
+        if (existingDocs && existingDocs.length > 0) {
+          for (const doc of existingDocs) {
+            const oldPath = doc.path || doc.url_archivo;
+            if (oldPath && !oldPath.startsWith('http') && !oldPath.startsWith('data:')) {
+              await supabaseClient.storage.from('documentos-conductores').remove([oldPath]);
+            }
+            await supabaseClient.from('documentos').delete().eq('id', doc.id);
+          }
+        }
+
         const { data, error } = await supabaseClient.storage.from('documentos-conductores').upload(fileName, file, { cacheControl: '3600', upsert: true });
         if (!error && data) {
-          const { data: urlData } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(fileName);
-          const publicUrl = urlData?.publicUrl || fileName;
           const { error: dbError } = await supabaseClient.from('documentos').insert({
             conductor_id: conductorId,
             tipo: tipo,
-            path: publicUrl
+            path: fileName,
+            url_archivo: fileName
           });
           if (dbError) throw dbError;
           return true;
@@ -2616,7 +2638,8 @@
           const { error: dbError } = await supabaseClient.from('documentos').insert({
             conductor_id: conductorId,
             tipo: tipo,
-            path: base64Data
+            path: base64Data,
+            url_archivo: base64Data
           });
           if (dbError) throw dbError;
           return true;
@@ -2628,7 +2651,8 @@
           const { error: dbError } = await supabaseClient.from('documentos').insert({
             conductor_id: conductorId,
             tipo: tipo,
-            path: base64Data
+            path: base64Data,
+            url_archivo: base64Data
           });
           if (dbError) throw dbError;
           return true;
@@ -2659,10 +2683,9 @@
         return;
       }
 
-      if (path && !path.startsWith('data:')) {
+      if (path && !path.startsWith('data:') && !path.startsWith('http')) {
         try {
-          const filename = path.substring(path.lastIndexOf('/') + 1);
-          await supabaseClient.storage.from('documentos-conductores').remove([filename]);
+          await supabaseClient.storage.from('documentos-conductores').remove([path]);
         } catch (e) {
           console.warn('Could not delete file from storage:', e);
         }
@@ -2905,15 +2928,15 @@
 
           // Upload files if any
           const filesToUpload = [
-            { id: 'editCedulaDoc', tipo: 'cedula' },
-            { id: 'editLicenciaDoc', tipo: 'licencia' },
-            { id: 'editRegistroDoc', tipo: 'registro_vehicular' },
-            { id: 'editPolizaDoc', tipo: 'poliza' },
-            { id: 'editFotoVehiculo', tipo: 'foto_vehiculo' },
-            { id: 'editFotoConductor', tipo: 'foto_conductor' },
-            { id: 'editAuthPropietario', tipo: 'auth_propietario' },
-            { id: 'editAvisoOperaciones', tipo: 'aviso_operaciones' },
-            { id: 'editRecordPolicivo', tipo: 'record_policivo' }
+            { id: 'editCedulaDoc', tipo: 'CEDULA' },
+            { id: 'editLicenciaDoc', tipo: 'LICENCIA' },
+            { id: 'editRegistroDoc', tipo: 'REGISTRO' },
+            { id: 'editPolizaDoc', tipo: 'POLIZA' },
+            { id: 'editFotoVehiculo', tipo: 'FOTO_VEHICULO' },
+            { id: 'editFotoConductor', tipo: 'FOTO_CONDUCTOR' },
+            { id: 'editAuthPropietario', tipo: 'AUTH_PROPIETARIO' },
+            { id: 'editAvisoOperaciones', tipo: 'AVISO_OPERACIONES' },
+            { id: 'editRecordPolicivo', tipo: 'RECORD_POLICIVO' }
           ];
 
           for (const item of filesToUpload) {

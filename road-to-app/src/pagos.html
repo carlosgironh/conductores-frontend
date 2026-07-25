@@ -458,7 +458,7 @@
     // CONFIGURACIÓN
     // ============================================================
 
-    const supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
 
     const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
     const YAPPY_DOMAIN = 'https://nrdesingcorp.com';
@@ -537,7 +537,7 @@
     // ============================================================
     async function restaurarSesionDesdeStorage() {
       try {
-        const raw = localStorage.getItem('supabase_session');
+        const raw = sessionStorage.getItem('supabase_session');
         if (!raw) return false;
         const stored = JSON.parse(raw);
         if (!stored.access_token) return false;
@@ -549,14 +549,14 @@
         });
 
         if (error || !data.session) {
-          localStorage.removeItem('supabase_session');
+          sessionStorage.removeItem('supabase_session');
           return false;
         }
 
         logDebug('✓ Sesión restaurada desde localStorage', 'success');
         return true;
       } catch (e) {
-        localStorage.removeItem('supabase_session');
+        sessionStorage.removeItem('supabase_session');
         return false;
       }
     }
@@ -601,7 +601,7 @@
         if (userError || !userData?.user) {
           logDebug(`Error obteniendo usuario: ${userError?.message || 'Sin usuario'}`, 'error');
           showAlert('Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn');
-          localStorage.removeItem('supabase_session');
+          sessionStorage.removeItem('supabase_session');
           setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
           return;
         }
@@ -932,12 +932,12 @@
     supabaseClient.auth.onAuthStateChange((event, session) => {
       logDebug(`Auth event: ${event}`);
       if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('supabase_session');
+        sessionStorage.removeItem('supabase_session');
         showAlert('Sesión cerrada. Redirigiendo al login...', 'warn');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
       }
       if (event === 'SIGNED_IN' && session) {
-        localStorage.setItem('supabase_session', JSON.stringify({
+        sessionStorage.setItem('supabase_session', JSON.stringify({
           access_token: session.access_token,
           refresh_token: session.refresh_token,
           expires_at: session.expires_at,

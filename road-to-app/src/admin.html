@@ -609,7 +609,7 @@ function initSupabase() {
     return false;
   }
   try {
-    supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
     /* log removed */
     return true;
   } catch (e) {

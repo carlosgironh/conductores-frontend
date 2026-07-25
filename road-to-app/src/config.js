@@ -41,7 +41,14 @@
       ? window.supabase.createClient
       : window.createClient;
 
-    return createFn(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    return createFn(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+      auth: {
+        storage: window.sessionStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    });
   }
 
   // Exportar al objeto global window.RoadTo

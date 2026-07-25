@@ -1067,7 +1067,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
 
 const form = document.getElementById("formUpdate");
 const mensaje = document.getElementById("mensaje");
@@ -1197,23 +1197,30 @@ function actualizarEstadoDocumento(tipo, subido) {
 async function subirDocumento(conductorId, tipo, file) {
   const path = `${conductorId}/${tipo}_${Date.now()}_${file.name}`;
   
+  const { data: existing } = await supabase
+    .from("documentos")
+    .select("id, url_archivo, path")
+    .eq("conductor_id", conductorId)
+    .eq("tipo", tipo)
+    .single();
+
+  if (existing) {
+    const oldPath = existing.url_archivo || existing.path;
+    if (oldPath && !oldPath.startsWith('http') && !oldPath.startsWith('data:')) {
+      await supabase.storage.from('documentos-conductores').remove([oldPath]);
+    }
+  }
+
   const { error: uploadError } = await supabase.storage
     .from("documentos-conductores")
     .upload(path, file);
   
   if (uploadError) throw uploadError;
 
-  const { data: existing } = await supabase
-    .from("documentos")
-    .select("id")
-    .eq("conductor_id", conductorId)
-    .eq("tipo", tipo)
-    .single();
-
   if (existing) {
-    await supabase.from("documentos").update({ url_archivo: path }).eq("id", existing.id);
+    await supabase.from("documentos").update({ url_archivo: path, path: path }).eq("id", existing.id);
   } else {
-    await supabase.from("documentos").insert([{ conductor_id: conductorId, tipo: tipo, url_archivo: path }]);
+    await supabase.from("documentos").insert([{ conductor_id: conductorId, tipo: tipo, url_archivo: path, path: path }]);
   }
 }
 

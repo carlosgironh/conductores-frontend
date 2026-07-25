@@ -639,7 +639,7 @@
   // ═══ CONFIGURACIÓN ═══
   const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.RoadTo?.config || {};
 
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
 
   // ═══ ESTADO GLOBAL ═══
   let map, userMarker;

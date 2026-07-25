@@ -1178,7 +1178,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
 
 const form = document.getElementById("formConductor");
 const mensaje = document.getElementById("mensaje");

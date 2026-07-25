@@ -1048,11 +1048,13 @@ async function listarDocumentosBucket(conductorId) {
       'cedula': 'CEDULA',
       'licencia': 'LICENCIA',
       'registro': 'REGISTRO',
+      'registro_vehicular': 'REGISTRO',
       'poliza': 'POLIZA',
       'foto_conductor': 'FOTO_CONDUCTOR',
       'foto_vehiculo': 'FOTO_VEHICULO',
       'aviso_operaciones': 'AVISO_OPERACIONES',
-      'auth_propietario': 'AUTH_PROPIETARIO'
+      'auth_propietario': 'AUTH_PROPIETARIO',
+      'record_policivo': 'RECORD_POLICIVO'
     };
 
     return files.map(f => {
@@ -1077,7 +1079,13 @@ async function listarDocumentosBucket(conductorId) {
 }
 
 async function docUrl(tipo, documentos) {
-  const doc = documentos?.find(d => d.tipo.toUpperCase() === tipo.toUpperCase() || d.tipo.toLowerCase() === tipo.toLowerCase());
+  let doc = documentos?.find(d => d.tipo.toUpperCase() === tipo.toUpperCase() || d.tipo.toLowerCase() === tipo.toLowerCase());
+  
+  // Handle aliases from old admin panel uploads
+  if (!doc && tipo === "REGISTRO") {
+    doc = documentos?.find(d => d.tipo.toUpperCase() === "REGISTRO_VEHICULAR" || d.tipo.toLowerCase() === "registro_vehicular");
+  }
+  
   if (!doc) return null;
 
   if (doc.path) {
@@ -1108,12 +1116,13 @@ async function renderPerfil(conductor, documentosDB, user) {
   renderStatusBanner(conductor.estado, conductor.motivo_deshabilitado || conductor.motivo_desactivacion);
   /* log removed */
 
-  // Fallback: if table is empty, read directly from bucket
-  let documentos = documentosDB;
-  if (!documentos || documentos.length === 0) {
-    /* log removed */
-    documentos = await listarDocumentosBucket(conductor.id);
-    /* log removed */
+  let documentos = [];
+  if (documentosDB && documentosDB.length > 0) {
+    documentos = [...documentosDB];
+  }
+  const bucketDocs = await listarDocumentosBucket(conductor.id);
+  if (bucketDocs && bucketDocs.length > 0) {
+    documentos = documentos.concat(bucketDocs);
   }
 
   // Pre-resolve all document URLs
