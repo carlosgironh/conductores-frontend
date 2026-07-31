@@ -869,6 +869,13 @@
     Actualizar Datos
   </button>
 
+  <button class="btn-update" id="btnMap" onclick="irAMapaConductor()" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); margin-top: 15px;">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 18l-6 2z"></path>
+    </svg>
+    Ver mis Carreras
+  </button>
+
   <!-- ELIMINADO: QR container -->
 </div>
 
@@ -1317,6 +1324,17 @@ function irAPanel() {
   document.body.style.opacity = "0.5";
   setTimeout(() => {
     window.location.href = "panel-usuario.html";
+  }, 200);
+}
+
+function irAMapaConductor() {
+  if (!perfilCache || !perfilCache.id) {
+    showToast('Espere a que cargue su perfil');
+    return;
+  }
+  document.body.style.opacity = "0.5";
+  setTimeout(() => {
+    window.location.href = `mapa.html?mode=driver&conductor_id=${perfilCache.id}`;
   }, 200);
 }
 

@@ -1486,23 +1486,79 @@
     }
   }
 
-  async function renderModoConductor(conductorId) {
-    // 1. Mostrar tu viaje actual si lo hay
+  async function calculateMultiStopRoute(waypoints) {
+    if (waypoints.length < 2) return;
     try {
-      const { data: viaje } = await supabaseClient
+      const coordsString = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
+      const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        
+        if (routeLayer) map.removeLayer(routeLayer);
+        routeLayer = L.polyline(coords, {
+          color: '#f59e0b',
+          weight: 5,
+          opacity: 0.9,
+          dashArray: '10, 10'
+        }).addTo(map);
+        
+        map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+      }
+    } catch (e) {
+      console.warn('Error calculando ruta multipunto:', e);
+    }
+  }
+
+  async function renderModoConductor(conductorId) {
+    try {
+      // 1. Obtener todos los viajes asignados al conductor (Carpooling)
+      const { data: viajes } = await supabaseClient
         .from('viajes_reservados')
         .select('*')
         .eq('conductor_asignado_id', conductorId)
-        .in('estado', ['asignado', 'en_curso'])
-        .maybeSingle();
+        .in('estado', ['asignado', 'en_curso']);
       
-      if (viaje && viaje.lat_destino) {
-        if (lastPosition) {
-           await calculateRoute(lastPosition, [viaje.lat_destino, viaje.lng_destino]);
+      const waypoints = [];
+      if (lastPosition) waypoints.push(lastPosition);
+
+      if (viajes && viajes.length > 0) {
+        viajes.forEach((v, index) => {
+          // Marcador de recogida (Pasajero)
+          if (v.lat_origen && v.lng_origen && v.estado_pasajero !== 'a_bordo' && v.estado_pasajero !== 'completado') {
+            L.marker([v.lat_origen, v.lng_origen], {
+              icon: L.divIcon({
+                className: 'stop-marker pickup',
+                html: `<div style="background:#22c55e; width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.4);">↑</div>`
+              })
+            }).addTo(map).bindPopup(`<b>Recoger Pasajero</b><br>${v.origen}<br>Pasajero ID: ${v.pasajero_id || 'N/A'}`);
+            waypoints.push([v.lat_origen, v.lng_origen]);
+          }
+
+          // Marcador de bajada
+          if (v.lat_destino && v.lng_destino && v.estado_pasajero !== 'completado') {
+            L.marker([v.lat_destino, v.lng_destino], {
+              icon: L.divIcon({
+                className: 'stop-marker dropoff',
+                html: `<div style="background:#ef4444; width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.4);">↓</div>`
+              })
+            }).addTo(map).bindPopup(`<b>Dejar Pasajero</b><br>${v.destino}<br>Pasajero ID: ${v.pasajero_id || 'N/A'}`);
+            waypoints.push([v.lat_destino, v.lng_destino]);
+          }
+        });
+
+        // Trazar ruta multipunto si hay paradas
+        if (waypoints.length > 1) {
+           await calculateMultiStopRoute(waypoints);
         }
+      } else {
+         showToast('No tienes viajes activos asignados.');
       }
 
-      // 2. Buscar viajes disponibles "pendientes" cercanos o en general
+      // 2. Buscar viajes disponibles "pendientes"
       const { data: disponibles } = await supabaseClient
         .from('viajes_reservados')
         .select('*')
@@ -1511,13 +1567,14 @@
       if (disponibles) {
         disponibles.forEach(v => {
           if (v.lat_origen && v.lng_origen) {
-            const m = L.marker([v.lat_origen, v.lng_origen]).addTo(map)
+            L.marker([v.lat_origen, v.lng_origen]).addTo(map)
               .bindPopup(`<b>Viaje Disponible</b><br>${v.origen}<br>➔ ${v.destino}`);
           }
         });
       }
     } catch(e) {
-      console.error("Error ocurrido en el cliente", "Contacte a soporte");
+      console.error("Error cargando modo conductor:", e);
+      showToast('Error cargando paradas del viaje.');
     }
   }
 </script>
