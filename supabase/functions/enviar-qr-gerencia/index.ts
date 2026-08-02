@@ -3,7 +3,7 @@ import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts'
 import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get("ALLOWED_ORIGIN") || 'https://road-to-app.vercel.app',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
