@@ -3087,7 +3087,54 @@
     }
 
     async function sendQRByEmail() {
-      showToast('Función de envío por email requiere configuración de servidor SMTP', 'warning');
+      try {
+        const qrContainer = document.getElementById('qrContainer');
+        const canvas = qrContainer.querySelector('canvas');
+        if (!canvas) {
+          showToast('No hay código QR generado para enviar', 'warning');
+          return;
+        }
+
+        const qrBase64 = canvas.toDataURL('image/png');
+        const infoDiv = document.getElementById('qrConductorInfo');
+        
+        // Extraemos nombre y email
+        const strongTag = infoDiv.querySelector('strong');
+        const conductorNombre = strongTag ? strongTag.textContent : 'Conductor';
+        
+        const htmlContent = infoDiv.innerHTML;
+        const brParts = htmlContent.split('<br>');
+        let conductorEmail = '';
+        if (brParts.length > 1) {
+          conductorEmail = brParts[1].trim();
+        }
+
+        showLoading('Enviando QR a gerencia...');
+
+        const { data, error } = await supabaseClient.functions.invoke('enviar-qr-gerencia', {
+          body: {
+            qrBase64,
+            conductorNombre,
+            conductorEmail
+          }
+        });
+
+        hideLoading();
+
+        if (error) {
+          throw error;
+        }
+        
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
+
+        showToast('QR enviado a gerencia exitosamente', 'success');
+      } catch (err) {
+        hideLoading();
+        console.error('Error enviando QR:', err);
+        showToast('Error al enviar el QR: ' + (err.message || 'Intente nuevamente'), 'error');
+      }
     }
 
     // Modal asignar conductor (admin)
