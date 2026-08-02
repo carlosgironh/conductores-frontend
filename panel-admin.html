@@ -2084,7 +2084,23 @@
         const canvas = document.createElement('canvas');
         // Usamos el token format de su app
         const qrString = `ROADTO-${email}-${new Date().getTime()}`;
-        await QRCode.toCanvas(canvas, qrString, { width: 300, margin: 2 });
+        await QRCode.toCanvas(canvas, qrString, { width: 300, margin: 2, errorCorrectionLevel: 'H' });
+        
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = 'logo.png';
+        await new Promise((resolve) => {
+          img.onload = () => {
+            const size = canvas.width * 0.25;
+            const pos = (canvas.width - size) / 2;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(pos - 4, pos - 4, size + 8, size + 8);
+            ctx.drawImage(img, pos, pos, size, size);
+            resolve();
+          };
+          img.onerror = resolve;
+        });
+
         const qrBase64 = canvas.toDataURL('image/png');
 
         // 3. Llamar a la Edge Function
@@ -2933,13 +2949,32 @@
       if (!c) return;
       const url = `${window.location.origin}/perfil_publico.html?id=${id}`;
       const canvas = document.createElement('canvas');
-      QRCode.toCanvas(canvas, url, { width: 250 }, (err) => {
+      QRCode.toCanvas(canvas, url, { width: 250, errorCorrectionLevel: 'H' }, (err) => {
         if (!err) {
-          const qrContainer = document.getElementById('qrContainer');
-          qrContainer.innerHTML = '';
-          qrContainer.appendChild(canvas);
-          document.getElementById('qrConductorInfo').innerHTML = `<strong>${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</strong><br>${window.RoadTo ? window.RoadTo.escapeHTML(c.email || '') : c.email || ''}`;
-          document.getElementById('qrModal').classList.add('show');
+          const ctx = canvas.getContext('2d');
+          const img = new Image();
+          img.src = 'logo.png';
+          
+          const showModal = () => {
+            const qrContainer = document.getElementById('qrContainer');
+            qrContainer.innerHTML = '';
+            qrContainer.appendChild(canvas);
+            document.getElementById('qrConductorInfo').innerHTML = `<strong>${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</strong><br>${window.RoadTo ? window.RoadTo.escapeHTML(c.email || '') : c.email || ''}`;
+            document.getElementById('qrModal').classList.add('show');
+          };
+
+          img.onload = () => {
+            const size = canvas.width * 0.25;
+            const pos = (canvas.width - size) / 2;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(pos - 4, pos - 4, size + 8, size + 8);
+            ctx.drawImage(img, pos, pos, size, size);
+            showModal();
+          };
+          
+          img.onerror = () => {
+            showModal();
+          };
         }
       });
     }
