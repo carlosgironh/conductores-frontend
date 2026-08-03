@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts'
+import nodemailer from 'npm:nodemailer@6.9.11'
 import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
@@ -21,10 +21,7 @@ serve(async (req) => {
 
     // Remover el prefijo 'data:image/png;base64,' si viene incluido
     const base64Data = qrBase64.replace(/^data:image\/png;base64,/, '');
-    const imageBytes = decode(base64Data);
 
-    const client = new SmtpClient();
-    
     // Obtener credenciales desde las variables de entorno
     const smtpHost = Deno.env.get('SMTP_HOST') || '';
     const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '465');
@@ -35,18 +32,20 @@ serve(async (req) => {
        throw new Error("SMTP variables (SMTP_HOST, SMTP_USER, SMTP_PASS) no están configuradas en Supabase Secrets");
     }
 
-    await client.connectTLS({
-      hostname: smtpHost,
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
       port: smtpPort,
-      username: smtpUser,
-      password: smtpPass,
+      secure: smtpPort === 465, // true for 465, false for other ports
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
     });
 
-    await client.send({
-      from: smtpUser,
+    await transporter.sendMail({
+      from: `"RoadTo Admin" <${smtpUser}>`,
       to: 'gerencia@nrdesingcorp.com',
       subject: `Código QR de acceso para: ${conductorNombre}`,
-      content: 'auto',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>Nuevo Código QR Generado</h2>
@@ -58,14 +57,12 @@ serve(async (req) => {
       attachments: [
         {
           filename: `QR_${conductorNombre.replace(/\s+/g, '_')}.png`,
-          content: imageBytes,
-          encoding: 'binary',
+          content: base64Data,
+          encoding: 'base64',
           contentType: 'image/png'
         }
       ]
     });
-
-    await client.close();
 
     return new Response(
       JSON.stringify({ success: true, message: 'Correo enviado a gerencia exitosamente' }),
