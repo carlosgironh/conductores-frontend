@@ -2853,6 +2853,7 @@
         if (!err) {
           const ctx = canvas.getContext('2d');
           const img = new Image();
+          img.crossOrigin = "Anonymous";
           img.src = 'logo.png';
           
           const showModal = () => {
