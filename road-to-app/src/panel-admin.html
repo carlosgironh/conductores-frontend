@@ -2778,8 +2778,14 @@
     }
 
     async function deleteConductor(id) {
-      if (!confirm('¿Seguro de eliminar permanentemente a este conductor? Se eliminarán todos sus documentos.')) return;
+      if (!confirm('¿Seguro de eliminar permanentemente a este conductor? Se eliminarán todos sus documentos y pagos.')) return;
       showLoading('Eliminando...');
+
+      // Eliminar registros relacionados para evitar error de foreign key
+      await supabaseClient.from('pagos').delete().eq('conductor_id', id);
+      await supabaseClient.from('documentos').delete().eq('conductor_id', id);
+      await supabaseClient.from('lista_espera_zonas').delete().eq('conductor_id', id);
+
       const { error } = await supabaseClient.from('conductores').delete().eq('id', id);
       hideLoading();
       if (!error) {

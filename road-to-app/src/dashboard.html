@@ -219,7 +219,7 @@
 <base target="_blank">
 
   <script src="config.js"></script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 </head>
 <body>
   <header class="app-header">
@@ -263,7 +263,7 @@
       </svg>
       <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
     </div>
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAAAjm3-B4j6dF10qM" style="margin-bottom: 15px;"></div>
+
         <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
     <div class="divider"></div>
     <button class="btn-reset" onclick="recuperar()">¿Olvidaste tu contraseña?</button>
@@ -337,18 +337,6 @@ async function login() {
   const password = document.getElementById("password").value.trim();
   const btn = document.getElementById("loginBtn");
 
-  const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
-  /*
-  if (!turnstileResponse) {
-    if (typeof showMessage === 'function') {
-      showMessage("Por favor, completa el Captcha", "error");
-    } else {
-      alert("Por favor, completa el Captcha de seguridad.");
-    }
-    return;
-  }
-  */
-
   if(!email || !password){
     showMessage("Completa todos los campos", "error");
     return;
@@ -358,11 +346,7 @@ async function login() {
   btn.disabled = true;
 
   try {
-    const signInOptions = { email, password };
-    if (turnstileResponse) {
-      signInOptions.options = { captchaToken: turnstileResponse };
-    }
-    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword(signInOptions);
+    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if(authError){
       console.error("Error ocurrido en el cliente", "Contacte a soporte");
