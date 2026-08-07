@@ -1084,7 +1084,10 @@ async function listarDocumentosBucket(conductorId) {
 }
 
 async function docUrl(tipo, documentos) {
-  const doc = documentos?.find(d => d.tipo.toUpperCase() === tipo.toUpperCase() || d.tipo.toLowerCase() === tipo.toLowerCase());
+  let doc = documentos?.find(d => d.tipo.toUpperCase() === tipo.toUpperCase() || d.tipo.toLowerCase() === tipo.toLowerCase());
+  if (!doc && tipo === "REGISTRO") {
+    doc = documentos?.find(d => d.tipo.toUpperCase() === "REGISTRO_VEHICULAR" || d.tipo.toLowerCase() === "registro_vehicular");
+  }
   if (!doc) return null;
 
   if (doc.path) {
@@ -1236,6 +1239,60 @@ async function renderPerfil(conductor, documentosDB, user) {
       }
     }
   });
+
+  // Renderizar documentos extra que no estén en la configuración
+  if (documentos && documentos.length > 0) {
+    const tiposEstandar = documentosConfig.map(d => d.tipo.toUpperCase());
+    tiposEstandar.push('FOTO_VEHICULO', 'FOTO_CONDUCTOR', 'REGISTRO_VEHICULAR');
+    
+    for (const doc of documentos) {
+      const docTipoUpper = doc.tipo.toUpperCase();
+      if (!tiposEstandar.includes(docTipoUpper)) {
+        let extraUrl = null;
+        if (doc.path) {
+          if (doc.path.startsWith('http://') || doc.path.startsWith('https://') || doc.path.startsWith('data:')) {
+            extraUrl = doc.path;
+          } else {
+            const { data } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(doc.path);
+            extraUrl = data?.publicUrl || doc.path;
+          }
+        } else if (doc.url_archivo) {
+          try {
+            const { data: signedUrl } = await supabaseClient.storage.from("documentos-conductores").createSignedUrl(doc.url_archivo, 3600);
+            if (signedUrl) extraUrl = signedUrl.signedUrl;
+          } catch(e) {}
+        }
+
+        if (extraUrl) {
+          tieneDocumentos = true;
+          const labelExtra = doc.tipo.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+          const isPdf = extraUrl.toLowerCase().endsWith('.pdf');
+          if (isPdf) {
+            docGrid.innerHTML += `
+              <div class="doc-preview" onclick="mostrarModalPreview('${extraUrl}', 'pdf')">
+                <div class="doc-preview-pdf">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <span>PDF</span>
+                </div>
+                <div class="doc-preview-label">${labelExtra}</div>
+                <div class="doc-preview-overlay"><span>Ver</span></div>
+              </div>
+            `;
+          } else {
+            docGrid.innerHTML += `
+              <div class="doc-preview" onclick="mostrarModalPreview('${extraUrl}', 'img')">
+                <img src="${extraUrl}" class="doc-preview-img" alt="${labelExtra}" loading="lazy">
+                <div class="doc-preview-label">${labelExtra}</div>
+                <div class="doc-preview-overlay"><span>Ver</span></div>
+              </div>
+            `;
+          }
+        }
+      }
+    }
+  }
 
   if (tieneAviso && avisoUrl) {
     tieneDocumentos = true;
