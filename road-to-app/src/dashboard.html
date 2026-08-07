@@ -338,6 +338,7 @@ async function login() {
   const btn = document.getElementById("loginBtn");
 
   const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+  /*
   if (!turnstileResponse) {
     if (typeof showMessage === 'function') {
       showMessage("Por favor, completa el Captcha", "error");
@@ -346,7 +347,7 @@ async function login() {
     }
     return;
   }
-
+  */
 
   if(!email || !password){
     showMessage("Completa todos los campos", "error");
@@ -357,7 +358,11 @@ async function login() {
   btn.disabled = true;
 
   try {
-    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const signInOptions = { email, password };
+    if (turnstileResponse) {
+      signInOptions.options = { captchaToken: turnstileResponse };
+    }
+    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword(signInOptions);
 
     if(authError){
       console.error("Error ocurrido en el cliente", "Contacte a soporte");
