@@ -2716,7 +2716,22 @@
 
     function obtenerDocumentoURL(doc) {
       if (!doc.path) return '#';
-      if (doc.path.startsWith('http://') || doc.path.startsWith('https://') || doc.path.startsWith('data:')) {
+      if (doc.path.startsWith('data:')) {
+        try {
+          const byteString = atob(doc.path.split(',')[1]);
+          const mimeString = doc.path.split(',')[0].split(':')[1].split(';')[0];
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+          }
+          const blob = new Blob([ab], {type: mimeString});
+          return URL.createObjectURL(blob);
+        } catch(e) {
+          return doc.path;
+        }
+      }
+      if (doc.path.startsWith('http://') || doc.path.startsWith('https://')) {
         return doc.path;
       }
       const { data } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(doc.path);
