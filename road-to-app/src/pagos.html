@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://bt-cdn.yappy.cloud; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://bt-cdn.yappy.cloud https://apipagosbg.bgeneral.cloud https://conductores-api.onrender.com; img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://unpkg.com https://bt-cdn.yappy.cloud; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
   <title>Pagos - Panel de Conductor</title>
   <script src="JS/supabase-bundle.js"></script>
   <!-- CDN del Botón de Pago Yappy -->
@@ -458,7 +459,7 @@
     // CONFIGURACIÓN
     // ============================================================
 
-    const supabaseClient = supabase.window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: window.sessionStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
+    const supabaseClient = window.RoadTo.createSupabase();
 
     const RENDER_API_URL = 'https://conductores-api.onrender.com/api/yappy';
     const YAPPY_DOMAIN = 'https://nrdesingcorp.com';
