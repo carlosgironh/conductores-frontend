@@ -255,13 +255,18 @@
       <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
       </svg>
-      <input id="email" type="email" placeholder="Correo electrónico" autocomplete="email">
+      <input id="email" type="text" placeholder="Correo electrónico o Cédula" autocomplete="email">
     </div>
     <div class="input-group">
       <svg class="input-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
       </svg>
       <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
+    </div>
+
+    <div class="form-group" style="margin-top: 16px; margin-bottom: 24px;">
+      <label style="color: var(--text-muted); font-size: 12px; margin-bottom: 8px; display: block;" id="captchaLabel">Verificación: ¿Cuánto es X + Y?</label>
+      <input id="captchaAnswer" type="number" placeholder="Escribe el resultado numérico" style="width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; outline: none;">
     </div>
 
         <button class="btn-login" id="loginBtn" onclick="login()">Ingresar</button>
@@ -303,6 +308,22 @@ const supabaseClient = window.RoadTo.createSupabase();
 let currentUserId = null;
 let currentUserEmail = null;
 
+let captchaNum1 = 0;
+let captchaNum2 = 0;
+let captchaCorrect = 0;
+
+function generateCaptcha() {
+  captchaNum1 = Math.floor(Math.random() * 10) + 1;
+  captchaNum2 = Math.floor(Math.random() * 10) + 1;
+  captchaCorrect = captchaNum1 + captchaNum2;
+  document.getElementById('captchaLabel').textContent = `Verificación: ¿Cuánto es ${captchaNum1} + ${captchaNum2}?`;
+  document.getElementById('captchaAnswer').value = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  generateCaptcha();
+});
+
 function goBack() {
   if (window.history.length > 1) window.history.back();
   else window.location.href = 'index.html';
@@ -342,11 +363,31 @@ async function login() {
     return;
   }
 
+  const userCaptcha = parseInt(document.getElementById("captchaAnswer").value.trim());
+  if (isNaN(userCaptcha) || userCaptcha !== captchaCorrect) {
+    showMessage("Resultado matemático incorrecto", "error");
+    generateCaptcha();
+    return;
+  }
+
   showMessage("Verificando credenciales...", "loading");
   btn.disabled = true;
 
   try {
-    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
+    let finalEmail = email;
+    if (!email.includes('@')) {
+      const { data: realEmail, error: rpcError } = await supabaseClient.rpc('get_email_by_cedula', { p_cedula: email });
+      if (!rpcError && realEmail) {
+        finalEmail = realEmail;
+      } else {
+        showMessage("No se encontró usuario con esa cédula", "error");
+        btn.disabled = false;
+        generateCaptcha();
+        return;
+      }
+    }
+
+    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email: finalEmail, password });
 
     if(authError){
       console.error("Error ocurrido en el cliente", "Contacte a soporte");
@@ -356,6 +397,7 @@ async function login() {
         showMessage("Error: " + authError.message, "error");
       }
       btn.disabled = false;
+      generateCaptcha();
       return;
     }
 
@@ -486,6 +528,10 @@ async function recuperar(){
 }
 
 document.getElementById('password').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') login();
+});
+
+document.getElementById('captchaAnswer').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') login();
 });
 

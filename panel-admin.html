@@ -1993,6 +1993,35 @@
     </div>
   </div>
 
+  <!-- Modal Activar Conductor con Pago -->
+  <div class="modal-overlay" id="activateDriverModal">
+    <div class="modal-content" style="max-width: 450px;">
+      <button class="modal-close" onclick="closeActivateDriverModal()">✕</button>
+      <div class="modal-header">
+        <h3 class="modal-title">Activar Conductor</h3>
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Sube el comprobante y justificación para registrar el pago y activar el conductor.</p>
+      
+      <div class="form-group">
+        <label style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px; display: block;">Comprobante de Pago (Imagen)</label>
+        <input type="file" id="activatePaymentFile" accept="image/*" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px; color: white;">
+      </div>
+      <div class="form-group" style="margin-top: 15px;">
+        <label style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px; display: block;">Monto Pagado ($)</label>
+        <input type="number" id="activatePaymentAmount" step="0.01" value="5.00" readonly style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white;">
+      </div>
+      <div class="form-group" style="margin-top: 15px;">
+        <label style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px; display: block;">Justificación / Referencia</label>
+        <textarea id="activatePaymentRef" rows="3" placeholder="Escribe el número de transferencia o justificación" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; resize: none;"></textarea>
+      </div>
+      
+      <div class="modal-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="btn btn-danger" onclick="closeActivateDriverModal()" style="flex: 1;">Cancelar</button>
+        <button class="btn btn-primary" id="btnSubmitActivate" onclick="submitActivateDriver()" style="flex: 1;">Registrar y Activar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <div class="loading-text">Cargando...</div>
@@ -2334,6 +2363,7 @@
               <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
               <button class="action-btn edit" onclick="openEditModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Editar Conductor">✏️</button>
               <button class="action-btn qr" onclick="generateQR('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Generar Código QR">📱</button>
+              ${estado === 'inactivo' ? `<button class="action-btn" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e;" onclick="openActivateDriverModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Activar con Pago Manual">💲</button>` : ''}
               <button class="action-btn toggle ${window.RoadTo ? window.RoadTo.escapeHTML(estado === 'inactivo' ? 'inactive' : '') : estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstado('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Habilitar/Deshabilitar">🔄</button>
               <button class="action-btn qr" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Estado de Pago">💳</button>
               <button class="action-btn delete" onclick="deleteConductor('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Eliminar permanentemente">🗑️</button>
@@ -2585,6 +2615,85 @@
     }
 
     // GENERAL ADMIN ACTIONS
+    let activateDriverId = null;
+
+    function openActivateDriverModal(id) {
+      activateDriverId = id;
+      document.getElementById('activatePaymentFile').value = '';
+      document.getElementById('activatePaymentRef').value = '';
+      document.getElementById('activateDriverModal').style.display = 'flex';
+    }
+
+    function closeActivateDriverModal() {
+      document.getElementById('activateDriverModal').style.display = 'none';
+      activateDriverId = null;
+    }
+
+    async function submitActivateDriver() {
+      if (!activateDriverId) return;
+      const fileInput = document.getElementById('activatePaymentFile');
+      const amount = document.getElementById('activatePaymentAmount').value;
+      const ref = document.getElementById('activatePaymentRef').value;
+
+      if (!fileInput.files.length || !amount || !ref) {
+        showToast('Debes completar todos los campos y subir el comprobante.', 'error');
+        return;
+      }
+
+      showLoading();
+      document.getElementById('btnSubmitActivate').disabled = true;
+
+      try {
+        const file = fileInput.files[0];
+        const ext = file.name.split('.').pop();
+        const fileName = `manual_payment_${Date.now()}.${ext}`;
+        const filePath = `${activateDriverId}/${fileName}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from('documentos-conductores')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { error: paymentError } = await supabaseClient
+          .from('pagos')
+          .insert({
+            conductor_id: activateDriverId,
+            monto: parseFloat(amount),
+            estado: 'aprobado',
+            metodo: 'Manual/Comprobante',
+            referencia: ref,
+            yappy_document_name: fileName,
+            fecha_pago: new Date().toISOString(),
+            fecha_vencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            plan: 'mensual'
+          });
+
+        if (paymentError) throw paymentError;
+
+        const { error: updateError } = await supabaseClient
+          .from('conductores')
+          .update({ 
+            estado: 'activo', 
+            suscripcion_activa: true, 
+            payment_status: 'paid' 
+          })
+          .eq('id', activateDriverId);
+
+        if (updateError) throw updateError;
+
+        showToast('Conductor activado correctamente.', 'success');
+        closeActivateDriverModal();
+        await loadConductores();
+      } catch (err) {
+        console.error(err);
+        showToast('Error al procesar: ' + err.message, 'error');
+      } finally {
+        hideLoading();
+        document.getElementById('btnSubmitActivate').disabled = false;
+      }
+    }
+
     async function openEditModal(id) {
       conductorEditId = id;
       showLoading('Cargando conductor...');
