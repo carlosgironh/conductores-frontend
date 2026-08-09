@@ -635,6 +635,16 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="paymentDetailModal">
+    <div class="modal-content" style="max-width: 400px; padding: 25px;">
+      <button class="modal-close" onclick="closePaymentDetailModal()">✕</button>
+      <div class="modal-header">
+        <h3 class="modal-title">💳 Estado de Pago</h3>
+      </div>
+      <div id="paymentDetailContent"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="editModalConductor">
     <div class="modal-content">
       <button class="modal-close" onclick="closeEditModalConductor()">✕</button>
@@ -1593,6 +1603,7 @@
               <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
               <button class="action-btn call" onclick="llamarCelular('${window.RoadTo ? window.RoadTo.escapeHTML(c.celular || '') : c.celular || ''}')" title="Llamar">📞</button>
               ${est === 'inactivo' ? `<button class="action-btn" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e;" onclick="openActivateDriverModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Activar con Pago Manual">💲</button>` : ''}
+              <button class="action-btn qr" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Estado de Pago">💳</button>
               <button class="action-btn edit ${window.RoadTo ? window.RoadTo.escapeHTML(permCoordinadoresEditar ? '' : 'disabled') : permCoordinadoresEditar ? '' : 'disabled'}" 
                 onclick="${permCoordinadoresEditar ? `openEditConductor('${c.id}')` : 'void(0)'}" 
                 title="${permCoordinadoresEditar ? 'Editar Conductor' : '🔒 Deshabilitado por Administrador'}">✏️</button>
@@ -1689,6 +1700,82 @@
       } finally {
         hideLoading();
         document.getElementById('btnSubmitActivate').disabled = false;
+      }
+    }
+
+    function openPaymentDetailModal(conductorId) {
+      const conductor = allConductores.find(c => c.id === conductorId);
+      if (!conductor) return;
+
+      const modal = document.getElementById('paymentDetailModal');
+      const content = document.getElementById('paymentDetailContent');
+      modal.classList.add('show');
+
+      const activa = verificarSuscripcionActiva(conductor);
+      content.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
+          <div>
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Plan</div>
+            <div style="font-weight: 500;">${window.RoadTo ? window.RoadTo.escapeHTML(conductor.plan || 'Básico') : conductor.plan || 'Básico'}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Vencimiento</div>
+            <div style="font-weight: 500;">${window.RoadTo ? window.RoadTo.escapeHTML(conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleDateString() : 'N/A') : conductor.fecha_vencimiento ? new Date(conductor.fecha_vencimiento).toLocaleDateString() : 'N/A'}</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:20px">
+          ${!activa ? 
+            `<button class="btn btn-primary" style="width: 100%;" onclick="activarPagoManual('${conductorId}')">Activar suscripción (24h)</button>` : 
+            `<div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-direction: column;">
+               <span style="color:#4ade80;font-weight:700;font-size:16px;">✅ Suscripción Activa</span>
+               <button class="btn btn-danger" style="padding: 8px 15px; font-size: 14px; width: 100%; margin-top: 10px;" onclick="desactivarPagoManual('${conductorId}')">Desactivar Pago</button>
+             </div>`
+          }
+        </div>
+      `;
+    }
+
+    function closePaymentDetailModal() {
+      document.getElementById('paymentDetailModal').classList.remove('show');
+    }
+
+    async function activarPagoManual(conductorId) {
+      if (!confirm('¿Activar suscripción por 24 horas?')) return;
+      showLoading('Activando...');
+      const ahora = new Date();
+      const vencimiento = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
+      const { error } = await supabaseClient.from('conductores').update({
+        fecha_vencimiento: vencimiento.toISOString(),
+        payment_status: 'paid',
+        pago_al_dia: true,
+        suscripcion_activa: true
+      }).eq('id', conductorId);
+      hideLoading();
+      if (!error) {
+        showToast('Pago manual activado', 'success');
+        closePaymentDetailModal();
+        await loadConductores();
+      } else {
+        showToast(error.message, 'error');
+      }
+    }
+
+    async function desactivarPagoManual(conductorId) {
+      if (!confirm('¿Seguro de desactivar la suscripción de este conductor?')) return;
+      showLoading('Desactivando...');
+      const { error } = await supabaseClient.from('conductores').update({
+        fecha_vencimiento: null,
+        payment_status: 'pending',
+        pago_al_dia: false,
+        suscripcion_activa: false
+      }).eq('id', conductorId);
+      hideLoading();
+      if (!error) {
+        showToast('Suscripción desactivada', 'success');
+        closePaymentDetailModal();
+        await loadConductores();
+      } else {
+        showToast(error.message, 'error');
       }
     }
 

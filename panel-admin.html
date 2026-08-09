@@ -3047,7 +3047,13 @@
           </div>
         </div>
         <div style="text-align:center;margin-top:15px">
-          ${!activa ? `<button class="btn-success" onclick="activarPagoManual('${conductorId}')">Activar suscripción (24h)</button>` : '<span style="color:#4ade80;font-weight:700">✅ Suscripción Activa</span>'}
+          ${!activa ? 
+            `<button class="btn-success" onclick="activarPagoManual('${conductorId}')">Activar suscripción (24h)</button>` : 
+            `<div style="display:flex; justify-content:center; align-items:center; gap: 10px;">
+               <span style="color:#4ade80;font-weight:700">✅ Suscripción Activa</span>
+               <button class="btn-danger" style="padding: 6px 12px; font-size: 13px; border-radius: 4px;" onclick="desactivarPagoManual('${conductorId}')">Desactivar</button>
+             </div>`
+          }
         </div>
       `;
     }
@@ -3070,6 +3076,25 @@
       hideLoading();
       if (!error) {
         showToast('Pago manual activado', 'success');
+        closePaymentDetailModal();
+        await refreshData();
+      } else {
+        showToast(error.message, 'error');
+      }
+    }
+
+    async function desactivarPagoManual(conductorId) {
+      if (!confirm('¿Seguro de desactivar la suscripción de este conductor?')) return;
+      showLoading('Desactivando...');
+      const { error } = await supabaseClient.from('conductores').update({
+        fecha_vencimiento: null,
+        payment_status: 'pending',
+        pago_al_dia: false,
+        suscripcion_activa: false
+      }).eq('id', conductorId);
+      hideLoading();
+      if (!error) {
+        showToast('Suscripción desactivada', 'success');
         closePaymentDetailModal();
         await refreshData();
       } else {
