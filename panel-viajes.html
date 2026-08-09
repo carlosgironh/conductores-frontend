@@ -821,20 +821,9 @@
             // Verificar que existe en tabla conductores (por auth_user_id)
             let { data: conductor, error } = await supabaseClient
                 .from('conductores')
-                .select('id, auth_user_id, status, nombres, apellidos, vehiculo, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
+                .select('id, auth_user_id, status, nombres, apellidos, marca, modelo, placa, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
                 .eq('auth_user_id', user.id)
                 .maybeSingle();
-
-            if (error && error.code === '42703') {
-                /* log removed */
-                const result = await supabaseClient
-                    .from('conductores')
-                    .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
-                    .eq('auth_user_id', user.id)
-                    .maybeSingle();
-                conductor = result.data;
-                error = result.error;
-            }
 
             if (error) {
                 console.error("Error ocurrido en el cliente", "Contacte a soporte");
