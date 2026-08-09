@@ -635,6 +635,26 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="deactivateDriverModal">
+    <div class="modal-content" style="max-width: 450px;">
+      <button class="modal-close" onclick="closeDeactivateDriverModal()">✕</button>
+      <div class="modal-header">
+        <h3 class="modal-title">Desactivar Pago de Conductor</h3>
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Por favor, ingresa el motivo o justificación para anular/desactivar la suscripción de este conductor.</p>
+      
+      <div class="form-group">
+        <label style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px; display: block;">Justificación de la Desactivación</label>
+        <textarea id="deactivatePaymentRef" rows="3" placeholder="Ej. El pago rebotó, conductor solicitó baja, etc." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; resize: none;"></textarea>
+      </div>
+      
+      <div class="modal-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="btn btn-primary" onclick="closeDeactivateDriverModal()" style="flex: 1; background: rgba(255,255,255,0.1);">Cancelar</button>
+        <button class="btn btn-danger" id="btnSubmitDeactivate" onclick="submitDeactivateDriver()" style="flex: 1;">Confirmar Desactivación</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="paymentDetailModal">
     <div class="modal-content" style="max-width: 400px; padding: 25px;">
       <button class="modal-close" onclick="closePaymentDetailModal()">✕</button>
@@ -932,7 +952,7 @@
     let conductoresMap = new Map();
     let viajeIdParaAsignar = null;
     let conductorSeleccionadoId = null;
-    let permCoordinadoresEditar = false;
+    let permisosCoordinador = { editar: false, eliminar: false, activar_pago: false, desactivar_pago: false };
 
     function showLoading(text = 'Cargando...') {
       const overlay = document.getElementById('loadingOverlay');
@@ -975,41 +995,21 @@
       }
     });
 
-    // CARGAR PERMISOS REALES DEL COORDINADOR DESDE LA CONFIG GLOBAL
     async function cargarPermisosCoordinador() {
       try {
         const { data, error } = await supabaseClient
           .from('coordinadores')
-          .select('celular')
+          .select('permisos')
           .eq('id', '00000000-0000-0000-0000-000000000000')
           .maybeSingle();
         
         if (error) {
           console.warn('Error cargando permisos globales:', error);
-          permCoordinadoresEditar = false;
-        } else if (data) {
-          permCoordinadoresEditar = data.celular === 'true';
-        } else {
-          permCoordinadoresEditar = false;
-        }
-
-        // Actualizar UI del Switch
-        const sw = document.getElementById('permisoCoordinadoresSwitch');
-        const lbl = document.getElementById('labelPermisoCoord');
-        if (sw && lbl) {
-          if (permCoordinadoresEditar) {
-            sw.classList.add('active');
-            lbl.textContent = "Habilitado";
-            lbl.style.color = "#4ade80";
-          } else {
-            sw.classList.remove('active');
-            lbl.textContent = "Deshabilitado";
-            lbl.style.color = "#ef4444";
-          }
+        } else if (data && data.permisos) {
+          permisosCoordinador = { ...permisosCoordinador, ...data.permisos };
         }
       } catch (e) {
         console.error("Error ocurrido en el cliente", "Contacte a soporte");
-        permCoordinadoresEditar = false;
       }
     }
 
@@ -1602,14 +1602,13 @@
             <div class="actions">
               <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
               <button class="action-btn call" onclick="llamarCelular('${window.RoadTo ? window.RoadTo.escapeHTML(c.celular || '') : c.celular || ''}')" title="Llamar">📞</button>
-              ${est === 'inactivo' ? `<button class="action-btn" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e;" onclick="openActivateDriverModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Activar con Pago Manual">💲</button>` : ''}
               <button class="action-btn qr" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Estado de Pago">💳</button>
-              <button class="action-btn edit ${window.RoadTo ? window.RoadTo.escapeHTML(permCoordinadoresEditar ? '' : 'disabled') : permCoordinadoresEditar ? '' : 'disabled'}" 
-                onclick="${permCoordinadoresEditar ? `openEditConductor('${c.id}')` : 'void(0)'}" 
-                title="${permCoordinadoresEditar ? 'Editar Conductor' : '🔒 Deshabilitado por Administrador'}">✏️</button>
-              <button class="action-btn delete ${permCoordinadoresEditar ? '' : 'disabled'}" 
-                onclick="${permCoordinadoresEditar ? `deleteConductor('${c.id}')` : 'void(0)'}" 
-                title="${permCoordinadoresEditar ? 'Eliminar Conductor' : '🔒 Deshabilitado por Administrador'}">🗑️</button>
+              <button class="action-btn edit ${window.RoadTo ? window.RoadTo.escapeHTML(permisosCoordinador.editar ? '' : 'disabled') : permisosCoordinador.editar ? '' : 'disabled'}" 
+                onclick="${permisosCoordinador.editar ? `openEditConductor('${c.id}')` : 'void(0)'}" 
+                title="${permisosCoordinador.editar ? 'Editar Conductor' : '🔒 Deshabilitado por Administrador'}">✏️</button>
+              <button class="action-btn delete ${permisosCoordinador.eliminar ? '' : 'disabled'}" 
+                onclick="${permisosCoordinador.eliminar ? `deleteConductor('${c.id}')` : 'void(0)'}" 
+                title="${permisosCoordinador.eliminar ? 'Eliminar Conductor' : '🔒 Deshabilitado por Administrador'}">🗑️</button>
             </div>
           </td>
         `;
@@ -1692,6 +1691,21 @@
         if (updateError) throw updateError;
 
         showToast('Conductor activado correctamente.', 'success');
+        
+        // WA link generation
+        const c = typeof allConductores !== 'undefined' ? allConductores.find(x => x.id === activateDriverId) : null;
+        if (c && c.celular) {
+          const { data: urlData } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(filePath);
+          if (urlData && urlData.publicUrl) {
+            const numero = c.celular.replace(/\D/g, '');
+            const msg = `Hola ${c.nombres}, tu pago manual por $${amount} ha sido registrado exitosamente. Referencia: ${ref}. Comprobante: ${urlData.publicUrl}`;
+            const waUrl = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+            setTimeout(() => {
+              window.open(waUrl, '_blank');
+            }, 500);
+          }
+        }
+
         closeActivateDriverModal();
         await loadConductores();
       } catch (err) {
@@ -1725,10 +1739,16 @@
         </div>
         <div style="text-align:center;margin-top:20px">
           ${!activa ? 
-            `<button class="btn btn-primary" style="width: 100%;" onclick="activarPagoManual('${conductorId}')">Activar suscripción (24h)</button>` : 
+            (permisosCoordinador.activar_pago ? 
+              `<button class="btn btn-primary" style="width: 100%;" onclick="closePaymentDetailModal(); openActivateDriverModal('${conductorId}')">Registrar Pago / Activar</button>` : 
+              `<div style="color:#f87171; font-size:13px; font-weight:600;">🔒 Sin permiso para activar pago</div>`
+            ) : 
             `<div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-direction: column;">
                <span style="color:#4ade80;font-weight:700;font-size:16px;">✅ Suscripción Activa</span>
-               <button class="btn btn-danger" style="padding: 8px 15px; font-size: 14px; width: 100%; margin-top: 10px;" onclick="desactivarPagoManual('${conductorId}')">Desactivar Pago</button>
+               ${permisosCoordinador.desactivar_pago ? 
+                 `<button class="btn btn-danger" style="padding: 8px 15px; font-size: 14px; width: 100%; margin-top: 10px;" onclick="closePaymentDetailModal(); openDeactivateDriverModal('${conductorId}')">Desactivar Pago</button>` : 
+                 `<div style="color:#f87171; font-size:13px; font-weight:600;">🔒 Sin permiso para desactivar pago</div>`
+               }
              </div>`
           }
         </div>
@@ -1739,43 +1759,51 @@
       document.getElementById('paymentDetailModal').classList.remove('show');
     }
 
-    async function activarPagoManual(conductorId) {
-      if (!confirm('¿Activar suscripción por 24 horas?')) return;
-      showLoading('Activando...');
-      const ahora = new Date();
-      const vencimiento = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
-      const { error } = await supabaseClient.from('conductores').update({
-        fecha_vencimiento: vencimiento.toISOString(),
-        payment_status: 'paid',
-        pago_al_dia: true,
-        suscripcion_activa: true
-      }).eq('id', conductorId);
-      hideLoading();
-      if (!error) {
-        showToast('Pago manual activado', 'success');
-        closePaymentDetailModal();
-        await loadConductores();
-      } else {
-        showToast(error.message, 'error');
-      }
+    let deactivateDriverId = null;
+
+    function openDeactivateDriverModal(id) {
+      deactivateDriverId = id;
+      document.getElementById('deactivatePaymentRef').value = '';
+      document.getElementById('deactivateDriverModal').classList.add('show');
     }
 
-    async function desactivarPagoManual(conductorId) {
-      if (!confirm('¿Seguro de desactivar la suscripción de este conductor?')) return;
+    function closeDeactivateDriverModal() {
+      document.getElementById('deactivateDriverModal').classList.remove('show');
+      deactivateDriverId = null;
+    }
+
+    async function submitDeactivateDriver() {
+      if (!deactivateDriverId) return;
+      const ref = document.getElementById('deactivatePaymentRef').value;
+
+      if (!ref || ref.trim() === '') {
+        showToast('Debes ingresar una justificación para la desactivación.', 'error');
+        return;
+      }
+
       showLoading('Desactivando...');
-      const { error } = await supabaseClient.from('conductores').update({
-        fecha_vencimiento: null,
-        payment_status: 'pending',
-        pago_al_dia: false,
-        suscripcion_activa: false
-      }).eq('id', conductorId);
-      hideLoading();
-      if (!error) {
+      document.getElementById('btnSubmitDeactivate').disabled = true;
+
+      try {
+        const { error } = await supabaseClient.from('conductores').update({
+          fecha_vencimiento: null,
+          payment_status: 'pending',
+          pago_al_dia: false,
+          suscripcion_activa: false,
+          motivo_desactivacion: ref
+        }).eq('id', deactivateDriverId);
+        
+        if (error) throw error;
+
         showToast('Suscripción desactivada', 'success');
-        closePaymentDetailModal();
+        closeDeactivateDriverModal();
         await loadConductores();
-      } else {
-        showToast(error.message, 'error');
+      } catch (err) {
+        console.error(err);
+        showToast('Error al procesar: ' + err.message, 'error');
+      } finally {
+        hideLoading();
+        document.getElementById('btnSubmitDeactivate').disabled = false;
       }
     }
 
