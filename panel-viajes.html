@@ -1407,7 +1407,12 @@
 
         let watchId = null;
         let currentLat = null;
+        let watchId = null;
+        let currentLat = null;
         let currentLng = null;
+        let stopStartTime = null;
+        let isStopped = false;
+        let cooldownParada = false;
 
         function iniciarGPSBroadcast() {
             if (!navigator.geolocation) {
@@ -1418,11 +1423,31 @@
             watchId = navigator.geolocation.watchPosition(async (pos) => {
                 currentLat = pos.coords.latitude;
                 currentLng = pos.coords.longitude;
+                const speed = pos.coords.speed || 0; // en metros por segundo
                 
-                // 1. Verificar si entró a una zona cabecera
+                // 1. Detección automática de Parada por velocidad (menor a ~5km/h)
+                if (speed < 1.5) {
+                    if (!stopStartTime) stopStartTime = Date.now();
+                    
+                    // Si ha estado detenido por más de 5 segundos y no está en cooldown
+                    if (!isStopped && !cooldownParada && (Date.now() - stopStartTime > 5000)) {
+                        isStopped = true;
+                        openModal('detencionModal');
+                    }
+                } else {
+                    stopStartTime = null;
+                    if (isStopped) {
+                        isStopped = false; // Se volvió a mover
+                    }
+                    if (speed > 2.7) { // aprox 10km/h
+                        cooldownParada = false; // Quitar el cooldown de la parada anterior
+                    }
+                }
+                
+                // 2. Verificar si entró a una zona cabecera
                 checkCabeceras(currentLat, currentLng);
 
-                // 2. Broadcast a Supabase
+                // 3. Broadcast a Supabase
                 if (currentUser) {
                     const { error } = await supabaseClient.from('driver_locations').upsert({
                         conductor_id: currentUser.id,
@@ -1459,6 +1484,7 @@
         async function registrarTranque() {
             // Aquí registrarías en DB que hubo un tranque (analytics)
             showToast('Tranque registrado.', 'success');
+            cooldownParada = true; // Prevenir múltiples popups seguidos
             closeModal('detencionModal');
         }
 
@@ -1478,6 +1504,7 @@
 
         async function setSuben(num) {
             pasajerosSuben = num;
+            cooldownParada = true; // Prevenir popups múltiples seguidos
             closeModal('subenModal');
             
             // Aquí enviamos la info a Supabase

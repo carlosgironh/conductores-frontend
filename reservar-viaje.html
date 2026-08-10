@@ -388,12 +388,49 @@
             <form id="form-reserva">
                 <div class="form-group">
                     <label for="origen">📍 Origen</label>
-                    <input type="text" id="origen" placeholder="Ej: Centro Comercial, Zona 1, Aeropuerto..." required>
+                    <div style="display:flex; gap:10px;">
+                        <select id="origen" required onchange="calcularTarifa()" style="flex:1;">
+                            <option value="">Selecciona tu ubicación...</option>
+                            <option value="Plaza La Carne (Chorrera)">Plaza La Carne (Chorrera)</option>
+                            <option value="Feulliet (Chorrera)">Feulliet (Chorrera)</option>
+                            <option value="Pte. Arraiján">Pte. Arraiján</option>
+                            <option value="Burunga">Burunga</option>
+                            <option value="Nvo Chorrillo">Nvo Chorrillo</option>
+                            <option value="Cerro Silvestre">Cerro Silvestre</option>
+                            <option value="Bique">Bique</option>
+                        </select>
+                        <button type="button" class="btn" style="background:#3b82f6; padding:0 15px;" onclick="autodetectarUbicacion()" title="Usar mi GPS">📍 GPS</button>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="destino">🏁 Destino</label>
-                    <input type="text" id="destino" placeholder="Ej: Hotel Marriott, Terminal de Buses..." required>
+                    <select id="destino" required onchange="calcularTarifa()">
+                        <option value="">Selecciona tu destino...</option>
+                        <optgroup label="Hacia Arraiján (Ida)">
+                            <option value="Bique">Bique</option>
+                            <option value="Cerro Silvestre">Cerro Silvestre</option>
+                            <option value="Nvo Chorrillo">Nvo Chorrillo</option>
+                            <option value="Cáceres">Cáceres</option>
+                            <option value="Burunga">Burunga</option>
+                            <option value="La Esperanza">La Esperanza</option>
+                            <option value="Perurena">Perurena</option>
+                            <option value="Terpel">Terpel</option>
+                            <option value="Pte. Arraiján">Pte. Arraiján</option>
+                        </optgroup>
+                        <optgroup label="Hacia Chorrera (Regreso)">
+                            <option value="Montelimar">Montelimar</option>
+                            <option value="Costa Verde">Costa Verde</option>
+                            <option value="Anclas">Anclas</option>
+                            <option value="Plaza Italia">Plaza Italia</option>
+                            <option value="Feulliet (Chorrera)">Feulliet (Chorrera)</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group" style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.2); text-align: center;">
+                    <span style="color: #94a3b8; font-size: 14px;">Tarifa Estimada</span>
+                    <div id="tarifa-estimada" style="color: #4ade80; font-size: 24px; font-weight: bold; margin-top: 5px;">$0.00</div>
                 </div>
 
                 <div class="form-group">
@@ -476,8 +513,93 @@
             }
         }
 
+        // ==========================================
+        // CALCULO AUTOMATICO DE TARIFAS
+        // ==========================================
+        const TARIFA_IDA = {
+            'Plaza La Carne (Chorrera)': {
+                'Bique': 1.00,
+                'Cerro Silvestre': 1.50,
+                'Nvo Chorrillo': 1.50,
+                'Cáceres': 1.50,
+                'Burunga': 1.50,
+                'La Esperanza': 2.00,
+                'Perurena': 2.00,
+                'Terpel': 2.00,
+                'Pte. Arraiján': 2.00
+            }
+        };
+
+        const TARIFA_REGRESO = {
+            'Pte. Arraiján': {
+                'Montelimar': 1.50,
+                'Costa Verde': 1.50,
+                'Anclas': 1.50,
+                'Plaza Italia': 1.50,
+                'Feulliet (Chorrera)': 1.50
+            },
+            'Burunga': { 'Feulliet (Chorrera)': 1.50 },
+            'Nvo Chorrillo': { 'Feulliet (Chorrera)': 1.50 },
+            'Cerro Silvestre': { 'Feulliet (Chorrera)': 1.00 }
+        };
+
+        let tarifaFinal = 0;
+
+        function calcularTarifa() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            let precio = null;
+
+            if (origen && destino) {
+                // Check Ida
+                if (TARIFA_IDA[origen] && TARIFA_IDA[origen][destino]) {
+                    precio = TARIFA_IDA[origen][destino];
+                }
+                // Check Regreso
+                else if (TARIFA_REGRESO[origen] && TARIFA_REGRESO[origen][destino]) {
+                    precio = TARIFA_REGRESO[origen][destino];
+                }
+            }
+
+            const tarifaDiv = document.getElementById('tarifa-estimada');
+            if (precio !== null) {
+                tarifaDiv.textContent = `$${precio.toFixed(2)}`;
+                tarifaDiv.style.color = '#4ade80';
+                tarifaFinal = precio;
+            } else if (origen && destino) {
+                tarifaDiv.textContent = 'Fuera de Ruta Estándar';
+                tarifaDiv.style.color = '#f59e0b'; // Naranja
+                tarifaFinal = 0;
+            } else {
+                tarifaDiv.textContent = '$0.00';
+                tarifaDiv.style.color = '#4ade80';
+                tarifaFinal = 0;
+            }
+        }
+
+        async function autodetectarUbicacion() {
+            if (!navigator.geolocation) {
+                showToast('GPS no soportado', 'error');
+                return;
+            }
+            showToast('Detectando ubicación...', 'success');
+            
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('origen').value = 'Plaza La Carne (Chorrera)';
+                showToast('Ubicación detectada (Simulado)', 'success');
+                calcularTarifa();
+            }, err => {
+                showToast('No se pudo acceder al GPS', 'error');
+            });
+        }
+
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!currentUser) {
+                showToast('Debes iniciar sesión para reservar', 'error');
+                return;
+            }
 
             const btn = document.getElementById('btn-submit');
             btn.disabled = true;
@@ -501,6 +623,10 @@
                     fecha_hora: fechaHora,
                     estado: 'pendiente'
                 };
+                
+                if (tarifaFinal > 0) {
+                    insertData.precio = tarifaFinal;
+                }
 
                 const { data: viaje, error: insertError } = await supabaseClient
                     .from('viajes_reservados')
