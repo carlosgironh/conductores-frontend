@@ -600,11 +600,10 @@ function initSupabase() {
     return false;
   }
   try {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    /* log removed */
+    supabaseClient = window.RoadTo ? window.RoadTo.createSupabase() : supabase.createClient(window.RoadTo.SUPABASE_URL, window.RoadTo.SUPABASE_ANON_KEY);
     return true;
   } catch (e) {
-    console.error("Error ocurrido en el cliente", "Contacte a soporte");
+    console.error("Error ocurrido en el cliente", "Contacte a soporte", e);
     return false;
   }
 }
