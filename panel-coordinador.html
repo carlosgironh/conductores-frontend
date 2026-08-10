@@ -932,6 +932,19 @@
       </div>
     </div>
 
+    </div>
+
+    <!-- MAPA GLOBAL SECTION -->
+    <div id="mapaGlobalSection" class="section-content">
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <h3 style="color: white; margin: 0;">🌍 Mapa en Vivo (Conductores Conectados)</h3>
+          <button class="btn" onclick="initGlobalMap()" style="padding: 6px 12px; font-size: 13px; background: #8ac725; color: #000;">↻ Refrescar</button>
+        </div>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Monitor en tiempo real de todos los conductores actualmente conectados (online).</p>
+        <div id="globalMap" style="height: 500px; width: 100%; border-radius: 12px; z-index: 1;"></div>
+      </div>
+    </div>
     
   </div>
 
@@ -1663,6 +1676,9 @@
 
         if (uploadError) throw uploadError;
 
+        const vencimiento = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        const planSeleccionado = '24 horas';
+
         const { error: paymentError } = await supabaseClient
           .from('pagos')
           .insert({
@@ -1673,8 +1689,8 @@
             referencia: ref,
             yappy_document_name: fileName,
             fecha_pago: new Date().toISOString(),
-            fecha_vencimiento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            plan: 'mensual'
+            fecha_vencimiento: vencimiento,
+            plan: planSeleccionado
           });
 
         if (paymentError) throw paymentError;
@@ -1682,9 +1698,12 @@
         const { error: updateError } = await supabaseClient
           .from('conductores')
           .update({ 
-            estado: 'activo', 
+            estado: true,
+            status: 'active',
             suscripcion_activa: true, 
-            payment_status: 'paid' 
+            payment_status: 'paid',
+            fecha_vencimiento: vencimiento,
+            plan: planSeleccionado
           })
           .eq('id', activateDriverId);
 
@@ -1692,22 +1711,25 @@
 
         showToast('Conductor activado correctamente.', 'success');
         
-        // WA link generation
+        // WA link generation (Emulado: Debería enviarse vía API desde el backend)
         const c = typeof allConductores !== 'undefined' ? allConductores.find(x => x.id === activateDriverId) : null;
         if (c && c.celular) {
           const { data: urlData } = supabaseClient.storage.from('documentos-conductores').getPublicUrl(filePath);
           if (urlData && urlData.publicUrl) {
             const numero = c.celular.replace(/\D/g, '');
             const msg = `Hola ${c.nombres}, tu pago manual por $${amount} ha sido registrado exitosamente. Referencia: ${ref}. Comprobante: ${urlData.publicUrl}`;
-            const waUrl = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
-            setTimeout(() => {
-              window.open(waUrl, '_blank');
-            }, 500);
+            
+            // Simulación de envío desde el número de soporte:
+            console.log("SIMULACIÓN WA API: Mensaje enviado a", numero, "desde número de soporte:", msg);
+            // supabaseClient.functions.invoke('send-whatsapp', { body: { phone: numero, message: msg } });
+            
+            showToast('Pago registrado. Notificación enviada al conductor.', 'success');
           }
         }
 
         closeActivateDriverModal();
-        await loadConductores();
+        await cargarConductores();
+        await renderTablaConductores();
       } catch (err) {
         console.error(err);
         showToast('Error al procesar: ' + err.message, 'error');
@@ -1995,6 +2017,56 @@
     async function logout() {
       await supabaseClient.auth.signOut();
       window.location.href = 'index.html';
+    }
+
+    // ==========================================
+    // MAPA GLOBAL (CONDUCTORES EN VIVO)
+    // ==========================================
+    let globalMarkers = {};
+    let globalRealtimeSub = null;
+
+    async function initGlobalMap() {
+      if (!window.globalMapObj) {
+        const map = L.map('globalMap').setView([8.9824, -79.5199], 12); // Default Panama City
+        window.globalMapObj = map;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+        }).addTo(map);
+      }
+      setTimeout(() => window.globalMapObj.invalidateSize(), 100);
+
+      // Limpiar marcadores actuales
+      Object.values(globalMarkers).forEach(m => window.globalMapObj.removeLayer(m));
+      globalMarkers = {};
+
+      // Cargar conductores actuales de driver_locations
+      const { data, error } = await supabaseClient.from('driver_locations').select('*, conductores(nombres, apellidos, placa)');
+      if (data) {
+        const customIcon = L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3202/3202926.png', // icono de carro
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
+        });
+        
+        data.forEach(driver => {
+          if (driver.lat && driver.lng) {
+            const m = L.marker([driver.lat, driver.lng], { icon: customIcon })
+              .bindPopup(`<b>${driver.conductores?.nombres || ''} ${driver.conductores?.apellidos || ''}</b><br>Placa: ${driver.conductores?.placa || ''}`);
+            m.addTo(window.globalMapObj);
+            globalMarkers[driver.conductor_id] = m;
+          }
+        });
+      }
+
+      // Suscribirse a cambios si no se ha hecho
+      if (!globalRealtimeSub) {
+        globalRealtimeSub = supabaseClient.channel('global-locations')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'driver_locations' }, payload => {
+            initGlobalMap(); // Refrescar mapa si hay cambios
+          })
+          .subscribe();
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {

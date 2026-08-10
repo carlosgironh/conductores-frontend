@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a1208">
     <title>Panel de Viajes - Conductor | Road To</title>
-    <script src="JS/supabase-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -589,8 +589,8 @@
 
   <script src="config.js"></script>
     <!-- Leaflet -->
-    <link rel="stylesheet" href="JS/leaflet/leaflet.css">
-    <script src="JS/leaflet/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- Turf.js for Geofencing -->
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
@@ -611,6 +611,11 @@
                 </svg>
                 Mi Perfil
             </a>
+            <button class="nav-btn" style="background: rgba(249, 115, 22, 0.2); color: #fb923c;" onclick="openModal('tarifasModal')" title="Ver Tarifas">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
+                </svg>
+            </button>
             <button class="nav-btn" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;" onclick="openDriverMap()" title="Mapa en Vivo">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7"></path>
@@ -722,8 +727,100 @@
                 <button onclick="confirmarCancelarViaje('pendiente')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">🔄 Dejar en Pendiente</button>
                 <button onclick="confirmarCancelarViaje('cancelado')" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;">❌ Cancelar Definitivo</button>
             </div>
+    </div>
+
+    <!-- Modales para Transporte Colectivo -->
+    
+    <!-- Modal Parada o Tranque -->
+    <div class="modal-overlay" id="detencionModal">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" onclick="closeModal('detencionModal')">×</button>
+            <h3 style="font-size:24px;font-weight:800;color:white;margin-bottom:20px;">Vehículo Detenido</h3>
+            <p style="color:#94a3b8;font-size:15px;margin-bottom:30px;">Indica el motivo de la detención</p>
+            <div style="display:flex;gap:15px;">
+                <button onclick="registrarTranque()" style="flex:1;padding:20px;border-radius:16px;background:rgba(239,68,68,0.2);border:2px solid #ef4444;color:#f87171;font-size:18px;font-weight:700;cursor:pointer;">🚦 Tranque</button>
+                <button onclick="iniciarParada()" style="flex:1;padding:20px;border-radius:16px;background:rgba(16,185,129,0.2);border:2px solid #10b981;color:#4ade80;font-size:18px;font-weight:700;cursor:pointer;">🚏 Parada</button>
+            </div>
         </div>
     </div>
+
+    <!-- Modal ¿Cuántos Bajan? -->
+    <div class="modal-overlay" id="bajanModal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="font-size:24px;font-weight:800;color:var(--corp-orange);margin-bottom:20px;">¿Cuántos pasajeros BAJAN?</h3>
+            <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;">
+                <button onclick="setBajan(0)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">0</button>
+                <button onclick="setBajan(1)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">1</button>
+                <button onclick="setBajan(2)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">2</button>
+                <button onclick="setBajan(3)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">3</button>
+                <button onclick="setBajan(4)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">4+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ¿Cuántos Suben? -->
+    <div class="modal-overlay" id="subenModal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="font-size:24px;font-weight:800;color:var(--success);margin-bottom:20px;">¿Cuántos pasajeros SUBEN?</h3>
+            <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;">
+                <button onclick="setSuben(0)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">0</button>
+                <button onclick="setSuben(1)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">1</button>
+                <button onclick="setSuben(2)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">2</button>
+                <button onclick="setSuben(3)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">3</button>
+                <button onclick="setSuben(4)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">4+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cola en Cabecera -->
+    <div class="modal-overlay" id="colaModal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="font-size:22px;font-weight:800;color:white;margin-bottom:10px;">Llegada a Cabecera</h3>
+            <p style="color:#94a3b8;font-size:14px;margin-bottom:20px;">Has entrado a <strong id="colaZonaNombre" style="color:var(--corp-green-light)">---</strong>.</p>
+            <div style="background:rgba(15,23,42,0.6);padding:20px;border-radius:16px;margin-bottom:20px;">
+                <h4 style="color:#cbd5e1;font-size:13px;text-transform:uppercase;margin-bottom:10px;">Posición en Fila</h4>
+                <div id="colaPosicionText" style="font-size:48px;font-weight:900;color:var(--corp-orange);">--</div>
+                <div style="color:#64748b;font-size:12px;">carros delante de ti</div>
+            </div>
+            <div style="display:flex;gap:15px;flex-direction:column;">
+                <button onclick="entrarEnCola()" id="btnEntrarCola" style="padding:16px;border-radius:14px;background:var(--corp-green);color:#000;font-size:16px;font-weight:700;border:none;cursor:pointer;">Entrar en Fila</button>
+                <button onclick="salirDeCola()" id="btnSalirCola" style="display:none;padding:16px;border-radius:14px;background:rgba(239,68,68,0.2);border:1px solid #ef4444;color:#f87171;font-size:16px;font-weight:700;cursor:pointer;">Salir de la Fila / Iniciar Viaje</button>
+                <button onclick="closeModal('colaModal')" style="padding:12px;background:transparent;color:#94a3b8;border:none;cursor:pointer;">Cerrar por ahora</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tarifas -->
+    <div class="modal-overlay" id="tarifasModal">
+        <div class="modal-content" style="max-width:600px;">
+            <button class="modal-close" onclick="closeModal('tarifasModal')">×</button>
+            <h3 style="font-size:22px;font-weight:800;color:white;margin-bottom:20px;">🗺️ Mapa de Tarifas</h3>
+            
+            <div style="margin-bottom: 25px;">
+                <h4 style="color:var(--corp-green-light);font-size:16px;margin-bottom:10px;border-bottom:1px solid rgba(138,199,37,0.3);padding-bottom:5px;">Viaje de Ida</h4>
+                <ul style="list-style:none;padding:0;color:#cbd5e1;font-size:14px;">
+                    <li style="margin-bottom:8px;"><strong>$1.00</strong> — Plaza La Carne hasta Bique</li>
+                    <li style="margin-bottom:8px;"><strong>$1.50</strong> — Plaza La Carne hasta Cerro Silvestre / Nvo Chorrillo / Cáceres y Burunga</li>
+                    <li style="margin-bottom:8px;"><strong>$2.00</strong> — Plaza La Carne hasta La Esperanza / Puente Perurena / Terpel CSS / Puente Arraiján</li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 style="color:var(--corp-orange);font-size:16px;margin-bottom:10px;border-bottom:1px solid rgba(249,115,22,0.3);padding-bottom:5px;">Viaje de Regreso</h4>
+                <ul style="list-style:none;padding:0;color:#cbd5e1;font-size:14px;">
+                    <li style="margin-bottom:8px;"><strong>$1.50</strong> — Puente Arraiján hasta Montelimar / Costa Verde / Anclas / Plaza Italia y Feulliet</li>
+                    <li style="margin-bottom:8px;"><strong>$1.50</strong> — Burunga y/o Nvo Chorrillo a Feulliet</li>
+                    <li style="margin-bottom:8px;"><strong>$1.00</strong> — Cerro Silvestre a Feulliet</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for DETENERSE -->
+    <button onclick="openModal('detencionModal')" style="position:fixed;bottom:max(80px, var(--safe-bottom));right:20px;z-index:900;width:70px;height:70px;border-radius:35px;background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);color:white;border:none;box-shadow:0 10px 25px rgba(239,68,68,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s;">
+        <span style="font-size:24px;">🛑</span>
+        <span style="font-size:10px;font-weight:800;margin-top:2px;">PARADA</span>
+    </button>
 
     <script>
 
@@ -821,20 +918,9 @@
             // Verificar que existe en tabla conductores (por auth_user_id)
             let { data: conductor, error } = await supabaseClient
                 .from('conductores')
-                .select('id, auth_user_id, status, nombres, apellidos, vehiculo, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
+                .select('id, auth_user_id, status, nombres, apellidos, marca, modelo, placa, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
                 .eq('auth_user_id', user.id)
                 .maybeSingle();
-
-            if (error && error.code === '42703') {
-                /* log removed */
-                const result = await supabaseClient
-                    .from('conductores')
-                    .select('id, auth_user_id, nombres, apellidos, suscripcion_activa, payment_status, fecha_ultimo_pago, fecha_vencimiento, pago_al_dia')
-                    .eq('auth_user_id', user.id)
-                    .maybeSingle();
-                conductor = result.data;
-                error = result.error;
-            }
 
             if (error) {
                 console.error("Error ocurrido en el cliente", "Contacte a soporte");
@@ -1314,7 +1400,193 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeCancelModal();
             });
+
+            // 5. Iniciar broadcast de GPS
+            iniciarGPSBroadcast();
         }
+
+        let watchId = null;
+        let currentLat = null;
+        let currentLng = null;
+
+        function iniciarGPSBroadcast() {
+            if (!navigator.geolocation) {
+                console.warn('Geolocalización no soportada por el navegador');
+                return;
+            }
+
+            watchId = navigator.geolocation.watchPosition(async (pos) => {
+                currentLat = pos.coords.latitude;
+                currentLng = pos.coords.longitude;
+                
+                // 1. Verificar si entró a una zona cabecera
+                checkCabeceras(currentLat, currentLng);
+
+                // 2. Broadcast a Supabase
+                if (currentUser) {
+                    const { error } = await supabaseClient.from('driver_locations').upsert({
+                        conductor_id: currentUser.id,
+                        lat: currentLat,
+                        lng: currentLng,
+                        updated_at: new Date().toISOString()
+                    });
+                }
+            }, (err) => {
+                console.warn('Error GPS:', err);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 10000,
+                timeout: 5000
+            });
+        }
+
+        }
+
+        // ==========================================
+        // LOGICA DE TRANSPORTE COLECTIVO
+        // ==========================================
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.style.display = 'none';
+        }
+
+        // --- Eventos de Parada ---
+        async function registrarTranque() {
+            // Aquí registrarías en DB que hubo un tranque (analytics)
+            showToast('Tranque registrado.', 'success');
+            closeModal('detencionModal');
+        }
+
+        function iniciarParada() {
+            closeModal('detencionModal');
+            openModal('bajanModal');
+        }
+
+        let pasajerosBajan = 0;
+        let pasajerosSuben = 0;
+
+        function setBajan(num) {
+            pasajerosBajan = num;
+            closeModal('bajanModal');
+            openModal('subenModal');
+        }
+
+        async function setSuben(num) {
+            pasajerosSuben = num;
+            closeModal('subenModal');
+            
+            // Aquí enviamos la info a Supabase
+            if (currentUser) {
+                try {
+                    await supabaseClient.from('estadisticas_ruta').insert({
+                        conductor_id: currentUser.id,
+                        bajan: pasajerosBajan,
+                        suben: pasajerosSuben,
+                        lat: currentLat,
+                        lng: currentLng,
+                        timestamp: new Date().toISOString()
+                    });
+                } catch(e) {
+                    console.log('Error registrando parada', e);
+                }
+            }
+            
+            showToast(`Registrado: Bajan ${pasajerosBajan}, Suben ${pasajerosSuben}`);
+        }
+
+        // --- Lógica de Zonas y Cola ---
+        let enZonaCabecera = null;
+
+        function checkCabeceras(lat, lng) {
+            if (!zonasGeofence || zonasGeofence.length === 0) return;
+            const pt = turf.point([lng, lat]);
+            let zonaEncontrada = null;
+
+            for (let z of zonasGeofence) {
+                if (!z.poligono || z.poligono.length < 3) continue;
+                let polyCoords = z.poligono.map(p => [p.lng, p.lat]);
+                polyCoords.push(polyCoords[0]); // cerrar polígono
+                let poly = turf.polygon([polyCoords]);
+
+                if (turf.booleanPointInPolygon(pt, poly)) {
+                    zonaEncontrada = z;
+                    break;
+                }
+            }
+
+            if (zonaEncontrada && zonaEncontrada.id !== enZonaCabecera?.id) {
+                // Entró a una zona nueva
+                enZonaCabecera = zonaEncontrada;
+                document.getElementById('colaZonaNombre').textContent = enZonaCabecera.nombre;
+                
+                // Mostrar UI de Cola
+                document.getElementById('btnEntrarCola').style.display = 'block';
+                document.getElementById('btnSalirCola').style.display = 'none';
+                document.getElementById('colaPosicionText').textContent = '--';
+                openModal('colaModal');
+            } else if (!zonaEncontrada && enZonaCabecera) {
+                // Salió de la zona
+                enZonaCabecera = null;
+                salirDeCola(true); // salir silenciosamente
+            }
+        }
+
+        async function entrarEnCola() {
+            if (!enZonaCabecera || !currentUser) return;
+            
+            // Insertar en la cola de esta zona
+            const { error } = await supabaseClient.from('lista_espera_zonas').upsert({
+                conductor_id: currentUser.id,
+                zona_id: enZonaCabecera.id,
+                estado: 'en_cola'
+            });
+
+            if (error) {
+                showToast('Error al entrar a la fila', 'error');
+                return;
+            }
+
+            document.getElementById('btnEntrarCola').style.display = 'none';
+            document.getElementById('btnSalirCola').style.display = 'block';
+            showToast('Estás en la fila', 'success');
+            
+            // Refrescar posición
+            calcularPosicionCola();
+        }
+
+        async function calcularPosicionCola() {
+            if (!enZonaCabecera || !currentUser) return;
+            
+            const { data, error } = await supabaseClient
+                .from('lista_espera_zonas')
+                .select('conductor_id')
+                .eq('zona_id', enZonaCabecera.id)
+                .eq('estado', 'en_cola')
+                .order('entrado_en', { ascending: true });
+                
+            if (!error && data) {
+                const index = data.findIndex(d => d.conductor_id === currentUser.id);
+                if (index !== -1) {
+                    document.getElementById('colaPosicionText').textContent = index; // index 0 means 0 carros delante
+                }
+            }
+        }
+
+        async function salirDeCola(silent = false) {
+            if (!currentUser) return;
+            await supabaseClient.from('lista_espera_zonas').delete().eq('conductor_id', currentUser.id);
+            
+            if (!silent) {
+                closeModal('colaModal');
+                showToast('Has salido de la fila. Viaje iniciado.', 'success');
+            }
+        }
+
 
         window.addEventListener('beforeunload', () => {
             subscriptions.forEach(sub => sub.unsubscribe());
