@@ -1078,7 +1078,8 @@
                         </div>
                         <div class="pasajero-info">
                             <strong>Pasajero:</strong> ${viaje.pasajero.nombre}<br>
-                            <strong>Teléfono:</strong> ${viaje.pasajero.telefono}
+                            <strong>💵 Tarifa:</strong> $${viaje.precio ? viaje.precio.toFixed(2) : '0.00'}<br>
+                            <strong>💳 Pago:</strong> <span style="color: ${viaje.estado_pago === 'pagado' ? '#4ade80' : '#f59e0b'};">${viaje.estado_pago === 'pagado' ? 'Pagado' : 'Pendiente o Efectivo'}</span>
                         </div>
                         <button class="btn btn-primary" onclick="aceptarViaje('${viaje.id}', this)">
                             ✋ Aceptar Viaje
@@ -1145,7 +1146,9 @@
                         <div class="pasajero-info">
                             <strong>👤 Pasajero:</strong> ${viaje.pasajero.nombre}<br>
                             <strong>📞 Teléfono:</strong> ${viaje.pasajero.telefono}<br>
-                            <strong>✉️ Email:</strong> ${viaje.pasajero.email}
+                            <strong>✉️ Email:</strong> ${viaje.pasajero.email}<br>
+                            <strong>💵 Tarifa:</strong> $${viaje.precio ? viaje.precio.toFixed(2) : '0.00'}<br>
+                            <strong>💳 Pago:</strong> <span style="color: ${viaje.estado_pago === 'pagado' ? '#4ade80' : '#f59e0b'};">${viaje.estado_pago === 'pagado' ? 'Pagado' : 'Pendiente o Efectivo'}</span>
                         </div>
                         ${viaje.estado === 'asignado' ? `
                             <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
@@ -1407,8 +1410,6 @@
 
         let watchId = null;
         let currentLat = null;
-        let watchId = null;
-        let currentLat = null;
         let currentLng = null;
         let stopStartTime = null;
         let isStopped = false;
@@ -1463,8 +1464,6 @@
                 maximumAge: 10000,
                 timeout: 5000
             });
-        }
-
         }
 
         // ==========================================
