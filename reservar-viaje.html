@@ -615,11 +615,41 @@
                     throw new Error('Completa todos los campos obligatorios');
                 }
 
+                // Coordenadas aproximadas
+                const PARADAS_COORDS = {
+                    'Plaza La Carne (Chorrera)': { lat: 8.878, lng: -79.782 },
+                    'Feulliet (Chorrera)': { lat: 8.876, lng: -79.775 },
+                    'Bique': { lat: 8.918, lng: -79.712 },
+                    'Cerro Silvestre': { lat: 8.932, lng: -79.695 },
+                    'Nvo Chorrillo': { lat: 8.941, lng: -79.680 },
+                    'Cáceres': { lat: 8.948, lng: -79.670 },
+                    'Burunga': { lat: 8.955, lng: -79.660 },
+                    'La Esperanza': { lat: 8.960, lng: -79.650 },
+                    'Perurena': { lat: 8.965, lng: -79.645 },
+                    'Terpel': { lat: 8.970, lng: -79.640 },
+                    'Pte. Arraiján': { lat: 8.975, lng: -79.635 },
+                    'Montelimar': { lat: 8.885, lng: -79.750 },
+                    'Costa Verde': { lat: 8.882, lng: -79.760 },
+                    'Anclas': { lat: 8.880, lng: -79.770 },
+                    'Plaza Italia': { lat: 8.879, lng: -79.775 }
+                };
+
+                // Si se usó el GPS y tenemos variables globales temporales de lat/lng, las usaríamos.
+                // Por ahora, leemos de la lista o caemos en default (Pte. Arraiján)
+                let latOrigen = PARADAS_COORDS[origen]?.lat || 8.975;
+                let lngOrigen = PARADAS_COORDS[origen]?.lng || -79.635;
+                let latDestino = PARADAS_COORDS[destino]?.lat || 8.878;
+                let lngDestino = PARADAS_COORDS[destino]?.lng || -79.782;
+
                 // CORREGIDO: Solo insertar columnas que existen en la tabla
                 const insertData = {
                     pasajero_id: currentUser.id,
                     origen,
                     destino,
+                    lat_origen: latOrigen,
+                    lng_origen: lngOrigen,
+                    lat_destino: latDestino,
+                    lng_destino: lngDestino,
                     fecha_hora: fechaHora,
                     estado: 'pendiente'
                 };

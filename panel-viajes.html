@@ -851,6 +851,7 @@
             const badges = {
                 'pendiente': '<span class="badge badge-pendiente">Pendiente</span>',
                 'asignado': '<span class="badge badge-asignado">Asignado</span>',
+                'en_curso': '<span class="badge" style="background: rgba(138, 199, 37, 0.15); color: var(--corp-green-light); border: 1px solid rgba(138, 199, 37, 0.25);">En Curso</span>',
                 'completado': '<span class="badge badge-completado">Completado</span>',
                 'cancelado': '<span class="badge badge-cancelado">Cancelado</span>'
             };
@@ -1102,12 +1103,12 @@
                     .from('viajes_reservados')
                     .select('*')
                     .eq('conductor_asignado_id', currentUser.id)
-                    .in('estado', ['asignado', 'completado', 'cancelado'])
+                    .in('estado', ['asignado', 'en_curso', 'completado', 'cancelado'])
                     .order('fecha_hora', { ascending: true });
 
                 if (error) throw error;
 
-                const asignados = viajes?.filter(v => v.estado === 'asignado') ?? [];
+                const asignados = viajes?.filter(v => v.estado === 'asignado' || v.estado === 'en_curso') ?? [];
                 const completados = viajes?.filter(v => v.estado === 'completado') ?? [];
                 const cancelados = viajes?.filter(v => v.estado === 'cancelado') ?? [];
 
@@ -1151,6 +1152,14 @@
                             <strong>💳 Pago:</strong> <span style="color: ${viaje.estado_pago === 'pagado' ? '#4ade80' : '#f59e0b'};">${viaje.estado_pago === 'pagado' ? 'Pagado' : 'Pendiente o Efectivo'}</span>
                         </div>
                         ${viaje.estado === 'asignado' ? `
+                            <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
+                                <button class="btn" onclick="iniciarViaje('${viaje.id}')" style="flex:1;min-width:120px;background:linear-gradient(135deg,var(--corp-green) 0%,var(--corp-green-dark) 100%);color:#000;">▶ Iniciar Viaje</button>
+                                <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;min-width:120px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
+                            </div>
+                            <button class="btn" onclick="contactarWhatsApp('${viaje.pasajero.celular_raw}', '${viaje.pasajero.apellidos}')" style="background:linear-gradient(135deg,#25D366 0%,#128C7E 100%);color:#fff;width:100%;">
+                                📱 Contactar Pasajero
+                            </button>
+                        ` : viaje.estado === 'en_curso' ? `
                             <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
                                 <button class="btn btn-success" onclick="completarViaje('${viaje.id}')" style="flex:1;min-width:120px;">✅ Completar</button>
                                 <button class="btn" onclick="abrirCancelModal('${viaje.id}')" style="flex:1;min-width:120px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;">❌ Cancelar</button>
@@ -1212,6 +1221,31 @@
             } finally {
                 btnElement.disabled = false;
                 btnElement.innerHTML = '✋ Aceptar Viaje';
+            }
+        }
+
+        // ============================================
+        // INICIAR VIAJE (EN CURSO)
+        // ============================================
+        async function iniciarViaje(viajeId) {
+            if (!verificarPagoActivo(currentConductor)) {
+                showToast('Tu cuenta está inactiva.', 'error');
+                return;
+            }
+            try {
+                const { data, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update({ estado: 'en_curso', updated_at: new Date().toISOString() })
+                    .eq('id', viajeId)
+                    .eq('conductor_asignado_id', currentUser.id)
+                    .select();
+
+                if (error) { console.error("Error ocurrido", "Contacte a soporte"); throw error; }
+                showToast('¡Viaje en curso! 🚗');
+                await cargarMisViajes();
+            } catch (err) {
+                console.error("Error", "Contacte a soporte");
+                showToast('Error: ' + (err.message || 'Error desconocido'), 'error');
             }
         }
 

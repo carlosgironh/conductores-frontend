@@ -4,12 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://bt-cdn.yappy.cloud https://bt-cdn-uat.yappycloud.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://bt-cdn.yappy.cloud https://bt-cdn-uat.yappycloud.com https://*.bgeneral.cloud https://apipagosbg.bgeneral.cloud https://api-comecom-uat.yappycloud.com https://*.yappycloud.com https://*.yappy.cloud https://conductores-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://unpkg.com https://bt-cdn.yappy.cloud https://*.yappy.cloud https://*.yappycloud.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://bt-cdn.yappy.cloud https://bt-cdn-uat.yappycloud.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://bt-cdn.yappy.cloud https://bt-cdn-uat.yappycloud.com https://*.bgeneral.cloud https://apipagosbg.bgeneral.cloud https://api-comecom-uat.yappycloud.com https://*.yappycloud.com https://*.yappy.cloud https://conductores-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://unpkg.com https://bt-cdn.yappy.cloud https://*.yappy.cloud https://*.yappycloud.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
   <title>Pagos - Panel de Conductor</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"
-    integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1"
-    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
   <!-- CDN del Botón de Pago Yappy -->
   <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
   <style>
@@ -386,8 +383,7 @@
   </style>
   <base target="_blank">
 
-  <script src="config.js"></script>
-</head>
+  <script src="config.js"></script></head>
 
 <body>
   <div class="container">
@@ -420,7 +416,6 @@
         <div style="font-size: 2.5rem; font-weight: 800; color: #60a5fa;">$0.01</div>
         <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;">Monto a pagar</div>
       </div>
-
 
       <!-- Input para número de Yappy -->
       <div class="input-group">
@@ -477,13 +472,13 @@
     // ============================================================
     // DEBUG
     // ============================================================
-    function logDebug( msg, type = 'info' ) {
-      const log = document.getElementById( 'debug-log' );
-      const time = new Date().toLocaleTimeString( 'es-PA', { hour12: false } );
-      const line = document.createElement( 'div' );
+    function logDebug(msg, type = 'info') {
+      const log = document.getElementById('debug-log');
+      const time = new Date().toLocaleTimeString('es-PA', { hour12: false });
+      const line = document.createElement('div');
       line.className = `debug-line ${type}`;
       line.textContent = `[${time}] ${msg}`;
-      log.appendChild( line );
+      log.appendChild(line);
       log.scrollTop = log.scrollHeight;
       /* log removed */
     }
@@ -491,19 +486,19 @@
     // ============================================================
     // ALERTAS
     // ============================================================
-    function showAlert( msg, type = 'error' ) {
-      const box = document.getElementById( 'alert-box' );
+    function showAlert(msg, type = 'error') {
+      const box = document.getElementById('alert-box');
       box.className = `alert alert-${type} show`;
       box.textContent = msg;
     }
     function hideAlert() {
-      document.getElementById( 'alert-box' ).classList.remove( 'show' );
+      document.getElementById('alert-box').classList.remove('show');
     }
 
-    function setBtnLoading( loading ) {
-      const btn = document.getElementById( 'btn-fallback' );
-      const text = document.getElementById( 'fallback-text' );
-      if ( loading ) {
+    function setBtnLoading(loading) {
+      const btn = document.getElementById('btn-fallback');
+      const text = document.getElementById('fallback-text');
+      if (loading) {
         btn.disabled = true;
         text.innerHTML = '<span class="spinner"></span> Procesando...';
       } else {
@@ -512,28 +507,28 @@
       }
     }
 
-    function updateStatusBadge( status ) {
-      const badge = document.getElementById( 'status-badge' );
+    function updateStatusBadge(status) {
+      const badge = document.getElementById('status-badge');
       badge.className = 'status-badge';
-      if ( status === 'active' || status === 'activa' ) {
-        badge.classList.add( 'activa' );
+      if (status === 'active' || status === 'activa') {
+        badge.classList.add('activa');
         badge.textContent = 'Activa';
-      } else if ( status === 'pendiente' ) {
-        badge.classList.add( 'pendiente' );
+      } else if (status === 'pendiente') {
+        badge.classList.add('pendiente');
         badge.textContent = 'Pendiente';
       } else {
-        badge.classList.add( 'inactiva' );
+        badge.classList.add('inactiva');
         badge.textContent = 'Inactiva';
       }
     }
 
-    function showSection( id ) {
-      const el = document.getElementById( id );
-      if ( el ) el.style.display = '';
+    function showSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
     }
 
-    function updateYappyStatus( status, text ) {
-      const el = document.getElementById( 'yappy-status' );
+    function updateYappyStatus(status, text) {
+      const el = document.getElementById('yappy-status');
       el.className = `yappy-status ${status}`;
       el.textContent = text;
     }
@@ -543,26 +538,26 @@
     // ============================================================
     async function restaurarSesionDesdeStorage() {
       try {
-        const raw = localStorage.getItem( 'supabase_session' );
-        if ( !raw ) return false;
-        const stored = JSON.parse( raw );
-        if ( !stored.access_token ) return false;
+        const raw = localStorage.getItem('supabase_session');
+        if (!raw) return false;
+        const stored = JSON.parse(raw);
+        if (!stored.access_token) return false;
 
-        logDebug( 'Intentando restaurar sesión desde localStorage...' );
-        const { data, error } = await supabaseClient.auth.setSession( {
+        logDebug('Intentando restaurar sesión desde localStorage...');
+        const { data, error } = await supabaseClient.auth.setSession({
           access_token: stored.access_token,
           refresh_token: stored.refresh_token,
-        } );
+        });
 
-        if ( error || !data.session ) {
-          localStorage.removeItem( 'supabase_session' );
+        if (error || !data.session) {
+          localStorage.removeItem('supabase_session');
           return false;
         }
 
-        logDebug( '✓ Sesión restaurada desde localStorage', 'success' );
+        logDebug('✓ Sesión restaurada desde localStorage', 'success');
         return true;
-      } catch ( e ) {
-        localStorage.removeItem( 'supabase_session' );
+      } catch (e) {
+        localStorage.removeItem('supabase_session');
         return false;
       }
     }
@@ -571,108 +566,108 @@
     // CARGAR DATOS DEL CONDUCTOR
     // ============================================================
     async function cargarDatosConductor() {
-      logDebug( 'Iniciando carga de página...' );
+      logDebug('Iniciando carga de página...');
 
       try {
-        logDebug( 'Verificando sesión de Supabase...' );
+        logDebug('Verificando sesión de Supabase...');
         let { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
 
-        if ( !sessionData?.session ) {
+        if (!sessionData?.session) {
           const restored = await restaurarSesionDesdeStorage();
-          if ( restored ) {
+          if (restored) {
             const refreshed = await supabaseClient.auth.getSession();
             sessionData = refreshed.data;
             sessionError = refreshed.error;
           }
         }
 
-        if ( sessionError ) {
-          logDebug( `Error de sesión: ${sessionError.message}`, 'error' );
-          showAlert( 'Error al verificar sesión. Intenta recargar la página.' );
+        if (sessionError) {
+          logDebug(`Error de sesión: ${sessionError.message}`, 'error');
+          showAlert('Error al verificar sesión. Intenta recargar la página.');
           return;
         }
 
-        if ( !sessionData?.session ) {
-          logDebug( 'No hay sesión activa. Usuario no logueado.', 'warn' );
-          showAlert( 'No has iniciado sesión. Redirigiendo al login...', 'warn' );
-          setTimeout( () => { window.location.href = 'dashboard.html'; }, 3000 );
+        if (!sessionData?.session) {
+          logDebug('No hay sesión activa. Usuario no logueado.', 'warn');
+          showAlert('No has iniciado sesión. Redirigiendo al login...', 'warn');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
           return;
         }
 
         const accessToken = sessionData.session.access_token;
-        logDebug( `Sesión encontrada. Token: ${accessToken.slice( 0, 16 )}...` );
+        logDebug(`Sesión encontrada. Token: ${accessToken.slice(0, 16)}...`);
 
-        const { data: userData, error: userError } = await supabaseClient.auth.getUser( accessToken );
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser(accessToken);
 
-        if ( userError || !userData?.user ) {
-          logDebug( `Error obteniendo usuario: ${userError?.message || 'Sin usuario'}`, 'error' );
-          showAlert( 'Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn' );
-          localStorage.removeItem( 'supabase_session' );
-          setTimeout( () => { window.location.href = 'dashboard.html'; }, 3000 );
+        if (userError || !userData?.user) {
+          logDebug(`Error obteniendo usuario: ${userError?.message || 'Sin usuario'}`, 'error');
+          showAlert('Sesión inválida o expirada. Por favor inicia sesión de nuevo.', 'warn');
+          localStorage.removeItem('supabase_session');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
           return;
         }
 
         authUser = userData.user;
         authReady = true;
-        logDebug( `Usuario autenticado: ${authUser.id}` );
-        logDebug( `Email: ${authUser.email || 'N/A'}` );
+        logDebug(`Usuario autenticado: ${authUser.id}`);
+        logDebug(`Email: ${authUser.email || 'N/A'}`);
 
-        logDebug( 'Buscando datos del conductor en tabla "conductores"...' );
+        logDebug('Buscando datos del conductor en tabla "conductores"...');
         const { data: conductor, error: condError } = await supabaseClient
-          .from( 'conductores' )
-          .select( 'id,nombres,apellidos,status,marca,modelo,placa,color,celular,direccion,auth_user_id,payment_status,fecha_vencimiento,suscripcion_activa,fecha_ultimo_pago,proximo_pago,pago_al_dia' )
-          .eq( 'auth_user_id', authUser.id )
+          .from('conductores')
+          .select('id,nombres,apellidos,status,marca,modelo,placa,color,celular,direccion,auth_user_id,payment_status,fecha_vencimiento,suscripcion_activa,fecha_ultimo_pago,proximo_pago,pago_al_dia')
+          .eq('auth_user_id', authUser.id)
           .maybeSingle();
 
-        if ( condError ) {
-          logDebug( `Error DB conductores: ${condError.message}`, 'error' );
-          showAlert( 'Error al cargar datos del conductor desde el servidor.' );
+        if (condError) {
+          logDebug(`Error DB conductores: ${condError.message}`, 'error');
+          showAlert('Error al cargar datos del conductor desde el servidor.');
           return;
         }
 
-        if ( !conductor ) {
-          logDebug( 'No se encontró registro en tabla conductores para este usuario.', 'warn' );
-          showAlert( 'Tu cuenta no tiene perfil de conductor registrado. Contacta al administrador.', 'warn' );
+        if (!conductor) {
+          logDebug('No se encontró registro en tabla conductores para este usuario.', 'warn');
+          showAlert('Tu cuenta no tiene perfil de conductor registrado. Contacta al administrador.', 'warn');
           return;
         }
 
         conductorData = conductor;
         const nombreCompleto = `${conductor.nombres || ''} ${conductor.apellidos || ''}`.trim();
-        const inicial = ( conductor.nombres?.[0] || '?' ).toUpperCase();
+        const inicial = (conductor.nombres?.[0] || '?').toUpperCase();
 
         const vehiculoInfo = [];
-        if ( conductor.marca ) vehiculoInfo.push( conductor.marca );
-        if ( conductor.modelo ) vehiculoInfo.push( conductor.modelo );
-        if ( conductor.placa ) vehiculoInfo.push( `Placa: ${conductor.placa}` );
-        if ( conductor.color ) vehiculoInfo.push( conductor.color );
-        const vehiculo = vehiculoInfo.join( ' • ' ) || 'Sin vehículo registrado';
+        if (conductor.marca) vehiculoInfo.push(conductor.marca);
+        if (conductor.modelo) vehiculoInfo.push(conductor.modelo);
+        if (conductor.placa) vehiculoInfo.push(`Placa: ${conductor.placa}`);
+        if (conductor.color) vehiculoInfo.push(conductor.color);
+        const vehiculo = vehiculoInfo.join(' • ') || 'Sin vehículo registrado';
 
-        document.getElementById( 'conductor-name' ).textContent = nombreCompleto || 'Conductor';
-        document.getElementById( 'conductor-initial' ).textContent = inicial;
-        document.getElementById( 'conductor-vehiculo' ).textContent = vehiculo;
-        updateStatusBadge( conductor.status );
+        document.getElementById('conductor-name').textContent = nombreCompleto || 'Conductor';
+        document.getElementById('conductor-initial').textContent = inicial;
+        document.getElementById('conductor-vehiculo').textContent = vehiculo;
+        updateStatusBadge(conductor.status);
 
-        logDebug( `Conductor: ${nombreCompleto} | Status: ${conductor.status || 'inactiva'} | Vehículo: ${vehiculo}` );
+        logDebug(`Conductor: ${nombreCompleto} | Status: ${conductor.status || 'inactiva'} | Vehículo: ${vehiculo}`);
 
         // Pre-llenar número de celular si existe
-        if ( conductor.celular ) {
-          const cleanPhone = String( conductor.celular ).replace( /\D/g, '' ).replace( /^507/, '' );
-          if ( cleanPhone.length >= 7 ) {
-            document.getElementById( 'yappy-phone' ).value = cleanPhone;
-            logDebug( `Número pre-llenado desde perfil: ${cleanPhone}`, 'info' );
+        if (conductor.celular) {
+          const cleanPhone = String(conductor.celular).replace(/\D/g, '').replace(/^507/, '');
+          if (cleanPhone.length >= 7) {
+            document.getElementById('yappy-phone').value = cleanPhone;
+            logDebug(`Número pre-llenado desde perfil: ${cleanPhone}`, 'info');
           }
         }
 
-        showSection( 'status-card' );
-        showSection( 'yappy-section' );
+        showSection('status-card');
+        showSection('yappy-section');
         hideAlert();
 
         initYappyComponent();
 
-      } catch ( err ) {
-        logDebug( `Error inesperado: ${err.message}`, 'error' );
-        console.error( "Error ocurrido en el cliente", "Contacte a soporte" );
-        showAlert( 'Error inesperado. Revisa la consola (F12) para más detalles.' );
+      } catch (err) {
+        logDebug(`Error inesperado: ${err.message}`, 'error');
+        console.error("Error ocurrido en el cliente", "Contacte a soporte");
+        showAlert('Error inesperado. Revisa la consola (F12) para más detalles.');
       }
     }
 
@@ -680,12 +675,12 @@
     // INICIALIZAR COMPONENTE YAPPY
     // ============================================================
     function initYappyComponent() {
-      logDebug( 'Inicializando componente Yappy...' );
+      logDebug('Inicializando componente Yappy...');
 
-      const btnYappy = document.getElementById( 'btn-yappy' );
+      const btnYappy = document.getElementById('btn-yappy');
 
-      if ( !btnYappy ) {
-        logDebug( 'Componente btn-yappy no encontrado en DOM', 'error' );
+      if (!btnYappy) {
+        logDebug('Componente btn-yappy no encontrado en DOM', 'error');
         showFallback();
         return;
       }
@@ -693,67 +688,67 @@
       let checkCount = 0;
       const maxChecks = 20;
 
-      const checkInterval = setInterval( () => {
+      const checkInterval = setInterval(() => {
         checkCount++;
 
-        if ( btnYappy.shadowRoot || btnYappy.isConnected ) {
-          clearInterval( checkInterval );
+        if (btnYappy.shadowRoot || btnYappy.isConnected) {
+          clearInterval(checkInterval);
           yappyComponentReady = true;
-          logDebug( 'Componente Yappy detectado en DOM', 'success' );
+          logDebug('Componente Yappy detectado en DOM', 'success');
 
-          setupYappyEvents( btnYappy );
-          updateYappyStatus( 'online', '✓ Yappy disponible' );
+          setupYappyEvents(btnYappy);
+          updateYappyStatus('online', '✓ Yappy disponible');
           return;
         }
 
-        if ( checkCount >= maxChecks ) {
-          clearInterval( checkInterval );
-          logDebug( 'Componente Yappy no cargó después de 10s. Usando fallback.', 'warn' );
+        if (checkCount >= maxChecks) {
+          clearInterval(checkInterval);
+          logDebug('Componente Yappy no cargó después de 10s. Usando fallback.', 'warn');
           showFallback();
         }
-      }, 500 );
+      }, 500);
     }
 
     // ============================================================
     // EVENTOS YAPPY — cumple documentación oficial v2
     // eventClick → fetch backend → btnyappy.eventPayment(params)
     // ============================================================
-    function setupYappyEvents( btnYappy ) {
+    function setupYappyEvents(btnYappy) {
 
       // Estado del canal Yappy
-      btnYappy.addEventListener( 'isYappyOnline', ( event ) => {
+      btnYappy.addEventListener('isYappyOnline', (event) => {
         const online = event.detail === true;
-        logDebug( `Yappy online: ${online}`, online ? 'success' : 'warn' );
+        logDebug(`Yappy online: ${online}`, online ? 'success' : 'warn');
         updateYappyStatus(
           online ? 'online' : 'offline',
           online ? '✓ Yappy disponible' : '✗ Yappy no disponible'
         );
-      } );
+      });
 
       // ── CLICK: llamar backend y pasar params al componente ──
-      btnYappy.addEventListener( 'eventClick', async () => {
-        logDebug( '=== CLICK EN BOTÓN YAPPY ===' );
+      btnYappy.addEventListener('eventClick', async () => {
+        logDebug('=== CLICK EN BOTÓN YAPPY ===');
 
-        if ( !authReady || !conductorData ) {
-          showAlert( 'Datos del conductor no cargados. Recarga la página.' );
+        if (!authReady || !conductorData) {
+          showAlert('Datos del conductor no cargados. Recarga la página.');
           return;
         }
 
         const yappyPhone = getYappyPhone();
-        if ( !yappyPhone ) return;
+        if (!yappyPhone) return;
 
         // Poner botón en estado de carga (propiedad oficial)
         btnYappy.isButtonLoading = true;
         hideAlert();
 
         try {
-          logDebug( `Celular enviado a backend: ${yappyPhone}` );
-          logDebug( `POST → ${RENDER_API_URL}` );
+          logDebug(`Celular enviado a backend: ${yappyPhone}`);
+          logDebug(`POST → ${RENDER_API_URL}`);
 
-          const response = await fetch( RENDER_API_URL, {
+          const response = await fetch(RENDER_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify( {
+            body: JSON.stringify({
               action: 'create-order',
               total: '0.01',
               subtotal: '0.01',
@@ -762,122 +757,122 @@
               aliasYappy: yappyPhone,
               conductor_id: conductorData?.id || null,
               auth_user_id: authUser?.id || null
-            } ),
-          } );
+            }),
+          });
 
           const data = await response.json();
-          logDebug( `Status HTTP: ${response.status}` );
-          logDebug( `Respuesta: ${JSON.stringify( data ).substring( 0, 300 )}` );
+          logDebug(`Status HTTP: ${response.status}`);
+          logDebug(`Respuesta: ${JSON.stringify(data).substring(0, 300)}`);
 
-          if ( !response.ok ) {
-            throw new Error( data.error || data.message || `HTTP ${response.status}` );
+          if (!response.ok) {
+            throw new Error(data.error || data.message || `HTTP ${response.status}`);
           }
 
-          if ( data.success && data.data?.status?.code === '0000' ) {
-            logDebug( '✓ Orden creada', 'success' );
+          if (data.success && data.data?.status?.code === '0000') {
+            logDebug('✓ Orden creada', 'success');
 
             const body = data.data?.body || {};
             const params = {
               transactionId: body.transactionId || data.transactionId,
-              token: body.token || data.paymentToken,
-              documentName: body.documentName || data.documentName,
+              token:         body.token         || data.paymentToken,
+              documentName:  body.documentName  || data.documentName,
             };
 
-            logDebug( `transactionId: ${params.transactionId}`, 'success' );
-            logDebug( `documentName: ${params.documentName ? params.documentName.slice( 0, 60 ) + '...' : 'N/A'}` );
+            logDebug(`transactionId: ${params.transactionId}`, 'success');
+            logDebug(`documentName: ${params.documentName ? params.documentName.slice(0, 60) + '...' : 'N/A'}`);
 
             // ── Entrega los params al componente (flujo oficial) ──
-            btnYappy.eventPayment( params );
+            btnYappy.eventPayment(params);
 
           } else {
-            throw new Error( data.data?.status?.description || 'Error creando la orden en Yappy' );
+            throw new Error(data.data?.status?.description || 'Error creando la orden en Yappy');
           }
 
-        } catch ( err ) {
-          logDebug( `ERROR: ${err.message}`, 'error' );
-          showAlert( 'Error procesando el pago: ' + err.message );
+        } catch (err) {
+          logDebug(`ERROR: ${err.message}`, 'error');
+          showAlert('Error procesando el pago: ' + err.message);
           btnYappy.isButtonLoading = false;
         }
-      } );
+      });
 
       // ── ÉXITO ──
-      btnYappy.addEventListener( 'eventSuccess', ( event ) => {
-        logDebug( '✓ Transacción exitosa: ' + JSON.stringify( event.detail ), 'success' );
-        showAlert( '¡Pago completado exitosamente!', 'success' );
+      btnYappy.addEventListener('eventSuccess', (event) => {
+        logDebug('✓ Transacción exitosa: ' + JSON.stringify(event.detail), 'success');
+        showAlert('¡Pago completado exitosamente!', 'success');
         activarSuscripcion();
-      } );
+      });
 
       // ── ERROR ──
-      btnYappy.addEventListener( 'eventError', ( event ) => {
-        logDebug( '✗ Error en transacción: ' + JSON.stringify( event.detail ), 'error' );
-        showAlert( 'Error en el pago: ' + ( event.detail?.message || 'Error desconocido' ) );
+      btnYappy.addEventListener('eventError', (event) => {
+        logDebug('✗ Error en transacción: ' + JSON.stringify(event.detail), 'error');
+        showAlert('Error en el pago: ' + (event.detail?.message || 'Error desconocido'));
         btnYappy.isButtonLoading = false;
-      } );
+      });
     }
 
     function showFallback() {
-      const btnYappy = document.getElementById( 'btn-yappy' );
-      const btnFallback = document.getElementById( 'btn-fallback' );
-      if ( btnYappy ) btnYappy.style.display = 'none';
-      if ( btnFallback ) {
-        btnFallback.classList.add( 'show' );
-        btnFallback.addEventListener( 'click', handleYappyPaymentFallback );
+      const btnYappy = document.getElementById('btn-yappy');
+      const btnFallback = document.getElementById('btn-fallback');
+      if (btnYappy) btnYappy.style.display = 'none';
+      if (btnFallback) {
+        btnFallback.classList.add('show');
+        btnFallback.addEventListener('click', handleYappyPaymentFallback);
       }
-      updateYappyStatus( 'offline', '✗ Yappy no disponible - Método alternativo' );
+      updateYappyStatus('offline', '✗ Yappy no disponible - Método alternativo');
     }
 
     // ── FALLBACK (si el web-component no cargó) ──
     async function handleYappyPaymentFallback() {
-      if ( !authReady || !conductorData ) {
-        showAlert( 'Datos del conductor no cargados. Recarga la página.' );
+      if (!authReady || !conductorData) {
+        showAlert('Datos del conductor no cargados. Recarga la página.');
         return;
       }
       const yappyPhone = getYappyPhone();
-      if ( !yappyPhone ) return;
+      if (!yappyPhone) return;
 
-      setBtnLoading( true );
+      setBtnLoading(true);
       hideAlert();
 
       try {
-        const response = await fetch( RENDER_API_URL, {
+        const response = await fetch(RENDER_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify( {
+          body: JSON.stringify({
             action: 'create-order',
             total: '0.01', subtotal: '0.01', taxes: '0.00', discount: '0.00',
             aliasYappy: yappyPhone,
             conductor_id: conductorData?.id || null,
             auth_user_id: authUser?.id || null
-          } ),
-        } );
+          }),
+        });
         const data = await response.json();
-        if ( !response.ok ) throw new Error( data.error || `HTTP ${response.status}` );
+        if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
 
-        if ( data.success && data.data?.status?.code === '0000' ) {
+        if (data.success && data.data?.status?.code === '0000') {
           const body = data.data?.body || {};
           const documentName = body.documentName || data.documentName;
           const paymentToken = body.token || data.paymentToken;
 
-          if ( documentName?.startsWith( 'http' ) ) {
-            window.open( documentName, '_blank' );
-            showAlert( 'Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info' );
-          } else if ( documentName ) {
-            document.getElementById( 'qr-content' ).innerHTML =
+          if (documentName?.startsWith('http')) {
+            window.open(documentName, '_blank');
+            showAlert('Se abrió Yappy en una nueva pestaña. Completa el pago allí.', 'info');
+          } else if (documentName) {
+            document.getElementById('qr-content').innerHTML =
               `<p style="font-size:18px;font-weight:bold;color:#333">${documentName}</p>`;
-            document.getElementById( 'yappy-qr' ).classList.add( 'show' );
-            showAlert( 'Usa el código mostrado para completar el pago en Yappy.', 'info' );
-          } else if ( paymentToken ) {
-            window.open( `https://apipagosbg.bgeneral.cloud/payments/payment-wc?token=${encodeURIComponent( paymentToken )}`, '_blank' );
-            showAlert( 'Se abrió Yappy en una nueva pestaña.', 'info' );
+            document.getElementById('yappy-qr').classList.add('show');
+            showAlert('Usa el código mostrado para completar el pago en Yappy.', 'info');
+          } else if (paymentToken) {
+            window.open(`https://apipagosbg.bgeneral.cloud/payments/payment-wc?token=${encodeURIComponent(paymentToken)}`, '_blank');
+            showAlert('Se abrió Yappy en una nueva pestaña.', 'info');
           }
         } else {
-          throw new Error( data.data?.status?.description || 'Error desconocido al crear orden' );
+          throw new Error(data.data?.status?.description || 'Error desconocido al crear orden');
         }
-      } catch ( err ) {
-        logDebug( `ERROR fallback: ${err.message}`, 'error' );
-        showAlert( 'Error: ' + err.message );
+      } catch (err) {
+        logDebug(`ERROR fallback: ${err.message}`, 'error');
+        showAlert('Error: ' + err.message);
       } finally {
-        setBtnLoading( false );
+        setBtnLoading(false);
       }
     }
 
@@ -885,10 +880,10 @@
     // OBTENER NÚMERO YAPPY DEL INPUT (con validación)
     // ============================================================
     function getYappyPhone() {
-      const input = document.getElementById( 'yappy-phone' );
-      const phone = input.value.trim().replace( /\D/g, '' );
-      if ( !phone || phone.length < 7 ) {
-        showAlert( 'Por favor ingresa un número de celular válido (mínimo 7 dígitos)' );
+      const input = document.getElementById('yappy-phone');
+      const phone = input.value.trim().replace(/\D/g, '');
+      if (!phone || phone.length < 7) {
+        showAlert('Por favor ingresa un número de celular válido (mínimo 7 dígitos)');
         input.focus();
         return null;
       }
@@ -896,32 +891,32 @@
     }
 
     // Solo permitir números en el input
-    document.addEventListener( 'DOMContentLoaded', () => {
-      const phoneInput = document.getElementById( 'yappy-phone' );
-      if ( phoneInput ) {
-        phoneInput.addEventListener( 'input', ( e ) => {
-          e.target.value = e.target.value.replace( /\D/g, '' );
-        } );
+    document.addEventListener('DOMContentLoaded', () => {
+      const phoneInput = document.getElementById('yappy-phone');
+      if (phoneInput) {
+        phoneInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '');
+        });
       }
-    } );
+    });
 
     // ============================================================
     // ACTIVAR SUSCRIPCIÓN
     // ============================================================
     async function activarSuscripcion() {
-      if ( !authUser || !conductorData ) {
-        logDebug( 'No hay authUser o conductorData', 'error' );
+      if (!authUser || !conductorData) {
+        logDebug('No hay authUser o conductorData', 'error');
         return;
       }
 
       try {
-        logDebug( 'Activando suscripción...' );
+        logDebug('Activando suscripción...');
         const ahora = new Date();
-        const expiracion = new Date( ahora.getTime() + 24 * 60 * 60 * 1000 );
+        const expiracion = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
 
         const { error } = await supabaseClient
-          .from( 'conductores' )
-          .update( {
+          .from('conductores')
+          .update({
             status: 'active',
             suscripcion_activa: true,
             pago_al_dia: true,
@@ -929,54 +924,54 @@
             proximo_pago: expiracion.toISOString(),
             fecha_vencimiento: expiracion.toISOString(),
             payment_status: 'paid',
-          } )
-          .eq( 'auth_user_id', authUser.id );
+          })
+          .eq('auth_user_id', authUser.id);
 
-        if ( error ) {
-          logDebug( `Error DB: ${error.message}`, 'error' );
-          showAlert( 'Pago recibido, pero hubo un error activando tu cuenta. Contacta soporte.' );
+        if (error) {
+          logDebug(`Error DB: ${error.message}`, 'error');
+          showAlert('Pago recibido, pero hubo un error activando tu cuenta. Contacta soporte.');
           return;
         }
 
-        updateStatusBadge( 'active' );
-        logDebug( `✓ Suscripción activada hasta ${expiracion.toLocaleString( 'es-PA' )}`, 'success' );
-        showAlert( '¡Suscripción activada! Tienes 24 horas de servicio.', 'success' );
+        updateStatusBadge('active');
+        logDebug(`✓ Suscripción activada hasta ${expiracion.toLocaleString('es-PA')}`, 'success');
+        showAlert('¡Suscripción activada! Tienes 24 horas de servicio.', 'success');
 
-        setTimeout( () => {
+        setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 3000 );
+        }, 3000);
 
-      } catch ( err ) {
-        logDebug( `Error: ${err.message}`, 'error' );
+      } catch (err) {
+        logDebug(`Error: ${err.message}`, 'error');
       }
     }
 
     // ============================================================
     // AUTH LISTENERS
     // ============================================================
-    supabaseClient.auth.onAuthStateChange( ( event, session ) => {
-      logDebug( `Auth event: ${event}` );
-      if ( event === 'SIGNED_OUT' ) {
-        localStorage.removeItem( 'supabase_session' );
-        showAlert( 'Sesión cerrada. Redirigiendo al login...', 'warn' );
-        setTimeout( () => { window.location.href = 'dashboard.html'; }, 2000 );
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      logDebug(`Auth event: ${event}`);
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('supabase_session');
+        showAlert('Sesión cerrada. Redirigiendo al login...', 'warn');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
       }
-      if ( event === 'SIGNED_IN' && session ) {
-        localStorage.setItem( 'supabase_session', JSON.stringify( {
+      if (event === 'SIGNED_IN' && session) {
+        localStorage.setItem('supabase_session', JSON.stringify({
           access_token: session.access_token,
           refresh_token: session.refresh_token,
           expires_at: session.expires_at,
-        } ) );
+        }));
       }
-    } );
+    });
 
     // ============================================================
     // INICIALIZACIÓN
     // ============================================================
-    document.addEventListener( 'DOMContentLoaded', () => {
-      logDebug( 'DOM cargado. Iniciando autenticación...' );
+    document.addEventListener('DOMContentLoaded', () => {
+      logDebug('DOM cargado. Iniciando autenticación...');
       cargarDatosConductor();
-    } );
+    });
   </script>
 </body>
 
