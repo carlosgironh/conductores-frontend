@@ -1587,6 +1587,38 @@
     </div>
   </div>
 
+  <!-- Modal Crear Tarifa -->
+  <div class="modal-overlay centered" id="createTarifaModal">
+    <div class="modal-content" style="max-width: 400px; padding: 20px;">
+      <h3 style="color: white; margin-bottom: 15px; font-size: 20px;">Nueva Tarifa</h3>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Configura el precio de una ruta entre dos zonas.</p>
+      
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label style="color:white; font-size:14px;">Zona de Origen:</label>
+        <select id="tarifaOrigen" class="modal-input" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; margin-bottom: 10px;">
+        </select>
+        
+        <label style="color:white; font-size:14px;">Zona de Destino:</label>
+        <select id="tarifaDestino" class="modal-input" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; margin-bottom: 10px;">
+        </select>
+        
+        <label style="color:white; font-size:14px;">Tipo de Viaje:</label>
+        <select id="tarifaTipo" class="modal-input" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; margin-bottom: 10px;">
+          <option value="Ida" style="color: black;">Ida</option>
+          <option value="Regreso" style="color: black;">Regreso</option>
+        </select>
+        
+        <label style="color:white; font-size:14px;">Precio ($):</label>
+        <input type="number" id="tarifaPrecio" step="0.25" min="0" class="modal-input" placeholder="Ej: 1.50" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; margin-bottom: 10px;">
+      </div>
+
+      <div class="modal-buttons" style="display: flex; gap: 10px;">
+        <button class="btn btn-danger" onclick="closeCreateTarifaModal()" style="flex: 1;">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitCreateTarifa()" style="flex: 1;">Guardar Tarifa</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Asignar Conductor -->
   <div class="modal-overlay centered" id="asignarConductorModal">
     <div class="modal-content" style="max-width: 500px;">
@@ -1774,6 +1806,7 @@
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
         <button class="section-tab" onclick="switchSection('viajes', this)">🚙 Viajes</button>
         <button class="section-tab" onclick="switchSection('zonas', this)">🗺️ Zonas</button>
+        <button class="section-tab" onclick="switchSection('tarifas', this)">💲 Tarifas</button>
         <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="switchSection('mapaGlobal', this); setTimeout(initGlobalMap, 300)">🌍 Mapa en Vivo</button>
         <button class="section-tab" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: #3b82f6;" onclick="window.location.href='admin.html'">⚙️ Accesos y Cuentas</button>
       </div>
@@ -2007,6 +2040,34 @@
         </div>
         <div id="colasContainer">
            <div style="text-align: center; color: #64748b; padding: 20px;">Cargando colas...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TARIFAS SECTION -->
+    <div id="tarifasSection" class="section-content">
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <h3 style="color: white; margin: 0;">Gestión de Tarifas por Ruta</h3>
+          <button class="btn-primary" onclick="openCreateTarifaModal()">+ Nueva Tarifa</button>
+        </div>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Define los precios de los viajes entre distintas zonas. Las tarifas se aplicarán según el origen y destino.</p>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Tipo de Viaje</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tarifasList">
+              <tr><td colspan="5" style="text-align:center;">Cargando tarifas...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -3675,6 +3736,113 @@
     }
 
     // ==========================================
+    // TARIFAS MANAGEMENT
+    let allTarifas = [];
+
+    async function cargarTarifas() {
+      const { data, error } = await supabaseClient.from('tarifas')
+        .select(`
+          id, precio, tipo_viaje,
+          origen:origen_zona_id (id, nombre),
+          destino:destino_zona_id (id, nombre)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (!error) {
+        allTarifas = data || [];
+        renderTarifasList();
+      } else {
+        console.error('Error al cargar tarifas:', error);
+      }
+    }
+
+    function renderTarifasList() {
+      const tbody = document.getElementById('tarifasList');
+      if (!tbody) return;
+      
+      if (allTarifas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No hay tarifas definidas.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      allTarifas.forEach(t => {
+        const origen = t.origen ? t.origen.nombre : 'Desconocido';
+        const destino = t.destino ? t.destino.nombre : 'Desconocido';
+        html += `
+          <tr>
+            <td>${origen}</td>
+            <td>${destino}</td>
+            <td><span class="status-badge" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">${t.tipo_viaje}</span></td>
+            <td>$${parseFloat(t.precio).toFixed(2)}</td>
+            <td>
+              <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="eliminarTarifa('${t.id}')">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function openCreateTarifaModal() {
+      // Cargar opciones de zonas
+      const selectOrigen = document.getElementById('tarifaOrigen');
+      const selectDestino = document.getElementById('tarifaDestino');
+      
+      let optionsHTML = '<option value="" style="color:black;">-- Seleccionar Zona --</option>';
+      allZonas.forEach(z => {
+        optionsHTML += `<option value="${z.id}" style="color:black;">${z.nombre}</option>`;
+      });
+      
+      selectOrigen.innerHTML = optionsHTML;
+      selectDestino.innerHTML = optionsHTML;
+      
+      document.getElementById('tarifaPrecio').value = '';
+      document.getElementById('tarifaTipo').value = 'Ida';
+      
+      document.getElementById('createTarifaModal').style.display = 'flex';
+    }
+
+    function closeCreateTarifaModal() {
+      document.getElementById('createTarifaModal').style.display = 'none';
+    }
+
+    async function submitCreateTarifa() {
+      const origen = document.getElementById('tarifaOrigen').value;
+      const destino = document.getElementById('tarifaDestino').value;
+      const tipo = document.getElementById('tarifaTipo').value;
+      const precio = parseFloat(document.getElementById('tarifaPrecio').value);
+      
+      if(!origen || !destino || isNaN(precio)) {
+        alert("Por favor completa todos los campos.");
+        return;
+      }
+      
+      const { error } = await supabaseClient.from('tarifas').insert({
+        origen_zona_id: origen,
+        destino_zona_id: destino,
+        tipo_viaje: tipo,
+        precio: precio
+      });
+      
+      if(error) {
+        console.error(error);
+        alert("Error al crear la tarifa.");
+      } else {
+        closeCreateTarifaModal();
+        await cargarTarifas();
+      }
+    }
+    
+    async function eliminarTarifa(id) {
+      if(confirm("¿Estás seguro de eliminar esta tarifa?")) {
+        const { error } = await supabaseClient.from('tarifas').delete().eq('id', id);
+        if(!error) {
+          await cargarTarifas();
+        }
+      }
+    }
+
     // ZONAS (GEOFENCING) MANAGEMENT
     // ==========================================
     let allZonas = [];
@@ -3725,6 +3893,7 @@
       });
 
       await cargarZonas();
+      await cargarTarifas();
     }
 
     async function cargarZonas() {
