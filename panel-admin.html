@@ -4165,9 +4165,14 @@
         const result = await response.json();
 
         if (result.success) {
+          let errorMsg = '';
+          if (result.fallidos > 0 && result.detalles) {
+            const fallidos = result.detalles.filter(r => !r.success);
+            errorMsg = '\\nDetalle del error: ' + JSON.stringify(fallidos[0].error);
+          }
           Swal.fire(
             '¡Mensajes Enviados!',
-            `${result.notificados || 0} notificados exitosamente. Fallaron: ${result.fallidos || 0}.\\n${result.message || ''}`,
+            `${result.notificados || 0} notificados exitosamente. Fallaron: ${result.fallidos || 0}.\\n${result.message || ''}${errorMsg}`,
             'success'
           );
         } else {
