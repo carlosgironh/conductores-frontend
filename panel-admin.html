@@ -4107,12 +4107,12 @@
 
       container.innerHTML = html;
       document.getElementById('selectAllInactivos').checked = true;
-      document.getElementById('selectInactivosModal').classList.add('active');
+      document.getElementById('selectInactivosModal').classList.add('show');
       updateInactivosCount();
     }
 
     function closeSelectInactivosModal() {
-      document.getElementById('selectInactivosModal').classList.remove('active');
+      document.getElementById('selectInactivosModal').classList.remove('show');
     }
 
     function toggleAllInactivos(source) {
