@@ -1894,7 +1894,7 @@
         <button class="filter-btn" onclick="filterConductores('inactivo', this)">Inactivos</button>
         <button class="filter-btn" onclick="filterConductores('con_pago', this)">💳 Con Pago</button>
         <button class="filter-btn" onclick="filterConductores('sin_pago', this)">❌ Sin Pago</button>
-        <button class="filter-btn" style="background: rgba(37, 211, 102, 0.2); color: #25d366; border-color: #25d366; font-weight: bold; margin-left: 15px;" onclick="enviarWhatsAppInactivos()">📱 Notificar Inactivos (WhatsApp)</button>
+        <button class="filter-btn" style="background: rgba(37, 211, 102, 0.2); color: #25d366; border-color: #25d366; font-weight: bold; margin-left: 15px;" onclick="openSelectInactivosModal()">📱 Notificar Inactivos (WhatsApp)</button>
       </div>
 
       <div class="table-container">
@@ -2146,6 +2146,31 @@
       <div class="modal-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
         <button class="btn btn-primary" onclick="closeDeactivateDriverModal()" style="flex: 1; background: rgba(255,255,255,0.1);">Cancelar</button>
         <button class="btn btn-danger" id="btnSubmitDeactivate" onclick="submitDeactivateDriver()" style="flex: 1;">Confirmar Desactivación</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Seleccionar Inactivos para WhatsApp -->
+  <div class="modal-overlay centered" id="selectInactivosModal">
+    <div class="modal-content" style="max-width: 550px;">
+      <button class="modal-close" onclick="closeSelectInactivosModal()">✕</button>
+      <div class="modal-header">
+        <h3 class="modal-title">Seleccionar Inactivos a Notificar</h3>
+      </div>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Selecciona los conductores inactivos a los que deseas enviar el recordatorio de pago por WhatsApp.</p>
+      
+      <div class="form-group" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <label style="color: white; font-size: 14px;"><input type="checkbox" id="selectAllInactivos" checked onclick="toggleAllInactivos(this)"> Seleccionar Todos</label>
+        <span id="inactivosCount" style="color: #22c55e; font-size: 13px; font-weight: bold;">0 seleccionados</span>
+      </div>
+
+      <div id="inactivosListContainer" style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px;">
+        <div style="text-align: center; color: #94a3b8; padding: 20px;">Cargando conductores inactivos...</div>
+      </div>
+      
+      <div class="modal-buttons" style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="btn btn-danger" onclick="closeSelectInactivosModal()" style="flex: 1;">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmSendWhatsAppInactivos()" style="flex: 2; background: rgba(37, 211, 102, 0.8); border: 1px solid #25d366;">Enviar WhatsApps</button>
       </div>
     </div>
   </div>
@@ -4056,9 +4081,67 @@
       container.innerHTML = html;
     }
 
-    async function enviarWhatsAppInactivos() {
-      if (!confirm('¿Estás seguro que deseas enviar el mensaje de notificación de WhatsApp a TODOS los conductores inactivos por falta de pago?')) return;
+    function openSelectInactivosModal() {
+      const container = document.getElementById('inactivosListContainer');
+      const inactivosCount = document.getElementById('inactivosCount');
       
+      const inactivosConCelular = allConductores.filter(c => !verificarSuscripcionActiva(c) && c.celular && c.celular.trim() !== '');
+
+      if (inactivosConCelular.length === 0) {
+        Swal.fire('Información', 'No hay conductores inactivos con número de celular registrado.', 'info');
+        return;
+      }
+
+      let html = '';
+      inactivosConCelular.forEach((c, index) => {
+        html += `
+          <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <input type="checkbox" class="inactivo-checkbox" value="${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}" checked onchange="updateInactivosCount()" style="margin-right: 10px;">
+            <div>
+              <div style="color: white; font-size: 14px;">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</div>
+              <div style="color: #94a3b8; font-size: 12px;">📞 ${window.RoadTo ? window.RoadTo.escapeHTML(c.celular) : c.celular} | 🚗 ${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || 'N/A') : c.placa || 'N/A'}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById('selectAllInactivos').checked = true;
+      document.getElementById('selectInactivosModal').classList.add('active');
+      updateInactivosCount();
+    }
+
+    function closeSelectInactivosModal() {
+      document.getElementById('selectInactivosModal').classList.remove('active');
+    }
+
+    function toggleAllInactivos(source) {
+      const checkboxes = document.querySelectorAll('.inactivo-checkbox');
+      checkboxes.forEach(cb => cb.checked = source.checked);
+      updateInactivosCount();
+    }
+
+    function updateInactivosCount() {
+      const selectedCount = document.querySelectorAll('.inactivo-checkbox:checked').length;
+      document.getElementById('inactivosCount').textContent = `${selectedCount} seleccionados`;
+      
+      const totalCount = document.querySelectorAll('.inactivo-checkbox').length;
+      document.getElementById('selectAllInactivos').checked = (selectedCount === totalCount && totalCount > 0);
+    }
+
+    async function confirmSendWhatsAppInactivos() {
+      const checkboxes = document.querySelectorAll('.inactivo-checkbox:checked');
+      const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+      if (selectedIds.length === 0) {
+        Swal.fire('Atención', 'Debes seleccionar al menos un conductor.', 'warning');
+        return;
+      }
+
+      if (!confirm(`¿Estás seguro que deseas enviar el mensaje de WhatsApp a los ${selectedIds.length} conductores seleccionados?`)) return;
+      
+      closeSelectInactivosModal();
+
       try {
         Swal.fire({
           title: 'Enviando mensajes...',
@@ -4073,7 +4156,8 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({ conductor_ids: selectedIds })
         });
 
         const result = await response.json();
