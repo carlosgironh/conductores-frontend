@@ -1894,6 +1894,7 @@
         <button class="filter-btn" onclick="filterConductores('inactivo', this)">Inactivos</button>
         <button class="filter-btn" onclick="filterConductores('con_pago', this)">💳 Con Pago</button>
         <button class="filter-btn" onclick="filterConductores('sin_pago', this)">❌ Sin Pago</button>
+        <button class="filter-btn" style="background: rgba(37, 211, 102, 0.2); color: #25d366; border-color: #25d366; font-weight: bold; margin-left: 15px;" onclick="enviarWhatsAppInactivos()">📱 Notificar Inactivos (WhatsApp)</button>
       </div>
 
       <div class="table-container">
@@ -2485,6 +2486,7 @@
               <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
               <button class="action-btn edit" onclick="openEditModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Editar Conductor">✏️</button>
               <button class="action-btn qr" onclick="generateQR('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Generar Código QR">📱</button>
+              <button class="action-btn" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59,130,246,0.3); color: #3b82f6;" onclick="solicitarDocumentos('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Solicitar Documentos (WhatsApp)">📄</button>
               ${estado === 'inactivo' ? `<button class="action-btn" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e;" onclick="openActivateDriverModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Activar con Pago Manual">💲</button>` : ''}
               <button class="action-btn toggle ${window.RoadTo ? window.RoadTo.escapeHTML(estado === 'inactivo' ? 'inactive' : '') : estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstado('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Habilitar/Deshabilitar">🔄</button>
               <button class="action-btn qr" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Estado de Pago">💳</button>
@@ -4052,6 +4054,77 @@
       }
 
       container.innerHTML = html;
+    }
+
+    async function enviarWhatsAppInactivos() {
+      if (!confirm('¿Estás seguro que deseas enviar el mensaje de notificación de WhatsApp a TODOS los conductores inactivos por falta de pago?')) return;
+      
+      try {
+        Swal.fire({
+          title: 'Enviando mensajes...',
+          text: 'Por favor espera, la API de YCloud los está enviando.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const response = await fetch('https://conductores-api.onrender.com/api/whatsapp/notify-unpaid', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          Swal.fire(
+            '¡Mensajes Enviados!',
+            `${result.notificados || 0} notificados exitosamente. Fallaron: ${result.fallidos || 0}.\\n${result.message || ''}`,
+            'success'
+          );
+        } else {
+          Swal.fire('Error', result.error || result.message || 'No se pudieron enviar los mensajes.', 'error');
+        }
+      } catch (error) {
+        console.error('Error enviando whatsapps:', error);
+        Swal.fire('Error', 'Hubo un problema de conexión al intentar comunicarse con el backend.', 'error');
+      }
+    }
+
+    async function solicitarDocumentos(conductorId) {
+      if (!confirm('¿Estás seguro que deseas solicitar la actualización de documentos a este conductor vía WhatsApp?')) return;
+      
+      try {
+        Swal.fire({
+          title: 'Enviando solicitud...',
+          text: 'Por favor espera.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const response = await fetch('https://conductores-api.onrender.com/api/whatsapp/notify-documents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ conductor_id: conductorId })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          Swal.fire('¡Enviado!', 'La solicitud de documentos fue enviada correctamente por WhatsApp.', 'success');
+        } else {
+          Swal.fire('Error', result.error || 'No se pudo enviar el mensaje.', 'error');
+        }
+      } catch (error) {
+        console.error('Error enviando WhatsApp de documentos:', error);
+        Swal.fire('Error', 'Hubo un problema de conexión con el servidor.', 'error');
+      }
     }
 
   </script>
