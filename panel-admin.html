@@ -3847,7 +3847,7 @@
         return;
       }
       
-      const { error } = await supabaseClient.from('tarifas').insert({
+      const { error } = await supabaseClient.from('tarifas_rutas').insert({
         origen_zona_id: origen,
         destino_zona_id: destino,
         tipo_viaje: tipo,
@@ -3865,7 +3865,7 @@
     
     async function eliminarTarifa(id) {
       if(confirm("¿Estás seguro de eliminar esta tarifa?")) {
-        const { error } = await supabaseClient.from('tarifas').delete().eq('id', id);
+        const { error } = await supabaseClient.from('tarifas_rutas').delete().eq('id', id);
         if(!error) {
           await cargarTarifas();
         }
@@ -3895,11 +3895,11 @@
           featureGroup: drawnItems
         },
         draw: {
-          polygon: true,
+          polygon: false,
           polyline: false,
-          rectangle: true,
+          rectangle: false,
           circle: false,
-          marker: false,
+          marker: true,
           circlemarker: false
         }
       });
@@ -3907,18 +3907,14 @@
 
       map.on(L.Draw.Event.CREATED, function (event) {
         const layer = event.layer;
-        const geojson = layer.toGeoJSON();
-        const coords = geojson.geometry.coordinates[0];
+        const latlng = layer.getLatLng();
         
-        // Formato para guardar
-        const poligonoObj = coords.map(c => ({ lng: c[0], lat: c[1] }));
-        
-        const nombre = prompt('Ingresa el nombre para esta zona (Ej. Aeropuerto):');
+        const nombre = prompt('Ingresa el nombre para esta zona de parada:');
         if (!nombre) return;
         
         const desc = prompt('Descripción de la zona (opcional):');
         
-        guardarZona(nombre, desc || '', poligonoObj);
+        guardarZona(nombre, desc || '', latlng.lat, latlng.lng);
       });
 
       await cargarZonas();
@@ -3926,7 +3922,7 @@
     }
 
     async function cargarZonas() {
-      const { data, error } = await supabaseClient.from('zonas_geofence').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabaseClient.from('zonas_paradas').select('*').order('created_at', { ascending: false });
       if (!error) {
         allZonas = data || [];
         renderZonasList();
@@ -3939,21 +3935,26 @@
       if (!drawnItems) return;
       drawnItems.clearLayers();
       allZonas.forEach(z => {
-        if (!z.activa) return;
-        // Convertir {lat, lng} a [lat, lng]
-        const latlngs = z.poligono.map(p => [p.lat, p.lng]);
-        const polygon = L.polygon(latlngs, {color: '#8b5cf6'}).bindTooltip(z.nombre);
-        drawnItems.addLayer(polygon);
+        // 500m radius
+        const circle = L.circle([z.latitud, z.longitud], {
+            radius: z.radio_metros || 500,
+            color: '#8b5cf6',
+            fillColor: '#8b5cf6',
+            fillOpacity: 0.2
+        }).bindTooltip(z.nombre);
+        drawnItems.addLayer(circle);
       });
     }
 
-    async function guardarZona(nombre, desc, poligono) {
+    async function guardarZona(nombre, desc, lat, lng) {
       showLoading('Guardando zona...');
       try {
-        const { error } = await supabaseClient.from('zonas_geofence').insert({
+        const { error } = await supabaseClient.from('zonas_paradas').insert({
           nombre: nombre,
           descripcion: desc,
-          poligono: poligono,
+          latitud: lat,
+          longitud: lng,
+          radio_metros: 500,
           activa: true
         });
         if (error) throw error;
@@ -3969,7 +3970,7 @@
     async function toggleZona(id, estadoActual) {
       showLoading('Actualizando zona...');
       try {
-        const { error } = await supabaseClient.from('zonas_geofence').update({
+        const { error } = await supabaseClient.from('zonas_paradas').update({
           activa: !estadoActual
         }).eq('id', id);
         if (error) throw error;
@@ -3986,7 +3987,7 @@
       if(!confirm('¿Eliminar esta zona permanentemente?')) return;
       showLoading('Eliminando...');
       try {
-        const { error } = await supabaseClient.from('zonas_geofence').delete().eq('id', id);
+        const { error } = await supabaseClient.from('zonas_paradas').delete().eq('id', id);
         if (error) throw error;
         showToast('Zona eliminada', 'success');
         await cargarZonas();
@@ -4031,7 +4032,7 @@
       if (!container) return;
 
       const { data, error } = await supabaseClient.from('lista_espera_zonas')
-        .select('*, zonas_geofence(nombre), conductores(nombres, apellidos, placa)')
+        .select('*, zonas_paradas(nombre), conductores(nombres, apellidos, placa)')
         .eq('estado', 'en_cola')
         .order('entrado_en', { ascending: true });
 
