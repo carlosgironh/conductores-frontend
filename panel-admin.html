@@ -59,22 +59,12 @@
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
-    min-height: -webkit-fill-available;
-    padding: 40px 20px;
-    padding-top: calc(80px + var(--safe-top));
-    padding-bottom: calc(20px + var(--safe-bottom));
-    background: 
-      radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 50% 0%, #0a1208 0%, #0a1208 100%);
+    margin: 0;
+    padding: 0;
+    background: #0a1208;
     color: var(--text-light);
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    position: relative;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
 
   body::before {
@@ -97,6 +87,55 @@
     0%, 100% { transform: translate(0, 0) rotate(0deg); }
     33% { transform: translate(30px, -30px) rotate(120deg); }
     66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+
+  
+  /* Layout Dashboard */
+  .sidebar {
+    width: 260px;
+    background: rgba(15, 23, 42, 0.8);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  
+  .main-content {
+    flex: 1;
+    height: 100vh;
+    padding: 30px;
+    overflow-y: auto;
+    position: relative;
+    z-index: 5;
+  }
+  
+  .section-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+  }
+  
+  .section-tab {
+    padding: 15px 20px;
+    text-align: left;
+    border-radius: 12px;
+    width: 100%;
+  }
+  
+  .card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    display: flex;
+    width: 100%;
+    max-width: none;
+    animation: none;
   }
 
   /* Header con navegación */
@@ -2014,9 +2053,18 @@
     <!-- ZONAS SECTION -->
     <div id="zonasSection" class="section-content">
       <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px;">
-        <h3 style="color: white; margin-bottom: 10px;">Gestión de Zonas (Geofencing)</h3>
-        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Dibuja polígonos en el mapa para definir zonas. El sistema detectará cuando un conductor entre o salga de estas áreas.</p>
-        <div id="zonasMap" style="height: 400px; width: 100%; border-radius: 12px; z-index: 1;"></div>
+        <h3 style="color: white; margin-bottom: 10px;">Gestión de Zonas y Paradas</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Usa el ícono de marcador en el mapa para registrar una nueva parada (radio de 500m), o ingresa las coordenadas manualmente abajo.</p>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+          <input type="text" id="manualZonaNombre" placeholder="Nombre (Ej: Plaza La Carne)" class="search-input" style="flex: 1; min-width: 150px;">
+          <input type="text" id="manualZonaDesc" placeholder="Descripción" class="search-input" style="flex: 1; min-width: 150px;">
+          <input type="number" id="manualZonaLat" placeholder="Latitud" class="search-input" style="flex: 1; min-width: 100px;">
+          <input type="number" id="manualZonaLng" placeholder="Longitud" class="search-input" style="flex: 1; min-width: 100px;">
+          <button onclick="registrarZonaManual()" class="btn-primary" style="padding: 10px 20px;">+ Guardar Zona</button>
+        </div>
+
+        <div id="zonasMap" style="height: 600px; width: 100%; border-radius: 12px; z-index: 1;"></div>
       </div>
       
       <div class="table-container">
