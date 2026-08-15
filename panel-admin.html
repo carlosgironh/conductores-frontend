@@ -246,11 +246,12 @@
   }
 
   .header {
-    text-align: center;
+    text-align: left;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding-right: 15px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     overflow-y: auto;
   }
 
@@ -282,7 +283,7 @@
   h2 {
     color: #ffffff;
     font-weight: 800;
-    font-size: 32px;
+    font-size: 24px;
     letter-spacing: -0.5px;
     margin-bottom: 8px;
     background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
@@ -549,7 +550,8 @@
   .actions {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 
   .action-btn {
@@ -2574,11 +2576,6 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}">${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}</span></td>
-          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</div></td>
-          <td><div class="conductor-email">${window.RoadTo ? window.RoadTo.escapeHTML(email) : email}</div></td>
-          <td style="color:#60a5fa">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</td>
-          <td>${renderPaymentIndicator(c)}</td>
           <td>
             <div class="actions">
               <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
@@ -2591,6 +2588,11 @@
               <button class="action-btn delete" onclick="deleteConductor('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Eliminar permanentemente">🗑️</button>
             </div>
           </td>
+<td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}">${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}</span></td>
+          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</div></td>
+          <td><div class="conductor-email">${window.RoadTo ? window.RoadTo.escapeHTML(email) : email}</div></td>
+          <td style="color:#60a5fa">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</td>
+          <td>${renderPaymentIndicator(c)}</td>
         `;
         tbody.appendChild(tr);
       }
@@ -2667,10 +2669,6 @@
         const est = obtenerEstadoPasajero(p);
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(est === 'active' ? 'active' : 'inactive') : est === 'active' ? 'active' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}</span></td>
-          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(p.nombres) : p.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(p.apellidos) : p.apellidos}</div></td>
-          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.email || 'Sin email') : p.email || 'Sin email'}</td>
-          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
           <td>
             <div class="actions">
               <button class="action-btn view" onclick="window.open('perfil-pasajero.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}', '_blank')" title="Ver Perfil">👁️</button>
@@ -2678,6 +2676,10 @@
               <button class="action-btn delete" onclick="deletePasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')" title="Eliminar Pasajero">🗑️</button>
             </div>
           </td>
+<td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(est === 'active' ? 'active' : 'inactive') : est === 'active' ? 'active' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}</span></td>
+          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(p.nombres) : p.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(p.apellidos) : p.apellidos}</div></td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.email || 'Sin email') : p.email || 'Sin email'}</td>
+          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
         `;
         tbody.appendChild(tr);
       }
