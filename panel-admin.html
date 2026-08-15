@@ -84,7 +84,7 @@
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     min-height: -webkit-fill-available;
-    padding: 40px 20px;
+    padding: 20px;
     padding-top: calc(80px + var(--safe-top));
     padding-bottom: calc(20px + var(--safe-bottom));
     overflow: hidden;
@@ -95,7 +95,7 @@
     color: var(--text-light);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     overflow: hidden;
   }
 
@@ -244,7 +244,7 @@
   .card {
     max-width: 1600px;
     width: 98vw;
-    height: 90vh;
+    height: calc(100vh - 90px - var(--safe-top));
     background: rgba(30, 41, 59, 0.4);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
@@ -4058,6 +4058,17 @@
       });
       map.addControl(drawControl);
 
+      // Crear zona al hacer clic en el mapa
+      map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        document.getElementById('manualZonaLat').value = lat;
+        document.getElementById('manualZonaLng').value = lng;
+        showToast('📍 Coordenadas capturadas: ' + lat + ', ' + lng + '. Llena el nombre y guarda.', 'success');
+        // Scroll al formulario
+        document.getElementById('manualZonaNombre').focus();
+      });
+
       map.on(L.Draw.Event.CREATED, function (event) {
         const layer = event.layer;
         const latlng = layer.getLatLng();
@@ -4118,6 +4129,24 @@
       } finally {
         hideLoading();
       }
+    }
+
+    async function registrarZonaManual() {
+      const nombre = document.getElementById('manualZonaNombre').value.trim();
+      const desc = document.getElementById('manualZonaDesc').value.trim();
+      const lat = parseFloat(document.getElementById('manualZonaLat').value);
+      const lng = parseFloat(document.getElementById('manualZonaLng').value);
+
+      if (!nombre) { showToast('Ingresa un nombre para la zona', 'error'); return; }
+      if (isNaN(lat) || isNaN(lng)) { showToast('Ingresa coordenadas válidas (latitud y longitud)', 'error'); return; }
+
+      await guardarZona(nombre, desc, lat, lng);
+
+      // Limpiar campos
+      document.getElementById('manualZonaNombre').value = '';
+      document.getElementById('manualZonaDesc').value = '';
+      document.getElementById('manualZonaLat').value = '';
+      document.getElementById('manualZonaLng').value = '';
     }
 
     async function toggleZona(id, estadoActual) {
