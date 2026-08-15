@@ -419,6 +419,56 @@
     border-color: transparent;
   }
 
+  
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  .dropdown-btn {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #0f172a;
+    min-width: 180px;
+    box-shadow: 0px 10px 25px rgba(0,0,0,0.5);
+    z-index: 9999;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 8px;
+    left: 0;
+    top: 100%;
+    margin-top: 5px;
+  }
+  .dropdown-content.show {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .dropdown-content .action-btn {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 6px;
+    padding: 6px 10px;
+    height: auto;
+    background: transparent;
+    border: none;
+  }
+  .dropdown-content .action-btn:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
   /* Tabla */
   .table-container {
     overflow-x: auto;
@@ -2575,25 +2625,28 @@
         const email = c.email || await obtenerEmailDesdeAuth(c.auth_user_id);
 
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>
-            <div class="actions">
-              <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')" title="Ver Perfil">👁️</button>
-              <button class="action-btn edit" onclick="openEditModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Editar Conductor">✏️</button>
-              <button class="action-btn qr" onclick="generateQR('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Generar Código QR">📱</button>
-              <button class="action-btn" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59,130,246,0.3); color: #3b82f6;" onclick="solicitarDocumentos('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Solicitar Documentos (WhatsApp)">📄</button>
-              ${estado === 'inactivo' ? `<button class="action-btn" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e;" onclick="openActivateDriverModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Activar con Pago Manual">💲</button>` : ''}
-              <button class="action-btn toggle ${window.RoadTo ? window.RoadTo.escapeHTML(estado === 'inactivo' ? 'inactive' : '') : estado === 'inactivo' ? 'inactive' : ''}" onclick="toggleEstado('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Habilitar/Deshabilitar">🔄</button>
-              <button class="action-btn qr" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Estado de Pago">💳</button>
-              <button class="action-btn delete" onclick="deleteConductor('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')" title="Eliminar permanentemente">🗑️</button>
-            </div>
-          </td>
-<td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}">${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}</span></td>
-          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</div></td>
-          <td><div class="conductor-email">${window.RoadTo ? window.RoadTo.escapeHTML(email) : email}</div></td>
-          <td style="color:#60a5fa">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</td>
-          <td>${renderPaymentIndicator(c)}</td>
-        `;
+                  tr.innerHTML = `
+            <td>
+              <div class="dropdown">
+                <button class="dropdown-btn" onclick="toggleDropdown('${c.id}')">⚙️ Acciones</button>
+                <div id="dropdown-${c.id}" class="dropdown-content">
+                  <button class="action-btn view" onclick="window.open('perfil_publico.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}', '_blank')">👁️ Ver Perfil</button>
+                  <button class="action-btn edit" onclick="openEditModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">✏️ Editar Conductor</button>
+                  <button class="action-btn qr" onclick="generateQR('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">📱 Generar Código QR</button>
+                  <button class="action-btn" style="color: #3b82f6;" onclick="solicitarDocumentos('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">📄 Solicitar Docs</button>
+                  ${estado === 'inactivo' ? `<button class="action-btn" style="color: #22c55e;" onclick="openActivateDriverModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">💸 Activar Pago</button>` : ''}
+                  <button class="action-btn toggle" style="color: #f97316;" onclick="toggleEstado('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">🔄 Hab/Deshab</button>
+                  <button class="action-btn qr" style="color: #8b5cf6;" onclick="openPaymentDetailModal('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">💳 Estado de Pago</button>
+                  <button class="action-btn delete" onclick="deleteConductor('${window.RoadTo ? window.RoadTo.escapeHTML(c.id) : c.id}')">🗑️ Eliminar</button>
+                </div>
+              </div>
+            </td>
+            <td>${renderPaymentIndicator(c)}</td>
+            <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}">${window.RoadTo ? window.RoadTo.escapeHTML(estado) : estado}</span></td>
+            <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres) : c.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos) : c.apellidos}</div></td>
+            <td><div class="conductor-email">${window.RoadTo ? window.RoadTo.escapeHTML(email) : email}</div></td>
+            <td style="color:#60a5fa">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</td>
+          `;
         tbody.appendChild(tr);
       }
       updateStats();
@@ -2668,19 +2721,22 @@
       for (const p of filtered) {
         const est = obtenerEstadoPasajero(p);
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>
-            <div class="actions">
-              <button class="action-btn view" onclick="window.open('perfil-pasajero.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}', '_blank')" title="Ver Perfil">👁️</button>
-              <button class="action-btn edit" onclick="openEditModalPasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')" title="Editar Pasajero">✏️</button>
-              <button class="action-btn delete" onclick="deletePasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')" title="Eliminar Pasajero">🗑️</button>
-            </div>
-          </td>
-<td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(est === 'active' ? 'active' : 'inactive') : est === 'active' ? 'active' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}</span></td>
-          <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(p.nombres) : p.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(p.apellidos) : p.apellidos}</div></td>
-          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.email || 'Sin email') : p.email || 'Sin email'}</td>
-          <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
-        `;
+                  tr.innerHTML = `
+            <td>
+              <div class="dropdown">
+                <button class="dropdown-btn" onclick="toggleDropdown('p-${p.id}')">⚙️ Acciones</button>
+                <div id="dropdown-p-${p.id}" class="dropdown-content">
+                  <button class="action-btn view" onclick="window.open('perfil-pasajero.html?id=${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}', '_blank')">👁️ Ver Perfil</button>
+                  <button class="action-btn edit" onclick="openEditModalPasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')">✏️ Editar Pasajero</button>
+                  <button class="action-btn delete" onclick="deletePasajero('${window.RoadTo ? window.RoadTo.escapeHTML(p.id) : p.id}')">🗑️ Eliminar</button>
+                </div>
+              </div>
+            </td>
+            <td><span class="status-badge ${window.RoadTo ? window.RoadTo.escapeHTML(est === 'active' ? 'active' : 'inactive') : est === 'active' ? 'active' : 'inactive'}">${window.RoadTo ? window.RoadTo.escapeHTML(est) : est}</span></td>
+            <td><div class="conductor-name">${window.RoadTo ? window.RoadTo.escapeHTML(p.nombres) : p.nombres} ${window.RoadTo ? window.RoadTo.escapeHTML(p.apellidos) : p.apellidos}</div></td>
+            <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.email || 'Sin email') : p.email || 'Sin email'}</td>
+            <td>${window.RoadTo ? window.RoadTo.escapeHTML(p.celular || '-') : p.celular || '-'}</td>
+          `;
         tbody.appendChild(tr);
       }
       updateStatsPasajeros();
