@@ -63,6 +63,7 @@
     padding: 40px 20px;
     padding-top: calc(80px + var(--safe-top));
     padding-bottom: calc(20px + var(--safe-bottom));
+    overflow: hidden;
     background: 
       radial-gradient(ellipse at 10% 20%, rgba(138, 199, 37, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 90% 80%, rgba(154, 217, 58, 0.1) 0%, transparent 50%),
@@ -169,8 +170,9 @@
   }
 
   .card {
-    max-width: 1200px;
-    width: 100%;
+    max-width: 1600px;
+    width: 98vw;
+    height: 90vh;
     background: rgba(30, 41, 59, 0.4);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
@@ -180,10 +182,13 @@
     box-shadow: 
       0 25px 50px -12px rgba(0, 0, 0, 0.5),
       0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    padding: 50px 45px;
+    padding: 20px;
     position: relative;
     z-index: 1;
     animation: cardEntry 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 20px;
     overflow: hidden;
   }
 
@@ -194,7 +199,11 @@
 
   .header {
     text-align: center;
-    margin-bottom: 40px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding-right: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
   }
 
   .header-icon {
@@ -283,13 +292,15 @@
   /* Section Tabs */
   .section-tabs {
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 30px;
-    justify-content: center;
-    flex-wrap: wrap;
+    width: 100%;
   }
   .section-tab {
-    padding: 12px 28px;
+    padding: 12px 20px;
+    text-align: left;
+    width: 100%;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -314,6 +325,9 @@
   .section-content {
     display: none;
     animation: fadeInSection 0.4s ease;
+    overflow-y: auto;
+    height: 100%;
+    padding-right: 10px;
   }
   .section-content.active {
     display: block;
