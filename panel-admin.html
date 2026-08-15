@@ -109,8 +109,10 @@
     height: 100vh;
     padding: 30px;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
     z-index: 5;
+    min-width: 0; /* Crucial para evitar que el flex item se expanda más allá de la pantalla */
   }
   
   .section-tabs {
