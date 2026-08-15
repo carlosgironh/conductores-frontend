@@ -13,7 +13,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <!-- Supabase y QRCode -->
-<script src="JS/supabase-bundle.js">
+<script src="JS/supabase-bundle.js"></script>
+<script>
       // Cierra los menús desplegables si se hace clic fuera de ellos
       window.onclick = function(event) {
         if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-btn')) {
@@ -2040,12 +2041,12 @@
         <table>
           <thead>
             <tr>
+              <th>Acciones</th>
+              <th>Pago</th>
               <th>Estado</th>
               <th>Conductor</th>
               <th>Correo</th>
               <th>Vehículo</th>
-              <th>Pago</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="conductoresTable">
@@ -2093,11 +2094,11 @@
         <table>
           <thead>
             <tr>
+              <th>Acciones</th>
               <th>Estado</th>
               <th>Pasajero</th>
               <th>Correo</th>
               <th>Celular</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="pasajerosTable">
@@ -2169,10 +2170,10 @@
         <table>
           <thead>
             <tr>
+              <th>Acciones</th>
               <th>Nombre de Zona</th>
               <th>Descripción</th>
               <th>Estado</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="zonasList">
