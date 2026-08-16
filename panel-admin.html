@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!D id="adminSidebar"OCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1676,59 +1676,7 @@
       width: 280px;
       box-shadow: 4px 0 20px rgba(0,0,0,0.5);
     }
-    .sidebar.active {
-      left: 0;
-    }
-    body {
-      flex-direction: column;
-    }
-    .main-content {
-      padding-top: 80px;
-    }
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
-
-  /* Mobile Sidebar Toggle */
-  .mobile-menu-btn {
-    display: none;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: #8ac725;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-  .mobile-menu-btn i {
-    color: #000;
-    font-size: 24px;
-  }
-  
-  @media (max-width: 768px) {
-    .mobile-menu-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      transition: left 0.3s ease;
-      z-index: 999;
-      background: rgba(10, 18, 8, 0.95);
-      backdrop-filter: blur(10px);
-      width: 280px;
-      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-    }
-    .sidebar.active {
+    .sidebar.active, #adminSidebar.active {
       left: 0;
     }
     body {
@@ -1754,6 +1702,10 @@
 </head>
 
 <body>
+<button class="mobile-menu-btn" id="sidebarToggle" onclick="document.getElementById('adminSidebar').classList.toggle('active')" title="Menu">
+  &#9776;
+</button>
+
 
   <!-- Header con navegación -->
   <header class="app-header">
