@@ -660,7 +660,7 @@
                 };
                 
                 if (tarifaFinal > 0) {
-                    insertData.precio = tarifaFinal;
+                    insertData.tarifa = tarifaFinal;
                 }
 
                 const { data: viaje, error: insertError } = await supabaseClient
