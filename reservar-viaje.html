@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a1208">
     <title>Reservar Viaje - Pasajero | Road To</title>
+    <!-- Supabase SDK debe cargarse ANTES de config.js para que createSupabase() funcione -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" integrity="sha384-UTSBJmKQ6i959fcNiwXTLNWA6jWoIch3oa4kEJharAIaQ7y2w3Htj8hqhFxuOqf1" crossorigin="anonymous"></script>
+    <script src="config.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -347,9 +349,6 @@
             .card { padding: 20px; }
         }
     </style>
-<base target="_blank">
-
-  <script src="config.js"></script>
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -389,7 +388,7 @@
                 <div class="form-group">
                     <label for="origen">📍 Origen</label>
                     <div style="display:flex; gap:10px;">
-                        <select id="origen" required onchange="calcularTarifa()" style="flex:1;">
+                        <select id="origen" required onchange="if(typeof calcularTarifa==='function') calcularTarifa()" style="flex:1;">
                             <option value="">Selecciona tu ubicación...</option>
                             <option value="Plaza La Carne (Chorrera)">Plaza La Carne (Chorrera)</option>
                             <option value="Feulliet (Chorrera)">Feulliet (Chorrera)</option>
@@ -405,7 +404,7 @@
 
                 <div class="form-group">
                     <label for="destino">🏁 Destino</label>
-                    <select id="destino" required onchange="calcularTarifa()">
+                    <select id="destino" required onchange="if(typeof calcularTarifa==='function') calcularTarifa()">
                         <option value="">Selecciona tu destino...</option>
                         <optgroup label="Hacia Arraiján (Ida)">
                             <option value="Bique">Bique</option>
@@ -463,7 +462,41 @@
 
     <script>
 
-        const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/asignar-conductor`;
+        // ==========================================
+        // TARIFAS — deben declararse primero para evitar
+        // errores de Temporal Dead Zone en inline onchange
+        // ==========================================
+        const TARIFA_IDA = {
+            'Plaza La Carne (Chorrera)': {
+                'Bique': 1.00,
+                'Cerro Silvestre': 1.50,
+                'Nvo Chorrillo': 1.50,
+                'Cáceres': 1.50,
+                'Burunga': 1.50,
+                'La Esperanza': 2.00,
+                'Perurena': 2.00,
+                'Terpel': 2.00,
+                'Pte. Arraiján': 2.00
+            }
+        };
+
+        const TARIFA_REGRESO = {
+            'Pte. Arraiján': {
+                'Montelimar': 1.50,
+                'Costa Verde': 1.50,
+                'Anclas': 1.50,
+                'Plaza Italia': 1.50,
+                'Feulliet (Chorrera)': 1.50
+            },
+            'Burunga': { 'Feulliet (Chorrera)': 1.50 },
+            'Nvo Chorrillo': { 'Feulliet (Chorrera)': 1.50 },
+            'Cerro Silvestre': { 'Feulliet (Chorrera)': 1.00 }
+        };
+
+        let tarifaFinal = 0;
+
+        // SUPABASE_URL tomado de config.js centralizado
+        const EDGE_FUNCTION_URL = `${window.RoadTo.config.SUPABASE_URL}/functions/v1/asignar-conductor`;
 
         const supabaseClient = window.RoadTo.createSupabase();
         let currentUser = null;
@@ -515,36 +548,8 @@
 
         // ==========================================
         // CALCULO AUTOMATICO DE TARIFAS
+        // (TARIFA_IDA, TARIFA_REGRESO y tarifaFinal ya declarados arriba)
         // ==========================================
-        const TARIFA_IDA = {
-            'Plaza La Carne (Chorrera)': {
-                'Bique': 1.00,
-                'Cerro Silvestre': 1.50,
-                'Nvo Chorrillo': 1.50,
-                'Cáceres': 1.50,
-                'Burunga': 1.50,
-                'La Esperanza': 2.00,
-                'Perurena': 2.00,
-                'Terpel': 2.00,
-                'Pte. Arraiján': 2.00
-            }
-        };
-
-        const TARIFA_REGRESO = {
-            'Pte. Arraiján': {
-                'Montelimar': 1.50,
-                'Costa Verde': 1.50,
-                'Anclas': 1.50,
-                'Plaza Italia': 1.50,
-                'Feulliet (Chorrera)': 1.50
-            },
-            'Burunga': { 'Feulliet (Chorrera)': 1.50 },
-            'Nvo Chorrillo': { 'Feulliet (Chorrera)': 1.50 },
-            'Cerro Silvestre': { 'Feulliet (Chorrera)': 1.00 }
-        };
-
-        let tarifaFinal = 0;
-
         function calcularTarifa() {
             const origen = document.getElementById('origen').value;
             const destino = document.getElementById('destino').value;
@@ -726,14 +731,6 @@
                 }
 
                 
-                const activeTrip = viajes.find(v => ['asignado', 'en_curso'].includes(v.estado));
-                if (activeTrip) {
-                    initActiveMap(activeTrip);
-                } else {
-                    document.getElementById('activeMapContainer').style.display = 'none';
-                    if (activeChannel) supabaseClient.removeChannel(activeChannel);
-                    activeDriverId = null;
-                }
                 const viajesConductor = await Promise.all(
                     viajes.map(async (viaje) => {
                         const conductor = await getConductorInfo(viaje.conductor_asignado_id);
@@ -801,9 +798,20 @@
 
             currentUser = session.user;
 
+            // Fecha mínima = ahora, valor por defecto = ahora + 15 min
+            // Usamos hora local del dispositivo directamente (sin conversión UTC)
+            const pad = n => String(n).padStart(2, '0');
+            const toLocalISO = (d) => {
+                d.setSeconds(0, 0);
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+
             const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('fecha-hora').min = now.toISOString().slice(0, 16);
+            document.getElementById('fecha-hora').min = toLocalISO(new Date(now));
+
+            // Valor por defecto: ahora + 15 minutos en hora local
+            const defaultTime = new Date(now.getTime() + 15 * 60 * 1000);
+            document.getElementById('fecha-hora').value = toLocalISO(defaultTime);
 
             await cargarMisViajes();
             iniciarRealtime();

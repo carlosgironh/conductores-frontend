@@ -2256,12 +2256,19 @@
         <h3 style="color: white; margin-bottom: 10px;">Gestión de Zonas y Paradas</h3>
         <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Usa el ícono de marcador en el mapa para registrar una nueva parada (radio de 500m), o ingresa las coordenadas manualmente abajo.</p>
         
-        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-          <input type="text" id="manualZonaNombre" placeholder="Nombre (Ej: Plaza La Carne)" class="search-input" style="flex: 1; min-width: 150px;">
-          <input type="text" id="manualZonaDesc" placeholder="Descripción" class="search-input" style="flex: 1; min-width: 150px;">
-          <input type="number" id="manualZonaLat" placeholder="Latitud" class="search-input" style="flex: 1; min-width: 100px;">
-          <input type="number" id="manualZonaLng" placeholder="Longitud" class="search-input" style="flex: 1; min-width: 100px;">
-          <button onclick="registrarZonaManual()" class="btn-primary" style="padding: 10px 20px;">+ Guardar Zona</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+          <input type="text" id="manualZonaNombre" placeholder="Nombre (Ej: Plaza La Carne)" class="search-input" style="flex: 2; min-width: 150px;">
+          <input type="text" id="manualZonaDesc" placeholder="Descripcion" class="search-input" style="flex: 2; min-width: 150px;">
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+          <input type="number" id="manualZonaLat" placeholder="Latitud" class="search-input" style="flex: 1; min-width: 100px;" step="any">
+          <input type="number" id="manualZonaLng" placeholder="Longitud" class="search-input" style="flex: 1; min-width: 100px;" step="any">
+          <input type="number" id="manualZonaRadio" placeholder="Radio m (def. 500)" class="search-input" style="flex: 1; min-width: 120px;" min="50" max="5000" step="50" value="500">
+          <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 160px;">
+            <span style="color: #4ade80; font-size: 13px; white-space: nowrap;">Tarifa Base $:</span>
+            <input type="number" id="manualZonaTarifa" placeholder="0.00" class="search-input" style="flex: 1;" min="0" step="0.25">
+          </div>
+          <button onclick="registrarZonaManual()" class="btn-primary" style="padding: 10px 20px; white-space: nowrap;">+ Guardar Zona</button>
         </div>
 
         <div id="zonasMap" style="height: 600px; width: 100%; border-radius: 12px; z-index: 1;"></div>
@@ -2273,12 +2280,14 @@
             <tr>
               <th>Acciones</th>
               <th>Nombre de Zona</th>
-              <th>Descripción</th>
+              <th>Descripcion</th>
+              <th>Radio (m)</th>
+              <th>Tarifa Base ($)</th>
               <th>Estado</th>
             </tr>
           </thead>
           <tbody id="zonasList">
-            <tr><td colspan="4" style="text-align:center;">Cargando zonas...</td></tr>
+            <tr><td colspan="6" style="text-align:center;">Cargando zonas...</td></tr>
           </tbody>
         </table>
       </div>
@@ -4024,7 +4033,7 @@
     let allTarifas = [];
 
     async function cargarTarifas() {
-      const { data, error } = await supabaseClient.from('tarifas')
+      const { data, error } = await supabaseClient.from('tarifas_rutas')
         .select(`
           id, precio, tipo_viaje,
           origen:origen_zona_id (id, nombre),
@@ -4212,19 +4221,23 @@
       });
     }
 
-    async function guardarZona(nombre, desc, lat, lng) {
+    async function guardarZona(nombre, desc, lat, lng, radio, tarifa) {
       showLoading('Guardando zona...');
       try {
-        const { error } = await supabaseClient.from('zonas_paradas').insert({
+        const insertData = {
           nombre: nombre,
           descripcion: desc,
           latitud: lat,
           longitud: lng,
-          radio_metros: 500,
+          radio_metros: radio || 500,
           activa: true
-        });
+        };
+        if (tarifa !== undefined && tarifa !== null && !isNaN(tarifa)) {
+          insertData.tarifa_base = parseFloat(tarifa);
+        }
+        const { error } = await supabaseClient.from('zonas_paradas').insert(insertData);
         if (error) throw error;
-        showToast('Zona guardada con éxito', 'success');
+        showToast('Zona guardada con exito', 'success');
         await cargarZonas();
       } catch(e) {
         showToast(e.message || 'Error al guardar zona', 'error');
@@ -4238,17 +4251,22 @@
       const desc = document.getElementById('manualZonaDesc').value.trim();
       const lat = parseFloat(document.getElementById('manualZonaLat').value);
       const lng = parseFloat(document.getElementById('manualZonaLng').value);
+      const radio = parseFloat(document.getElementById('manualZonaRadio').value) || 500;
+      const tarifaVal = document.getElementById('manualZonaTarifa').value;
+      const tarifa = tarifaVal !== '' ? parseFloat(tarifaVal) : null;
 
       if (!nombre) { showToast('Ingresa un nombre para la zona', 'error'); return; }
-      if (isNaN(lat) || isNaN(lng)) { showToast('Ingresa coordenadas válidas (latitud y longitud)', 'error'); return; }
+      if (isNaN(lat) || isNaN(lng)) { showToast('Ingresa coordenadas validas (latitud y longitud)', 'error'); return; }
 
-      await guardarZona(nombre, desc, lat, lng);
+      await guardarZona(nombre, desc, lat, lng, radio, tarifa);
 
       // Limpiar campos
       document.getElementById('manualZonaNombre').value = '';
       document.getElementById('manualZonaDesc').value = '';
       document.getElementById('manualZonaLat').value = '';
       document.getElementById('manualZonaLng').value = '';
+      document.getElementById('manualZonaRadio').value = '500';
+      document.getElementById('manualZonaTarifa').value = '';
     }
 
     async function toggleZona(id, estadoActual) {
@@ -4287,7 +4305,7 @@
       if (!tbody) return;
       
       if (allZonas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">No hay zonas definidas.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">No hay zonas definidas.</td></tr>';
         return;
       }
       
@@ -4296,16 +4314,22 @@
         const statusBadge = z.activa 
           ? '<span style="background:rgba(34,197,94,0.2);color:#4ade80;padding:4px 8px;border-radius:4px;font-size:12px;">Activa</span>' 
           : '<span style="background:rgba(239,68,68,0.2);color:#f87171;padding:4px 8px;border-radius:4px;font-size:12px;">Inactiva</span>';
+        const tarifaDisplay = (z.tarifa_base !== null && z.tarifa_base !== undefined)
+          ? '<span style="color:#4ade80;font-weight:700;">$' + parseFloat(z.tarifa_base).toFixed(2) + '</span>'
+          : '<span style="color:#64748b;">-</span>';
           
         const tr = document.createElement('tr');
+        const escH = (s) => window.RoadTo ? window.RoadTo.escapeHTML(s) : String(s || '');
         tr.innerHTML = `
-          <td style="color:white;font-weight:600;">${window.RoadTo ? window.RoadTo.escapeHTML(z.nombre) : z.nombre}</td>
-          <td style="color:#94a3b8;">${window.RoadTo ? window.RoadTo.escapeHTML(z.descripcion || '-') : z.descripcion || '-'}</td>
-          <td>${window.RoadTo ? window.RoadTo.escapeHTML(statusBadge) : statusBadge}</td>
           <td>
-            <button class="action-btn view" onclick="toggleZona('${window.RoadTo ? window.RoadTo.escapeHTML(z.id) : z.id}', ${window.RoadTo ? window.RoadTo.escapeHTML(z.activa) : z.activa})" title="Activar/Desactivar">👁️</button>
-            <button class="action-btn delete" onclick="eliminarZona('${window.RoadTo ? window.RoadTo.escapeHTML(z.id) : z.id}')" title="Eliminar">✕</button>
+            <button class="action-btn view" onclick="toggleZona('${escH(z.id)}', ${z.activa ? 'true' : 'false'})" title="Activar/Desactivar">&#128065;</button>
+            <button class="action-btn delete" onclick="eliminarZona('${escH(z.id)}')" title="Eliminar">&times;</button>
           </td>
+          <td style="color:white;font-weight:600;">${escH(z.nombre)}</td>
+          <td style="color:#94a3b8;">${escH(z.descripcion || '-')}</td>
+          <td style="color:#94a3b8;">${z.radio_metros || 500} m</td>
+          <td>${tarifaDisplay}</td>
+          <td>${statusBadge}</td>
         `;
         tbody.appendChild(tr);
       });
