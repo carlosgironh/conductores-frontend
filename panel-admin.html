@@ -3004,6 +3004,9 @@
             ${isBlocked ? `
               <button class="action-btn unlock" onclick="desbloquearViajeAdmin('${v.id}')" title="Desbloquear Viaje" style="font-size:16px">🔓</button>
             ` : `
+              ${cleanEstado === 'pendiente' ? `
+                <button class="action-btn asignar" onclick="openAsignarModal('${v.id}')" title="Asignar Conductor" style="font-size:16px; color:#60a5fa; background:rgba(96,165,250,0.1)">🚕</button>
+              ` : ''}
               <button class="action-btn lock" onclick="bloquearViajeAdmin('${v.id}')" title="Bloquear Viaje" style="font-size:16px">🔒</button>
             `}
             <button class="action-btn delete" onclick="deleteViajeAdmin('${v.id}')" title="Eliminar Viaje">🗑️</button>

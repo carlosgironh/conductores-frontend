@@ -461,12 +461,11 @@
     <div id="toast" class="toast"></div>
 
     <script>
-
         // ==========================================
-        // TARIFAS — deben declararse primero para evitar
-        // errores de Temporal Dead Zone en inline onchange
+        // TARIFAS — inicializadas con var para evitar Temporal Dead Zone
         // ==========================================
-        const TARIFA_IDA = {
+        var tarifaFinal = 0;
+        var TARIFA_IDA = {
             'Plaza La Carne (Chorrera)': {
                 'Bique': 1.00,
                 'Cerro Silvestre': 1.50,
@@ -480,7 +479,7 @@
             }
         };
 
-        const TARIFA_REGRESO = {
+        var TARIFA_REGRESO = {
             'Pte. Arraiján': {
                 'Montelimar': 1.50,
                 'Costa Verde': 1.50,
@@ -493,10 +492,8 @@
             'Cerro Silvestre': { 'Feulliet (Chorrera)': 1.00 }
         };
 
-        let tarifaFinal = 0;
-
         // SUPABASE_URL tomado de config.js centralizado
-        const EDGE_FUNCTION_URL = `${window.RoadTo.config.SUPABASE_URL}/functions/v1/asignar-conductor`;
+        const EDGE_FUNCTION_URL = `${window.RoadTo?.config?.SUPABASE_URL || 'https://ugchmuhjzzyofoogprlr.supabase.co'}/functions/v1/asignar-conductor`;
 
         const supabaseClient = window.RoadTo.createSupabase();
         let currentUser = null;
