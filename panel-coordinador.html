@@ -811,6 +811,7 @@
         <button class="section-tab" onclick="switchSection('conductores', this)">🚗 Conductores</button>
         <button class="section-tab" onclick="switchSection('pasajeros', this)">👤 Pasajeros</button>
         <button class="section-tab" onclick="switchSection('flota', this)">📊 Estado de Flota</button>
+        <button class="section-tab" onclick="switchSection('carrerasActivas', this); cargarCarrerasActivas()">🚌 Carreras a Bordo <span id="carrerasActivasBadge" style="background:rgba(249,115,22,0.3);color:#fb923c;padding:1px 6px;border-radius:8px;font-size:11px;"></span></button>
         <button class="section-tab" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: #22c55e;" onclick="switchSection('mapaGlobal', this); setTimeout(initGlobalMap, 300)">🌍 Mapa en Vivo</button>
       </div>
     </div>
@@ -831,6 +832,21 @@
 
     <!-- VIAJES SECTION -->
     <div id="viajesSection" class="section-content active">
+
+    <!-- CARRERAS ACTIVAS SECTION -->
+    <div id="carrerasActivasSection" class="section-content">
+      <div style="margin-bottom:20px;">
+        <h3 style="color:#fb923c;font-size:18px;font-weight:700;margin-bottom:6px;">🚌 Carreras Activas en Ruta</h3>
+        <p style="color:#64748b;font-size:13px;">Pasajeros actualmente a bordo de todos los buses en tiempo real.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button onclick="cargarCarrerasActivas()" style="padding:10px 20px;border-radius:10px;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.3);color:#fb923c;font-weight:700;cursor:pointer;">🔄 Actualizar</button>
+      </div>
+      <div id="carrerasActivasList" style="display:grid;gap:12px;">
+        <div style="text-align:center;padding:30px;color:#64748b;">Cargando carreras...</div>
+      </div>
+    </div>
+
       <div class="stats-grid">
         <div class="stat-card total">
           <div class="stat-value" id="totalCountViajes">0</div>
@@ -1483,31 +1499,31 @@
 
     async function renderConductoresDisponibles() {
       const container = document.getElementById('conductoresDisponiblesList');
-      const activos = allConductores.filter(c => c.estado === true);
+      const activos = allConductores.filter(c => c.status === 'active' || c.status == null || c.estado === true);
 
       if (activos.length === 0) {
-        container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">No hay conductores activos.</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">No hay conductores activos. Verifica el estado de los conductores.</div>`;
         return;
       }
-      container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">Cargando prioridades...</div>`;
+      container.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b">Cargando conductores...</div>`;
 
       let colasMap = {};
       try {
         const { data, error } = await supabaseClient.from('lista_espera_zonas')
-          .select('conductor_id, zonas_geofence(nombre), entrado_en')
+          .select('conductor_id, zona_id, entrado_en, zonas_paradas(nombre)')
           .eq('estado', 'en_cola')
           .order('entrado_en', { ascending: true });
         
         if (!error && data) {
            data.forEach((item, index) => {
              colasMap[item.conductor_id] = {
-               zona: item.zonas_geofence?.nombre || 'Zona',
+               zona: item.zonas_paradas?.nombre || 'En cola',
                pos: index + 1
              };
            });
         }
       } catch (e) {
-        console.error("Error ocurrido en el cliente", "Contacte a soporte");
+        console.warn('No se pudo cargar colas:', e.message);
       }
 
       // Ordenar: los que están en cola van primero
@@ -1528,7 +1544,7 @@
         
         let badgeHtml = '';
         if (colasMap[c.id]) {
-          badgeHtml = `<span style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 8px;">En fila: ${colasMap[c.id].zona} (#${colasMap[c.id].pos})</span>`;
+          badgeHtml = `<span style="background:rgba(168,85,247,0.2);color:#a855f7;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:8px;">En cola: ${window.RoadTo ? window.RoadTo.escapeHTML(colasMap[c.id].zona) : colasMap[c.id].zona} (#${colasMap[c.id].pos})</span>`;
         }
 
         const iniN = (c.nombres && c.nombres.length > 0) ? c.nombres[0] : '';
@@ -1536,7 +1552,7 @@
         div.innerHTML = `
           <div class="avatar">${window.RoadTo ? window.RoadTo.escapeHTML(iniN) : iniN}${window.RoadTo ? window.RoadTo.escapeHTML(iniA) : iniA}</div>
           <div class="info">
-            <div class="name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(badgeHtml) : badgeHtml}</div>
+            <div class="name">${window.RoadTo ? window.RoadTo.escapeHTML(c.nombres || '') : c.nombres || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.apellidos || '') : c.apellidos || ''} ${badgeHtml}</div>
             <div class="vehicle">${window.RoadTo ? window.RoadTo.escapeHTML(c.marca || '') : c.marca || ''} ${window.RoadTo ? window.RoadTo.escapeHTML(c.modelo || '') : c.modelo || ''} (${window.RoadTo ? window.RoadTo.escapeHTML(c.placa || '') : c.placa || ''})</div>
           </div>
         `;
@@ -1557,25 +1573,18 @@
         // Quitar al conductor de la cola virtual si estaba en ella
         await supabaseClient.from('lista_espera_zonas').update({ estado: 'asignado' }).eq('conductor_id', id).eq('estado', 'en_cola');
         
-        // Notificar al conductor por Push Notification
+        // Registrar en historial
         try {
-          const session = await supabaseClient.auth.getSession();
-          if (session.data.session) {
-             fetch(`${SUPABASE_URL}/functions/v1/notificar-conductor`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${session.data.session.access_token}`
-                },
-                body: JSON.stringify({
-                  conductor_id: id,
-                  titulo: 'Nuevo Viaje Asignado',
-                  mensaje: 'Se te ha asignado un nuevo viaje. Revisa la aplicación.'
-                })
-             });
-          }
+          const conductorAsignado = allConductores.find(c => c.id === id);
+          // Notificar en historial
+          await supabaseClient.from('notificaciones').insert({
+            conductor_id: id,
+            tipo: 'viaje_asignado',
+            mensaje: 'Se te ha asignado un nuevo viaje. Revisa tu app.',
+            leida: false
+          });
         } catch (e) {
-          console.warn('No se pudo notificar al conductor', e);
+          console.warn('No se pudo registrar notificación', e);
         }
 
         showToast('Conductor asignado con éxito', 'success');
@@ -2026,6 +2035,74 @@
       document.getElementById('flotaInactivos').textContent = allConductores.filter(c => c.estado === false).length;
       document.getElementById('flotaPagados').textContent = allConductores.filter(c => verificarSuscripcionActiva(c)).length;
       document.getElementById('flotaDisponibles').textContent = allConductores.filter(c => c.estado === true && verificarSuscripcionActiva(c)).length;
+    }
+
+    // ========== CARRERAS ACTIVAS (TODOS LOS BUSES) ==========
+    async function cargarCarrerasActivas() {
+      const container = document.getElementById('carrerasActivasList');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;">Cargando...</div>';
+      try {
+        const { data, error } = await supabaseClient
+          .from('carreras_activas')
+          .select('*, conductores(nombres, apellidos, placa, marca, modelo)')
+          .eq('estado', 'activa')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Actualizar badge
+        const badge = document.getElementById('carrerasActivasBadge');
+        if (badge) badge.textContent = data?.length || '';
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;">✅ Sin carreras activas en este momento</div>';
+          return;
+        }
+
+        // Agrupar por conductor
+        const porConductor = {};
+        data.forEach(c => {
+          const key = c.conductor_id;
+          if (!porConductor[key]) {
+            porConductor[key] = { info: c.conductores, carreras: [] };
+          }
+          porConductor[key].carreras.push(c);
+        });
+
+        container.innerHTML = Object.entries(porConductor).map(([condId, grupo]) => {
+          const cond = grupo.info;
+          const nombre = cond ? `${cond.nombres || ''} ${cond.apellidos || ''}`.trim() : 'Conductor desconocido';
+          const vehiculo = cond ? `${cond.marca || ''} ${cond.modelo || ''} (${cond.placa || ''})` : '';
+          const totalTarifa = grupo.carreras.reduce((s, c) => s + (parseFloat(c.tarifa) || 0), 0);
+
+          return `
+            <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(249,115,22,0.3);border-radius:16px;padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div>
+                  <div style="font-weight:700;color:#fb923c;font-size:15px;">🚗 ${nombre}</div>
+                  <div style="color:#64748b;font-size:12px;">${vehiculo}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="color:#4ade80;font-weight:700;">$${totalTarifa.toFixed(2)}</div>
+                  <div style="color:#64748b;font-size:12px;">${grupo.carreras.length}/4 pasajeros</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                ${grupo.carreras.map(c => `
+                  <div style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:8px;padding:6px 10px;font-size:12px;">
+                    <div style="font-weight:700;color:#fb923c;">${c.nombre_carrera}</div>
+                    <div style="color:#64748b;">Desde: ${c.zona_origen}</div>
+                    <div style="color:#4ade80;">$${parseFloat(c.tarifa || 0).toFixed(2)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch(e) {
+        container.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;">Error: ${e.message}</div>`;
+      }
     }
 
     function switchSection(section, btn) {

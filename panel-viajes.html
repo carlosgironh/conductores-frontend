@@ -678,11 +678,35 @@
             <div style="background: rgba(138, 199, 37, 0.2); padding: 12px; text-align: center; font-weight: 700; color: #b8e85c;">🗺️ Mapa Multi-Paradas y Pasajeros Disponibles</div>
             <div id="driverMap" style="height: 350px; width: 100%;"></div>
         </div>
+
+        <!-- ===== CARRERAS A BORDO ===== -->
+        <div id="carrerasABordoSection" style="margin-bottom:20px;background:rgba(15,23,42,0.6);border:1px solid rgba(249,115,22,0.3);border-radius:16px;padding:16px;display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-size:15px;font-weight:700;color:#fb923c;">🚌 Carreras a Bordo <span id="carrerasCountBadge" style="background:rgba(249,115,22,0.2);color:#fb923c;padding:2px 8px;border-radius:10px;font-size:12px;margin-left:6px;">0</span></div>
+                <div style="font-size:12px;color:#64748b;">Máx 4 pasajeros</div>
+            </div>
+            <div id="carrerasABordoList" style="display:flex;flex-wrap:wrap;gap:8px;">
+                <div style="color:#64748b;font-size:13px;width:100%;text-align:center;padding:8px 0;">Sin pasajeros a bordo</div>
+            </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#94a3b8;">Total estimado:</span>
+                <span id="carrerasTotalTarifa" style="color:#4ade80;font-weight:700;">$0.00</span>
+            </div>
+        </div>
+
+        <!-- ===== TABS DE NAVEGACIÓN ===== -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;background:rgba(15,23,42,0.4);border-radius:12px;padding:6px;">
+            <button id="tabBtnDisponibles" onclick="switchTab('disponibles')" style="flex:1;padding:10px 6px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;background:rgba(249,115,22,0.25);color:#fb923c;">📍 Solicitudes</button>
+            <button id="tabBtnSinAsignar" onclick="switchTab('sinAsignar')" style="flex:1;padding:10px 6px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:#64748b;">🆓 Sin Asignar <span id="sinAsignarCount" style="background:rgba(239,68,68,0.2);color:#f87171;padding:1px 6px;border-radius:8px;font-size:11px;"></span></button>
+            <button id="tabBtnMisViajes" onclick="switchTab('misViajes')" style="flex:1;padding:10px 6px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:#64748b;">👤 Mis Viajes</button>
+        </div>
+
         <div class="grid" id="viajesGrid">
-            <div class="card">
+            <!-- TAB: Solicitudes disponibles -->
+            <div id="tabDisponibles" class="card" style="display:block;">
                 <div class="card-header">
                     <div class="card-title">
-                        📍 Viajes Disponibles
+                        📍 Solicitudes de Viaje
                         <span class="badge badge-pendiente">En vivo</span>
                     </div>
                 </div>
@@ -691,10 +715,25 @@
                 </div>
             </div>
 
-            <div class="card">
+            <!-- TAB: Carreras sin asignar (viajes_reservados pendientes) -->
+            <div id="tabSinAsignar" class="card" style="display:none;">
                 <div class="card-header">
                     <div class="card-title">
-                        👥 Mis Pasajeros Asignados
+                        🆓 Carreras Sin Conductor
+                        <span class="badge" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.25);">Disponibles</span>
+                    </div>
+                </div>
+                <p style="color:#64748b;font-size:13px;margin-bottom:12px;">Carreras reservadas por pasajeros que aún no tienen conductor asignado. Puedes tomarlas.</p>
+                <div id="lista-sin-asignar">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <!-- TAB: Mis viajes asignados -->
+            <div id="tabMisViajes" class="card" style="display:none;">
+                <div class="card-header">
+                    <div class="card-title">
+                        👤 Mis Pasajeros Asignados
                         <span class="badge badge-asignado">Activos</span>
                     </div>
                 </div>
@@ -767,7 +806,26 @@
                 <button onclick="setSuben(1)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">1</button>
                 <button onclick="setSuben(2)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">2</button>
                 <button onclick="setSuben(3)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">3</button>
-                <button onclick="setSuben(4)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">4+</button>
+                <button onclick="setSuben(4)" style="width:60px;height:60px;border-radius:12px;background:#1e293b;border:1px solid #475569;color:white;font-size:24px;font-weight:700;">4</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Selección de Carreras que BAJAN -->
+    <div class="modal-overlay" id="seleccionBajanModal">
+        <div class="modal-content" style="max-width:420px;">
+            <h3 style="font-size:20px;font-weight:800;color:var(--corp-orange);margin-bottom:6px;">🛑 ¿Quiénes BAJAN?</h3>
+            <p style="color:#94a3b8;font-size:13px;margin-bottom:16px;">Selecciona las carreras que se bajan en esta parada:</p>
+            <div id="seleccionBajanList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:16px;">
+                <!-- Checkboxes generados dinámicamente -->
+            </div>
+            <div style="background:rgba(15,23,42,0.5);padding:10px 14px;border-radius:10px;margin-bottom:16px;display:flex;justify-content:space-between;font-size:13px;">
+                <span style="color:#94a3b8;">Seleccionadas:</span>
+                <span id="seleccionBajanCount" style="color:#fb923c;font-weight:700;">0 de 0</span>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="closeModal('seleccionBajanModal')" style="flex:1;padding:14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-weight:700;cursor:pointer;">Cancelar</button>
+                <button onclick="confirmarBajada()" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;font-weight:700;cursor:pointer;border:none;">✅ Confirmar Bajada</button>
             </div>
         </div>
     </div>
@@ -1405,6 +1463,132 @@
         }
 
         // ============================================
+        // TABS
+        // ============================================
+        function switchTab(tab) {
+            const tabs = { disponibles: 'tabDisponibles', sinAsignar: 'tabSinAsignar', misViajes: 'tabMisViajes' };
+            const btns = { disponibles: 'tabBtnDisponibles', sinAsignar: 'tabBtnSinAsignar', misViajes: 'tabBtnMisViajes' };
+            const activeStyle = 'background:rgba(249,115,22,0.25);color:#fb923c;';
+            const inactiveStyle = 'background:transparent;color:#64748b;';
+            Object.keys(tabs).forEach(t => {
+                const el = document.getElementById(tabs[t]);
+                const btn = document.getElementById(btns[t]);
+                if (el) el.style.display = t === tab ? 'block' : 'none';
+                if (btn) btn.style.cssText = btn.style.cssText.replace(/background:[^;]+;color:[^;]+;/, '') + (t === tab ? activeStyle : inactiveStyle);
+            });
+            if (tab === 'sinAsignar') cargarCarrerasSinAsignar();
+            if (tab === 'misViajes') cargarMisViajes();
+        }
+
+        // ============================================
+        // CARRERAS SIN ASIGNAR (viajes_reservados pendientes)
+        // ============================================
+        async function cargarCarrerasSinAsignar() {
+            const container = document.getElementById('lista-sin-asignar');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            try {
+                const { data: viajes, error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .select('*')
+                    .eq('estado', 'pendiente')
+                    .is('conductor_asignado_id', null)
+                    .order('fecha_hora', { ascending: true });
+
+                if (error) throw error;
+
+                // Actualizar badge del tab
+                const badge = document.getElementById('sinAsignarCount');
+                if (badge) badge.textContent = viajes?.length || '';
+
+                if (!viajes || viajes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h3>Sin carreras disponibles</h3>
+                            <p>No hay carreras sin conductor en este momento</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = viajes.map(v => `
+                    <div class="viaje-item pendiente" style="border-left:3px solid #f59e0b;">
+                        <div class="viaje-route">
+                            <span class="origin">📍 ${v.origen || 'Origen'}</span>
+                            <span class="arrow">→</span>
+                            <span class="destiny">🏁 ${v.destino || 'Destino'}</span>
+                        </div>
+                        <div class="viaje-meta">
+                            <span>👤 ${v.pasajero_nombre || 'Pasajero'}</span>
+                            ${v.tarifa ? `<span>💰 $${parseFloat(v.tarifa).toFixed(2)}</span>` : ''}
+                            <span>📅 ${formatDate(v.fecha_hora)}</span>
+                        </div>
+                        <button onclick="tomarCarrera('${v.id}')" style="width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#8ac725,#448414);color:#000;font-weight:800;font-size:14px;border:none;cursor:pointer;margin-top:8px;">
+                            🚗 Tomar esta Carrera
+                        </button>
+                    </div>
+                `).join('');
+            } catch(e) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>Error cargando</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+        async function tomarCarrera(viajeId) {
+            if (!currentConductor) { showToast('Error: no identificado como conductor', 'error'); return; }
+            try {
+                const { error } = await supabaseClient
+                    .from('viajes_reservados')
+                    .update({
+                        estado: 'asignado',
+                        conductor_asignado_id: currentUser.id,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', viajeId)
+                    .eq('estado', 'pendiente'); // Solo si sigue pendiente
+
+                if (error) throw error;
+
+                // Registrar en historial
+                await supabaseClient.from('historial').insert({
+                    conductor_id: currentConductor.id,
+                    accion: 'carrera_tomada',
+                    fecha: new Date().toISOString(),
+                    detalle: { viaje_id: viajeId }
+                });
+
+                showToast('✅ ¡Carrera tomada! Revisa Mis Viajes.', 'success');
+                cargarCarrerasSinAsignar();
+                switchTab('misViajes');
+            } catch(e) {
+                showToast('Error al tomar la carrera: ' + e.message, 'error');
+            }
+        }
+
+        // Restaurar carreras activas al recargar (desde DB)
+        async function recuperarCarrerasABordo() {
+            if (!currentConductor) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('carreras_activas')
+                    .select('*')
+                    .eq('conductor_id', currentConductor.id)
+                    .eq('estado', 'activa')
+                    .order('created_at', { ascending: true });
+
+                if (!error && data && data.length > 0) {
+                    carrerasABordo = data;
+                    // Reconstruir contadores
+                    data.forEach(c => {
+                        if (!contadorPorZona[c.zona_origen]) contadorPorZona[c.zona_origen] = 0;
+                        if (c.numero_secuencia > contadorPorZona[c.zona_origen]) {
+                            contadorPorZona[c.zona_origen] = c.numero_secuencia;
+                        }
+                    });
+                    renderCarrerasABordo();
+                }
+            } catch(e) { console.warn('Error recuperando carreras:', e); }
+        }
+
+        // ============================================
         // INIT
         // ============================================
         async function init() {
@@ -1420,6 +1604,8 @@
 
             // 2. Si tiene pago activo, cargar datos
             if (verificarPagoActivo(currentConductor)) {
+                await cargarZonasParadas();          // Cargar zonas para GPS
+                await recuperarCarrerasABordo();     // Restaurar carreras activas si recargó
                 await cargarViajesDisponibles();
                 await cargarMisViajes();
                 
@@ -1428,6 +1614,8 @@
                 loadGeofenceZones();
                 // 3. Suscripciones
                 iniciarSuscripciones();
+                // 4. Actualizar badge sin-asignar en background
+                cargarCarrerasSinAsignar();
             }
 
             // 4. Modal listeners
@@ -1513,11 +1701,119 @@
             if (m) m.style.display = 'none';
         }
 
+        // --- Estado de Carreras a Bordo ---
+        let carrerasABordo = [];          // Array de objetos carrera activos en memoria
+        let contadorPorZona = {};         // { "Montelimar": 2, "Bique": 1, ... }
+        let zonasParadas = [];            // Cache de zonas_paradas cargadas de DB
+        let viajeActivoId = null;         // ID del viaje_conductor activo
+
+        // Haversine distance en metros
+        function haversineDistancia(lat1, lng1, lat2, lng2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        // Encontrar la zona más cercana al GPS actual
+        function encontrarZonaMasCercana(lat, lng) {
+            if (!zonasParadas || zonasParadas.length === 0) return null;
+            let mejor = null;
+            let mejorDist = Infinity;
+            for (const z of zonasParadas) {
+                if (!z.latitud || !z.longitud) continue;
+                const dist = haversineDistancia(lat, lng, z.latitud, z.longitud);
+                if (dist < mejorDist) {
+                    mejorDist = dist;
+                    mejor = z;
+                }
+            }
+            // Retornar la más cercana aunque esté lejos (siempre hay que asignar una zona)
+            return mejor ? { ...mejor, distancia: mejorDist } : null;
+        }
+
+        // Cargar zonas desde Supabase al iniciar
+        async function cargarZonasParadas() {
+            const { data, error } = await supabaseClient
+                .from('zonas_paradas')
+                .select('id, nombre, latitud, longitud, radio_metros, tarifa_base')
+                .eq('activa', true)
+                .order('nombre');
+            if (!error && data) {
+                zonasParadas = data;
+            }
+        }
+
+        // Obtener o crear viaje_conductor activo
+        async function obtenerViajeActivo() {
+            if (!currentConductor) return null;
+            // Buscar viaje en progreso
+            const { data } = await supabaseClient
+                .from('viajes_conductor')
+                .select('id')
+                .eq('conductor_id', currentConductor.id)
+                .eq('estado', 'En Progreso')
+                .maybeSingle();
+            if (data) return data.id;
+            // Crear uno nuevo si no hay
+            const { data: nuevo, error } = await supabaseClient
+                .from('viajes_conductor')
+                .insert({ conductor_id: currentConductor.id, origen: 'Ruta', destino: 'Ruta', estado: 'En Progreso' })
+                .select('id')
+                .single();
+            return nuevo ? nuevo.id : null;
+        }
+
+        // Actualizar la sección visual de Carreras a Bordo
+        function renderCarrerasABordo() {
+            const section = document.getElementById('carrerasABordoSection');
+            const list = document.getElementById('carrerasABordoList');
+            const badge = document.getElementById('carrerasCountBadge');
+            const total = document.getElementById('carrerasTotalTarifa');
+
+            const activas = carrerasABordo.filter(c => c.estado === 'activa');
+
+            badge.textContent = activas.length;
+
+            if (activas.length > 0) {
+                section.style.display = 'block';
+                list.innerHTML = activas.map(c => `
+                    <div style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex:1;min-width:calc(50% - 4px);">
+                        <div>
+                            <div style="font-weight:700;color:#fb923c;font-size:13px;">${c.nombre_carrera}</div>
+                            <div style="color:#64748b;font-size:11px;">${c.zona_origen}</div>
+                        </div>
+                        <div style="color:#4ade80;font-weight:700;font-size:14px;">$${(c.tarifa || 0).toFixed(2)}</div>
+                    </div>
+                `).join('');
+            } else {
+                section.style.display = carrerasABordo.some(c => c.estado === 'activa') ? 'block' : 'none';
+                list.innerHTML = '<div style="color:#64748b;font-size:13px;width:100%;text-align:center;padding:8px 0;">Sin pasajeros a bordo</div>';
+            }
+
+            const totalTarifa = activas.reduce((s, c) => s + (c.tarifa || 0), 0);
+            total.textContent = `$${totalTarifa.toFixed(2)}`;
+        }
+
         // --- Eventos de Parada ---
         async function registrarTranque() {
-            // Aquí registrarías en DB que hubo un tranque (analytics)
+            if (currentConductor) {
+                try {
+                    await supabaseClient.from('historial').insert({
+                        conductor_id: currentConductor.id,
+                        accion: 'tranque',
+                        fecha: new Date().toISOString(),
+                        lat: currentLat,
+                        lng: currentLng,
+                        detalle: { lat: currentLat, lng: currentLng }
+                    });
+                } catch(e) { console.warn('Error registrando tranque', e); }
+            }
             showToast('Tranque registrado.', 'success');
-            cooldownParada = true; // Prevenir múltiples popups seguidos
+            cooldownParada = true;
             closeModal('detencionModal');
         }
 
@@ -1532,31 +1828,241 @@
         function setBajan(num) {
             pasajerosBajan = num;
             closeModal('bajanModal');
+            if (num === 0) {
+                // Solo registrar sin modal de selección, ir directo a suben
+                openModal('subenModal');
+                return;
+            }
+            const activas = carrerasABordo.filter(c => c.estado === 'activa');
+            if (activas.length === 0) {
+                showToast('No hay carreras activas a bordo', 'warning');
+                openModal('subenModal');
+                return;
+            }
+            // Mostrar modal de selección
+            mostrarModalSeleccionBajan(activas, num);
+        }
+
+        function mostrarModalSeleccionBajan(activas, cuantosBajan) {
+            const list = document.getElementById('seleccionBajanList');
+            const countEl = document.getElementById('seleccionBajanCount');
+
+            list.innerHTML = activas.map(c => `
+                <label style="display:flex;align-items:center;gap:12px;background:rgba(15,23,42,0.5);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;cursor:pointer;" onclick="actualizarContadorSeleccion(${cuantosBajan})">
+                    <input type="checkbox" data-carrera-id="${c.id}" style="width:18px;height:18px;accent-color:#ef4444;cursor:pointer;">
+                    <div style="flex:1;">
+                        <div style="font-weight:700;color:#fb923c;">${c.nombre_carrera}</div>
+                        <div style="font-size:12px;color:#64748b;">Subió en: ${c.zona_origen}</div>
+                    </div>
+                    <div style="color:#4ade80;font-weight:700;">$${(c.tarifa || 0).toFixed(2)}</div>
+                </label>
+            `).join('');
+
+            countEl.textContent = `0 de ${cuantosBajan}`;
+            openModal('seleccionBajanModal');
+        }
+
+        function actualizarContadorSeleccion(cuantosBajan) {
+            setTimeout(() => {
+                const checks = document.querySelectorAll('#seleccionBajanList input[type=checkbox]:checked');
+                const countEl = document.getElementById('seleccionBajanCount');
+                countEl.textContent = `${checks.length} de ${cuantosBajan}`;
+                countEl.style.color = checks.length >= cuantosBajan ? '#4ade80' : '#fb923c';
+            }, 10);
+        }
+
+        async function confirmarBajada() {
+            const checks = document.querySelectorAll('#seleccionBajanList input[type=checkbox]:checked');
+            const idsSeleccionados = Array.from(checks).map(c => c.dataset.carreraId);
+
+            if (idsSeleccionados.length === 0) {
+                showToast('Selecciona al menos una carrera', 'warning');
+                return;
+            }
+
+            closeModal('seleccionBajanModal');
+
+            // Determinar zona de bajada más cercana
+            const zonaBajada = encontrarZonaMasCercana(currentLat, currentLng);
+            const zonaBajadaNombre = zonaBajada ? zonaBajada.nombre : 'Desconocida';
+            const ahora = new Date().toISOString();
+
+            // Actualizar carreras en memoria
+            let carrerasCompletadas = [];
+            for (const id of idsSeleccionados) {
+                const idx = carrerasABordo.findIndex(c => c.id === id);
+                if (idx !== -1) {
+                    carrerasABordo[idx].estado = 'completada';
+                    carrerasABordo[idx].zona_bajada = zonaBajadaNombre;
+                    carrerasABordo[idx].completada_at = ahora;
+                    carrerasCompletadas.push(carrerasABordo[idx]);
+                }
+            }
+
+            // Actualizar en DB
+            if (currentConductor) {
+                try {
+                    // Marcar carreras como completadas en DB
+                    await supabaseClient.from('carreras_activas')
+                        .update({
+                            estado: 'completada',
+                            zona_bajada: zonaBajadaNombre,
+                            zona_bajada_id: zonaBajada?.id || null,
+                            lat_bajada: currentLat,
+                            lng_bajada: currentLng,
+                            completada_at: ahora
+                        })
+                        .in('id', idsSeleccionados);
+
+                    // Registrar en historial
+                    const tarifaTotal = carrerasCompletadas.reduce((s, c) => s + (c.tarifa || 0), 0);
+                    await supabaseClient.from('historial').insert({
+                        conductor_id: currentConductor.id,
+                        accion: 'bajada',
+                        fecha: ahora,
+                        zona_destino: zonaBajadaNombre,
+                        pasajeros_bajan: idsSeleccionados.length,
+                        tarifa: tarifaTotal,
+                        lat: currentLat,
+                        lng: currentLng,
+                        detalle: {
+                            carreras: carrerasCompletadas.map(c => ({
+                                nombre: c.nombre_carrera,
+                                zona_origen: c.zona_origen,
+                                zona_bajada: zonaBajadaNombre,
+                                tarifa: c.tarifa
+                            }))
+                        }
+                    });
+                } catch(e) { console.warn('Error registrando bajada', e); }
+            }
+
+            renderCarrerasABordo();
+            showToast(`✅ Bajada registrada: ${idsSeleccionados.length} carrera(s) en ${zonaBajadaNombre}`, 'success');
+
+            // Continuar con ¿cuántos suben?
             openModal('subenModal');
         }
 
         async function setSuben(num) {
             pasajerosSuben = num;
-            cooldownParada = true; // Prevenir popups múltiples seguidos
+            cooldownParada = true;
             closeModal('subenModal');
-            
-            // Aquí enviamos la info a Supabase
-            if (currentUser) {
+
+            if (num === 0) {
+                showToast('Parada registrada.', 'success');
+                return;
+            }
+
+            // Verificar límite de 4 pasajeros
+            const activas = carrerasABordo.filter(c => c.estado === 'activa');
+            const disponibles = 4 - activas.length;
+            if (disponibles <= 0) {
+                showToast('⚠️ Bus lleno (4/4 pasajeros)', 'error');
+                return;
+            }
+            const aSubir = Math.min(num, disponibles);
+
+            // Encontrar zona más cercana
+            const zona = encontrarZonaMasCercana(currentLat, currentLng);
+            const zonaNombre = zona ? zona.nombre : 'Zona Desconocida';
+            const zonaId = zona ? zona.id : null;
+            const tarifa = zona ? (parseFloat(zona.tarifa_base) || 1.00) : 1.00;
+
+            // Calcular siguiente número para esta zona
+            if (!contadorPorZona[zonaNombre]) contadorPorZona[zonaNombre] = 0;
+
+            // Obtener viaje activo
+            if (!viajeActivoId) viajeActivoId = await obtenerViajeActivo();
+
+            const ahora = new Date().toISOString();
+            const nuevasCarreras = [];
+
+            for (let i = 0; i < aSubir; i++) {
+                contadorPorZona[zonaNombre]++;
+                const nombre = `${zonaNombre} ${contadorPorZona[zonaNombre]}`;
+                const carrera = {
+                    id: null, // Se llenará con el ID de DB
+                    conductor_id: currentConductor?.id,
+                    viaje_id: viajeActivoId,
+                    zona_origen: zonaNombre,
+                    zona_origen_id: zonaId,
+                    nombre_carrera: nombre,
+                    numero_secuencia: contadorPorZona[zonaNombre],
+                    tarifa: tarifa,
+                    estado: 'activa',
+                    lat_subida: currentLat,
+                    lng_subida: currentLng,
+                    created_at: ahora
+                };
+                nuevasCarreras.push(carrera);
+            }
+
+            // Insertar en DB y obtener IDs reales
+            if (currentConductor) {
                 try {
-                    await supabaseClient.from('estadisticas_ruta').insert({
-                        conductor_id: currentUser.id,
-                        bajan: pasajerosBajan,
-                        suben: pasajerosSuben,
+                    const { data: insertadas, error: insErr } = await supabaseClient
+                        .from('carreras_activas')
+                        .insert(nuevasCarreras.map(c => ({
+                            conductor_id: c.conductor_id,
+                            viaje_id: c.viaje_id,
+                            zona_origen: c.zona_origen,
+                            zona_origen_id: c.zona_origen_id,
+                            nombre_carrera: c.nombre_carrera,
+                            numero_secuencia: c.numero_secuencia,
+                            tarifa: c.tarifa,
+                            estado: 'activa',
+                            lat_subida: c.lat_subida,
+                            lng_subida: c.lng_subida
+                        })))
+                        .select('id, nombre_carrera');
+
+                    if (!insErr && insertadas) {
+                        insertadas.forEach((row, idx) => {
+                            nuevasCarreras[idx].id = row.id;
+                        });
+                    }
+
+                    // Registrar en historial
+                    await supabaseClient.from('historial').insert({
+                        conductor_id: currentConductor.id,
+                        accion: 'subida',
+                        fecha: ahora,
+                        zona_origen: zonaNombre,
+                        pasajeros_suben: aSubir,
+                        tarifa: tarifa * aSubir,
                         lat: currentLat,
                         lng: currentLng,
-                        timestamp: new Date().toISOString()
+                        detalle: {
+                            zona: zonaNombre,
+                            distancia_zona_metros: Math.round(zona?.distancia || 0),
+                            carreras: nuevasCarreras.map(c => ({ nombre: c.nombre_carrera, tarifa: c.tarifa }))
+                        }
                     });
-                } catch(e) {
-                    console.log('Error registrando parada', e);
-                }
+
+                    // Registrar en paradas_viaje si hay viaje activo
+                    if (viajeActivoId) {
+                        await supabaseClient.from('paradas_viaje').insert({
+                            viaje_id: viajeActivoId,
+                            tipo: 'subida',
+                            pasajeros_suben: aSubir,
+                            pasajeros_bajan: pasajerosBajan,
+                            latitud: currentLat,
+                            longitud: currentLng,
+                            zona_nombre: zonaNombre,
+                            zona_id: zonaId,
+                            carreras_ids: nuevasCarreras.filter(c => c.id).map(c => c.id)
+                        });
+                    }
+                } catch(e) { console.warn('Error creando carreras', e); }
             }
-            
-            showToast(`Registrado: Bajan ${pasajerosBajan}, Suben ${pasajerosSuben}`);
+
+            // Agregar a estado local
+            carrerasABordo.push(...nuevasCarreras);
+            renderCarrerasABordo();
+
+            const nombres = nuevasCarreras.map(c => c.nombre_carrera).join(', ');
+            showToast(`🟢 Subieron ${aSubir}: ${nombres}`, 'success');
         }
 
         // --- Lógica de Zonas y Cola ---
